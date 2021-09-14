@@ -5,12 +5,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"patreon/internal/app/store"
 )
 
 type Server struct {
 	config *Config
 	logger *log.Logger
 	router *mux.Router
+	store  *store.Store
 }
 
 func New(config *Config) *Server {
@@ -28,9 +30,23 @@ func (s *Server) Start() error {
 	}
 	s.configfureRouter()
 
+	if err := s.configureStore(); err != nil {
+		return err
+	}
+
 	s.logger.Info("starting server")
 
 	return http.ListenAndServe(s.config.BindAddr, s.router)
+}
+func (s *Server) configureStore() error {
+	st := store.New(s.config.Store)
+	if err := st.Open(); err != nil {
+		return err
+	}
+
+	s.store = st
+
+	return nil
 }
 
 func (s *Server) configureServer() error {

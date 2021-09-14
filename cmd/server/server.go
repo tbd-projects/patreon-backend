@@ -4,7 +4,7 @@ import (
 	"flag"
 	"github.com/BurntSushi/toml"
 	"log"
-	"patreon/internal/server"
+	server2 "patreon/internal/app/server"
 )
 
 var (
@@ -17,13 +17,13 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config := server.NewConfig()
+	config := server2.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s := server.New(config)
+	s := server2.New(config)
 
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
