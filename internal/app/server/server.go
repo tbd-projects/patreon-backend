@@ -21,21 +21,7 @@ func New(config *Config, handler Handler) *Server {
 
 // Start server
 func (s *Server) Start() error {
-	if err := s.configureServer(); err != nil {
-		return err
-	}
-
 	s.logger.Info("starting server")
 
 	return http.ListenAndServe(s.config.BindAddr, s.handler)
-}
-func (s *Server) configureServer() error {
-	level, err := log.ParseLevel(s.config.LogLevel)
-	if err != nil {
-		return err
-	}
-
-	s.logger.SetLevel(level)
-
-	return nil
 }

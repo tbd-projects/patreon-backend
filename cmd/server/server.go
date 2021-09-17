@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/BurntSushi/toml"
+	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"os"
 	server "patreon/internal/app/server"
@@ -36,9 +37,10 @@ func main() {
 	handler := server.NewMainHandler()
 	handler.SetLogger(logger)
 
-	router := server.NewRouter()
-	router.Configure()
+	router := mux.NewRouter()
 	handler.SetRouter(router)
+
+	handler.RegisterHandlers()
 
 	st := store.New(config.Store)
 	err = st.Open()

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -9,11 +10,11 @@ import (
 
 func TestServer_HandleRoot(t *testing.T) {
 	expected := "hello patron!"
-	router := NewRouter()
-	router.Configure()
+	handler := NewMainHandler()
+	handler.SetRouter(mux.NewRouter())
 	recorder := httptest.NewRecorder()
 	reader, _ := http.NewRequest(http.MethodGet, "/hello", nil)
-	router.HandleRoot().ServeHTTP(recorder, reader)
+	handler.HandleRoot().ServeHTTP(recorder, reader)
 
 	assert.Equal(t, expected, recorder.Body.String())
 }
