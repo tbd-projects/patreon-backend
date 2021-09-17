@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"github.com/BurntSushi/toml"
-	"github.com/gorilla/mux"
-	"log"
+	log "github.com/sirupsen/logrus"
+	"os"
 	server "patreon/internal/app/server"
+	"patreon/internal/app/store"
 )
 
 var (
@@ -22,9 +23,31 @@ func main() {
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		log.Fatal(err)
+		os.Exit(1)
 	}
-	router := mux.NewRouter()
-	s := server.New(config, router)
+	level, err := log.ParseLevel(config.LogLevel)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	logger := log.New()
+	logger.SetLevel(level)
+
+	handler := server.NewMainHandler()
+	handler.SetLogger(logger)
+
+	router := server.NewRouter()
+	router.Configure()
+	handler.SetRouter(router)
+
+	st := store.New(config.Store)
+	err = st.Open()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	handler.SetStore(st)
+	s := server.New(config, handler)
 
 	if err := s.Start(); err != nil {
 		log.Fatal(err)

@@ -32,6 +32,10 @@ func (st *Store) Open() error {
 
 }
 
-func (st *Store) Close() {
-
+func (st *Store) Close() error {
+	err := st.db.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
