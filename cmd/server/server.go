@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"github.com/BurntSushi/toml"
+	"github.com/gorilla/mux"
 	"log"
-	server2 "patreon/internal/app/server"
+	server "patreon/internal/app/server"
 )
 
 var (
@@ -17,13 +18,13 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config := server2.NewConfig()
+	config := server.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	s := server2.New(config)
+	router := mux.NewRouter()
+	s := server.New(config, router)
 
 	if err := s.Start(); err != nil {
 		log.Fatal(err)

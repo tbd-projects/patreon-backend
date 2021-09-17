@@ -15,11 +15,11 @@ type Server struct {
 	store  *store.Store
 }
 
-func New(config *Config) *Server {
+func New(config *Config, router *mux.Router) *Server {
 	return &Server{
 		config: config,
 		logger: log.New(),
-		router: mux.NewRouter(),
+		router: router,
 	}
 }
 
@@ -61,7 +61,7 @@ func (s *Server) configureServer() error {
 }
 
 func (s *Server) configfureRouter() {
-	s.router.HandleFunc("/hello", s.HandleRoot())
+	s.router.HandleFunc("/hello", s.HandleRoot()).Methods("GET", "POST")
 }
 
 func (s *Server) HandleRoot() http.HandlerFunc {
