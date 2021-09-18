@@ -1,7 +1,6 @@
 package store
 
 import (
-	"fmt"
 	"patreon/internal/models"
 )
 
@@ -22,11 +21,12 @@ func (repo *UserRepository) Create(u *models.User) (*models.User, error) {
 	}
 	return u, nil
 }
+
 func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
 	user := models.User{}
-	query := fmt.Sprintf("SELECT user_id, login, password from users where login = $1", login)
+	//query := fmt.Sprintf("SELECT user_id, login, password from users where login=%s", login)
 
-	if err := repo.store.db.QueryRow(query).
+	if err := repo.store.db.QueryRow("SELECT user_id, login, password from users where login=$1", login).
 		Scan(&user.ID, &user.Login, &user.Password); err != nil {
 		return nil, err
 	}
