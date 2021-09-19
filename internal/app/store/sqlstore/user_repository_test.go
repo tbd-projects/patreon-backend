@@ -2,6 +2,7 @@ package sqlstore
 
 import (
 	"github.com/stretchr/testify/assert"
+	"patreon/internal/app/store"
 	"patreon/internal/models"
 	"testing"
 )
@@ -23,7 +24,7 @@ func TestUserRepository_FindByLogin(t *testing.T) {
 	s := New(db)
 	login := "mail1999"
 	_, err := s.User().FindByLogin(login)
-	assert.Error(t, err)
+	assert.EqualError(t, store.NotFound, err.Error())
 
 	u := models.TestUser(t)
 	u.Login = login

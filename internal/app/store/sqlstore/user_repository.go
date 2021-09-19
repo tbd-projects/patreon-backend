@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"patreon/internal/app/store"
 	"patreon/internal/models"
 )
 
@@ -33,7 +34,7 @@ func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
 
 	if err := repo.store.db.QueryRow("SELECT user_id, login, encrypted_password from users where login=$1", login).
 		Scan(&user.ID, &user.Login, &user.EncryptedPassword); err != nil {
-		return nil, err
+		return nil, store.NotFound
 	}
 
 	return &user, nil

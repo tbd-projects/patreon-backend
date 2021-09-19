@@ -6,11 +6,11 @@ import (
 )
 
 type User struct {
-	ID                int
-	Login             string
-	Password          string
-	EncryptedPassword string
-	Avatar            string
+	ID                int    `json:"id"`
+	Login             string `json:"login"`
+	Password          string `json:"password,omitempty"`
+	EncryptedPassword string `json:",omitempty"`
+	Avatar            string `json:"avatar,omitempty"`
 }
 
 func (u *User) Validate() error {
@@ -19,7 +19,10 @@ func (u *User) Validate() error {
 		validation.Field(&u.Password, validation.By(requiredIf(u.EncryptedPassword == "")), validation.Length(6, 50)),
 	)
 }
-
+func (u *User) MakePrivateDate() {
+	u.Password = ""
+	u.EncryptedPassword = ""
+}
 func (u *User) BeforeCreate() error {
 	if len(u.Password) > 0 {
 		enc, err := u.encryptString(u.Password)
