@@ -25,6 +25,7 @@ type SuiteTestRepository struct {
 func (s *SuiteTestRepository) SetupSuite() {
 	s.log = logrus.New()
 	s.log.SetLevel(logrus.FatalLevel)
+	s.output = ""
 	s.log.SetOutput(bytes.NewBufferString(s.output))
 
 	var err error
@@ -43,6 +44,7 @@ func (s *SuiteTestRepository) SetupSuite() {
 
 func (s *SuiteTestRepository) AfterTest(_, _ string) {
 	s.SetupSuite()
+	s.output = ""
 }
 
 func (s *SuiteTestRepository) TearDownSuite() {
@@ -71,7 +73,7 @@ func (s *SuiteTestRepository) TestSet() {
 
 	_, err = s.redisServer.Get(session.UniqID)
 	assert.Equal(s.T(), err, miniredis.ErrKeyNotFound)
-
+	assert.Equal(s.T(), s.output, "")
 	s.redisServer.Close()
 }
 
@@ -89,6 +91,7 @@ func (s *SuiteTestRepository) TestGetUserID() {
 	userID, err = s.redisRepository.GetUserId(session.UniqID)
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), userID, session.UserID)
+	assert.Equal(s.T(), s.output, "")
 
 	s.redisServer.Close()
 }
@@ -108,6 +111,7 @@ func (s *SuiteTestRepository) TestDel() {
 
 	_, err = s.redisServer.Get(session.UniqID)
 	assert.Equal(s.T(), err, miniredis.ErrKeyNotFound)
+	assert.Equal(s.T(), s.output, "")
 
 	s.redisServer.Close()
 }
