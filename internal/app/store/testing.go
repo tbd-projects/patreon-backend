@@ -20,7 +20,7 @@ func TestStore(t *testing.T, dbUrl string) (*Store, func(tables ...string)) {
 	create_users_rb := "CREATE TABLE IF NOT EXISTS users (" +
 		"user_id bigserial not null primary key," +
 		"login text not null unique," +
-		"password text not null," +
+		"encrypted_password text not null," +
 		"avatar text not null);"
 
 	s.db.QueryRow(create_users_rb)

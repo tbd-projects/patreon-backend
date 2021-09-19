@@ -10,11 +10,8 @@ func TestUserRepository_Create(t *testing.T) {
 	s, teardown := TestStore(t, dbUrl)
 	defer teardown("users")
 
-	u, err := s.User().Create(&models.User{
-		Login:    "golang@python.js",
-		Password: "1234",
-		Avatar:   "static/img/avatar.png",
-	})
+	u, err := s.User().Create(models.TestUser(t))
+	assert.NoError(t, u.BeforeCreate())
 	assert.NoError(t, err)
 	assert.NotNil(t, u)
 }
@@ -22,19 +19,19 @@ func TestUserRepository_Create(t *testing.T) {
 func TestUserRepository_FindByLogin(t *testing.T) {
 	s, teardown := TestStore(t, dbUrl)
 	defer teardown("users")
-	login := "i unknown user!"
+
+	login := "mail1999"
 	_, err := s.User().FindByLogin(login)
 	assert.Error(t, err)
 
-	_, err = s.User().Create(&models.User{
-		Login:    "golang@python.js",
-		Password: "1234",
-		Avatar:   "static/img/avatar.png",
-	})
+	u := models.TestUser(t)
+	u.Login = login
 
+	assert.NoError(t, u.BeforeCreate())
+	_, err = s.User().Create(u)
 	assert.NoError(t, err)
 
-	u, err := s.User().FindByLogin("golang@python.js")
+	u, err = s.User().FindByLogin(login)
 	assert.NotNil(t, u)
 	assert.Nil(t, err)
 }
