@@ -12,13 +12,13 @@ type RedisRepository struct {
 	log       *logrus.Logger
 }
 
-func createRedisRepository(pool *redis.Pool, log *logrus.Logger) *RedisRepository {
+func CreateRedisRepository(pool *redis.Pool, log *logrus.Logger) *RedisRepository {
 	return &RedisRepository{pool, log}
 }
 
 func (rep *RedisRepository) Set(session *models.Session) error {
 	con := rep.redisPool.Get()
-	defer func () {
+	defer func() {
 		err := con.Close()
 		if err != nil {
 			rep.log.Errorf("Unsuccessful close connection to redis with error: %s, with session: %s",
@@ -36,7 +36,7 @@ func (rep *RedisRepository) Set(session *models.Session) error {
 
 func (rep *RedisRepository) GetUserId(uniqID string) (string, error) {
 	con := rep.redisPool.Get()
-	defer func () {
+	defer func() {
 		err := con.Close()
 		if err != nil {
 			rep.log.Errorf("Unsuccessful close connection to redis with error: %s, with session id: %s",
@@ -49,7 +49,7 @@ func (rep *RedisRepository) GetUserId(uniqID string) (string, error) {
 
 func (rep *RedisRepository) Del(session *models.Session) error {
 	con := rep.redisPool.Get()
-	defer func () {
+	defer func() {
 		err := con.Close()
 		if err != nil {
 			rep.log.Errorf("Unsuccessful close connection to redis with error: %s, with session: %s",
