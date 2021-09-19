@@ -14,7 +14,7 @@ type Handler interface {
 
 type MainHandler struct {
 	router *mux.Router
-	store  *store.Store
+	Store  store.Store
 	log    *logrus.Logger
 }
 
@@ -27,8 +27,8 @@ func NewMainHandler() *MainHandler {
 func (h *MainHandler) SetRouter(router *mux.Router) {
 	h.router = router
 }
-func (h *MainHandler) SetStore(store *store.Store) {
-	h.store = store
+func (h *MainHandler) SetStore(store store.Store) {
+	h.Store = store
 }
 func (h *MainHandler) SetLogger(logger *logrus.Logger) {
 	h.log = logger

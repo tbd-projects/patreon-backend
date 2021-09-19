@@ -1,4 +1,4 @@
-package store
+package sqlstore
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -7,19 +7,20 @@ import (
 )
 
 func TestUserRepository_Create(t *testing.T) {
-	s, teardown := TestStore(t, dbUrl)
+	db, teardown := TestDB(t, dbUrl)
 	defer teardown("users")
 
-	u, err := s.User().Create(models.TestUser(t))
-	assert.NoError(t, u.BeforeCreate())
+	s := New(db)
+	u := models.TestUser(t)
+	err := s.User().Create(u)
 	assert.NoError(t, err)
-	assert.NotNil(t, u)
 }
 
 func TestUserRepository_FindByLogin(t *testing.T) {
-	s, teardown := TestStore(t, dbUrl)
+	db, teardown := TestDB(t, dbUrl)
 	defer teardown("users")
 
+	s := New(db)
 	login := "mail1999"
 	_, err := s.User().FindByLogin(login)
 	assert.Error(t, err)
@@ -28,7 +29,7 @@ func TestUserRepository_FindByLogin(t *testing.T) {
 	u.Login = login
 
 	assert.NoError(t, u.BeforeCreate())
-	_, err = s.User().Create(u)
+	err = s.User().Create(u)
 	assert.NoError(t, err)
 
 	u, err = s.User().FindByLogin(login)

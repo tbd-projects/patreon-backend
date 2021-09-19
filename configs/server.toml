@@ -2,6 +2,5 @@ log_level = "debug"
 
 bind_addr = ":8080"
 
-[store]
 database_url = "user=flashie password=1111 host=localhost dbname=restapi_dev sslmode=disable"
 
