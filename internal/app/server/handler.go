@@ -3,9 +3,8 @@ package server
 import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"io"
 	"net/http"
-	"patreon/internal/app/store"
+	"patreon/internal/app/server/attachable_handler"
 )
 
 type Handler interface {
@@ -13,23 +12,23 @@ type Handler interface {
 }
 
 type MainHandler struct {
-	router *mux.Router
-	store  *store.Store
-	log    *logrus.Logger
+	baseHandler attachable_handler.HandlerAttacher
+	router      *mux.Router
+	log         *logrus.Logger
 }
 
-func NewMainHandler() *MainHandler {
+func NewMainHandler(router *mux.Router,	attachedHandlers []attachable_handler.IAttachable) *MainHandler {
 	return &MainHandler{
-		log: logrus.New(),
+		baseHandler: attachable_handler.CreateHandlerAttacher(attachedHandlers, ""),
+		log:    logrus.New(),
+		router: router,
 	}
 }
 
 func (h *MainHandler) SetRouter(router *mux.Router) {
 	h.router = router
 }
-func (h *MainHandler) SetStore(store *store.Store) {
-	h.store = store
-}
+
 func (h *MainHandler) SetLogger(logger *logrus.Logger) {
 	h.log = logger
 }
@@ -37,16 +36,6 @@ func (h MainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.router.ServeHTTP(w, r)
 }
 
-func (h *MainHandler) HandleRoot() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := io.WriteString(w, "hello patron!")
-		if err != nil {
-			h.log.Fatal(err)
-		}
-	}
-}
-
-func (h *MainHandler) RegisterHandlers() {
-	h.router.HandleFunc("/hello", h.HandleRoot()).Methods("GET", "POST")
-
+func (h *MainHandler) Attach() {
+	h.baseHandler.Attach(h.router)
 }
