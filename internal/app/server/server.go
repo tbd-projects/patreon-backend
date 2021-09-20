@@ -6,16 +6,18 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
+	"patreon/internal/app"
+	"patreon/internal/app/handlers"
 	"patreon/internal/app/store/sqlstore"
 )
 
 type Server struct {
 	config  *Config
-	handler Handler
+	handler app.Handler
 	logger  *log.Logger
 }
 
-func New(config *Config, handler Handler) *Server {
+func New(config *Config, handler app.Handler) *Server {
 	return &Server{
 		config:  config,
 		logger:  log.New(),
@@ -44,7 +46,7 @@ func Start(config *Config) error {
 	logger := log.New()
 	logger.SetLevel(level)
 
-	handler := NewMainHandler()
+	handler := handlers.NewMainHandler()
 	handler.SetLogger(logger)
 
 	router := mux.NewRouter()
