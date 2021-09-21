@@ -6,19 +6,19 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
-	"patreon/internal/app/server/attachable_handler"
+	"patreon/internal/app/server/joinable_handler"
 	"patreon/internal/app/store"
 )
 
 type RegisterHandler struct {
-	baseHandler attachable_handler.HandlerAttacher
+	baseHandler joinable_handler.HandlerJoiner
 	Store       store.Store
 	log         *logrus.Logger
 }
 
-func NewRegisterHandler(store store.Store, attachedHandlers []attachable_handler.IAttachable) *RegisterHandler {
+func NewRegisterHandler(store store.Store, joinedHandlers []joinable_handler.IJoinable) *RegisterHandler {
 	return &RegisterHandler{
-		baseHandler: attachable_handler.CreateHandlerAttacher(attachedHandlers, "/register"),
+		baseHandler: joinable_handler.CreateHandlerJoiner(joinedHandlers, "/register"),
 		Store:       store,
 		log:         logrus.New(),
 	}
@@ -65,9 +65,9 @@ func (h RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.respond(w, r, http.StatusOK, u)*/
 }
 
-func (h *RegisterHandler) Attach(router *mux.Router) {
+func (h *RegisterHandler) Join(router *mux.Router) {
 	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST")
-	h.baseHandler.Attach(router)
+	h.baseHandler.Join(router)
 }
 
 func (h *RegisterHandler) error(w http.ResponseWriter, r *http.Request, code int, err error) {

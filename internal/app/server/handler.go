@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"patreon/internal/app/server/attachable_handler"
+	"patreon/internal/app/server/joinable_handler"
 )
 
 type Handler interface {
@@ -12,16 +12,16 @@ type Handler interface {
 }
 
 type MainHandler struct {
-	baseHandler attachable_handler.HandlerAttacher
+	baseHandler joinable_handler.HandlerJoiner
 	router      *mux.Router
 	log         *logrus.Logger
 }
 
-func NewMainHandler(router *mux.Router,	attachedHandlers []attachable_handler.IAttachable) *MainHandler {
+func NewMainHandler(router *mux.Router, joinedHandlers []joinable_handler.IJoinable) *MainHandler {
 	return &MainHandler{
-		baseHandler: attachable_handler.CreateHandlerAttacher(attachedHandlers, ""),
-		log:    logrus.New(),
-		router: router,
+		baseHandler: joinable_handler.CreateHandlerJoiner(joinedHandlers, ""),
+		log:         logrus.New(),
+		router:      router,
 	}
 }
 
@@ -36,6 +36,6 @@ func (h MainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.router.ServeHTTP(w, r)
 }
 
-func (h *MainHandler) Attach() {
-	h.baseHandler.Attach(h.router)
+func (h *MainHandler) Join() {
+	h.baseHandler.Join(h.router)
 }

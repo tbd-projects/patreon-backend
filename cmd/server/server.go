@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	server "patreon/internal/app/server"
-	"patreon/internal/app/server/attachable_handler"
+	"patreon/internal/app/server/joinable_handler"
 	"patreon/internal/app/store"
 )
 
@@ -44,11 +44,11 @@ func main() {
 	logger.SetLevel(level)
 
 	router := mux.NewRouter()
-	handler := server.NewMainHandler(router, []attachable_handler.IAttachable{server.NewRegisterHandler(*st,
-		[]attachable_handler.IAttachable{})})
+	handler := server.NewMainHandler(router, []joinable_handler.IJoinable{server.NewRegisterHandler(*st,
+		[]joinable_handler.IJoinable{})})
 	handler.SetLogger(logger)
 
-	handler.Attach()
+	handler.Join()
 
 	s := server.New(config, handler)
 
