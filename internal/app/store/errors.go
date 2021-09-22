@@ -3,6 +3,7 @@ package store
 import "errors"
 
 var (
-	NotFound         = errors.New("user not found")
-	UserAlreadyExist = errors.New("user already exist")
+	NotFound                 = errors.New("user not found")
+	UserAlreadyExist         = errors.New("user already exist")
+	IncorrectEmailOrPassword = errors.New("incorrect email or password")
 )

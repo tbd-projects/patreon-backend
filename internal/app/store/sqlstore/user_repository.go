@@ -23,7 +23,7 @@ func (repo *UserRepository) Create(u *models.User) error {
 		return err
 	}
 	if err := repo.store.db.QueryRow("INSERT INTO users (login, encrypted_password, avatar) VALUES ($1, $2, $3)"+
-		"RETURNING user_id", u.Login, u.Password, u.Avatar).Scan(&u.ID); err != nil {
+		"RETURNING user_id", u.Login, u.EncryptedPassword, u.Avatar).Scan(&u.ID); err != nil {
 		return err
 	}
 	return nil

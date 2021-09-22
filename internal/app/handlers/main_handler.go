@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"io"
+	"log"
 	"net/http"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
@@ -37,7 +38,8 @@ func (h *MainHandler) SetLogger(logger *logrus.Logger) {
 }
 
 func (h *MainHandler) RegisterHandlers() {
-	h.router.HandleFunc("/register", h.HandleRegistration()).Methods("POST")
+	h.router.HandleFunc("/register", h.HandleRegistration()).Methods("GET", "POST")
+	h.router.HandleFunc("/login", h.HandleLogin()).Methods("GET", "POST")
 }
 
 func (h *MainHandler) HandleRegistration() http.HandlerFunc {
@@ -81,6 +83,37 @@ func (h *MainHandler) HandleRegistration() http.HandlerFunc {
 		h.Respond(w, r, http.StatusOK, u)
 
 	}
+}
+func (h *MainHandler) HandleLogin() http.HandlerFunc {
+	type request struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}(r.Body)
+
+		req := &request{}
+		decoder := json.NewDecoder(r.Body)
+
+		if err := decoder.Decode(req); err != nil {
+			h.Error(w, r, http.StatusUnprocessableEntity, err)
+			return
+		}
+		u, err := h.Store.User().FindByLogin(req.Login)
+
+		if err != nil || !u.ComparePassword(req.Password) {
+			h.Error(w, r, http.StatusUnauthorized, store.IncorrectEmailOrPassword)
+			return
+		}
+
+		h.Respond(w, r, http.StatusOK, "successfully login")
+	}
+
 }
 
 func (h *MainHandler) Error(w http.ResponseWriter, r *http.Request, code int, err error) {
