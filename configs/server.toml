@@ -2,5 +2,5 @@ log_level = "debug"
 
 bind_addr = ":8080"
 
-database_url = "user=flashie password=1111 host=localhost dbname=restapi_dev sslmode=disable"
+database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
 
