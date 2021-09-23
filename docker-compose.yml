@@ -45,8 +45,6 @@ services:
         limits:
           cpus: '2'
           memory: 4G
-    networks:
-      - postgres
 #  pgadmin:
 #    container_name: pgadmin_container
 #    image: dpage/pgadmin4:5.7

@@ -4,7 +4,7 @@ build:
 	go build -v ./cmd/server
 
 build-docker:
-	docker build -f ./docker/builder.Dockerfile . --tag patreon
+	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
 run:
 	sudo chown -R 5050:5050 ./pgadmin
