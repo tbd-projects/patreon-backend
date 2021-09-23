@@ -7,26 +7,38 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"patreon/internal/app"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
 )
 
+//type MainHandler struct {
+//	router *mux.Router
+//	Store  store.Store
+//	log    *logrus.Logger
+//}
 type MainHandler struct {
-	router *mux.Router
-	Store  store.Store
-	log    *logrus.Logger
+	baseHandler app.HandlerJoiner
+	router      *mux.Router
+	Store       store.Store
+	log         *logrus.Logger
 }
 
 func NewMainHandler() *MainHandler {
 	return &MainHandler{
-		log: logrus.New(),
+		baseHandler: app.HandlerJoiner{},
+		log:         logrus.New(),
 	}
 }
 
 func (h MainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.router.ServeHTTP(w, r)
 }
+func (h *MainHandler) JoinHandlers(joinedHandlers []app.Joinable) {
+	h.baseHandler.AddHandlers(joinedHandlers)
+	h.baseHandler.Join(h.router)
 
+}
 func (h *MainHandler) SetRouter(router *mux.Router) {
 	h.router = router
 }
@@ -35,6 +47,10 @@ func (h *MainHandler) SetStore(store store.Store) {
 }
 func (h *MainHandler) SetLogger(logger *logrus.Logger) {
 	h.log = logger
+}
+
+func (h *MainHandler) Join(router *mux.Router) {
+	h.baseHandler.Join(router)
 }
 
 func (h *MainHandler) RegisterHandlers() {

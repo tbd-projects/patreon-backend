@@ -52,8 +52,7 @@ func Start(config *Config) error {
 	router := mux.NewRouter()
 	handler.SetRouter(router)
 
-	handler.RegisterHandlers()
-	s := New(config, handler)
+	//handler.RegisterHandlers()
 
 	db, err := newDB(config.DataBaseUrl)
 	if err != nil {
@@ -75,6 +74,18 @@ func Start(config *Config) error {
 
 	handler.SetStore(store)
 
+	registerHandler := handlers.NewRegisterHandler()
+	registerHandler.SetStore(store)
+
+	loginHandler := handlers.NewLoginHandler()
+	loginHandler.SetStore(store)
+	//joinedHandlers := []app.Joinable{
+	//	handlers.NewRegisterHandler(),
+	//}
+
+	handler.JoinHandlers([]app.Joinable{registerHandler, loginHandler})
+
+	s := New(config, handler)
 	s.logger.Info("starting server")
 
 	return http.ListenAndServe(config.BindAddr, s.handler)
