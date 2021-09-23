@@ -17,10 +17,10 @@ const (
 )
 
 type SessionsManager struct {
-	sessionRep sessions.IRepository
+	sessionRep sessions.Repository
 }
 
-func CreateSessionsManager(sessionRep sessions.IRepository) SessionsManager {
+func CreateSessionsManager(sessionRep sessions.Repository) SessionsManager {
 	return SessionsManager{sessionRep}
 }
 

@@ -7,11 +7,11 @@ import (
 )
 
 type SessionsMiddleware struct {
-	sessionsManager sessions.ISessionsManager
+	sessionsManager sessions.SessionManageable
 	log             *logrus.Logger
 }
 
-func CreateSessionMiddleware(sessionManager sessions.ISessionsManager, log *logrus.Logger) *SessionsMiddleware {
+func CreateSessionMiddleware(sessionManager sessions.SessionManageable, log *logrus.Logger) *SessionsMiddleware {
 	sessMiddleware := &SessionsMiddleware{
 		sessionsManager: sessionManager,
 		log:             log,
