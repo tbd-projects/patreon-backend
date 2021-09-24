@@ -2,13 +2,18 @@ package server
 
 import (
 	"database/sql"
-	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers"
+	"patreon/internal/app/sessions/repository"
+	"patreon/internal/app/sessions/sessions_manager"
 	"patreon/internal/app/store/sqlstore"
+
+	redis "github.com/gomodule/redigo/redis"
+
+	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 type Server struct {
@@ -72,8 +77,6 @@ func Start(config *Config) error {
 		os.Exit(1)
 	}
 
-	handler.SetStore(store)
-
 	registerHandler := handlers.NewRegisterHandler()
 	registerHandler.SetStore(store)
 
@@ -82,7 +85,17 @@ func Start(config *Config) error {
 	//joinedHandlers := []app.Joinable{
 	//	handlers.NewRegisterHandler(),
 	//}
+	sessionLog := log.New()
+	sessionLog.SetLevel(log.FatalLevel)
+	redisConn := &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", "localhost:6379")
+		},
+	}
 
+	redisRepository := repository.NewRedisRepository(redisConn, sessionLog)
+	sessionManager := sessions_manager.NewSessionManager(redisRepository)
+	loginHandler.SetSessionManager(sessionManager)
 	handler.JoinHandlers([]app.Joinable{registerHandler, loginHandler})
 
 	s := New(config, handler)

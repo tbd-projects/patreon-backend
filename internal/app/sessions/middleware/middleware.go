@@ -2,23 +2,23 @@ package middleware
 
 import (
 	"net/http"
-	"patreon/internal/app/sessions/sessions_manager"
+	"patreon/internal/app/sessions"
 
 	"github.com/sirupsen/logrus"
 )
 
 type SessionMiddleware struct {
-	SessionManager sessions_manager.SessionManager
+	SessionManager sessions.SessionsManager
 	log            *logrus.Logger
 }
 
-func NewSessionMiddleware(sessionManager sessions_manager.SessionManager, log *logrus.Logger) *SessionMiddleware {
+func NewSessionMiddleware(sessionManager sessions.SessionsManager, log *logrus.Logger) *SessionMiddleware {
 	return &SessionMiddleware{
 		SessionManager: sessionManager,
 		log:            log,
 	}
 }
-func (m *SessionMiddleware) Check(next http.HandlerFunc) http.HandlerFunc {
+func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {

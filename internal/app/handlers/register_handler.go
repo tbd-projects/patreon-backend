@@ -2,19 +2,22 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"patreon/internal/app"
+	"patreon/internal/app/sessions"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type RegisterHandler struct {
 	baseHandler app.HandlerJoiner
 	router      *mux.Router
 	Store       store.Store
+	Sessions    sessions.SessionRepository
 	log         *logrus.Logger
 }
 
@@ -30,6 +33,9 @@ func (h *RegisterHandler) SetStore(store store.Store) {
 }
 func (h *RegisterHandler) SetLogger(logger *logrus.Logger) {
 	h.log = logger
+}
+func (h *RegisterHandler) SetSessionStore(store sessions.SessionRepository) {
+	h.Sessions = store
 }
 func (h *RegisterHandler) Join(router *mux.Router) {
 	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")

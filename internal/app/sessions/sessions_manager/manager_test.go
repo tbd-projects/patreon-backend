@@ -14,15 +14,15 @@ import (
 
 type SuiteTestSesManager struct {
 	suite.Suite
-	sessionsManager SessionManager
-	mock            *gomock.Controller
-	mockIRepository *mocks.MockIRepository
+	sessionsManager       SessionManager
+	mock                  *gomock.Controller
+	mockSessionRepository *mocks.MockSessionRepository
 }
 
 func (s *SuiteTestSesManager) SetupSuite() {
 	s.mock = gomock.NewController(s.T())
-	s.mockIRepository = mocks.NewMockIRepository(s.mock)
-	s.sessionsManager = NewSessionManager(s.mockIRepository)
+	s.mockSessionRepository = mocks.NewMockSessionRepository(s.mock)
+	s.sessionsManager = NewSessionManager(s.mockSessionRepository)
 }
 
 func (s *SuiteTestSesManager) TearDownSuite() {
@@ -57,7 +57,7 @@ func (s *SuiteTestSesManager) TestCreateSession() {
 	userID := int64(1)
 
 	var uniqID string
-	s.mockIRepository.EXPECT().
+	s.mockSessionRepository.EXPECT().
 		Set(SkipUniqIDMatcher(models.Session{UserID: fmt.Sprintf("%d", userID), UniqID: "some uniqID",
 			Expiration: expiredCookiesTime})).
 		Times(1).
@@ -77,7 +77,7 @@ func (s *SuiteTestSesManager) TestCheckSession() {
 	uniqID := "some hash"
 	userID := int64(1)
 
-	s.mockIRepository.EXPECT().
+	s.mockSessionRepository.EXPECT().
 		GetUserId(uniqID).
 		Return(fmt.Sprintf("%d", userID), nil).
 		Times(1)
@@ -92,7 +92,7 @@ func (s *SuiteTestSesManager) TestCheckSession() {
 func (s *SuiteTestSesManager) TestDeleteSession() {
 	uniqID := "some hash"
 
-	s.mockIRepository.EXPECT().
+	s.mockSessionRepository.EXPECT().
 		Del(&models.Session{UniqID: uniqID}).
 		Return(nil).
 		Times(1)

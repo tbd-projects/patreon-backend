@@ -9,7 +9,7 @@ type SessionRepository interface {
 }
 
 type SessionsManager interface {
-	CheckSession(uniqID string) (models.Result, error)
-	CreateSession(userID int64) (models.Result, error)
-	DeleteSession(uniqID string) error
+	Check(uniqID string) (models.Result, error)
+	Create(userID int64) (models.Result, error)
+	Delete(uniqID string) error
 }

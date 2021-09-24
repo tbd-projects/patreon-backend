@@ -2,20 +2,25 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"io"
 	"log"
 	"net/http"
 	"patreon/internal/app"
+	"patreon/internal/app/sessions"
+	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type LoginHandler struct {
-	baseHandler app.HandlerJoiner
-	router      *mux.Router
-	Store       store.Store
-	log         *logrus.Logger
+	baseHandler    app.HandlerJoiner
+	authMiddleware middleware.SessionMiddleware
+	router         *mux.Router
+	Store          store.Store
+	SessionManager sessions.SessionsManager
+	log            *logrus.Logger
 }
 
 func NewLoginHandler() *LoginHandler {
@@ -31,8 +36,13 @@ func (h *LoginHandler) SetStore(store store.Store) {
 func (h *LoginHandler) SetLogger(logger *logrus.Logger) {
 	h.log = logger
 }
+func (h *LoginHandler) SetSessionManager(manager sessions.SessionsManager) {
+	h.SessionManager = manager
+	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
+}
 func (h *LoginHandler) Join(router *mux.Router) {
 	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
+	router.Use(h.authMiddleware.Check)
 	h.baseHandler.Join(router)
 }
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +70,6 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusUnauthorized, store.IncorrectEmailOrPassword)
 		return
 	}
-
 	h.Respond(w, r, http.StatusOK, "successfully login")
 }
 func (h *LoginHandler) Error(w http.ResponseWriter, r *http.Request, code int, err error) {
@@ -76,5 +85,5 @@ func (h *LoginHandler) Respond(w http.ResponseWriter, r *http.Request, code int,
 		}
 	}
 	logUser, _ := json.Marshal(data)
-	logrus.Info("Respond data: ", string(logUser))
+	h.log.Info("Respond data: ", string(logUser))
 }

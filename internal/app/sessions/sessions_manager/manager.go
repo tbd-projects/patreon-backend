@@ -21,8 +21,8 @@ type SessionManager struct {
 	sessionRepository sessions.SessionRepository
 }
 
-func NewSessionManager(sessionRep sessions.SessionRepository) SessionManager {
-	return SessionManager{
+func NewSessionManager(sessionRep sessions.SessionRepository) *SessionManager {
+	return &SessionManager{
 		sessionRepository: sessionRep,
 	}
 }
