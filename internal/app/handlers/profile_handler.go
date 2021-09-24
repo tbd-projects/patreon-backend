@@ -8,13 +8,12 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
-	"patreon/internal/models"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
-type RegisterHandler struct {
+type ProfileHandler struct {
 	baseHandler    app.HandlerJoiner
 	authMiddleware middleware.SessionMiddleware
 	router         *mux.Router
@@ -24,29 +23,29 @@ type RegisterHandler struct {
 	RespondHandler
 }
 
-func NewRegisterHandler() *RegisterHandler {
-	return &RegisterHandler{
-		baseHandler: *app.NewHandlerJoiner([]app.Joinable{}, "/register"),
+func NewProfileHandler() *ProfileHandler {
+	return &ProfileHandler{
+		baseHandler: *app.NewHandlerJoiner([]app.Joinable{}, "/profile"),
 		log:         logrus.New(),
 	}
 }
 
-func (h *RegisterHandler) SetStore(store store.Store) {
+func (h *ProfileHandler) SetStore(store store.Store) {
 	h.Store = store
 }
-func (h *RegisterHandler) SetLogger(logger *logrus.Logger) {
+func (h *ProfileHandler) SetLogger(logger *logrus.Logger) {
 	h.log = logger
 }
-func (h *RegisterHandler) SetSessionManager(manager sessions.SessionsManager) {
+func (h *ProfileHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.SessionManager = manager
 	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
 }
-func (h *RegisterHandler) Join(router *mux.Router) {
+func (h *ProfileHandler) Join(router *mux.Router) {
 	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
-	router.Use(h.authMiddleware.CheckNotAuthorized)
+	router.Use(h.authMiddleware.Check)
 	h.baseHandler.Join(router)
 }
-func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		Login    string `json:"login"`
 		Password string `json:"password"`
@@ -64,24 +63,5 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.Error(h.log, w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
-	u := &models.User{
-		Login:    req.Login,
-		Password: req.Password,
-	}
-
-	logUser, _ := json.Marshal(u)
-	h.log.Info("get: ", string(logUser))
-
-	checkUser, _ := h.Store.User().FindByLogin(u.Login)
-	if checkUser != nil {
-		h.Error(h.log, w, r, http.StatusConflict, store.UserAlreadyExist)
-		return
-	}
-	if err := h.Store.User().Create(u); err != nil {
-		h.Error(h.log, w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	u.MakePrivateDate()
-	h.Respond(h.log, w, r, http.StatusOK, u)
+	h.Respond(h.log, w, r, http.StatusOK, "access is allowed")
 }

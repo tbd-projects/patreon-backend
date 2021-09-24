@@ -3,12 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -21,6 +21,7 @@ type LoginHandler struct {
 	Store          store.Store
 	SessionManager sessions.SessionsManager
 	log            *logrus.Logger
+	RespondHandler
 }
 
 func NewLoginHandler() *LoginHandler {
@@ -42,7 +43,7 @@ func (h *LoginHandler) SetSessionManager(manager sessions.SessionsManager) {
 }
 func (h *LoginHandler) Join(router *mux.Router) {
 	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
-	router.Use(h.authMiddleware.Check)
+	router.Use(h.authMiddleware.CheckNotAuthorized)
 	h.baseHandler.Join(router)
 }
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +54,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			log.Fatal(err)
+			h.log.Fatal(err)
 		}
 	}(r.Body)
 
@@ -61,29 +62,25 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(req); err != nil {
-		h.Error(w, r, http.StatusUnprocessableEntity, err)
+		h.Error(h.log, w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 	u, err := h.Store.User().FindByLogin(req.Login)
 
 	if err != nil || !u.ComparePassword(req.Password) {
-		h.Error(w, r, http.StatusUnauthorized, store.IncorrectEmailOrPassword)
+		h.Error(h.log, w, r, http.StatusUnauthorized, store.IncorrectEmailOrPassword)
 		return
 	}
-	h.Respond(w, r, http.StatusOK, "successfully login")
-}
-func (h *LoginHandler) Error(w http.ResponseWriter, r *http.Request, code int, err error) {
-	h.Respond(w, r, code, map[string]string{"error": err.Error()})
-}
-func (h *LoginHandler) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
-	encoder := json.NewEncoder(w)
-	w.WriteHeader(code)
-	if data != nil {
-		err := encoder.Encode(data)
-		if err != nil {
-			h.log.Error(err)
-		}
+	res, err := h.SessionManager.Create(int64(u.ID))
+	if err != nil || res.UserID != int64(u.ID) {
+		h.Error(h.log, w, r, http.StatusInternalServerError, store.IncorrectEmailOrPassword)
+		return
 	}
-	logUser, _ := json.Marshal(data)
-	h.log.Info("Respond data: ", string(logUser))
+	cookie := &http.Cookie{
+		Name:    "session_id",
+		Value:   res.UniqID,
+		Expires: time.Now().Add(10 * time.Hour),
+	}
+	http.SetCookie(w, cookie)
+	h.Respond(h.log, w, r, http.StatusOK, "successfully login")
 }

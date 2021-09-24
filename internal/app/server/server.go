@@ -57,8 +57,6 @@ func Start(config *Config) error {
 	router := mux.NewRouter()
 	handler.SetRouter(router)
 
-	//handler.RegisterHandlers()
-
 	db, err := newDB(config.DataBaseUrl)
 	if err != nil {
 		log.Fatal(err)
@@ -82,9 +80,10 @@ func Start(config *Config) error {
 
 	loginHandler := handlers.NewLoginHandler()
 	loginHandler.SetStore(store)
-	//joinedHandlers := []app.Joinable{
-	//	handlers.NewRegisterHandler(),
-	//}
+
+	profileHandler := handlers.NewProfileHandler()
+	profileHandler.SetStore(store)
+
 	sessionLog := log.New()
 	sessionLog.SetLevel(log.FatalLevel)
 	redisConn := &redis.Pool{
@@ -96,7 +95,10 @@ func Start(config *Config) error {
 	redisRepository := repository.NewRedisRepository(redisConn, sessionLog)
 	sessionManager := sessions_manager.NewSessionManager(redisRepository)
 	loginHandler.SetSessionManager(sessionManager)
-	handler.JoinHandlers([]app.Joinable{registerHandler, loginHandler})
+	registerHandler.SetSessionManager(sessionManager)
+	profileHandler.SetSessionManager(sessionManager)
+
+	handler.JoinHandlers([]app.Joinable{registerHandler, loginHandler, profileHandler})
 
 	s := New(config, handler)
 	s.logger.Info("starting server")

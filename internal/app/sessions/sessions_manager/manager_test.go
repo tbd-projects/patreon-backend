@@ -22,7 +22,7 @@ type SuiteTestSesManager struct {
 func (s *SuiteTestSesManager) SetupSuite() {
 	s.mock = gomock.NewController(s.T())
 	s.mockSessionRepository = mocks.NewMockSessionRepository(s.mock)
-	s.sessionsManager = NewSessionManager(s.mockSessionRepository)
+	s.sessionsManager = *NewSessionManager(s.mockSessionRepository)
 }
 
 func (s *SuiteTestSesManager) TearDownSuite() {
