@@ -45,6 +45,7 @@ func (h *LoginHandler) Join(router *mux.Router) {
 	router.Use(h.authMiddleware.Check)
 	h.baseHandler.Join(router)
 }
+
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		Login    string `json:"login"`

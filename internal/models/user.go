@@ -5,6 +5,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Return struct {
+	Login    string
+	Password string
+}
+
+type Res struct {
+	Code int    `json:"status"`
+	Err  string `json:"error"`
+}
+
+type UserPrivate struct {
+	ID    int    `json:"id"`
+	Login string `json:"login"`
+}
+
 type User struct {
 	ID                int    `json:"id"`
 	Login             string `json:"login"`

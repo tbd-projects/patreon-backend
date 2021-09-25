@@ -41,6 +41,17 @@ func (h *RegisterHandler) Join(router *mux.Router) {
 	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
 	h.baseHandler.Join(router)
 }
+
+// Registration
+// @Summary create new user
+// @Description create new account and get cookies
+// @Accept  json
+// @Produce  json
+// @Success 201 {object} models.UserPrivate "Create user successfully"
+// @Failure 400 {object} models.Res "invalid information"
+// @Failure 409 {object} models.Res "user already exist"
+// @Failure 422 {object} models.Res "invalid information"
+// @Router /register [POST]
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		Login    string `json:"login"`

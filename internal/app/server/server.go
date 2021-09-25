@@ -14,6 +14,10 @@ import (
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+
+	_ "patreon/docs"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Server struct {
@@ -42,6 +46,23 @@ func newDB(url string) (*sql.DB, error) {
 	return db, nil
 }
 
+// @title Patreon
+// @version 1.0
+// @description Server for Patreon application.
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
+// @x-extension-openapi {"example": "value on a json format"}
+
 func Start(config *Config) error {
 	level, err := log.ParseLevel(config.LogLevel)
 	if err != nil {
@@ -55,6 +76,7 @@ func Start(config *Config) error {
 	handler.SetLogger(logger)
 
 	router := mux.NewRouter()
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	handler.SetRouter(router)
 
 	//handler.RegisterHandlers()
@@ -100,6 +122,5 @@ func Start(config *Config) error {
 
 	s := New(config, handler)
 	s.logger.Info("starting server")
-
 	return http.ListenAndServe(config.BindAddr, s.handler)
 }
