@@ -7,7 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type RespondHandler struct{}
+type RespondHandler struct {
+	log *logrus.Logger
+}
 
 func (h *RespondHandler) Error(log *logrus.Logger, w http.ResponseWriter, r *http.Request, code int, err error) {
 	h.Respond(log, w, r, code, map[string]string{"error": err.Error()})

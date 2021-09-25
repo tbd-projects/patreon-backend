@@ -11,14 +11,13 @@ import (
 type MainHandler struct {
 	baseHandler app.HandlerJoiner
 	router      *mux.Router
-	log         *logrus.Logger
 	RespondHandler
 }
 
 func NewMainHandler() *MainHandler {
 	return &MainHandler{
-		baseHandler: app.HandlerJoiner{},
-		log:         logrus.New(),
+		baseHandler:    app.HandlerJoiner{},
+		RespondHandler: RespondHandler{logrus.New()},
 	}
 }
 

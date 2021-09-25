@@ -20,14 +20,13 @@ type LoginHandler struct {
 	router         *mux.Router
 	Store          store.Store
 	SessionManager sessions.SessionsManager
-	log            *logrus.Logger
 	RespondHandler
 }
 
 func NewLoginHandler() *LoginHandler {
 	return &LoginHandler{
-		baseHandler: *app.NewHandlerJoiner([]app.Joinable{}, "/login"),
-		log:         logrus.New(),
+		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/login"),
+		RespondHandler: RespondHandler{logrus.New()},
 	}
 }
 
@@ -42,8 +41,10 @@ func (h *LoginHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
 }
 func (h *LoginHandler) Join(router *mux.Router) {
-	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
-	router.Use(h.authMiddleware.CheckNotAuthorized)
+	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET")
+
+	//router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
+	//router.Use(h.authMiddleware.CheckNotAuthorized)
 	h.baseHandler.Join(router)
 }
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -77,9 +78,10 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cookie := &http.Cookie{
-		Name:    "session_id",
-		Value:   res.UniqID,
-		Expires: time.Now().Add(10 * time.Hour),
+		Name:     "session_id",
+		Value:    res.UniqID,
+		Expires:  time.Now().Add(10 * time.Hour),
+		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
 	h.Respond(h.log, w, r, http.StatusOK, "successfully login")

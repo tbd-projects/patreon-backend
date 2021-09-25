@@ -34,7 +34,8 @@ func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 			return
 		} else {
 			m.log.Infof("Get session for user: %d\n", res.UserID)
-			r = r.WithContext(context.WithValue(r.Context(), "user_id", res)) //nolint
+			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID)) //nolint
+			r = r.WithContext(context.WithValue(r.Context(), "uniq_id", res.UniqID)) //nolint
 		}
 		next.ServeHTTP(w, r)
 	})

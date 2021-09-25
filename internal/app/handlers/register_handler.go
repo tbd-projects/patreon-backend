@@ -20,14 +20,13 @@ type RegisterHandler struct {
 	router         *mux.Router
 	Store          store.Store
 	SessionManager sessions.SessionsManager
-	log            *logrus.Logger
 	RespondHandler
 }
 
 func NewRegisterHandler() *RegisterHandler {
 	return &RegisterHandler{
-		baseHandler: *app.NewHandlerJoiner([]app.Joinable{}, "/register"),
-		log:         logrus.New(),
+		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/register"),
+		RespondHandler: RespondHandler{logrus.New()},
 	}
 }
 
@@ -42,8 +41,9 @@ func (h *RegisterHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
 }
 func (h *RegisterHandler) Join(router *mux.Router) {
-	router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
-	router.Use(h.authMiddleware.CheckNotAuthorized)
+	//router.HandleFunc(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("POST", "GET")
+	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET")
+	//router.Use(h.authMiddleware.CheckNotAuthorized)
 	h.baseHandler.Join(router)
 }
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +61,8 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil {
-		h.Error(h.log, w, r, http.StatusUnprocessableEntity, err)
+		h.log.Warnf("can not parse request %s", err)
+		h.Error(h.log, w, r, http.StatusUnprocessableEntity, store.InvalidBody)
 		return
 	}
 	u := &models.User{

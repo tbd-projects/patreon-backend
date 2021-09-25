@@ -39,3 +39,13 @@ func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
 
 	return &user, nil
 }
+func (repo *UserRepository) FindByID(id int64) (*models.User, error) {
+	user := models.User{}
+
+	if err := repo.store.db.QueryRow("SELECT user_id, login, avatar from users where user_id=$1", id).
+		Scan(&user.ID, &user.Login, &user.Avatar); err != nil {
+		return nil, store.NotFound
+	}
+
+	return &user, nil
+}

@@ -1,6 +1,9 @@
 package models
 
 import (
+	"fmt"
+	"strconv"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -13,6 +16,9 @@ type User struct {
 	Avatar            string `json:"avatar,omitempty"`
 }
 
+func (u *User) String() string {
+	return fmt.Sprintf("{ID: %s, Login: %s}", strconv.Itoa(u.ID), u.Login)
+}
 func (u *User) Validate() error {
 	return validation.ValidateStruct(u,
 		validation.Field(&u.Login, validation.Required, validation.Length(5, 25)),
