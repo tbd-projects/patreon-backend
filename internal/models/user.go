@@ -10,14 +10,19 @@ type Return struct {
 	Password string
 }
 
-type Res struct {
+type BaseResponse struct {
 	Code int    `json:"status"`
 	Err  string `json:"error"`
 }
 
-type UserPrivate struct {
+type UserResponse struct {
 	ID    int    `json:"id"`
 	Login string `json:"login"`
+}
+
+type ProfileResponse struct {
+	Login  string `json:"login"`
+	Avatar string `json:"avatar"`
 }
 
 type User struct {

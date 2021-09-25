@@ -8,7 +8,7 @@ import (
 	"patreon/internal/app/handlers"
 	"patreon/internal/app/sessions/repository"
 	"patreon/internal/app/sessions/sessions_manager"
-	"patreon/internal/app/store/sqlstore"
+	_ "patreon/internal/app/store/sqlstore"
 
 	redis "github.com/gomodule/redigo/redis"
 
@@ -81,7 +81,7 @@ func Start(config *Config) error {
 
 	//handler.RegisterHandlers()
 
-	db, err := newDB(config.DataBaseUrl)
+	/*db, err := newDB(config.DataBaseUrl)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
@@ -97,13 +97,13 @@ func Start(config *Config) error {
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
-	}
+	}*/
 
 	registerHandler := handlers.NewRegisterHandler()
-	registerHandler.SetStore(store)
+	//registerHandler.SetStore(store)
 
 	loginHandler := handlers.NewLoginHandler()
-	loginHandler.SetStore(store)
+	//loginHandler.SetStore(store)
 	//joinedHandlers := []app.Joinable{
 	//	handlers.NewRegisterHandler(),
 	//}
