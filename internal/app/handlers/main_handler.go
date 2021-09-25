@@ -22,6 +22,7 @@ func NewMainHandler() *MainHandler {
 }
 
 func (h MainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.PrintRequest(r)
 	h.router.ServeHTTP(w, r)
 }
 func (h *MainHandler) JoinHandlers(joinedHandlers []app.Joinable) {

@@ -56,16 +56,16 @@ func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.log.Error("can not get user_id from context")
-		h.Error(h.log, w, r, http.StatusInternalServerError, errors.New(""))
+		h.Error(w, r, http.StatusInternalServerError, errors.New(""))
 		return
 	}
 
 	u, err := h.Store.User().FindByID(userID.(int64))
 	if err != nil {
 		h.log.Errorf("get: %s err:%s can not get user from db", u, err.Error())
-		h.Error(h.log, w, r, http.StatusServiceUnavailable, store.GetProfileFail)
+		h.Error(w, r, http.StatusServiceUnavailable, store.GetProfileFail)
 		return
 	}
-	h.log.Infof("get profile %s", u)
-	h.Respond(h.log, w, r, http.StatusOK, u)
+	h.log.Debugf("get profile %s", u)
+	h.Respond(w, r, http.StatusOK, u)
 }

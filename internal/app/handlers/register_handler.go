@@ -62,7 +62,7 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil {
 		h.log.Warnf("can not parse request %s", err)
-		h.Error(h.log, w, r, http.StatusUnprocessableEntity, store.InvalidBody)
+		h.Error(w, r, http.StatusUnprocessableEntity, store.InvalidBody)
 		return
 	}
 	u := &models.User{
@@ -71,18 +71,18 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logUser, _ := json.Marshal(u)
-	h.log.Info("get: ", string(logUser))
+	h.log.Debug("get: ", string(logUser))
 
 	checkUser, _ := h.Store.User().FindByLogin(u.Login)
 	if checkUser != nil {
-		h.Error(h.log, w, r, http.StatusConflict, store.UserAlreadyExist)
+		h.Error(w, r, http.StatusConflict, store.UserAlreadyExist)
 		return
 	}
 	if err := h.Store.User().Create(u); err != nil {
-		h.Error(h.log, w, r, http.StatusBadRequest, err)
+		h.Error(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	u.MakePrivateDate()
-	h.Respond(h.log, w, r, http.StatusOK, u)
+	h.Respond(w, r, http.StatusOK, u)
 }

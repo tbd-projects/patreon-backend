@@ -3,15 +3,13 @@ package app
 import (
 	"net/http"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/gorilla/mux"
 )
 
 type Handler interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
-	Error(log *logrus.Logger, w http.ResponseWriter, r *http.Request, code int, err error)
-	Respond(log *logrus.Logger, w http.ResponseWriter, r *http.Request, code int, data interface{})
+	Error(w http.ResponseWriter, r *http.Request, code int, err error)
+	Respond(w http.ResponseWriter, r *http.Request, code int, data interface{})
 }
 
 type Joinable interface {

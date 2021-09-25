@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -63,20 +64,22 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(req); err != nil {
-		h.Error(h.log, w, r, http.StatusUnprocessableEntity, err)
+		h.Error(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 	u, err := h.Store.User().FindByLogin(req.Login)
-
+	h.log.Infof("Login : %s, password : %s", req.Login, req.Password)
 	if err != nil || !u.ComparePassword(req.Password) {
-		h.Error(h.log, w, r, http.StatusUnauthorized, store.IncorrectEmailOrPassword)
+		h.Error(w, r, http.StatusUnauthorized, store.IncorrectEmailOrPassword)
 		return
 	}
 	res, err := h.SessionManager.Create(int64(u.ID))
 	if err != nil || res.UserID != int64(u.ID) {
-		h.Error(h.log, w, r, http.StatusInternalServerError, store.IncorrectEmailOrPassword)
+		h.log.Error(err)
+		h.Error(w, r, http.StatusInternalServerError, errors.New("can't create session"))
 		return
 	}
+
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    res.UniqID,
@@ -84,5 +87,5 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
-	h.Respond(h.log, w, r, http.StatusOK, "successfully login")
+	h.Respond(w, r, http.StatusOK, "successfully login")
 }

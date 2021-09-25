@@ -90,8 +90,17 @@ func Start(config *Config) error {
 	sessionLog.SetLevel(log.FatalLevel)
 	redisConn := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", "localhost:6379")
+			return redis.Dial("tcp", config.RedisUrl)
 		},
+	}
+	conn, err := redisConn.Dial()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = conn.Close()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	redisRepository := repository.NewRedisRepository(redisConn, sessionLog)

@@ -50,19 +50,23 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	uniqID := r.Context().Value("uniq_id")
 	if uniqID == nil {
 		h.log.Error("can not get uniq_id from context")
-		h.Error(h.log, w, r, http.StatusInternalServerError, errors.New(""))
+		h.Error(w, r, http.StatusInternalServerError, errors.New(""))
 		return
 	}
+
+	h.log.Debugf("Logout session: %s", uniqID)
+
 	err := h.SessionManager.Delete(uniqID.(string))
 	if err != nil {
-		h.Error(h.log, w, r, http.StatusInternalServerError, store.DeleteCookieFail)
+		h.Error( w, r, http.StatusInternalServerError, store.DeleteCookieFail)
 		return
 	}
+
 	cookie := &http.Cookie{
 		Name:    "session_id",
 		Value:   uniqID.(string),
 		Expires: time.Now().AddDate(0, 0, -1),
 	}
 	http.SetCookie(w, cookie)
-	h.Respond(h.log, w, r, http.StatusOK, "successfully logout")
+	h.Respond(w, r, http.StatusOK, "successfully logout")
 }
