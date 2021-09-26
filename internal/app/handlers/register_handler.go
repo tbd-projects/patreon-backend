@@ -45,14 +45,15 @@ func (h *RegisterHandler) SetSessionManager(manager sessions.SessionsManager) {
 }
 func (h *RegisterHandler) Join(router *mux.Router) {
 	//router.HandleFunc(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("POST", "GET")
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
-	//router.Use(h.authMiddleware.CheckNotAuthorized)
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
 		gorilla_handlers.AllowedHeaders([]string{"*"}),
 		gorilla_handlers.AllowCredentials(),
-		gorilla_handlers.AllowedMethods([]string{"POST", "OPTIONS"}),
+		gorilla_handlers.AllowedMethods([]string{"POST", "OPTIONS", "GET"}),
 	))
+	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
+	//router.Use(h.authMiddleware.CheckNotAuthorized)
+
 	h.baseHandler.Join(router)
 }
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
