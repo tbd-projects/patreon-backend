@@ -59,10 +59,13 @@ func Start(config *Config) error {
 	router := mux.NewRouter()
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
-		gorilla_handlers.AllowedHeaders([]string{"*"}),
+		gorilla_handlers.AllowedHeaders([]string{
+			"Accept, Content-Type, Content-Length," +
+				"Accept-Encoding, X-CSRF-Token, csrf-token, Authorization"}),
 		gorilla_handlers.AllowCredentials(),
 		gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
 	))
+
 	handler.SetRouter(router)
 
 	db, err := newDB(config.DataBaseUrl)
