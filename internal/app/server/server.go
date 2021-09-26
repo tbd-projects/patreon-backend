@@ -12,6 +12,7 @@ import (
 
 	redis "github.com/gomodule/redigo/redis"
 
+	gorilla_handlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
@@ -55,6 +56,7 @@ func Start(config *Config) error {
 	handler.SetLogger(logger)
 
 	router := mux.NewRouter()
+	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedOrigins([]string{"*"})))
 	handler.SetRouter(router)
 
 	db, err := newDB(config.DataBaseUrl)
