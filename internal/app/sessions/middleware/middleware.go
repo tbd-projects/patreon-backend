@@ -66,6 +66,7 @@ func (m *SessionMiddleware) CorsMiddleware(next http.Handler) http.Handler {
 		if r.Method == "OPTIONS" {
 			m.log.Info("options request")
 			w.WriteHeader(http.StatusNoContent)
+			return
 		} else {
 			next.ServeHTTP(w, r)
 		}
