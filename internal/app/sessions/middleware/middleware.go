@@ -63,6 +63,7 @@ func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 }
 func (m *SessionMiddleware) CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		m.log.Infof("Method: %s Body: %s URL %s", r.Method, r.Body, r.URL)
 		if r.Method == "OPTIONS" {
 			m.log.Info("options request")
 			w.WriteHeader(http.StatusNoContent)
