@@ -56,7 +56,11 @@ func Start(config *Config) error {
 	handler.SetLogger(logger)
 
 	router := mux.NewRouter()
-	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedOrigins([]string{"*"})))
+	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"})))
+	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedHeaders([]string{"*"})))
+	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedMethods([]string{"*"})))
+	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowCredentials()))
+	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})))
 	handler.SetRouter(router)
 
 	db, err := newDB(config.DataBaseUrl)
