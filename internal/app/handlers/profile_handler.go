@@ -42,12 +42,12 @@ func (h *ProfileHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
 }
 func (h *ProfileHandler) Join(router *mux.Router) {
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("POST", "GET", "OPTIONS")
+	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "OPTIONS")
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
 		gorilla_handlers.AllowedHeaders([]string{"*"}),
 		gorilla_handlers.AllowCredentials(),
-		gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
+		gorilla_handlers.AllowedMethods([]string{"GET", "OPTIONS"}),
 	))
 	//router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")
 	//router.Use(h.authMiddleware.Check)
@@ -60,7 +60,10 @@ func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.log.Error(err)
 		}
 	}(r.Body)
-
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.log.Error("can not get user_id from context")

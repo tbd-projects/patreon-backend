@@ -21,6 +21,10 @@ func NewSessionMiddleware(sessionManager sessions.SessionsManager, log *logrus.L
 }
 func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+			m.log.Info("options request")
+			w.WriteHeader(http.StatusNoContent)
+		}
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
 			m.log.Warnf("in parsing cookie: %v", err)
@@ -43,6 +47,10 @@ func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 
 func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+			m.log.Info("options request")
+			w.WriteHeader(http.StatusNoContent)
+		}
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
 			m.log.Debug("User not Authorized")
@@ -59,5 +67,14 @@ func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 			m.log.Warnf("UserAuthorized: %d", res.UserID)
 		}
 		w.WriteHeader(http.StatusTeapot)
+	})
+}
+func (m *SessionMiddleware) corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+
+		} else {
+			next.ServeHTTP(w, r)
+		}
 	})
 }

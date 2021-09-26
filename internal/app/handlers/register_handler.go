@@ -51,7 +51,7 @@ func (h *RegisterHandler) Join(router *mux.Router) {
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
 		gorilla_handlers.AllowedHeaders([]string{"*"}),
 		gorilla_handlers.AllowCredentials(),
-		gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
+		gorilla_handlers.AllowedMethods([]string{"POST", "OPTIONS"}),
 	))
 	h.baseHandler.Join(router)
 }
