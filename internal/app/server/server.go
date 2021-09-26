@@ -62,10 +62,6 @@ func Start(config *Config) error {
 		gorilla_handlers.AllowCredentials(),
 		gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
 	))
-	router.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
-		str := "<!DOCTYPE html>\n<html lang=\"en\">\n\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>Hello!</title>\n    </head>\n\n    <body>\n        <h1>Hello World!</h1>\n        <p>This is a simple paragraph.</p>\n    </body>\n\n</html>"
-		writer.Write([]byte(str))
-	})
 	handler.SetRouter(router)
 
 	db, err := newDB(config.DataBaseUrl)
