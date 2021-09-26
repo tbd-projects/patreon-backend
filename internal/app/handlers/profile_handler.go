@@ -42,7 +42,7 @@ func (h *ProfileHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
 }
 func (h *ProfileHandler) Join(router *mux.Router) {
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("POST", "GET")
+	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("POST", "GET", "OPTIONS")
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
 		gorilla_handlers.AllowedHeaders([]string{"*"}),

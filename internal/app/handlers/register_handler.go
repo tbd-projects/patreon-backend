@@ -45,7 +45,7 @@ func (h *RegisterHandler) SetSessionManager(manager sessions.SessionsManager) {
 }
 func (h *RegisterHandler) Join(router *mux.Router) {
 	//router.HandleFunc(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("POST", "GET")
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET")
+	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
 	//router.Use(h.authMiddleware.CheckNotAuthorized)
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),

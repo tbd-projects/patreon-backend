@@ -56,11 +56,16 @@ func Start(config *Config) error {
 	handler.SetLogger(logger)
 
 	router := mux.NewRouter()
-	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"})))
-	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedHeaders([]string{"*"})))
-	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedMethods([]string{"*"})))
-	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowCredentials()))
-	router.Use(gorilla_handlers.CORS(gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})))
+	router.Use(gorilla_handlers.CORS(
+		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
+		gorilla_handlers.AllowedHeaders([]string{"*"}),
+		gorilla_handlers.AllowCredentials(),
+		gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
+	))
+	router.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
+		str := "<!DOCTYPE html>\n<html lang=\"en\">\n\n    <head>\n        <meta charset=\"UTF-8\">\n        <title>Hello!</title>\n    </head>\n\n    <body>\n        <h1>Hello World!</h1>\n        <p>This is a simple paragraph.</p>\n    </body>\n\n</html>"
+		writer.Write([]byte(str))
+	})
 	handler.SetRouter(router)
 
 	db, err := newDB(config.DataBaseUrl)
