@@ -61,7 +61,7 @@ func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}(r.Body)
 	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusNoContent)
+		h.Respond(w, r, http.StatusNoContent, nil)
 		return
 	}
 	userID := r.Context().Value("user_id")

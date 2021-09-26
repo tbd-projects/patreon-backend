@@ -49,7 +49,7 @@ func (h *LoginHandler) Join(router *mux.Router) {
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
 		gorilla_handlers.AllowedHeaders([]string{"*"}),
 		gorilla_handlers.AllowCredentials(),
-		gorilla_handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
+		gorilla_handlers.AllowedMethods([]string{"POST", "OPTIONS"}),
 	))
 
 	//router.HandleFunc(h.baseHandler.GetUrl(), h.ServeHTTP).Methods("POST", "GET")

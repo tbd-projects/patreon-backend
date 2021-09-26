@@ -24,6 +24,7 @@ func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 		if r.Method == "OPTIONS" {
 			m.log.Info("options request")
 			w.WriteHeader(http.StatusNoContent)
+			return
 		}
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
@@ -50,6 +51,7 @@ func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 		if r.Method == "OPTIONS" {
 			m.log.Info("options request")
 			w.WriteHeader(http.StatusNoContent)
+			return
 		}
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
