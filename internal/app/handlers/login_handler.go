@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"patreon/internal/app"
+	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
@@ -64,19 +64,23 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(req); err != nil {
-		h.Error(w, r, http.StatusUnprocessableEntity, err)
+		h.log.Warnf("can not decode body %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
+
 	u, err := h.Store.User().FindByLogin(req.Login)
-	h.log.Infof("Login : %s, password : %s", req.Login, req.Password)
+	h.log.Debugf("Login : %s, password : %s", req.Login, req.Password)
 	if err != nil || !u.ComparePassword(req.Password) {
-		h.Error(w, r, http.StatusUnauthorized, store.IncorrectEmailOrPassword)
+		h.log.Warnf("Fail get user or compare password %s", err)
+		h.Error(w, r, http.StatusUnauthorized, handler_errors.IncorrectEmailOrPassword)
 		return
 	}
+
 	res, err := h.SessionManager.Create(int64(u.ID))
 	if err != nil || res.UserID != int64(u.ID) {
-		h.log.Error(err)
-		h.Error(w, r, http.StatusInternalServerError, errors.New("can't create session"))
+		h.log.Errorf("Error create session %s", err)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateSession)
 		return
 	}
 

@@ -16,12 +16,6 @@ func NewUserRepository(st *Store) *UserRepository {
 }
 
 func (repo *UserRepository) Create(u *models.User) error {
-	if err := u.Validate(); err != nil {
-		return err
-	}
-	if err := u.BeforeCreate(); err != nil {
-		return err
-	}
 	if err := repo.store.db.QueryRow("INSERT INTO users (login, encrypted_password, avatar) VALUES ($1, $2, $3)"+
 		"RETURNING user_id", u.Login, u.EncryptedPassword, u.Avatar).Scan(&u.ID); err != nil {
 		return err

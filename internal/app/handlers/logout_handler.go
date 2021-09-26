@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"errors"
 	"io"
 	"net/http"
 	"patreon/internal/app"
+	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	"patreon/internal/app/store"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -50,7 +49,7 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	uniqID := r.Context().Value("uniq_id")
 	if uniqID == nil {
 		h.log.Error("can not get uniq_id from context")
-		h.Error(w, r, http.StatusInternalServerError, errors.New(""))
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
 		return
 	}
 
@@ -58,7 +57,8 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err := h.SessionManager.Delete(uniqID.(string))
 	if err != nil {
-		h.Error( w, r, http.StatusInternalServerError, store.DeleteCookieFail)
+		h.log.Errorf("can not delete session %s", err)
+		h.Error( w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
+	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
@@ -62,7 +63,7 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil {
 		h.log.Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, store.InvalidBody)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 	u := &models.User{
@@ -75,11 +76,26 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	checkUser, _ := h.Store.User().FindByLogin(u.Login)
 	if checkUser != nil {
-		h.Error(w, r, http.StatusConflict, store.UserAlreadyExist)
+		h.log.Warn(handler_errors.UserAlreadyExist)
+		h.Error(w, r, http.StatusConflict, handler_errors.UserAlreadyExist)
 		return
 	}
+
+	if err := u.Validate(); err != nil {
+		h.log.Warnf("Not valid login or password %s", err)
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
+		return
+	}
+
+	if err := u.BeforeCreate(); err != nil {
+		h.log.Errorf("Error prepare user info %s", err)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorPrepareUser)
+		return
+	}
+
 	if err := h.Store.User().Create(u); err != nil {
-		h.Error(w, r, http.StatusBadRequest, err)
+		h.log.Errorf("Error create user in bd %s", err)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateUser)
 		return
 	}
 

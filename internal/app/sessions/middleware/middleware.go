@@ -23,7 +23,7 @@ func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
-			m.log.Errorf("Error in parsing cookie: %v", err)
+			m.log.Warnf("in parsing cookie: %v", err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
