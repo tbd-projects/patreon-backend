@@ -8,9 +8,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Profile struct {
+	ID                int    `json:"id"`
+	Nickname          string `json:"nickname"`
+	Avatar            string `json:"avatar,omitempty"`
+}
+
 type User struct {
 	ID                int    `json:"id"`
 	Login             string `json:"login"`
+	Nickname          string `json:"nickname"`
 	Password          string `json:"password,omitempty"`
 	EncryptedPassword string `json:",omitempty"`
 	Avatar            string `json:"avatar,omitempty"`
@@ -29,6 +36,7 @@ func (u *User) MakePrivateDate() {
 	u.Password = ""
 	u.EncryptedPassword = ""
 }
+
 func (u *User) BeforeCreate() error {
 	if len(u.Password) > 0 {
 		enc, err := u.encryptString(u.Password)

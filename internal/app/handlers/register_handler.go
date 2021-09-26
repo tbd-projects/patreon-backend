@@ -42,13 +42,6 @@ func (h *RegisterHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
 }
 func (h *RegisterHandler) Join(router *mux.Router) {
-	//router.HandleFunc(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("POST", "GET")
-	//router.Use(gorilla_handlers.CORS(
-	//	gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001"}),
-	//	gorilla_handlers.AllowedHeaders([]string{"*"}),
-	//	gorilla_handlers.AllowCredentials(),
-	//	gorilla_handlers.AllowedMethods([]string{"POST", "OPTIONS", "GET"}),
-	//))
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
 	//router.Use(h.authMiddleware.CheckNotAuthorized)
 
@@ -57,6 +50,7 @@ func (h *RegisterHandler) Join(router *mux.Router) {
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		Login    string `json:"login"`
+		Nickname string `json:"nickname"`
 		Password string `json:"password"`
 	}
 	defer func(Body io.ReadCloser) {
@@ -76,6 +70,7 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	u := &models.User{
 		Login:    req.Login,
 		Password: req.Password,
+		Nickname: req.Nickname,
 	}
 
 	logUser, _ := json.Marshal(u)

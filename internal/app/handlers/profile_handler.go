@@ -8,6 +8,7 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
+	"patreon/internal/models"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -74,5 +75,5 @@ func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.log.Debugf("get profile %s", u)
-	h.Respond(w, r, http.StatusOK, u)
+	h.Respond(w, r, http.StatusOK, models.Profile{Nickname: u.Nickname, Avatar: u.Avatar})
 }
