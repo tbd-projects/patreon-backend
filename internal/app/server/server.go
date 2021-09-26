@@ -60,7 +60,7 @@ func Start(config *Config) error {
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001", "https://patreon-dev.herokuapp.com",
 			"https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",
-			"http://patreon-dev.herokuapp.com/"}),
+			"http://patreon-dev.herokuapp.com"}),
 		gorilla_handlers.AllowedHeaders([]string{
 			"Accept", "Content-Type", "Content-Length",
 			"Accept-Encoding", "X-CSRF-Token", "csrf-token", "Authorization"}),

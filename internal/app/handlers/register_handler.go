@@ -43,8 +43,6 @@ func (h *RegisterHandler) SetSessionManager(manager sessions.SessionsManager) {
 }
 func (h *RegisterHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
-	//router.Use(h.authMiddleware.CheckNotAuthorized)
-
 	h.baseHandler.Join(router)
 }
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
