@@ -98,6 +98,12 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			Category:    req.Category,
 			Description: req.Description,
 		}
+		if err := cr.Validate(); err != nil {
+			toLog, _ := json.Marshal(err)
+			h.log.Errorf("get: %s err:%s ", cr, string(toLog))
+			h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
+			return
+		}
 		if err := h.Store.Creator().Create(cr); err != nil {
 			h.log.Errorf("get: %s err:%s can not create profile", cr, err)
 			h.Error(w, r, http.StatusServiceUnavailable, handler_errors.BDError)

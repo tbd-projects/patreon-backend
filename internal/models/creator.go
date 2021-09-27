@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"strconv"
+
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type Creator struct {
@@ -13,11 +15,18 @@ type Creator struct {
 	Avatar      string `json:"avatar,omitempty"`
 	Cover       string `json:"cover,omitempty"`
 }
-
 type ResponseCreator struct {
 	Creator
 }
 
+func (cr *Creator) Validate() error {
+	return validation.ValidateStruct(cr,
+		validation.Field(&cr.ID, validation.Required),
+		validation.Field(&cr.Nickname, validation.Required),
+		validation.Field(&cr.Category, validation.Required),
+		validation.Field(&cr.Description, validation.Required),
+	)
+}
 func ToResponseCreator(cr Creator) ResponseCreator {
 	return ResponseCreator{
 		cr,
