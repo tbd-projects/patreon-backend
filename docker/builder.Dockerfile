@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-EXPOSE 8080 8081
+EXPOSE 80 8081
 
 RUN make build
 
