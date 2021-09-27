@@ -11,3 +11,13 @@ func TestUser(t *testing.T) *User {
 	}
 
 }
+func TestCreator(t *testing.T) *Creator {
+	t.Helper()
+
+	return &Creator{
+		ID:          1,
+		Category:    "podcasts",
+		Description: "i love podcasts",
+	}
+
+}
