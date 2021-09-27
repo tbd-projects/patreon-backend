@@ -18,6 +18,12 @@ type ResponseCreator struct {
 	Creator
 }
 
+func ToResponseCreator(cr Creator) ResponseCreator {
+	return ResponseCreator{
+		cr,
+	}
+}
+
 func (u *ResponseCreator) String() string {
 	return fmt.Sprintf("{ID: %s, Nickname: %s}", strconv.Itoa(u.ID), u.Nickname)
 }

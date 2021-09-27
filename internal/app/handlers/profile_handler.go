@@ -17,7 +17,6 @@ import (
 type ProfileHandler struct {
 	baseHandler    app.HandlerJoiner
 	authMiddleware middleware.SessionMiddleware
-	router         *mux.Router
 	Store          store.Store
 	SessionManager sessions.SessionsManager
 	RespondHandler

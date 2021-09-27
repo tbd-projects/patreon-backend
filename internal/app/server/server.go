@@ -99,6 +99,12 @@ func Start(config *Config) error {
 
 	logoutHandler := handlers.NewLogoutHandler()
 
+	creatorHandler := handlers.NewCreatorHandler()
+	creatorHandler.SetStore(store)
+
+	creatorCreateHandler := handlers.NewCreatorCreateHandler()
+	creatorCreateHandler.SetStore(store)
+
 	sessionLog := log.New()
 	sessionLog.SetLevel(log.FatalLevel)
 	redisConn := &redis.Pool{
@@ -123,12 +129,19 @@ func Start(config *Config) error {
 	registerHandler.SetSessionManager(sessionManager)
 	profileHandler.SetSessionManager(sessionManager)
 	logoutHandler.SetSessionManager(sessionManager)
+	creatorHandler.SetSessionManager(sessionManager)
+	creatorCreateHandler.SetSessionManager(sessionManager)
+
+	creatorHandler.JoinHandlers([]app.Joinable{
+		creatorCreateHandler,
+	})
 
 	handler.JoinHandlers([]app.Joinable{
 		registerHandler,
 		loginHandler,
 		profileHandler,
 		logoutHandler,
+		creatorHandler,
 	})
 
 	s := New(config, handler)

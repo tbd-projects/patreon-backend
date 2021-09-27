@@ -16,7 +16,6 @@ import (
 type LogoutHandler struct {
 	baseHandler    app.HandlerJoiner
 	authMiddleware middleware.SessionMiddleware
-	router         *mux.Router
 	SessionManager sessions.SessionsManager
 	RespondHandler
 }
@@ -58,7 +57,7 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := h.SessionManager.Delete(uniqID.(string))
 	if err != nil {
 		h.log.Errorf("can not delete session %s", err)
-		h.Error( w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)
 		return
 	}
 

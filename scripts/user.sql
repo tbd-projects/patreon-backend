@@ -5,16 +5,16 @@ CREATE TABLE IF NOT EXISTS users
     login              text      not null unique,
     nickname           text      not null unique,
     encrypted_password text      not null,
-    avatar             text      not null
+    avatar             text
 );
 CREATE TABLE IF NOT EXISTS creator_profile
 (
     creator_id  integer not null primary key,
-    category    text      not null,
-    description text      not null,
-    avatar      text      not null,
-    cover       text      not null,
-    foreign key (creator_id) references users(user_id) on delete cascade
+    category    text    not null,
+    description text    not null,
+    avatar      text,
+    cover       text,
+    foreign key (creator_id) references users (user_id) on delete cascade
 );
 CREATE TABLE IF NOT EXISTS subscribers
 (

@@ -37,8 +37,9 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	}
 	res := make([]models.Creator, count)
 
-	rows, err := repo.store.db.Query("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")
+	rows, err := repo.store.db.Query(
+		"SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
+			"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")
 	if err != nil {
 		return nil, err
 	}

@@ -28,7 +28,6 @@ func (h MainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *MainHandler) JoinHandlers(joinedHandlers []app.Joinable) {
 	h.baseHandler.AddHandlers(joinedHandlers)
 	h.baseHandler.Join(h.router)
-
 }
 func (h *MainHandler) SetRouter(router *mux.Router) {
 	h.router = router

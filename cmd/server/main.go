@@ -2,10 +2,15 @@ package main
 
 import (
 	"flag"
-	"github.com/BurntSushi/toml"
-	log "github.com/sirupsen/logrus"
 	"os"
 	server "patreon/internal/app/server"
+
+	_ "patreon/docs"
+
+	"github.com/BurntSushi/toml"
+	log "github.com/sirupsen/logrus"
+	// gin-swagger middleware
+	// swagger embed files
 )
 
 var (
@@ -15,6 +20,19 @@ var (
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/server.toml", "path to config file")
 }
+
+// @title Patreon
+// @version 1.0
+// @description Server for Patreon application.
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
+// @x-extension-openapi {"example": "value on a json format"}
 
 func main() {
 	flag.Parse()
