@@ -21,22 +21,28 @@ func NewCreatorRepository(st *Store) *CreatorRepository {
 }
 
 func (repo *CreatorRepository) Create(cr *models.Creator) error {
-	if err := repo.store.db.QueryRow("INSERT INTO creator_profile (creator_id, category, description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+
+	if err := repo.store.db.QueryRow("INSERT INTO creator_profile (creator_id, category, "+
+		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+
 		"RETURNING creator_id", cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
 		return err
 	}
 	return nil
 }
-func (repo *CreatorRepository) GetCreators() ([]models.ResponseCreator, error) {
+
+func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	count := 0
+
 	if err := repo.store.db.QueryRow("SELECT count(*) from creator_profile").Scan(&count); err != nil {
-		return nil, store.InternalError
+		return nil, err
 	}
-	res := make([]models.ResponseCreator, count)
-	rows, err := repo.store.db.Query("SELECT * from creator_profile")
+	res := make([]models.Creator, count)
+
+	rows, err := repo.store.db.Query("SELECT creator_id, cover, description, category, avatar, usr.nickname " +
+		"from creator_profile join user as usr on usr.user_id = creator_profile.creator_id")
 	if err != nil {
 		return nil, err
 	}
+
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
@@ -46,16 +52,11 @@ func (repo *CreatorRepository) GetCreators() ([]models.ResponseCreator, error) {
 
 	i := 0
 	for empty := rows.Next(); !empty; i++ {
-		var creator models.ResponseCreator
-		if err = rows.Scan(&creator.ID, &creator.Category, &creator.Description,
-			&creator.Avatar, &creator.Cover); err != nil {
+		var creator models.Creator
+		if err = rows.Scan(&creator.ID, &creator.Cover, &creator.Description, &creator.Category,
+			&creator.Avatar, &creator.Nickname); err != nil {
 			return nil, err
 		}
-		var user *models.User
-		if user, err = repo.UserRepository.FindByID(int64(creator.ID)); err != nil {
-			return nil, err
-		}
-		creator.Nickname = user.Nickname
 		res[i] = creator
 
 		if err = rows.Err(); err != nil {
@@ -63,7 +64,19 @@ func (repo *CreatorRepository) GetCreators() ([]models.ResponseCreator, error) {
 		}
 	}
 	return res, err
+}
 
+func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, error) {
+	creator := &models.Creator{}
+
+	if err := repo.store.db.QueryRow("SELECT creator_id, cover, description, category, background, usr.nickname " +
+		"from creator_profile join user as usr on usr.user_id = creator_profile.creator_id where creator_id=$1", creatorId).
+		Scan(&creator.ID, &creator.Cover, &creator.Description, &creator.Category,
+			&creator.Avatar, &creator.Nickname); err != nil {
+		return nil, store.NotFound
+	}
+
+	return creator, nil
 }
 
 //func (repo *CreatorRepository) FindByLogin(login string) (*models.User, error) {

@@ -10,6 +10,10 @@ type UserRepository struct {
 	users map[string]*models.User
 }
 
+func (repo *UserRepository) FindByID(i int64) (*models.User, error) {
+	panic("implement me")
+}
+
 func NewUserRepository(st *Store) *UserRepository {
 	return &UserRepository{
 		store: st,

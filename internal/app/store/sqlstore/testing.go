@@ -20,6 +20,7 @@ func TestDB(t *testing.T, dbUrl string) (*sql.DB, func(tables ...string)) {
 	if err := db.Ping(); err != nil {
 		t.Fatal(err)
 	}
+
 	create_users_tb := "CREATE TABLE IF NOT EXISTS users" +
 		"(" +
 		"user_id            bigserial not null primary key," +
@@ -28,6 +29,7 @@ func TestDB(t *testing.T, dbUrl string) (*sql.DB, func(tables ...string)) {
 		"encrypted_password text      not null," +
 		"avatar             text      not null" +
 		");"
+
 	create_creator_profile_db := "CREATE TABLE IF NOT EXISTS creator_profile" +
 		"(" +
 		"creator_id  integer not null primary key," +

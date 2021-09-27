@@ -19,4 +19,12 @@ func TestCreatorRepository_Create(t *testing.T) {
 	assert.Equal(t, u.ID, cr.ID)
 	err = s.Creator().Create(cr)
 	assert.NoError(t, err)
+
+	scrArray, err := s.Creator().GetCreators()
+	assert.NoError(t, err)
+	assert.Equal(t, []models.Creator{*cr}, scrArray)
+
+	scr, err := s.Creator().GetCreator(1)
+	assert.NoError(t, err)
+	assert.Equal(t, cr, scr)
 }
