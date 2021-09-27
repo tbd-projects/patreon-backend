@@ -2,7 +2,6 @@ package sqlstore
 
 import (
 	"database/sql"
-	"patreon/internal/app/store"
 	"patreon/internal/models"
 
 	log "github.com/sirupsen/logrus"
@@ -30,7 +29,7 @@ func (repo *CreatorRepository) Create(cr *models.Creator) error {
 func (repo *CreatorRepository) GetCreators() ([]models.ResponseCreator, error) {
 	count := 0
 	if err := repo.store.db.QueryRow("SELECT count(*) from creator_profile").Scan(&count); err != nil {
-		return nil, store.InternalError
+		return nil, err
 	}
 	res := make([]models.ResponseCreator, count)
 	rows, err := repo.store.db.Query("SELECT * from creator_profile")
