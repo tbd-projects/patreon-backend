@@ -2,13 +2,15 @@ package sqlstore
 
 import (
 	"database/sql"
-	_ "github.com/lib/pq"
 	"patreon/internal/app/store"
+
+	_ "github.com/lib/pq"
 )
 
 type Store struct {
-	db             *sql.DB
-	userRepository *UserRepository
+	db                *sql.DB
+	userRepository    *UserRepository
+	creatorRepository *CreatorRepository
 }
 
 func New(db *sql.DB) *Store {
@@ -24,4 +26,12 @@ func (st *Store) User() store.UserRepository {
 	st.userRepository = NewUserRepository(st)
 
 	return st.userRepository
+}
+func (st *Store) Creator() store.CreatorRepository {
+	if st.creatorRepository != nil {
+		return st.creatorRepository
+	}
+	st.creatorRepository = NewCreatorRepository(st)
+
+	return st.creatorRepository
 }
