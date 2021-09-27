@@ -1,6 +1,9 @@
 log_level = "debug"
 
-bind_addr = ":8080"
+bind_addr_https = ":8080"
+bind_addr_http = ":8081"
+
+domen = "tp.volodyalarin.site"
 
 database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
 

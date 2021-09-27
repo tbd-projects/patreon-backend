@@ -137,18 +137,18 @@ func Start(config *Config) error {
 	m := &autocert.Manager{
 		Cache:      autocert.DirCache("golang-autocert"),
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(config.BindAddr),
+		HostPolicy: autocert.HostWhitelist(config.Domen),
 	}
 	serverHTTPS := &http.Server{
-		Addr:      config.BindAddr,
+		Addr:      config.BindAddrHTTPS,
 		TLSConfig: m.TLSConfig(),
 		Handler:   s.handler,
 	}
 
 	serverHTTP := &http.Server{
-		Addr: config.BindAddr,
+		Addr: config.BindAddrHTTP,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "https://"+config.BindAddr+r.RequestURI, http.StatusMovedPermanently)
+			http.Redirect(w, r, "https://"+config.Domen+r.RequestURI, http.StatusMovedPermanently)
 		}),
 	}
 
