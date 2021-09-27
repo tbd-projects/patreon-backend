@@ -95,6 +95,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Value:    res.UniqID,
 		Expires:  time.Now().Add(10 * time.Hour),
 		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
 	}
 	http.SetCookie(w, cookie)
 	h.Respond(w, r, http.StatusOK, "successfully login")

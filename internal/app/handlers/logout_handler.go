@@ -66,6 +66,8 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Name:    "session_id",
 		Value:   uniqID.(string),
 		Expires: time.Now().AddDate(0, 0, -1),
+		SameSite: http.SameSiteNoneMode,
+		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
 	h.Respond(w, r, http.StatusOK, "successfully logout")
