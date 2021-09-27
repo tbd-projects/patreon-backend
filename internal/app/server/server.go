@@ -137,7 +137,7 @@ func Start(config *Config) error {
 	m := &autocert.Manager{
 		Cache:      autocert.DirCache("golang-autocert"),
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist("example.org", "www.example.org"),
+		HostPolicy: autocert.HostWhitelist(config.BindAddr),
 	}
 	serverHTTPS := &http.Server{
 		Addr:      config.BindAddr,
