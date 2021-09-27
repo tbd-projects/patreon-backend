@@ -16,7 +16,7 @@ func TestCreatorRepository_Create(t *testing.T) {
 	u := models.TestUser(t)
 	err := s.User().Create(u)
 	assert.NoError(t, err)
-	assert.Equal(t, u.ID, cr.ID)
+	cr.ID = u.ID
 	err = s.Creator().Create(cr)
 	assert.NoError(t, err)
 

@@ -10,11 +10,11 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS creator_profile
 (
     creator_id  integer not null primary key,
-    avatar      text    not null,
-    cover       text    not null,
-    description text    not null,
-    category    text    not null,
-    foreign key (creator_id) references users (user_id) on delete cascade
+    category    text      not null,
+    description text      not null,
+    avatar      text      not null,
+    cover       text      not null,
+    foreign key (creator_id) references users(user_id) on delete cascade
 );
 CREATE TABLE IF NOT EXISTS subscribers
 (

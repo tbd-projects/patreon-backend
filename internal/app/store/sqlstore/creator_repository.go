@@ -37,8 +37,8 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	}
 	res := make([]models.Creator, count)
 
-	rows, err := repo.store.db.Query("SELECT creator_id, cover, description, category, avatar, usr.nickname " +
-		"from creator_profile join user as usr on usr.user_id = creator_profile.creator_id")
+	rows, err := repo.store.db.Query("SELECT creator_id, category, description, avatar, cover, usr.nickname " +
+		"from creator_profile as prof join users as usr on usr.user_id = prof.creator_id")
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +53,8 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	i := 0
 	for empty := rows.Next(); !empty; i++ {
 		var creator models.Creator
-		if err = rows.Scan(&creator.ID, &creator.Cover, &creator.Description, &creator.Category,
-			&creator.Avatar, &creator.Nickname); err != nil {
+		if err = rows.Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,
+			&creator.Cover, &creator.Nickname); err != nil {
 			return nil, err
 		}
 		res[i] = creator
@@ -69,10 +69,10 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, error) {
 	creator := &models.Creator{}
 
-	if err := repo.store.db.QueryRow("SELECT creator_id, cover, description, category, background, usr.nickname " +
+	if err := repo.store.db.QueryRow("SELECT creator_id, category, description, avatar, cover, usr.nickname "+
 		"from creator_profile join user as usr on usr.user_id = creator_profile.creator_id where creator_id=$1", creatorId).
-		Scan(&creator.ID, &creator.Cover, &creator.Description, &creator.Category,
-			&creator.Avatar, &creator.Nickname); err != nil {
+		Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,
+			&creator.Cover, &creator.Nickname); err != nil {
 		return nil, store.NotFound
 	}
 
