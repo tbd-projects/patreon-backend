@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"golang.org/x/crypto/acme/autocert"
 	"net/http"
+	"net/url"
 	"os"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers"
@@ -145,24 +146,26 @@ func Start(config *Config) error {
 		Handler:   s.handler,
 	}
 
-	/*serverHTTP := &http.Server{
+	serverHTTP := &http.Server{
 		Addr: config.BindAddrHTTP,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Serve(autocert.NewListener(config.Domen), nil)
-			// http.Redirect(w, r, "https://"+config.Domen+r.RequestURI, http.StatusMovedPermanently)
+			//http.Serve(autocert.NewListener(config.Domen), nil)
+			targetUrl := url.URL{ Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
 		}),
-	}*/
+	}
 
 	
 	s.logger.Info("starting server")
-	/*go func(log *log.Logger) {
-
+	go func(log *log.Logger) {
+		log.Info("starting http server")
 		err := serverHTTP.ListenAndServe()
+		log.Info("starting http server")
 		if err != nil {
 			log.Fatalf("Drop http server with error: %s", err)
 		}
 		log.Info("starting http server")
-	}(s.logger)*/
+	}(s.logger)
 
 	return serverHTTPS.ListenAndServeTLS("", "")
 }
