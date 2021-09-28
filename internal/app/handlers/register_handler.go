@@ -44,6 +44,19 @@ func (h *RegisterHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
 	h.baseHandler.Join(router)
 }
+
+// Registration
+// @Summary create new user
+// @Description create new account and get cookies
+// @Accept  json
+// @Produce json
+// @Success 201 {object} models.UserResponse "Create user successfully"
+// @Failure 400 {object} models.BaseResponse "Invalid body"
+// @Failure 409 {object} models.BaseResponse "User already exist"
+// @Failure 422 {object} models.BaseResponse "Not valid body"
+// @Failure 500 {object} models.BaseResponse "Creation error in base data"
+// @Failure 418 "User are authorized"
+// @Router /register [POST]
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	type request struct {
 		Login    string `json:"login"`

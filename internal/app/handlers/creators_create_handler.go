@@ -42,6 +42,28 @@ func (h *CreatorCreateHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "POST", "OPTIONS")
 	h.baseHandler.Join(router)
 }
+
+// Get Creator
+// @Summary get creator
+// @Description get creator with id from request
+// @Produce json
+// @Param id path int true "Get creator with id"
+// @Success 200 {object} models.Creator "Get profile successfully"
+// @Failure 503 {object} models.BaseResponse "Internal error"
+// @Router /creators [GET]
+
+// Create Creator
+// @Summary create creator
+// @Description create creator with id from request, and respond created creator
+// @Produce json
+// @Param id path int true "Create creator with id"
+// @Success 200 {object} models.Creator "Create profile successfully"
+// @Failure 400 {object} models.BaseResponse "Invalid request query"
+// @Failure 404 {object} models.BaseResponse "User with id not found"
+// @Failure 409 {object} models.BaseResponse "Creator already exist"
+// @Failure 422 {object} models.BaseResponse "Invalid request body"
+// @Failure 503 {object} models.BaseResponse "Internal error"
+// @Router /creators [POST]
 func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

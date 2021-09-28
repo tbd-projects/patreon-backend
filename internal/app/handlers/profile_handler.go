@@ -43,6 +43,17 @@ func (h *ProfileHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CorsMiddleware(h.authMiddleware.Check(h))).Methods("GET", "OPTIONS")
 	h.baseHandler.Join(router)
 }
+
+// Profile
+// @Summary get information from user for profile
+// @Description get nickname and avatar for profile
+// @Accept  json
+// @Produce json
+// @Success 201 {object} models.ProfileResponse "Successfully get profile"
+// @Failure 401 "User are not authorized"
+// @Failure 503 {object} models.BaseResponse "Not found user"
+// @Failure 500 {object} models.BaseResponse "Error context"
+// @Router /profile [GET]
 func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

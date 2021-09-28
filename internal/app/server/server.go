@@ -4,11 +4,14 @@ import (
 	"database/sql"
 	"net/http"
 	"os"
+	_ "patreon/docs"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers"
 	"patreon/internal/app/sessions/repository"
 	"patreon/internal/app/sessions/sessions_manager"
 	"patreon/internal/app/store/sqlstore"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 
 	gorilla_handlers "github.com/gorilla/handlers"
 
@@ -44,6 +47,22 @@ func newDB(url string) (*sql.DB, error) {
 	return db, nil
 }
 
+// @title Patreon
+// @version 1.0
+// @description Server for Patreon application.
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
+// @x-extension-openapi {"example": "value on a json format"}
 func Start(config *Config) error {
 	level, err := log.ParseLevel(config.LogLevel)
 	if err != nil {
@@ -57,6 +76,7 @@ func Start(config *Config) error {
 	handler.SetLogger(logger)
 
 	router := mux.NewRouter()
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001", "https://patreon-dev.herokuapp.com",
 			"https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",

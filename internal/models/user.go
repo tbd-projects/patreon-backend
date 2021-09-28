@@ -9,9 +9,9 @@ import (
 )
 
 type Profile struct {
-	ID                int    `json:"id"`
-	Nickname          string `json:"nickname"`
-	Avatar            string `json:"avatar,omitempty"`
+	ID       int    `json:"id"`
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar,omitempty"`
 }
 
 type User struct {

@@ -38,6 +38,16 @@ func (h *LogoutHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET")
 	h.baseHandler.Join(router)
 }
+
+// Profile
+// @Summary logout user
+// @Description logout user
+// @Accept  json
+// @Produce json
+// @Success 201 {object} models.BaseResponse "Successfully logout"
+// @Failure 500 {object} models.BaseResponse "Error logout session"
+// @Failure 401 "User not are authorized"
+// @Router /logout [GET]
 func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

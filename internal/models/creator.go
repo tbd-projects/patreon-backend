@@ -15,9 +15,6 @@ type Creator struct {
 	Avatar      string `json:"avatar,omitempty"`
 	Cover       string `json:"cover,omitempty"`
 }
-type ResponseCreator struct {
-	Creator
-}
 
 func (cr *Creator) Validate() error {
 	return validation.ValidateStruct(cr,

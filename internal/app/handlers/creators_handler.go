@@ -43,6 +43,15 @@ func (h *CreatorHandler) Join(router *mux.Router) {
 func (h *CreatorHandler) JoinHandlers(joinedHandlers []app.Joinable) {
 	h.baseHandler.AddHandlers(joinedHandlers)
 }
+
+// Creators
+// @Summary get list of Creators
+// @Description get list of creators which register on service
+// @Produce json
+// @Success 201 {array} models.ResponseCreator "Create user successfully"
+// @Failure 503 {object} models.BaseResponse "Internal error"
+// @Failure 418 "User are not authorized"
+// @Router /creators [GET]
 func (h *CreatorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

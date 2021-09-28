@@ -16,6 +16,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
+	github.com/swaggo/http-swagger v1.1.1 // indirect
 	github.com/swaggo/swag v1.7.3
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272
 	golang.org/x/net v0.0.0-20210924151903-3ad01bbaa167 // indirect
