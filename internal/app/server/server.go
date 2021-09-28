@@ -77,6 +77,7 @@ func Start(config *Config) error {
 
 	router := mux.NewRouter()
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
 	router.Use(gorilla_handlers.CORS(
 		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001", "https://patreon-dev.herokuapp.com",
 			"https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",

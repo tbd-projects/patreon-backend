@@ -1,6 +1,7 @@
 .PHONY = build test
-
 build:
+	go get -u github.com/swaggo/swag/cmd/swag
+	swag init -g ./cmd/server/main.go -o docs
 	go build -v ./cmd/server
 
 build-docker:
