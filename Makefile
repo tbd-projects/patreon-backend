@@ -6,9 +6,13 @@ build:
 build-docker:
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
-run:
+make-dir-cert:
+	if ![ -f ./bin/status ]; then \
+        mkdir ./patreon-secrt; \
+	fi
+
+run: make-dir-cert
 	#sudo chown -R 5050:5050 ./pgadmin
-	sudo mkdir ./patreon-secrt
 	docker-compose up --build --no-deps
 
 stop:

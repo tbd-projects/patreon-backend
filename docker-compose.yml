@@ -17,7 +17,7 @@ services:
     networks:
       - default
     volumes:
-      - ./patreon-secrt:./patreon-secrt
+      - $PWD/patreon-secrt:/app/patreon-secrt
     depends_on:
       - redis
       - patreon-bd
