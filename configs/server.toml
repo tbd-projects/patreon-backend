@@ -1,6 +1,6 @@
 log_level = "debug"
 
-bind_addr_https = ":8080"
+bind_addr_https = ":443"
 bind_addr_http = ":80"
 
 domen = "tp.volodyalarin.site"

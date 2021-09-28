@@ -8,9 +8,11 @@ services:
     image: patreon
     expose:
       - "8080"
+      - "443"
       - "80"
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     networks:
       - default

@@ -148,13 +148,15 @@ func Start(config *Config) error {
 	serverHTTP := &http.Server{
 		Addr: config.BindAddrHTTP,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "https://"+config.Domen+r.RequestURI, http.StatusMovedPermanently)
+			http.Serve(autocert.NewListener("tp.volodyalarin.site"), nil)
+			// http.Redirect(w, r, "https://"+config.Domen+r.RequestURI, http.StatusMovedPermanently)
 		}),
 	}
 
+	
 	s.logger.Info("starting server")
-
 	go func(log *log.Logger) {
+
 		err := serverHTTP.ListenAndServe()
 		if err != nil {
 			log.Fatalf("Drop http server with error: %s", err)
