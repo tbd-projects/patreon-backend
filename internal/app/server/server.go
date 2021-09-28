@@ -13,7 +13,7 @@ import (
 
 	gorilla_handlers "github.com/gorilla/handlers"
 
-	redis "github.com/gomodule/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -145,24 +145,24 @@ func Start(config *Config) error {
 		Handler:   s.handler,
 	}
 
-	serverHTTP := &http.Server{
+	/*serverHTTP := &http.Server{
 		Addr: config.BindAddrHTTP,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Serve(autocert.NewListener("tp.volodyalarin.site"), nil)
+			http.Serve(autocert.NewListener(config.Domen), nil)
 			// http.Redirect(w, r, "https://"+config.Domen+r.RequestURI, http.StatusMovedPermanently)
 		}),
-	}
+	}*/
 
 	
 	s.logger.Info("starting server")
-	go func(log *log.Logger) {
+	/*go func(log *log.Logger) {
 
 		err := serverHTTP.ListenAndServe()
 		if err != nil {
 			log.Fatalf("Drop http server with error: %s", err)
 		}
 		log.Info("starting http server")
-	}(s.logger)
+	}(s.logger)*/
 
 	return serverHTTPS.ListenAndServeTLS("", "")
 }
