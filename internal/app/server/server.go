@@ -149,8 +149,8 @@ func Start(config *Config) error {
 	serverHTTP := &http.Server{
 		Addr: config.BindAddrHTTP,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			//http.Serve(autocert.NewListener(config.Domen), nil)
 			targetUrl := url.URL{ Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+			log.Infof("Redirect from %s, to %s", r.URL.String(), targetUrl.String())
 			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
 		}),
 	}
@@ -160,11 +160,9 @@ func Start(config *Config) error {
 	go func(log *log.Logger) {
 		log.Info("starting http server")
 		err := serverHTTP.ListenAndServe()
-		log.Info("starting http server")
 		if err != nil {
 			log.Fatalf("Drop http server with error: %s", err)
 		}
-		log.Info("starting http server")
 	}(s.logger)
 
 	return serverHTTPS.ListenAndServeTLS("", "")
