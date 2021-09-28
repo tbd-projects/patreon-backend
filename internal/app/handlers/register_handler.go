@@ -50,6 +50,7 @@ func (h *RegisterHandler) Join(router *mux.Router) {
 // @Description create new account and get cookies
 // @Accept  json
 // @Produce json
+// @Param user body models.RequestRegistration true "Request body for user registration"
 // @Success 201 {object} models.UserResponse "Create user successfully"
 // @Failure 400 {object} models.BaseResponse "Invalid body"
 // @Failure 409 {object} models.BaseResponse "User already exist"
@@ -58,18 +59,13 @@ func (h *RegisterHandler) Join(router *mux.Router) {
 // @Failure 418 "User are authorized"
 // @Router /register [POST]
 func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	type request struct {
-		Login    string `json:"login"`
-		Nickname string `json:"nickname"`
-		Password string `json:"password"`
-	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
 			h.log.Error(err)
 		}
 	}(r.Body)
-	req := &request{}
+	req := &models.RequestRegistration{}
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil {

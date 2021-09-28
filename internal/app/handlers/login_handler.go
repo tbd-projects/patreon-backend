@@ -9,6 +9,7 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
+	"patreon/internal/models"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -50,6 +51,7 @@ func (h *LoginHandler) Join(router *mux.Router) {
 // @Description login user
 // @Accept  json
 // @Produce json
+// @Param user body models.RequestLogin true "Request body for login"
 // @Success 201 {object} models.BaseResponse "Successfully login"
 // @Failure 401 {object} models.BaseResponse "Incorrect password or email"
 // @Failure 422 {object} models.BaseResponse "Not valid body"
@@ -57,10 +59,6 @@ func (h *LoginHandler) Join(router *mux.Router) {
 // @Failure 418 "User are authorized"
 // @Router /login [POST]
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	type request struct {
-		Login    string `json:"login"`
-		Password string `json:"password"`
-	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -68,7 +66,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}(r.Body)
 
-	req := &request{}
+	req := &models.RequestLogin{}
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(req); err != nil {

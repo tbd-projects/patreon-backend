@@ -56,6 +56,7 @@ func (h *CreatorCreateHandler) Join(router *mux.Router) {
 // @Description create creator with id from request, and respond created creator
 // @Produce json
 // @Param id path int true "Create creator with id"
+// @Param creator body models.RequestCreator true "Request body for create"
 // @Success 200 {object} models.Creator "Create profile successfully"
 // @Failure 400 {object} models.BaseResponse "Invalid request query"
 // @Failure 404 {object} models.BaseResponse "User with id not found"
@@ -91,11 +92,7 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		h.Respond(w, r, http.StatusOK, creator)
 		return
 	} else if r.Method == "POST" {
-		type request struct {
-			Category    string `json:"category"`
-			Description string `json:"description"`
-		}
-		req := &request{}
+		req := &models.RequestCreator{}
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(req); err != nil {
 			h.log.Warnf("can not parse request %s", err)
