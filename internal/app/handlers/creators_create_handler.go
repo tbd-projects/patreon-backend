@@ -51,7 +51,6 @@ func (h *CreatorCreateHandler) Join(router *mux.Router) {
 // @Success 200 {object} models.Creator "Get profile successfully"
 // @Failure 503 {object} models.BaseResponse "Internal error"
 // @Router /creators/{:id} [GET]
-
 // Create Creator
 // @Summary create creator
 // @Description create creator with id from request, and respond created creator
@@ -63,7 +62,7 @@ func (h *CreatorCreateHandler) Join(router *mux.Router) {
 // @Failure 409 {object} models.BaseResponse "Creator already exist"
 // @Failure 422 {object} models.BaseResponse "Invalid request body"
 // @Failure 503 {object} models.BaseResponse "Internal error"
-// @Router /creators{:id} [POST]
+// @Router /creators/{:id} [POST]
 func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
