@@ -136,9 +136,9 @@ func Start(config *Config) error {
 	s := New(config, handler)
 
 	m := &autocert.Manager{
-		Cache:      autocert.DirCache("golang-autocert"),
+		Cache:      autocert.DirCache("patreon-secrt"),
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(config.Domen),
+		HostPolicy: autocert.HostWhitelist(config.Domen, "www."+config.Domen),
 	}
 	serverHTTPS := &http.Server{
 		Addr:      config.BindAddrHTTPS,
@@ -149,13 +149,12 @@ func Start(config *Config) error {
 	serverHTTP := &http.Server{
 		Addr: config.BindAddrHTTP,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			targetUrl := url.URL{ Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+			targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
 			log.Infof("Redirect from %s, to %s", r.URL.String(), targetUrl.String())
 			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
 		}),
 	}
 
-	
 	s.logger.Info("starting server")
 	go func(log *log.Logger) {
 		log.Info("starting http server")
