@@ -16,6 +16,8 @@ services:
       - "8080:8080"
     networks:
       - default
+    volumes:
+      - ./patreon-secrt:./patreon-secrt
     depends_on:
       - redis
       - patreon-bd

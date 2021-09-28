@@ -8,10 +8,11 @@ build-docker:
 
 run:
 	#sudo chown -R 5050:5050 ./pgadmin
+	sudo mkdir ./patreon-secrt
 	docker-compose up --build --no-deps
 
 stop:
-	docker-compose down
+	docker-compose stop
 
 rm-docker:
 	docker rm -vf $$(docker ps -a -q) || true

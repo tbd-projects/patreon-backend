@@ -7,5 +7,6 @@ COPY . .
 EXPOSE 80 8080
 
 RUN make build
+RUN mkdir patreon-secrt
 
-CMD ./server
+CMD ls

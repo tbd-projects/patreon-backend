@@ -14,6 +14,7 @@
 # ide files
 .idea
 .vscode
+patreon-secrt
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
