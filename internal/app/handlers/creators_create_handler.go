@@ -45,7 +45,7 @@ func (h *CreatorCreateHandler) Join(router *mux.Router) {
 
 // Get Creator
 // @Summary get creator
-// @Description get creator with id from request
+// @Description get creator with id from path
 // @Produce json
 // @Param id path int true "Get creator with id"
 // @Success 200 {object} models.Creator "Get profile successfully"
@@ -53,9 +53,8 @@ func (h *CreatorCreateHandler) Join(router *mux.Router) {
 // @Router /creators/{:id} [GET]
 // Create Creator
 // @Summary create creator
-// @Description create creator with id from request, and respond created creator
+// @Description create creator with id from path, and respond created creator
 // @Produce json
-// @Param id path int true "Create creator with id"
 // @Param creator body models.RequestCreator true "Request body for create"
 // @Success 200 {object} models.Creator "Create profile successfully"
 // @Failure 400 {object} models.BaseResponse "Invalid request query"
