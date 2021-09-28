@@ -136,7 +136,7 @@ func Start(config *Config) error {
 	s := New(config, handler)
 
 	m := &autocert.Manager{
-		Cache:      autocert.DirCache("golang-autocert"),
+		Cache:      autocert.DirCache("patreon-cert"),
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist(config.Domen),
 	}
