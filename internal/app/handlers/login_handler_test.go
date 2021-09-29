@@ -21,7 +21,7 @@ import (
 
 type TestTable struct {
 	name              string
-	data              *models.User
+	data              *models.RequestLogin
 	expectedMockTimes int
 	expectedCode      int
 }
@@ -48,7 +48,7 @@ type SuiteTestStore struct {
 	mockUserRepository    *mock_store.MockUserRepository
 	mockCreatorRepository *mock_store.MockCreatorRepository
 	store                 store.Store
-	tests                 []TestTable
+	test                  TestTable
 }
 
 func (s *SuiteTestStore) SetupSuite() {
@@ -58,7 +58,7 @@ func (s *SuiteTestStore) SetupSuite() {
 
 	s.store = NewStore(s.mockUserRepository, s.mockCreatorRepository)
 
-	s.tests = []TestTable{}
+	s.test = TestTable{}
 }
 
 func (s *SuiteTestStore) TearDownSuite() {
@@ -70,15 +70,9 @@ func TestTestStore(t *testing.T) {
 }
 
 func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_EmptyBody() {
-	type TestTable struct {
-		name              string
-		data              interface{}
-		expectedMockTimes int
-		expectedCode      int
-	}
-	test := TestTable{
+	s.test = TestTable{
 		name:              "Invalid body",
-		data:              &models.User{},
+		data:              &models.RequestLogin{},
 		expectedMockTimes: 0,
 		expectedCode:      http.StatusUnprocessableEntity,
 	}
@@ -90,41 +84,27 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_EmptyBody() {
 
 	handler.SetLogger(logger)
 
-	//store := new(Store)
-	//handler.SetStore(store)
-
-	//s.mockUserRepository.EXPECT().
-	//	Create(s.data).
-	//	Times(test.expectedMockTimes).
-	//	Do()
-
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(s.test.data)
 
 	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
 	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_InvalidBody() {
-	type TestTable struct {
-		name              string
-		data              interface{}
-		expectedMockTimes int
-		expectedCode      int
-	}
-	test := TestTable{
-		name: "Invalid body",
-		data: struct {
-			nickname string `json:"nickname"`
-			password string `json:"password"`
-		}{
-			nickname: "dmitriy",
-			password: "mail.ru",
-		},
+	s.test = TestTable{
+		name:              "Invalid body",
 		expectedMockTimes: 0,
 		expectedCode:      http.StatusUnprocessableEntity,
+	}
+	data := struct {
+		Nickname string `json:"nickname"`
+		Password string `json:"password"`
+	}{
+		Nickname: "nickname",
+		Password: "password",
 	}
 	recorder := httptest.NewRecorder()
 	handler := NewLoginHandler()
@@ -134,41 +114,24 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_InvalidBody() {
 
 	handler.SetLogger(logger)
 
-	//store := new(Store)
-	//handler.SetStore(store)
-
-	//s.mockUserRepository.EXPECT().
-	//	Create(s.data).
-	//	Times(test.expectedMockTimes).
-	//	Do()
-
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(data)
 
 	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
 	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNotFound() {
-	type TestTable struct {
-		name              string
-		data              interface{}
-		expectedMockTimes int
-		expectedCode      int
-	}
-	test := TestTable{
+	s.test = TestTable{
 		name: "Invalid body",
-		data: struct {
-			Login    string `json:"login"`
-			Password string `json:"password"`
-		}{
+		data: &models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
 		expectedMockTimes: 1,
-		expectedCode:      http.StatusUnprocessableEntity,
+		expectedCode:      http.StatusUnauthorized,
 	}
 	recorder := httptest.NewRecorder()
 	handler := NewLoginHandler()
@@ -178,20 +141,18 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNotFound() {
 
 	handler.SetLogger(logger)
 
-	st := new(Store)
-	handler.SetStore(st)
-	user := test.data.(models.RequestLogin)
+	handler.SetStore(s.store)
 	s.mockUserRepository.EXPECT().
-		FindByLogin(user.Login).
-		Times(test.expectedMockTimes).
+		FindByLogin(s.test.data.Login).
+		Times(s.test.expectedMockTimes).
 		Return(nil, store.NotFound)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(s.test.data)
 
-	assert.Error(s.T(), err)
+	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
 	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
