@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
@@ -12,37 +11,40 @@ import (
 	"patreon/internal/models"
 	"time"
 
+	gh "patreon/internal/app/handlers/general_handlers"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 type LoginHandler struct {
-	baseHandler    app.HandlerJoiner
 	authMiddleware middleware.SessionMiddleware
 	Store          store.Store
 	SessionManager sessions.SessionsManager
-	RespondHandler
+	gh.RespondHandler
+	withHideMethod
 }
 
 func NewLoginHandler() *LoginHandler {
 	return &LoginHandler{
-		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/login"),
-		RespondHandler: RespondHandler{logrus.New()},
+		RespondHandler: gh.RespondHandler{},
+		withHideMethod:    withHideMethod{gh.NewBaseHandler(logrus.New(), "/login")},
 	}
 }
 
 func (h *LoginHandler) SetStore(store store.Store) {
 	h.Store = store
 }
-func (h *LoginHandler) SetLogger(logger *logrus.Logger) {
-	h.log = logger
-}
+
 func (h *LoginHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
+	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.Log())
 }
+
 func (h *LoginHandler) Join(router *mux.Router) {
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "OPTIONS")
+	h.baseHandler.AddMethod(gh.POST, h.ServeHTTP)
+	h.baseHandler.AddMethod(gh.GET, h.ServeHTTP)
+	h.baseHandler.AddMiddleware(h.authMiddleware.CheckNotAuthorized)
 	h.baseHandler.Join(router)
 }
 
@@ -62,7 +64,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.log.Fatal(err)
+			h.Log().Fatal(err)
 		}
 	}(r.Body)
 
@@ -70,22 +72,22 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(req); err != nil {
-		h.log.Warnf("can not decode body %s", err)
+		h.Log().Warnf("can not decode body %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 
 	u, err := h.Store.User().FindByLogin(req.Login)
-	h.log.Debugf("Login : %s, password : %s", req.Login, req.Password)
+	h.Log().Debugf("Login : %s, password : %s", req.Login, req.Password)
 	if err != nil || !u.ComparePassword(req.Password) {
-		h.log.Warnf("Fail get user or compare password %s", err)
+		h.Log().Warnf("Fail get user or compare password %s", err)
 		h.Error(w, r, http.StatusUnauthorized, handler_errors.IncorrectEmailOrPassword)
 		return
 	}
 
 	res, err := h.SessionManager.Create(int64(u.ID))
 	if err != nil || res.UserID != int64(u.ID) {
-		h.log.Errorf("Error create session %s", err)
+		h.Log().Errorf("Error create session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateSession)
 		return
 	}

@@ -1,41 +1,42 @@
 package handlers
 
 import (
+	"github.com/gorilla/mux"
 	"io"
 	"net/http"
-	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"time"
 
-	"github.com/gorilla/mux"
+	gh "patreon/internal/app/handlers/general_handlers"
+
 	"github.com/sirupsen/logrus"
 )
 
 type LogoutHandler struct {
-	baseHandler    app.HandlerJoiner
 	authMiddleware middleware.SessionMiddleware
 	SessionManager sessions.SessionsManager
-	RespondHandler
+	gh.RespondHandler
+	withHideMethod
 }
 
 func NewLogoutHandler() *LogoutHandler {
 	return &LogoutHandler{
-		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/logout"),
-		RespondHandler: RespondHandler{logrus.New()},
+		RespondHandler: gh.RespondHandler{},
+		withHideMethod: withHideMethod{gh.NewBaseHandler(logrus.New(), "/logout")},
 	}
 }
 
-func (h *LogoutHandler) SetLogger(logger *logrus.Logger) {
-	h.log = logger
-}
 func (h *LogoutHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
+	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.Log())
 }
+
 func (h *LogoutHandler) Join(router *mux.Router) {
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET")
+	h.baseHandler.AddMethod(gh.GET, h.ServeHTTP)
+	h.baseHandler.AddMethod(gh.OPTIONAL, h.ServeHTTP)
+	h.baseHandler.AddMiddleware(h.authMiddleware.Check)
 	h.baseHandler.Join(router)
 }
 
@@ -52,21 +53,21 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.log.Fatal(err)
+			h.Log().Fatal(err)
 		}
 	}(r.Body)
 	uniqID := r.Context().Value("uniq_id")
 	if uniqID == nil {
-		h.log.Error("can not get uniq_id from context")
+		h.Log().Error("can not get uniq_id from context")
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
 		return
 	}
 
-	h.log.Debugf("Logout session: %s", uniqID)
+	h.Log().Debugf("Logout session: %s", uniqID)
 
 	err := h.SessionManager.Delete(uniqID.(string))
 	if err != nil {
-		h.log.Errorf("can not delete session %s", err)
+		h.Log().Errorf("can not delete session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)
 		return
 	}

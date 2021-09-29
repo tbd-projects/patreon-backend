@@ -73,7 +73,6 @@ func Start(config *Config) error {
 	logger.SetLevel(level)
 
 	handler := handlers.NewMainHandler()
-	handler.SetLogger(logger)
 
 	router := mux.NewRouter()
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
@@ -111,23 +110,27 @@ func Start(config *Config) error {
 
 	registerHandler := handlers.NewRegisterHandler()
 	registerHandler.SetStore(store)
+	registerHandler.SetLogger(logger)
 
 	loginHandler := handlers.NewLoginHandler()
 	loginHandler.SetStore(store)
+	loginHandler.SetLogger(logger)
 
 	profileHandler := handlers.NewProfileHandler()
 	profileHandler.SetStore(store)
+	profileHandler.SetLogger(logger)
 
 	logoutHandler := handlers.NewLogoutHandler()
+	logoutHandler.SetLogger(logger)
 
 	creatorHandler := handlers.NewCreatorHandler()
 	creatorHandler.SetStore(store)
+	creatorHandler.SetLogger(logger)
 
 	creatorCreateHandler := handlers.NewCreatorCreateHandler()
 	creatorCreateHandler.SetStore(store)
+	creatorCreateHandler.SetLogger(logger)
 
-	sessionLog := log.New()
-	sessionLog.SetLevel(log.FatalLevel)
 	redisConn := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			return redis.DialURL(config.RedisUrl)
@@ -144,7 +147,7 @@ func Start(config *Config) error {
 		log.Fatal(err)
 	}
 
-	redisRepository := repository.NewRedisRepository(redisConn, sessionLog)
+	redisRepository := repository.NewRedisRepository(redisConn, logger)
 	sessionManager := sessions_manager.NewSessionManager(redisRepository)
 	loginHandler.SetSessionManager(sessionManager)
 	registerHandler.SetSessionManager(sessionManager)

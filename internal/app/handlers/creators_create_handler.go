@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
@@ -12,34 +11,41 @@ import (
 	"patreon/internal/models"
 	"strconv"
 
+	gh "patreon/internal/app/handlers/general_handlers"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 type CreatorCreateHandler struct {
-	baseHandler    app.HandlerJoiner
 	authMiddleware middleware.SessionMiddleware
 	Store          store.Store
 	SessionManager sessions.SessionsManager
-	RespondHandler
+	gh.RespondHandler
+	withHideMethod
 }
 
 func NewCreatorCreateHandler() *CreatorCreateHandler {
 	return &CreatorCreateHandler{
-		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/{id}"),
-		RespondHandler: RespondHandler{logrus.New()},
+		RespondHandler: gh.RespondHandler{},
+		withHideMethod: withHideMethod{gh.NewBaseHandler(logrus.New(), "/{id}")},
 	}
 }
 
 func (h *CreatorCreateHandler) SetStore(store store.Store) {
 	h.Store = store
 }
+
 func (h *CreatorCreateHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
+	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.baseHandler.Log())
 }
+
 func (h *CreatorCreateHandler) Join(router *mux.Router) {
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "POST", "OPTIONS")
+	h.baseHandler.AddMethod(gh.GET, h.ServeHTTP)
+	h.baseHandler.AddMethod(gh.POST, h.ServeHTTP)
+	h.baseHandler.AddMethod(gh.OPTIONAL, h.ServeHTTP)
+	h.baseHandler.AddMiddleware(h.authMiddleware.Check)
 	h.baseHandler.Join(router)
 }
 
@@ -67,45 +73,47 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.log.Error(err)
+			h.Log().Error(err)
 		}
 	}(r.Body)
+
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
-	h.log.Info("in /creators/id")
+	h.Log().Info("in /creators/id")
 	idInt, err := strconv.Atoi(id)
 	if len(vars) > 1 || !ok || err != nil {
-		h.log.Info(vars)
+		h.Log().Info(vars)
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
+
 	if r.Method == "GET" {
 		creator, err := h.Store.Creator().GetCreator(int64(idInt))
 		if err != nil {
-			h.log.Errorf("get: %s err:%s can not get user from db", creator, err)
+			h.Log().Errorf("get: %s err:%s can not get user from db", creator, err)
 			h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
 			return
 		}
 
-		h.log.Debugf("get creator %s with id %d", creator, id)
+		h.Log().Debugf("get creator %s with id %d", creator, id)
 		h.Respond(w, r, http.StatusOK, creator)
 		return
 	} else if r.Method == "POST" {
 		req := &models.RequestCreator{}
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(req); err != nil {
-			h.log.Warnf("can not parse request %s", err)
+			h.Log().Warnf("can not parse request %s", err)
 			h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 			return
 		}
 		u, err := h.Store.User().FindByID(int64(idInt))
 		if err != nil {
-			h.log.Errorf("get: %s err:%s can not get user from db", u, err)
+			h.Log().Errorf("get: %s err:%s can not get user from db", u, err)
 			h.Error(w, r, http.StatusNotFound, handler_errors.UserNotFound)
 			return
 		}
 		if _, err := h.Store.Creator().GetCreator(int64(idInt)); err == nil {
-			h.log.Errorf("get: %s err:%s", u, handler_errors.ProfileAlreadyExist)
+			h.Log().Errorf("get: %s err:%s", u, handler_errors.ProfileAlreadyExist)
 			h.Error(w, r, http.StatusConflict, handler_errors.ProfileAlreadyExist)
 			return
 		}
@@ -117,12 +125,12 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		}
 		if err := cr.Validate(); err != nil {
 			toLog, _ := json.Marshal(err)
-			h.log.Errorf("get: %s err:%s ", cr, string(toLog))
+			h.Log().Errorf("get: %s err:%s ", cr, string(toLog))
 			h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
 			return
 		}
 		if err := h.Store.Creator().Create(cr); err != nil {
-			h.log.Errorf("get: %s err:%s can not create profile", cr, err)
+			h.Log().Errorf("get: %s err:%s can not create profile", cr, err)
 			h.Error(w, r, http.StatusServiceUnavailable, handler_errors.BDError)
 			return
 		}
