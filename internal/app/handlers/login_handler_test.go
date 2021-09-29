@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	store "patreon/internal/app/store"
+	"patreon/internal/app/store"
 	mock_store "patreon/internal/app/store/mocks"
 	"patreon/internal/models"
 	"testing"
@@ -72,7 +72,7 @@ func TestTestStore(t *testing.T) {
 func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_EmptyBody() {
 	type TestTable struct {
 		name              string
-		data              *models.User
+		data              interface{}
 		expectedMockTimes int
 		expectedCode      int
 	}
@@ -102,6 +102,94 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_EmptyBody() {
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	assert.NoError(s.T(), err)
+
+	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
+	handler.ServeHTTP(recorder, reader)
+	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+}
+func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_InvalidBody() {
+	type TestTable struct {
+		name              string
+		data              interface{}
+		expectedMockTimes int
+		expectedCode      int
+	}
+	test := TestTable{
+		name: "Invalid body",
+		data: struct {
+			nickname string `json:"nickname"`
+			password string `json:"password"`
+		}{
+			nickname: "dmitriy",
+			password: "mail.ru",
+		},
+		expectedMockTimes: 0,
+		expectedCode:      http.StatusUnprocessableEntity,
+	}
+	recorder := httptest.NewRecorder()
+	handler := NewLoginHandler()
+	logger := logrus.New()
+	str := bytes.Buffer{}
+	logger.SetOutput(&str)
+
+	handler.SetLogger(logger)
+
+	//store := new(Store)
+	//handler.SetStore(store)
+
+	//s.mockUserRepository.EXPECT().
+	//	Create(s.data).
+	//	Times(test.expectedMockTimes).
+	//	Do()
+
+	b := bytes.Buffer{}
+	err := json.NewEncoder(&b).Encode(test.data)
+
+	assert.NoError(s.T(), err)
+
+	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
+	handler.ServeHTTP(recorder, reader)
+	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+}
+func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNotFound() {
+	type TestTable struct {
+		name              string
+		data              interface{}
+		expectedMockTimes int
+		expectedCode      int
+	}
+	test := TestTable{
+		name: "Invalid body",
+		data: struct {
+			Login    string `json:"login"`
+			Password string `json:"password"`
+		}{
+			Login:    "dmitriy",
+			Password: "mail.ru",
+		},
+		expectedMockTimes: 1,
+		expectedCode:      http.StatusUnprocessableEntity,
+	}
+	recorder := httptest.NewRecorder()
+	handler := NewLoginHandler()
+	logger := logrus.New()
+	str := bytes.Buffer{}
+	logger.SetOutput(&str)
+
+	handler.SetLogger(logger)
+
+	st := new(Store)
+	handler.SetStore(st)
+	user := test.data.(models.RequestLogin)
+	s.mockUserRepository.EXPECT().
+		FindByLogin(user.Login).
+		Times(test.expectedMockTimes).
+		Return(nil, store.NotFound)
+
+	b := bytes.Buffer{}
+	err := json.NewEncoder(&b).Encode(test.data)
+
+	assert.Error(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
 	handler.ServeHTTP(recorder, reader)
