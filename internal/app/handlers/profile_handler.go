@@ -40,7 +40,7 @@ func (h *ProfileHandler) SetSessionManager(manager sessions.SessionsManager) {
 	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
 }
 func (h *ProfileHandler) Join(router *mux.Router) {
-	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CorsMiddleware(h.authMiddleware.Check(h))).Methods("GET", "OPTIONS")
+	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "OPTIONS")
 	h.baseHandler.Join(router)
 }
 

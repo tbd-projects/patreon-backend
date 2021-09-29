@@ -5,16 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/models"
 	"testing"
-)
 
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+)
 
 type LogoutTestSuit struct {
 	SuiteTestStore
@@ -40,16 +40,16 @@ func (s *LogoutTestSuit) TestServeHTTP_WithSession() {
 	logger.SetOutput(&str)
 
 	handler.SetLogger(logger)
-	handler.SetSessionManager(s.mockSesionsManager)
+	handler.SetSessionManager(s.mockSessionsManager)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	require.NoError(s.T(), err)
-	ctx:= context.WithValue(context.Background(), "uniq_id", uniqID)
+	ctx := context.WithValue(context.Background(), "uniq_id", uniqID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/login", &b)
 
-	s.mockSesionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(nil)
+	s.mockSessionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(nil)
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 }
@@ -70,7 +70,7 @@ func (s *LogoutTestSuit) TestServeHTTP_WithoutCookies() {
 	logger.SetOutput(&str)
 
 	handler.SetLogger(logger)
-	handler.SetSessionManager(s.mockSesionsManager)
+	handler.SetSessionManager(s.mockSessionsManager)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
@@ -78,7 +78,7 @@ func (s *LogoutTestSuit) TestServeHTTP_WithoutCookies() {
 	require.NoError(s.T(), err)
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
 
-	s.mockSesionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(nil)
+	s.mockSessionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(nil)
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 }
@@ -99,16 +99,16 @@ func (s *LogoutTestSuit) TestServeHTTP_ErrorSessions() {
 	logger.SetOutput(&str)
 
 	handler.SetLogger(logger)
-	handler.SetSessionManager(s.mockSesionsManager)
+	handler.SetSessionManager(s.mockSessionsManager)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	require.NoError(s.T(), err)
-	ctx:= context.WithValue(context.Background(), "uniq_id", uniqID)
+	ctx := context.WithValue(context.Background(), "uniq_id", uniqID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/login", &b)
 
-	s.mockSesionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(errors.New(""))
+	s.mockSessionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(errors.New(""))
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 }

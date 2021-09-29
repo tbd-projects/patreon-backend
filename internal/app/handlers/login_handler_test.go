@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app/sessions/mocks"
 	"patreon/internal/app/store"
 	mock_store "patreon/internal/app/store/mocks"
 	"patreon/internal/models"
@@ -21,7 +22,7 @@ import (
 
 type TestTable struct {
 	name              string
-	data              *models.RequestLogin
+	data              interface{}
 	expectedMockTimes int
 	expectedCode      int
 }
@@ -47,6 +48,7 @@ type SuiteTestStore struct {
 	mock                  *gomock.Controller
 	mockUserRepository    *mock_store.MockUserRepository
 	mockCreatorRepository *mock_store.MockCreatorRepository
+	mockSessionsManager   *mocks.MockSessionsManager
 	store                 store.Store
 	test                  TestTable
 }
@@ -55,6 +57,7 @@ func (s *SuiteTestStore) SetupSuite() {
 	s.mock = gomock.NewController(s.T())
 	s.mockUserRepository = mock_store.NewMockUserRepository(s.mock)
 	s.mockCreatorRepository = mock_store.NewMockCreatorRepository(s.mock)
+	s.mockSessionsManager = mocks.NewMockSessionsManager(s.mock)
 
 	s.store = NewStore(s.mockUserRepository, s.mockCreatorRepository)
 
@@ -126,7 +129,7 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_InvalidBody() {
 func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNotFound() {
 	s.test = TestTable{
 		name: "Invalid body",
-		data: &models.RequestLogin{
+		data: models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
@@ -143,7 +146,7 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNotFound() {
 
 	handler.SetStore(s.store)
 	s.mockUserRepository.EXPECT().
-		FindByLogin(s.test.data.Login).
+		FindByLogin(s.test.data.(models.RequestLogin).Login).
 		Times(s.test.expectedMockTimes).
 		Return(nil, store.NotFound)
 
