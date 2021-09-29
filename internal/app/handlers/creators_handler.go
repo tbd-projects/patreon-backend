@@ -61,7 +61,7 @@ func (h *CreatorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}(r.Body)
 	creators, err := h.Store.Creator().GetCreators()
 	if err != nil {
-		h.log.Errorf("get: %s err:%s can not get user from db", creators, err)
+		h.log.Errorf("get: %v err:%v can not get user from db", creators, err)
 		h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
 		return
 	}
@@ -70,6 +70,6 @@ func (h *CreatorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		respondCreators[i] = models.ToResponseCreator(cr)
 	}
 
-	h.log.Debugf("get creators %s", respondCreators)
+	h.log.Debugf("get creators %v", respondCreators)
 	h.Respond(w, r, http.StatusOK, respondCreators)
 }

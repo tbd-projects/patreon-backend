@@ -82,12 +82,12 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	if r.Method == "GET" {
 		creator, err := h.Store.Creator().GetCreator(int64(idInt))
 		if err != nil {
-			h.log.Errorf("get: %s err:%s can not get user from db", creator, err)
+			h.log.Errorf("get: %v err:%v can not get user from db", creator, err)
 			h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
 			return
 		}
 
-		h.log.Debugf("get creator %s with id %d", creator, id)
+		h.log.Debugf("get creator %v with id %v", creator, id)
 		h.Respond(w, r, http.StatusOK, creator)
 		return
 	} else if r.Method == "POST" {
@@ -117,12 +117,12 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		}
 		if err := cr.Validate(); err != nil {
 			toLog, _ := json.Marshal(err)
-			h.log.Errorf("get: %s err:%s ", cr, string(toLog))
+			h.log.Errorf("get: %v err:%v ", cr, string(toLog))
 			h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
 			return
 		}
 		if err := h.Store.Creator().Create(cr); err != nil {
-			h.log.Errorf("get: %s err:%s can not create profile", cr, err)
+			h.log.Errorf("get: %v err:%v can not create profile", cr, err)
 			h.Error(w, r, http.StatusServiceUnavailable, handler_errors.BDError)
 			return
 		}

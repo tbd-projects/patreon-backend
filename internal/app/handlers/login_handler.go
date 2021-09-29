@@ -69,7 +69,8 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestLogin{}
 	decoder := json.NewDecoder(r.Body)
 
-	if err := decoder.Decode(req); err != nil {
+	if err := decoder.Decode(req); err != nil ||
+		len(req.Login) == 0 || len(req.Password) == 0 {
 		h.log.Warnf("can not decode body %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
