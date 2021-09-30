@@ -25,8 +25,8 @@ func (h MainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.router.ServeHTTP(w, r)
 }
 
-func (h *MainHandler) JoinHandlers(joinedHandlers []app.Joinable) {
-	h.joinedHandler.AddHandlers(joinedHandlers)
+func (h *MainHandler) JoinHandlers(joinedHandlers ...app.Joinable) {
+	h.joinedHandler.JoinHandlers(joinedHandlers...)
 	h.joinedHandler.Join(h.router)
 }
 

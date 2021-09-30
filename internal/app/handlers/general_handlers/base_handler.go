@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
+	"patreon/internal/app/handlers/urls"
 	"strings"
 )
 
@@ -23,8 +24,8 @@ func (h *BaseHandler) SetLogger(logger *logrus.Logger) {
 	h.log = logger
 }
 
-func NewBaseHandler(log *logrus.Logger, url string) *BaseHandler {
-	return &BaseHandler{log: log, joinedHandlers: &HandlerJoiner{currentUrl: url},
+func NewBaseHandler(log *logrus.Logger, url urls.UrlPath) *BaseHandler {
+	return &BaseHandler{log: log, joinedHandlers: &HandlerJoiner{handlerUrl: url},
 		handlerMethods: map[string]HandlerFunc{}, middlewares: []MiddlewareFunc{}, useMethods: []string{}}
 }
 
@@ -50,12 +51,12 @@ func (h *BaseHandler) applyMiddleware(handler http.Handler) http.Handler {
 }
 
 func (h *BaseHandler) Join(router *mux.Router) {
-	router.Handle(h.joinedHandlers.GetUrl(), h.applyMiddleware(h)).Methods(h.useMethods...)
+	router.Handle(string(h.joinedHandlers.GetUrl()), h.applyMiddleware(h)).Methods(h.useMethods...)
 	h.joinedHandlers.Join(router)
 }
 
-func (h *BaseHandler) JoinHandlers(joinedHandlers []app.Joinable) {
-	h.joinedHandlers.AddHandlers(joinedHandlers)
+func (h *BaseHandler) JoinHandlers(joinedHandlers ...app.Joinable) {
+	h.joinedHandlers.JoinHandlers(joinedHandlers...)
 }
 
 func (h *BaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

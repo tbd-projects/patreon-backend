@@ -3,6 +3,7 @@ package general_handlers
 import (
 	"github.com/gorilla/mux"
 	"patreon/internal/app"
+	"patreon/internal/app/handlers/urls"
 )
 
 const (
@@ -14,28 +15,28 @@ const (
 
 type HandlerJoiner struct {
 	joinedHandlers []app.Joinable
-	currentUrl     string
+	handlerUrl     urls.UrlPath
 }
 
-func NewHandlerJoiner(joinedHandlers []app.Joinable, currentUrl string) *HandlerJoiner {
+func NewHandlerJoiner(joinedHandlers []app.Joinable, handlerUrl urls.UrlPath) *HandlerJoiner {
 	return &HandlerJoiner{
 		joinedHandlers: joinedHandlers,
-		currentUrl:     currentUrl,
+		handlerUrl:     handlerUrl,
 	}
 }
 
-func (h *HandlerJoiner) AddHandlers(joinedHandlers []app.Joinable) {
+func (h *HandlerJoiner) JoinHandlers(joinedHandlers ...app.Joinable) {
 	for _, handler := range joinedHandlers {
 		h.joinedHandlers = append(h.joinedHandlers, handler)
 	}
 }
 
-func (h HandlerJoiner) GetUrl() string {
-	return h.currentUrl
+func (h HandlerJoiner) GetUrl() urls.UrlPath {
+	return h.handlerUrl
 }
 
 func (h *HandlerJoiner) Join(router *mux.Router) {
-	subrouter := router.PathPrefix(h.currentUrl).Subrouter()
+	subrouter := router.PathPrefix(string(h.handlerUrl)).Subrouter()
 
 	for _, handler := range h.joinedHandlers {
 		handler.Join(subrouter)

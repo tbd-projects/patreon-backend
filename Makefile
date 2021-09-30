@@ -2,7 +2,7 @@
 build:
 	go get -u github.com/swaggo/swag/cmd/swag
 	swag init -g ./cmd/server/main.go -o docs
-	go build -v ./cmd/server
+	go build -v -o server.out ./cmd/server
 
 build-docker:
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon

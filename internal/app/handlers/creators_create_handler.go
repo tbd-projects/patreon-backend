@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app/handlers/handler_errors"
+	"patreon/internal/app/handlers/urls"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
@@ -28,7 +29,7 @@ type CreatorCreateHandler struct {
 func NewCreatorCreateHandler() *CreatorCreateHandler {
 	return &CreatorCreateHandler{
 		RespondHandler: gh.RespondHandler{},
-		withHideMethod: withHideMethod{gh.NewBaseHandler(logrus.New(), "/{id}")},
+		withHideMethod: withHideMethod{gh.NewBaseHandler(logrus.New(), urls.ID)},
 	}
 }
 

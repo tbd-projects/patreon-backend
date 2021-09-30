@@ -5,6 +5,10 @@
 *.so
 *.dylib
 
+cover
+cover2
+server.
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -14,6 +18,7 @@
 # ide files
 .idea
 .vscode
+docs
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

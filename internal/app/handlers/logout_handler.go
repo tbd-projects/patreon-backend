@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app/handlers/handler_errors"
+	"patreon/internal/app/handlers/urls"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"time"
@@ -24,7 +25,7 @@ type LogoutHandler struct {
 func NewLogoutHandler() *LogoutHandler {
 	return &LogoutHandler{
 		RespondHandler: gh.RespondHandler{},
-		withHideMethod: withHideMethod{gh.NewBaseHandler(logrus.New(), "/logout")},
+		withHideMethod: withHideMethod{gh.NewBaseHandler(logrus.New(), urls.Logout)},
 	}
 }
 

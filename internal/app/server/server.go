@@ -158,7 +158,7 @@ func Start(config *Config) error {
 
 	creatorHandler.JoinHandlers([]app.Joinable{
 		creatorCreateHandler,
-	})
+	}...)
 
 	handler.JoinHandlers([]app.Joinable{
 		registerHandler,
@@ -166,7 +166,7 @@ func Start(config *Config) error {
 		profileHandler,
 		logoutHandler,
 		creatorHandler,
-	})
+	}...)
 
 	s := New(config, handler)
 	s.logger.Info("starting server")

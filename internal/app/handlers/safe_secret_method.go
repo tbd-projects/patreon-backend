@@ -18,8 +18,8 @@ func (h *withHideMethod) SetLogger(logger *logrus.Logger) {
 	h.baseHandler.SetLogger(logger)
 }
 
-func (h *withHideMethod) JoinHandlers(joinedHandlers []app.Joinable) {
-	h.baseHandler.JoinHandlers(joinedHandlers)
+func (h *withHideMethod) JoinHandlers(joinedHandlers ...app.Joinable) {
+	h.baseHandler.JoinHandlers(joinedHandlers...)
 }
 
 

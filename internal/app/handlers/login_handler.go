@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app/handlers/handler_errors"
+	"patreon/internal/app/handlers/urls"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/store"
@@ -28,7 +29,7 @@ type LoginHandler struct {
 func NewLoginHandler() *LoginHandler {
 	return &LoginHandler{
 		RespondHandler: gh.RespondHandler{},
-		withHideMethod:    withHideMethod{gh.NewBaseHandler(logrus.New(), "/login")},
+		withHideMethod:    withHideMethod{gh.NewBaseHandler(logrus.New(), urls.Login)},
 	}
 }
 
