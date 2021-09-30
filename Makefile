@@ -17,5 +17,12 @@ stop:
 rm-docker:
 	docker rm -vf $$(docker ps -a -q) || true
 
+run-coverage:
+	go test -covermode=atomic -coverpkg=./... -coverprofile=cover ./...
+	cat cover | fgrep -v "mock" | fgrep -v "pb.go" | \
+	fgrep -v "testing.go" | fgrep -v "teststore" | fgrep -v "easyjson" | \
+	fgrep -v "start.go" | fgrep -v "docs"  | fgrep -v "config" | fgrep -v "main" > cover2
+	go tool cover -func=cover2
+
 test:
 	go test -v -race ./...

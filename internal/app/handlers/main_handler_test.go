@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -10,7 +12,7 @@ import (
 
 func TestMainHandler_HandleRegistration(t *testing.T) {
 	//s := teststore.New()
-	TestOffLogger(t)
+	logrus.SetOutput(ioutil.Discard)
 	var tests = []struct {
 		name         string
 		data         interface{}

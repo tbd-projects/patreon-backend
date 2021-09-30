@@ -1,9 +1,10 @@
 package models_test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"patreon/internal/models"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUser_BeforeCreate(t *testing.T) {
@@ -68,6 +69,57 @@ func TestUser_Validate(t *testing.T) {
 				assert.NoError(t, test.u().Validate())
 			} else {
 				assert.Error(t, test.u().Validate())
+			}
+		})
+	}
+}
+func TestUser_MakePrivateDate(t *testing.T) {
+	tests := []struct {
+		name string
+		u    *models.User
+	}{
+		{
+			name: "Valid test",
+			u:    models.TestUser(t),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.u.MakePrivateDate()
+			assert.Empty(t, test.u.Password)
+			assert.Empty(t, test.u.EncryptedPassword)
+		})
+	}
+}
+func TestUser_ComparePassword(t *testing.T) {
+	tests := []struct {
+		name     string
+		user     models.User
+		password string
+		isValid  bool
+	}{
+		{
+			name:     "emptyPassword",
+			user:     models.User{},
+			password: "",
+			isValid:  false,
+		},
+		{
+			name:     "emptyPassword",
+			user:     models.User{},
+			password: "pswd",
+			isValid:  true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.user.Password = test.password
+			assert.NoError(t, test.user.BeforeCreate())
+			res := test.user.ComparePassword(test.password)
+			if test.isValid {
+				assert.True(t, res)
+			} else {
+				assert.False(t, res)
 			}
 		})
 	}

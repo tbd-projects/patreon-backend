@@ -9,8 +9,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	log "github.com/sirupsen/logrus"
-	// gin-swagger middleware
-	// swagger embed files
 )
 
 var (

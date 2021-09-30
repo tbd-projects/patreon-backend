@@ -70,6 +70,7 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			h.log.Error(err)
 		}
 	}(r.Body)
+
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	h.log.Info("in /creators/id")

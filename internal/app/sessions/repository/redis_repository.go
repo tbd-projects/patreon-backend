@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/models"
 
 	"github.com/gomodule/redigo/redis"
@@ -30,10 +29,10 @@ func (repo *RedisRepository) Set(session *models.Session) error {
 		}
 	}(con)
 
-	res, _ := redis.String(con.Do("SET", session.UniqID, session.UserID,
+	res, err := redis.String(con.Do("SET", session.UniqID, session.UserID,
 		"EX", session.Expiration))
 	if res != "OK" {
-		return sessions.StatusNotOK
+		return err
 	}
 	return nil
 }

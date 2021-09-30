@@ -35,10 +35,8 @@ func (h *HandlerJoiner) AddHandlers(joinedHandlers []Joinable) {
 func (h HandlerJoiner) GetUrl() string {
 	return h.currentUrl
 }
-
 func (h *HandlerJoiner) Join(router *mux.Router) {
 	subrouter := router.PathPrefix(h.currentUrl).Subrouter()
-
 	for _, handler := range h.joinedHandlers {
 		handler.Join(subrouter)
 	}

@@ -80,25 +80,3 @@ func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, err
 
 	return creator, nil
 }
-
-//func (repo *CreatorRepository) FindByLogin(login string) (*models.User, error) {
-//	user := models.User{}
-//
-//	if err := repo.store.db.QueryRow("SELECT user_id, login, encrypted_password from users where login=$1", login).
-//		Scan(&user.ID, &user.Login, &user.EncryptedPassword); err != nil {
-//		return nil, store.NotFound
-//	}
-//
-//	return &user, nil
-//}
-
-//func (repo *CreatorRepository) FindByID(id int64) (*models.User, error) {
-//	user := models.User{}
-//
-//	if err := repo.store.db.QueryRow("SELECT user_id, nickname, avatar from users where user_id=$1", id).
-//		Scan(&user.ID, &user.Nickname, &user.Avatar); err != nil {
-//		return nil, store.NotFound
-//	}
-//
-//	return &user, nil
-//}

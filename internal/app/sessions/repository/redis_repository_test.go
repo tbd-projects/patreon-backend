@@ -75,6 +75,10 @@ func (s *SuiteTestRepository) TestSet() {
 	_, err = s.redisServer.Get(session.UniqID)
 	assert.Equal(s.T(), err, miniredis.ErrKeyNotFound)
 	assert.Equal(s.T(), s.output, "")
+
+	s.redisServer.SetError("Error")
+	err = s.redisRepository.Set(session)
+	assert.Error(s.T(), err)
 	s.redisServer.Close()
 }
 
@@ -93,6 +97,10 @@ func (s *SuiteTestRepository) TestGetUserID() {
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), userID, session.UserID)
 	assert.Equal(s.T(), s.output, "")
+
+	s.redisServer.SetError("Error")
+	_, err = s.redisRepository.GetUserId(session.UniqID)
+	assert.Error(s.T(), err)
 
 	s.redisServer.Close()
 }
@@ -113,6 +121,10 @@ func (s *SuiteTestRepository) TestDel() {
 	_, err = s.redisServer.Get(session.UniqID)
 	assert.Equal(s.T(), err, miniredis.ErrKeyNotFound)
 	assert.Equal(s.T(), s.output, "")
+
+	s.redisServer.SetError("Error")
+	err = s.redisRepository.Del(session)
+	assert.Error(s.T(), err)
 
 	s.redisServer.Close()
 }
