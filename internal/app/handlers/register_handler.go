@@ -68,7 +68,8 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestRegistration{}
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(req); err != nil {
+	if err := decoder.Decode(req); err != nil || len(req.Password) == 0 ||
+		len(req.Nickname) == 0 || len(req.Login) == 0 {
 		h.log.Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
