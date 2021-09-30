@@ -2,10 +2,13 @@ package sqlstore
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 )
+
+var BDError = errors.New("BD error")
 
 type Suite struct {
 	suite.Suite

@@ -42,6 +42,14 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 
 	err := s.store.User().Create(u)
 	assert.NoError(s.T(), err)
+
+	s.mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar"+
+		") VALUES ($1, $2, $3, $4)"+"RETURNING user_id")).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).WillReturnError(BDError)
+
+	err = s.store.User().Create(u)
+	assert.Error(s.T(), err)
+	assert.Equal(s.T(), BDError, err)
 }
 
 func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
