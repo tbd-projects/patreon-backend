@@ -2,6 +2,7 @@ package sessions_manager
 
 import (
 	"fmt"
+	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/mocks"
 	"patreon/internal/app/sessions/models"
 	"testing"
@@ -87,6 +88,15 @@ func (s *SuiteTestSesManager) TestCheckSession() {
 
 	assert.Equal(s.T(), result.UserID, userID)
 	assert.Equal(s.T(), result.UniqID, uniqID)
+
+	s.mockSessionRepository.EXPECT().
+		GetUserId(uniqID).
+		Return("", sessions.StatusNotOK).
+		Times(1)
+
+	_, err = s.sessionsManager.Check(uniqID)
+	assert.Error(s.T(), err)
+	assert.Equal(s.T(), err, sessions.StatusNotOK)
 }
 
 func (s *SuiteTestSesManager) TestDeleteSession() {
@@ -99,4 +109,13 @@ func (s *SuiteTestSesManager) TestDeleteSession() {
 
 	err := s.sessionsManager.Delete(uniqID)
 	require.NoError(s.T(), err)
+
+	s.mockSessionRepository.EXPECT().
+		Del(&models.Session{UniqID: uniqID}).
+		Return(sessions.StatusNotOK).
+		Times(1)
+
+	err = s.sessionsManager.Delete(uniqID)
+	require.Error(s.T(), err)
+	assert.Equal(s.T(), err, sessions.StatusNotOK)
 }

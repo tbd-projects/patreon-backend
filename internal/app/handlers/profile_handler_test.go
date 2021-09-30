@@ -7,23 +7,18 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
-	"testing"
 )
 
-type ProfileTestSuit struct {
-	SuiteTestStore
+type ProfileTestSuite struct {
+	SuiteTestBaseHandler
 }
 
-func TestTestStore3(t *testing.T) {
-	suite.Run(t, new(ProfileTestSuit))
-}
 
-func (s *ProfileTestSuit) TestServeHTTP_Correct() {
+func (s *ProfileTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
 	test := TestTable{
 		name:              "correct",
@@ -61,7 +56,7 @@ func (s *ProfileTestSuit) TestServeHTTP_Correct() {
 		Avatar: test.data.(*models.User).Avatar})
 }
 
-func (s *ProfileTestSuit) TestServeHTTP_WitDBError() {
+func (s *ProfileTestSuite) TestServeHTTP_WitDBError() {
 	userID := int64(1)
 	test := TestTable{
 		name:              "with db error",
@@ -91,7 +86,7 @@ func (s *ProfileTestSuit) TestServeHTTP_WitDBError() {
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 }
 
-func (s *ProfileTestSuit) TestServeHTTP_WithoutContext() {
+func (s *ProfileTestSuite) TestServeHTTP_WithoutContext() {
 	userID := int64(1)
 	test := TestTable{
 		name:              "without context",

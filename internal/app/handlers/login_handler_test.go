@@ -9,74 +9,19 @@ import (
 	session_models "patreon/internal/app/sessions/models"
 	"patreon/internal/app/sessions/sessions_manager"
 
-	"patreon/internal/app/sessions/mocks"
-	"patreon/internal/app/store"
-	mock_store "patreon/internal/app/store/mocks"
-	"patreon/internal/models"
-	"testing"
-
 	"github.com/sirupsen/logrus"
-
-	"github.com/stretchr/testify/suite"
-
-	"github.com/golang/mock/gomock"
+	"patreon/internal/app/store"
+	"patreon/internal/models"
 
 	"github.com/stretchr/testify/assert"
 )
 
-type TestTable struct {
-	name              string
-	data              interface{}
-	expectedMockTimes int
-	expectedCode      int
-}
-type Store struct {
-	userRepository    store.UserRepository
-	creatorRepository store.CreatorRepository
+type LoginTestSuite struct {
+	SuiteTestBaseHandler
 }
 
-func NewStore(userRep store.UserRepository,
-	creatorRep store.CreatorRepository) *Store {
-	return &Store{userRep, creatorRep}
-}
 
-func (st *Store) User() store.UserRepository {
-	return st.userRepository
-}
-func (st *Store) Creator() store.CreatorRepository {
-	return st.creatorRepository
-}
-
-type SuiteTestStore struct {
-	suite.Suite
-	mock                  *gomock.Controller
-	mockUserRepository    *mock_store.MockUserRepository
-	mockCreatorRepository *mock_store.MockCreatorRepository
-	mockSessionsManager   *mocks.MockSessionsManager
-	store                 store.Store
-	test                  TestTable
-}
-
-func (s *SuiteTestStore) SetupSuite() {
-	s.mock = gomock.NewController(s.T())
-	s.mockUserRepository = mock_store.NewMockUserRepository(s.mock)
-	s.mockCreatorRepository = mock_store.NewMockCreatorRepository(s.mock)
-	s.mockSessionsManager = mocks.NewMockSessionsManager(s.mock)
-
-	s.store = NewStore(s.mockUserRepository, s.mockCreatorRepository)
-
-	s.test = TestTable{}
-}
-
-func (s *SuiteTestStore) TearDownSuite() {
-	s.mock.Finish()
-}
-
-func TestTestStore(t *testing.T) {
-	suite.Run(t, new(SuiteTestStore))
-}
-
-func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_EmptyBody() {
+func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_EmptyBody() {
 	s.test = TestTable{
 		name:              "Empty body in request",
 		data:              &models.RequestLogin{},
@@ -100,7 +45,7 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_EmptyBody() {
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
-func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_InvalidBody() {
+func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_InvalidBody() {
 	s.test = TestTable{
 		name:              "Invalid body",
 		expectedMockTimes: 0,
@@ -130,7 +75,7 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_InvalidBody() {
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
-func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNotFound() {
+func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNotFound() {
 	s.test = TestTable{
 		name: "User not found in db",
 		data: models.RequestLogin{
@@ -165,7 +110,7 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNotFound() {
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
-func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
+func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
 	s.test = TestTable{
 		name: "Not authorized user",
 		data: models.RequestLogin{
@@ -214,7 +159,7 @@ func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
-func (s *SuiteTestStore) TestLoginHandler_ServeHTTP_Ok() {
+func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_Ok() {
 	s.test = TestTable{
 		name: "Invalid body",
 		data: models.RequestLogin{

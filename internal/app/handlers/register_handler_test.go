@@ -3,26 +3,20 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"github.com/golang/mock/gomock"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/models"
-	"testing"
-
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
-
-	"github.com/stretchr/testify/suite"
 )
 
-type LoginTestSuite struct {
-	SuiteTestStore
+type RegisterTestSuite struct {
+	SuiteTestBaseHandler
 }
 
-func TestRegisterHandler(t *testing.T) {
-	suite.Run(t, new(SuiteTestStore))
-}
-
-func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_EmptyBody() {
+func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_EmptyBody() {
 	s.test = TestTable{
 		name:              "Empty body from request",
 		data:              &models.RequestRegistration{},
@@ -47,7 +41,7 @@ func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_EmptyBody() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 
-func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_InvalidBody() {
+func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_InvalidBody() {
 	s.test = TestTable{
 		name:              "Invalid body",
 		expectedMockTimes: 0,
@@ -77,7 +71,7 @@ func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_InvalidBody() {
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
-func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
+func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
 	s.test = TestTable{
 		name: "User exist in database",
 		data: models.RequestRegistration{
@@ -119,7 +113,7 @@ func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
-func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_SmallPassword() {
+func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_SmallPassword() {
 	s.test = TestTable{
 		name: "Small password in request",
 		data: models.RequestRegistration{
@@ -161,7 +155,29 @@ func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_SmallPassword() {
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
-func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_CreateSuccess() {
+
+type userWithPasswordMatcher struct{ user *models.User }
+
+func newUserWithPasswordMatcher(user *models.User) gomock.Matcher {
+	return &userWithPasswordMatcher{user}
+}
+
+func (match *userWithPasswordMatcher) Matches(x interface{}) bool {
+	switch x.(type) {
+	case *models.User:
+		return x.(*models.User).ID == match.user.ID && x.(*models.User).Login == match.user.Login &&
+			x.(*models.User).Avatar == match.user.Avatar && x.(*models.User).Nickname == match.user.Nickname &&
+			x.(*models.User).Password == match.user.Password && match.user.ComparePassword(x.(*models.User).Password)
+	default:
+		return false
+	}
+}
+
+func (match *userWithPasswordMatcher) String() string {
+	return fmt.Sprintf("User: %s", match.user.String())
+}
+
+func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_CreateSuccess() {
 	s.test = TestTable{
 		name: "Success create user",
 		data: models.RequestRegistration{
@@ -198,7 +214,7 @@ func (s *SuiteTestStore) TestRegisterHandler_ServeHTTP_CreateSuccess() {
 
 	assert.NoError(s.T(), user.BeforeCreate())
 
-	s.mockUserRepository.EXPECT().Create(user).Return(nil).Times(1)
+	s.mockUserRepository.EXPECT().Create(newUserWithPasswordMatcher(user)).Return(nil).Times(1)
 
 	handler.SetStore(s.store)
 	reader, _ := http.NewRequest(http.MethodPost, "/register", &b)

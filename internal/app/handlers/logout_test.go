@@ -5,26 +5,19 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"net/http"
-	"net/http/httptest"
-	"patreon/internal/models"
-	"testing"
-
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
+	"net/http"
+	"net/http/httptest"
+	"patreon/internal/models"
 )
 
-type LogoutTestSuit struct {
-	SuiteTestStore
+type LogoutTestSuite struct {
+	SuiteTestBaseHandler
 }
 
-func TestTestStore2(t *testing.T) {
-	suite.Run(t, new(LogoutTestSuit))
-}
-
-func (s *LogoutTestSuit) TestServeHTTP_WithSession() {
+func (s *LogoutTestSuite) TestServeHTTP_WithSession() {
 	uniqID := "1"
 	test := TestTable{
 		name:              "with cookies",
@@ -54,7 +47,7 @@ func (s *LogoutTestSuit) TestServeHTTP_WithSession() {
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 }
 
-func (s *LogoutTestSuit) TestServeHTTP_WithoutCookies() {
+func (s *LogoutTestSuite) TestServeHTTP_WithoutCookies() {
 	uniqID := "1"
 	test := TestTable{
 		name:              "without cookies",
@@ -83,7 +76,7 @@ func (s *LogoutTestSuit) TestServeHTTP_WithoutCookies() {
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 }
 
-func (s *LogoutTestSuit) TestServeHTTP_ErrorSessions() {
+func (s *LogoutTestSuite) TestServeHTTP_ErrorSessions() {
 	uniqID := "1"
 	test := TestTable{
 		name:              "without cookies",
