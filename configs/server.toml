@@ -1,0 +1,9 @@
+log_level = "debug"
+
+bind_addr = ":8080"
+
+database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
+#database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
+
+redis_url = "redis://redis/0"
+#redis_url = "redis://localhost:6379"
