@@ -6,12 +6,14 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app"
 	session_models "patreon/internal/app/sessions/models"
 	"patreon/internal/app/sessions/sessions_manager"
 
-	"github.com/sirupsen/logrus"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +21,6 @@ import (
 type LoginTestSuite struct {
 	SuiteTestBaseHandler
 }
-
 
 func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_EmptyBody() {
 	s.test = TestTable{
@@ -29,12 +30,14 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_EmptyBody() {
 		expectedCode:      http.StatusUnprocessableEntity,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLoginHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(s.test.data)
@@ -59,12 +62,14 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_InvalidBody() {
 		Password: "password",
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLoginHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(data)
@@ -87,14 +92,14 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNotFound() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLoginHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-
-	handler.SetStore(s.store)
 
 	s.mockUserRepository.EXPECT().
 		FindByLogin(s.test.data.(models.RequestLogin).Login).
@@ -121,16 +126,14 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
 		expectedCode:      http.StatusInternalServerError,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLoginHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-
-	handler.SetStore(s.store)
-
-	handler.SetSessionManager(s.mockSessionsManager)
 
 	user := models.User{
 		ID:       1,
@@ -170,14 +173,14 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_Ok() {
 		expectedCode:      http.StatusOK,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLoginHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-	handler.SetStore(s.store)
-	handler.SetSessionManager(s.mockSessionsManager)
 
 	user := models.User{
 		ID:       1,

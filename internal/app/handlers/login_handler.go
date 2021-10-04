@@ -6,9 +6,7 @@ import (
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	"patreon/internal/app/store"
 	"patreon/internal/models"
 	"time"
 
@@ -18,29 +16,24 @@ import (
 
 type LoginHandler struct {
 	baseHandler    app.HandlerJoiner
+	dataStorage    *app.DataStorage
 	authMiddleware middleware.SessionMiddleware
-	Store          store.Store
-	SessionManager sessions.SessionsManager
 	RespondHandler
 }
 
-func NewLoginHandler() *LoginHandler {
-	return &LoginHandler{
+func NewLoginHandler(storage *app.DataStorage) *LoginHandler {
+	h := &LoginHandler{
 		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/login"),
+		dataStorage:    storage,
 		RespondHandler: RespondHandler{logrus.New()},
 	}
+	if storage != nil {
+		h.authMiddleware = *middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.log)
+	}
+
+	return h
 }
 
-func (h *LoginHandler) SetStore(store store.Store) {
-	h.Store = store
-}
-func (h *LoginHandler) SetLogger(logger *logrus.Logger) {
-	h.log = logger
-}
-func (h *LoginHandler) SetSessionManager(manager sessions.SessionsManager) {
-	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
-}
 func (h *LoginHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "OPTIONS")
 	h.baseHandler.Join(router)
@@ -76,7 +69,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.Store.User().FindByLogin(req.Login)
+	u, err := h.dataStorage.Store.User().FindByLogin(req.Login)
 	h.log.Debugf("Login : %s, password : %s", req.Login, req.Password)
 	if err != nil || !u.ComparePassword(req.Password) {
 		h.log.Warnf("Fail get user or compare password %s", err)
@@ -84,7 +77,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.SessionManager.Create(int64(u.ID))
+	res, err := h.dataStorage.SessionManager.Create(int64(u.ID))
 	if err != nil || res.UserID != int64(u.ID) {
 		h.log.Errorf("Error create session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateSession)

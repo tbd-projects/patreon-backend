@@ -6,9 +6,7 @@ import (
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	"patreon/internal/app/store"
 	"patreon/internal/models"
 
 	"github.com/gorilla/mux"
@@ -17,29 +15,24 @@ import (
 
 type RegisterHandler struct {
 	baseHandler    app.HandlerJoiner
+	dataStorage    *app.DataStorage
 	authMiddleware middleware.SessionMiddleware
-	Store          store.Store
-	SessionManager sessions.SessionsManager
 	RespondHandler
 }
 
-func NewRegisterHandler() *RegisterHandler {
-	return &RegisterHandler{
+func NewRegisterHandler(storage *app.DataStorage) *RegisterHandler {
+	h := &RegisterHandler{
 		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/register"),
+		dataStorage:    storage,
 		RespondHandler: RespondHandler{logrus.New()},
 	}
+	if storage != nil {
+		h.authMiddleware = *middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.log)
+	}
+
+	return h
 }
 
-func (h *RegisterHandler) SetStore(store store.Store) {
-	h.Store = store
-}
-func (h *RegisterHandler) SetLogger(logger *logrus.Logger) {
-	h.log = logger
-}
-func (h *RegisterHandler) SetSessionManager(manager sessions.SessionsManager) {
-	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
-}
 func (h *RegisterHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
 	h.baseHandler.Join(router)
@@ -83,7 +76,7 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logUser, _ := json.Marshal(u)
 	h.log.Debug("get: ", string(logUser))
 
-	checkUser, _ := h.Store.User().FindByLogin(u.Login)
+	checkUser, _ := h.dataStorage.Store.User().FindByLogin(u.Login)
 	if checkUser != nil {
 		h.log.Warn(handler_errors.UserAlreadyExist)
 		h.Error(w, r, http.StatusConflict, handler_errors.UserAlreadyExist)
@@ -102,7 +95,7 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.Store.User().Create(u); err != nil {
+	if err := h.dataStorage.Store.User().Create(u); err != nil {
 		h.log.Errorf("Error create user in bd %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateUser)
 		return

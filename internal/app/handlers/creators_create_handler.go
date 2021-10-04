@@ -6,37 +6,33 @@ import (
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	"patreon/internal/app/store"
 	"patreon/internal/models"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+
+	"github.com/gorilla/mux"
 )
 
 type CreatorCreateHandler struct {
 	baseHandler    app.HandlerJoiner
+	dataStorage    *app.DataStorage
 	authMiddleware middleware.SessionMiddleware
-	Store          store.Store
-	SessionManager sessions.SessionsManager
 	RespondHandler
 }
 
-func NewCreatorCreateHandler() *CreatorCreateHandler {
-	return &CreatorCreateHandler{
+func NewCreatorCreateHandler(storage *app.DataStorage) *CreatorCreateHandler {
+	h := &CreatorCreateHandler{
 		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/{id}"),
+		dataStorage:    storage,
 		RespondHandler: RespondHandler{logrus.New()},
 	}
-}
+	if storage != nil {
+		h.authMiddleware = *middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.log)
 
-func (h *CreatorCreateHandler) SetStore(store store.Store) {
-	h.Store = store
-}
-func (h *CreatorCreateHandler) SetSessionManager(manager sessions.SessionsManager) {
-	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
+	}
+	return h
 }
 func (h *CreatorCreateHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "POST", "OPTIONS")
@@ -81,7 +77,7 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if r.Method == "GET" {
-		creator, err := h.Store.Creator().GetCreator(int64(idInt))
+		creator, err := h.dataStorage.Store.Creator().GetCreator(int64(idInt))
 		if err != nil {
 			h.log.Errorf("get: %v err:%v can not get user from db", creator, err)
 			h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
@@ -99,13 +95,13 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 			return
 		}
-		u, err := h.Store.User().FindByID(int64(idInt))
+		u, err := h.dataStorage.Store.User().FindByID(int64(idInt))
 		if err != nil {
 			h.log.Errorf("get: %s err:%s can not get user from db", u, err)
 			h.Error(w, r, http.StatusNotFound, handler_errors.UserNotFound)
 			return
 		}
-		if _, err := h.Store.Creator().GetCreator(int64(idInt)); err == nil {
+		if _, err := h.dataStorage.Store.Creator().GetCreator(int64(idInt)); err == nil {
 			h.log.Errorf("get: %s err:%s", u, handler_errors.ProfileAlreadyExist)
 			h.Error(w, r, http.StatusConflict, handler_errors.ProfileAlreadyExist)
 			return
@@ -122,7 +118,7 @@ func (h *CreatorCreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
 			return
 		}
-		if err := h.Store.Creator().Create(cr); err != nil {
+		if err := h.dataStorage.Store.Creator().Create(cr); err != nil {
 			h.log.Errorf("get: %v err:%v can not create profile", cr, err)
 			h.Error(w, r, http.StatusServiceUnavailable, handler_errors.BDError)
 			return

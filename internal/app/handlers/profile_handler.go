@@ -5,9 +5,7 @@ import (
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	"patreon/internal/app/store"
 	"patreon/internal/models"
 
 	"github.com/gorilla/mux"
@@ -16,29 +14,23 @@ import (
 
 type ProfileHandler struct {
 	baseHandler    app.HandlerJoiner
+	dataStorage    *app.DataStorage
 	authMiddleware middleware.SessionMiddleware
-	Store          store.Store
-	SessionManager sessions.SessionsManager
 	RespondHandler
 }
 
-func NewProfileHandler() *ProfileHandler {
-	return &ProfileHandler{
+func NewProfileHandler(storage *app.DataStorage) *ProfileHandler {
+	h := &ProfileHandler{
 		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/profile"),
 		RespondHandler: RespondHandler{logrus.New()},
+		dataStorage:    storage,
 	}
+	if storage != nil {
+		h.authMiddleware = *middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.log)
+	}
+	return h
 }
 
-func (h *ProfileHandler) SetStore(store store.Store) {
-	h.Store = store
-}
-func (h *ProfileHandler) SetLogger(logger *logrus.Logger) {
-	h.log = logger
-}
-func (h *ProfileHandler) SetSessionManager(manager sessions.SessionsManager) {
-	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
-}
 func (h *ProfileHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "OPTIONS")
 	h.baseHandler.Join(router)
@@ -69,7 +61,7 @@ func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.Store.User().FindByID(userID.(int64))
+	u, err := h.dataStorage.Store.User().FindByID(userID.(int64))
 	if err != nil {
 		h.log.Errorf("get: %s err:%s can not get user from db", u, err)
 		h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)

@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"patreon/internal/app"
+	"patreon/internal/app/store"
+	"patreon/internal/models"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"patreon/internal/app/store"
-	"patreon/internal/models"
 )
 
 type ProfileTestSuite struct {
 	SuiteTestBaseHandler
 }
-
 
 func (s *ProfileTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
@@ -28,13 +29,14 @@ func (s *ProfileTestSuite) TestServeHTTP_Correct() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewProfileHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewProfileHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-	handler.SetStore(s.store)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
@@ -66,13 +68,14 @@ func (s *ProfileTestSuite) TestServeHTTP_WitDBError() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewProfileHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewProfileHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-	handler.SetStore(s.store)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
@@ -96,13 +99,14 @@ func (s *ProfileTestSuite) TestServeHTTP_WithoutContext() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewProfileHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewProfileHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-	handler.SetStore(s.store)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)

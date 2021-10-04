@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"patreon/internal/app"
 	server "patreon/internal/app/server"
 
 	_ "patreon/docs"
@@ -35,7 +36,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config := server.NewConfig()
+	config := app.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		log.Fatal(err)

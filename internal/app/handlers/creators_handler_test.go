@@ -3,14 +3,16 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
+
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type CreatorTestSuite struct {
@@ -27,9 +29,12 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewCreatorHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewCreatorHandler(dataStorage)
 	logrus.SetOutput(ioutil.Discard)
-	handler.SetStore(s.store)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
@@ -63,9 +68,12 @@ func (s *CreatorTestSuite) TestServeHTTP_WitDBError() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewCreatorHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewCreatorHandler(dataStorage)
 	logrus.SetOutput(ioutil.Discard)
-	handler.SetStore(s.store)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
@@ -82,4 +90,3 @@ func (s *CreatorTestSuite) TestServeHTTP_WitDBError() {
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 
 }
-

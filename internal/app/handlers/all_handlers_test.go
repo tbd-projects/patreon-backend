@@ -1,15 +1,17 @@
 package handlers
 
 import (
-	"github.com/golang/mock/gomock"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 	"patreon/internal/app"
 	"patreon/internal/app/sessions/mocks"
 	"patreon/internal/app/store"
 	mock_store "patreon/internal/app/store/mocks"
 	"testing"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/require"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/suite"
 )
 
 type TestTable struct {
@@ -75,12 +77,12 @@ func TestHandler(t *testing.T) {
 		router := mux.NewRouter()
 		handler := NewMainHandler()
 		handler.SetRouter(router)
-		registerHandler := NewRegisterHandler()
-		loginHandler := NewLoginHandler()
-		profileHandler := NewProfileHandler()
-		logoutHandler := NewLogoutHandler()
-		creatorHandler := NewCreatorHandler()
-		creatorCreateHandler := NewCreatorCreateHandler()
+		registerHandler := NewRegisterHandler(nil)
+		loginHandler := NewLoginHandler(nil)
+		profileHandler := NewProfileHandler(nil)
+		logoutHandler := NewLogoutHandler(nil)
+		creatorHandler := NewCreatorHandler(nil)
+		creatorCreateHandler := NewCreatorCreateHandler(nil)
 
 		creatorHandler.JoinHandlers([]app.Joinable{
 			creatorCreateHandler,

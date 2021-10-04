@@ -5,12 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"patreon/internal/app"
+	"patreon/internal/models"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"patreon/internal/models"
 )
 
 type LogoutTestSuite struct {
@@ -27,13 +29,14 @@ func (s *LogoutTestSuite) TestServeHTTP_WithSession() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLogoutHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLogoutHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-	handler.SetSessionManager(s.mockSessionsManager)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
@@ -57,13 +60,14 @@ func (s *LogoutTestSuite) TestServeHTTP_WithoutCookies() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLogoutHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLogoutHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-	handler.SetSessionManager(s.mockSessionsManager)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
@@ -86,13 +90,14 @@ func (s *LogoutTestSuite) TestServeHTTP_ErrorSessions() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLogoutHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewLogoutHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-	handler.SetSessionManager(s.mockSessionsManager)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)

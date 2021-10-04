@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"patreon/internal/app"
+	"patreon/internal/models"
+
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"patreon/internal/models"
 )
 
 type RegisterTestSuite struct {
@@ -24,12 +26,14 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_EmptyBody() {
 		expectedCode:      http.StatusUnprocessableEntity,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewRegisterHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewRegisterHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(s.test.data)
@@ -55,12 +59,14 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_InvalidBody() {
 		Password: "password",
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewRegisterHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewRegisterHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(data)
@@ -83,14 +89,14 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
 		expectedCode:      http.StatusConflict,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewRegisterHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewRegisterHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-
-	handler.SetStore(s.store)
 
 	req := s.test.data.(models.RequestRegistration)
 	user := &models.User{
@@ -125,14 +131,14 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_SmallPassword() {
 		expectedCode:      http.StatusBadRequest,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewRegisterHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewRegisterHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
-
-	handler.SetStore(s.store)
 
 	req := s.test.data.(models.RequestRegistration)
 	user := &models.User{
@@ -189,12 +195,14 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_CreateSuccess() {
 		expectedCode:      http.StatusOK,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewRegisterHandler()
+	dataStorage := &app.DataStorage{
+		Store:          s.store,
+		SessionManager: s.mockSessionsManager,
+	}
+	handler := NewRegisterHandler(dataStorage)
 	logger := logrus.New()
 	str := bytes.Buffer{}
 	logger.SetOutput(&str)
-
-	handler.SetLogger(logger)
 
 	req := s.test.data.(models.RequestRegistration)
 	user := &models.User{
@@ -216,8 +224,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_CreateSuccess() {
 
 	s.mockUserRepository.EXPECT().Create(newUserWithPasswordMatcher(user)).Return(nil).Times(1)
 
-	handler.SetStore(s.store)
 	reader, _ := http.NewRequest(http.MethodPost, "/register", &b)
 	handler.ServeHTTP(recorder, reader)
-	//assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
+	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }

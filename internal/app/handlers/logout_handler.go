@@ -5,34 +5,31 @@ import (
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_errors"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+
+	"github.com/gorilla/mux"
 )
 
 type LogoutHandler struct {
 	baseHandler    app.HandlerJoiner
+	dataStorage    *app.DataStorage
 	authMiddleware middleware.SessionMiddleware
-	SessionManager sessions.SessionsManager
 	RespondHandler
 }
 
-func NewLogoutHandler() *LogoutHandler {
-	return &LogoutHandler{
+func NewLogoutHandler(storage *app.DataStorage) *LogoutHandler {
+	h := &LogoutHandler{
 		baseHandler:    *app.NewHandlerJoiner([]app.Joinable{}, "/logout"),
+		dataStorage:    storage,
 		RespondHandler: RespondHandler{logrus.New()},
 	}
-}
-
-func (h *LogoutHandler) SetLogger(logger *logrus.Logger) {
-	h.log = logger
-}
-func (h *LogoutHandler) SetSessionManager(manager sessions.SessionsManager) {
-	h.SessionManager = manager
-	h.authMiddleware = *middleware.NewSessionMiddleware(h.SessionManager, h.log)
+	if storage != nil {
+		h.authMiddleware = *middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.log)
+	}
+	return h
 }
 func (h *LogoutHandler) Join(router *mux.Router) {
 	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET")
@@ -64,7 +61,7 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Debugf("Logout session: %s", uniqID)
 
-	err := h.SessionManager.Delete(uniqID.(string))
+	err := h.dataStorage.SessionManager.Delete(uniqID.(string))
 	if err != nil {
 		h.log.Errorf("can not delete session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)
