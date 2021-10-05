@@ -1,13 +1,10 @@
 package app
 
 import (
-	"database/sql"
-	"os"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/repository"
 	"patreon/internal/app/sessions/sessions_manager"
 	"patreon/internal/app/store"
-	"patreon/internal/app/store/sqlstore"
 
 	"github.com/gomodule/redigo/redis"
 	log "github.com/sirupsen/logrus"
@@ -25,37 +22,7 @@ func (dst *DataStorage) SetSessionManager(manager sessions.SessionsManager) {
 	dst.SessionManager = manager
 }
 
-func NewDB(url string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", url)
-	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func NewDataStorage(config *Config) *DataStorage {
-	db, err := NewDB(config.DataBaseUrl)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(db)
-
-	st := sqlstore.New(db)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
-
+func NewDataStorage(config *Config, store store.Store) *DataStorage {
 	sessionLog := log.New()
 	sessionLog.SetLevel(log.FatalLevel)
 	redisConn := &redis.Pool{
@@ -76,7 +43,7 @@ func NewDataStorage(config *Config) *DataStorage {
 
 	sessionManager := sessions_manager.NewSessionManager(repository.NewRedisRepository(redisConn, sessionLog))
 	return &DataStorage{
-		Store:          st,
+		Store:          store,
 		SessionManager: sessionManager,
 	}
 }

@@ -1,11 +1,15 @@
 package server
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
 	"os"
 	_ "patreon/docs"
 	"patreon/internal/app"
-	"patreon/internal/app/handlers"
+	"patreon/internal/app/handlers/handler_factory"
+	"patreon/internal/app/store/sqlstore"
+	"time"
 
 	gorilla_handlers "github.com/gorilla/handlers"
 
@@ -42,6 +46,17 @@ func CORSConfigure(router *mux.Router) {
 		))
 	}
 }
+func NewDB(url string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", url)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
 
 // @title Patreon
 // @version 1.0
@@ -66,41 +81,52 @@ func Start(config *app.Config) error {
 		os.Exit(1)
 	}
 	logger := log.New()
+	currentTime := time.Now()
+	formatted := config.LogAddr + fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		currentTime.Year(), currentTime.Month(), currentTime.Day(),
+		currentTime.Hour(), currentTime.Minute(), currentTime.Second()) + ".out"
+
+	f, err := os.OpenFile(formatted, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+
+	logger.SetOutput(f)
 	logger.SetLevel(level)
-
-	handler := handlers.NewMainHandler()
-	handler.SetLogger(logger)
-
 	router := mux.NewRouter()
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	CORSConfigure(router)
 
-	handler.SetRouter(router)
+	db, err := NewDB(config.DataBaseUrl)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(db)
 
-	dataStorage := app.NewDataStorage(config)
+	st := sqlstore.New(db)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
 
-	registerHandler := handlers.NewRegisterHandler(dataStorage)
-	loginHandler := handlers.NewLoginHandler(dataStorage)
-	logoutHandler := handlers.NewLogoutHandler(dataStorage)
-	profileHandler := handlers.NewProfileHandler(dataStorage)
-	creatorHandler := handlers.NewCreatorHandler(dataStorage)
-	creatorCreateHandler := handlers.NewCreatorCreateHandler(dataStorage)
+	dataStorage := app.NewDataStorage(config, st)
 
-	creatorHandler.JoinHandlers([]app.Joinable{
-		creatorCreateHandler,
-	})
+	factory := handler_factory.NewFactory(logger, dataStorage)
+	hs := factory.GetHandleUrls()
 
-	handler.JoinHandlers([]app.Joinable{
-		registerHandler,
-		loginHandler,
-		profileHandler,
-		logoutHandler,
-		creatorHandler,
-	})
+	for url, h := range *hs {
+		h.Connect(router.PathPrefix(url))
+	}
 
-	s := New(config, handler)
-	s.logger.Info("starting server")
+	log.Info("starting server")
 
-	return http.ListenAndServe(config.BindAddr, s.handler)
+	return http.ListenAndServe(config.BindAddr, router)
 }

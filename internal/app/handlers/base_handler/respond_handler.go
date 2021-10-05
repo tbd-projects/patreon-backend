@@ -1,4 +1,4 @@
-package handlers
+package base_handler
 
 import (
 	"encoding/json"
@@ -11,8 +11,11 @@ type RespondHandler struct {
 	log *logrus.Logger
 }
 
+func (h *RespondHandler) Log() *logrus.Logger {
+	return h.log
+}
 func (h *RespondHandler) PrintRequest(r *http.Request) {
-	h.log.Infof("Request: %s. From URL: %s", r.Method, r.URL.Host + r.URL.Path)
+	h.log.Infof("Request: %s. From URL: %s", r.Method, r.URL.Host+r.URL.Path)
 }
 
 func (h *RespondHandler) Error(w http.ResponseWriter, r *http.Request, code int, err error) {
