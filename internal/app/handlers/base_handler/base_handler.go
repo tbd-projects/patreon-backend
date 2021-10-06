@@ -13,6 +13,7 @@ const (
 	GET     = http.MethodGet
 	POST    = http.MethodPost
 	PUT     = http.MethodPut
+	DELETE  = http.MethodDelete
 	OPTIONS = http.MethodOptions
 )
 

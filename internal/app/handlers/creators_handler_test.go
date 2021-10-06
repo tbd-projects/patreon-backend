@@ -3,14 +3,11 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"patreon/internal/app"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,18 +26,13 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 	}
 
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewCreatorHandler(dataStorage)
-	logrus.SetOutput(ioutil.Discard)
+	handler := NewCreatorHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	require.NoError(s.T(), err)
-	reader, _ := http.NewRequest(http.MethodPost, "/creators", &b)
+	reader, _ := http.NewRequest(http.MethodGet, "/creators", &b)
 
 	s.mockCreatorRepository.
 		EXPECT().
@@ -59,7 +51,6 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 }
 
 func (s *CreatorTestSuite) TestServeHTTP_WitDBError() {
-
 	test := TestTable{
 		name:              "with db error",
 		data:              nil,
@@ -68,18 +59,13 @@ func (s *CreatorTestSuite) TestServeHTTP_WitDBError() {
 	}
 
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewCreatorHandler(dataStorage)
-	logrus.SetOutput(ioutil.Discard)
+	handler := NewCreatorHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	require.NoError(s.T(), err)
-	reader, _ := http.NewRequest(http.MethodPost, "/creators", &b)
+	reader, _ := http.NewRequest(http.MethodGet, "/creators", &b)
 
 	s.mockCreatorRepository.
 		EXPECT().

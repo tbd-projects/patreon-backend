@@ -18,12 +18,12 @@ const (
 )
 
 type Factory struct {
-	storage    *app.DataStorage
+	storage    app.DataStorage
 	logger     *logrus.Logger
 	urlHandler *map[string]app.Handler
 }
 
-func NewFactory(logger *logrus.Logger, storage *app.DataStorage) *Factory {
+func NewFactory(logger *logrus.Logger, storage app.DataStorage) *Factory {
 	return &Factory{
 		storage: storage,
 		logger:  logger,

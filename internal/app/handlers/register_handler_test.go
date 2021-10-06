@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"patreon/internal/app"
 	"patreon/internal/models"
 
 	"github.com/golang/mock/gomock"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,14 +24,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_EmptyBody() {
 		expectedCode:      http.StatusUnprocessableEntity,
 	}
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewRegisterHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
+	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(s.test.data)
@@ -59,14 +50,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_InvalidBody() {
 		Password: "password",
 	}
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewRegisterHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
+	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(data)
@@ -88,15 +72,9 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
 		expectedMockTimes: 1,
 		expectedCode:      http.StatusConflict,
 	}
+
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewRegisterHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
+	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	req := s.test.data.(models.RequestRegistration)
 	user := &models.User{
@@ -131,14 +109,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_SmallPassword() {
 		expectedCode:      http.StatusBadRequest,
 	}
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewRegisterHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
+	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	req := s.test.data.(models.RequestRegistration)
 	user := &models.User{
@@ -195,14 +166,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_CreateSuccess() {
 		expectedCode:      http.StatusOK,
 	}
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewRegisterHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
+	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	req := s.test.data.(models.RequestRegistration)
 	user := &models.User{

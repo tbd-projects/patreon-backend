@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"patreon/internal/app"
+	"patreon/internal/app/server/data_storage"
 	"patreon/internal/app/sessions/mocks"
 	"patreon/internal/app/store"
 	mock_store "patreon/internal/app/store/mocks"
 	"testing"
-
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/require"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
@@ -20,6 +20,7 @@ type TestTable struct {
 	expectedMockTimes int
 	expectedCode      int
 }
+
 type Store struct {
 	userRepository    store.UserRepository
 	creatorRepository store.CreatorRepository
@@ -43,7 +44,8 @@ type SuiteTestBaseHandler struct {
 	mockUserRepository    *mock_store.MockUserRepository
 	mockCreatorRepository *mock_store.MockCreatorRepository
 	mockSessionsManager   *mocks.MockSessionsManager
-	store                 store.Store
+	dataStorage           app.DataStorage
+	logger                *logrus.Logger
 	test                  TestTable
 }
 
@@ -53,9 +55,14 @@ func (s *SuiteTestBaseHandler) SetupSuite() {
 	s.mockCreatorRepository = mock_store.NewMockCreatorRepository(s.mock)
 	s.mockSessionsManager = mocks.NewMockSessionsManager(s.mock)
 
-	s.store = NewStore(s.mockUserRepository, s.mockCreatorRepository)
+	ds := &data_storage.DataStorage{}
+	ds.SetStore(NewStore(s.mockUserRepository, s.mockCreatorRepository))
+	ds.SetSessionManager(s.mockSessionsManager)
+	s.dataStorage = ds
 
 	s.test = TestTable{}
+	s.logger = logrus.New()
+	s.logger.SetOutput(ioutil.Discard)
 }
 
 func (s *SuiteTestBaseHandler) TearDownSuite() {
@@ -68,32 +75,20 @@ func TestHandler(t *testing.T) {
 	suite.Run(t, new(ProfileTestSuite))
 	suite.Run(t, new(RegisterTestSuite))
 	suite.Run(t, new(CreatorTestSuite))
-	t.Run("Join run", func(t *testing.T) {
+	/*t.Run("Join run", func(t *testing.T) {
 		defer func() {
 			err := recover()
 			require.Equal(t, err, nil)
 		}()
 
 		router := mux.NewRouter()
-		handler := NewMainHandler()
-		handler.SetRouter(router)
-		registerHandler := NewRegisterHandler(nil)
-		loginHandler := NewLoginHandler(nil)
-		profileHandler := NewProfileHandler(nil)
-		logoutHandler := NewLogoutHandler(nil)
-		creatorHandler := NewCreatorHandler(nil)
-		creatorCreateHandler := NewCreatorCreateHandler(nil)
+		dataStorage := app.NewDataStorage(config, st)
 
-		creatorHandler.JoinHandlers([]app.Joinable{
-			creatorCreateHandler,
-		})
+		factory := handler_factory.NewFactory(logger, dataStorage)
+		hs := factory.GetHandleUrls()
 
-		handler.JoinHandlers([]app.Joinable{
-			registerHandler,
-			loginHandler,
-			profileHandler,
-			logoutHandler,
-			creatorHandler,
-		})
-	})
+		for url, h := range *hs {
+			h.Connect(router.PathPrefix(url))
+		}
+	})*/
 }

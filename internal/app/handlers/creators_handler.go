@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
-	"patreon/internal/app/handlers/base_handler"
+	bh "patreon/internal/app/handlers/base_handler"
 	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/models"
@@ -13,27 +13,19 @@ import (
 )
 
 type CreatorHandler struct {
-	dataStorage *app.DataStorage
-	base_handler.BaseHandler
-	base_handler.RespondHandler
+	dataStorage app.DataStorage
+	bh.BaseHandler
 }
 
-func NewCreatorHandler(log *logrus.Logger, storage *app.DataStorage) *CreatorHandler {
+func NewCreatorHandler(log *logrus.Logger, storage app.DataStorage) *CreatorHandler {
 	h := &CreatorHandler{
-		BaseHandler: *base_handler.NewBaseHandler(log),
+		BaseHandler: *bh.NewBaseHandler(log),
 		dataStorage: storage,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager(), h.Log()).Check)
 	return h
 }
-
-//func (h *CreatorHandler) Join(router *mux.Router) {
-//	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "OPTIONS")
-//	h.baseHandler.Join(router)
-//func (h *CreatorHandler) JoinHandlers(joinedHandlers []app.Joinable) {
-//	h.baseHandler.AddHandlers(joinedHandlers)
-//}
 
 // Creators
 // @Summary get list of Creators
@@ -50,7 +42,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 			h.Log().Error(err)
 		}
 	}(r.Body)
-	creators, err := h.dataStorage.Store.Creator().GetCreators()
+	creators, err := h.dataStorage.Store().Creator().GetCreators()
 	if err != nil {
 		h.Log().Errorf("get: %v err:%v can not get user from db", creators, err)
 		h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)

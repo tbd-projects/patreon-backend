@@ -14,9 +14,8 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewCreatorHandler()
-	logrus.SetOutput(ioutil.Discard)
-	handler.SetStore(s.store)
+	handler := NewCreatorHandler(s.logger, s.dataStorage)
+
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)

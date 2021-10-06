@@ -6,11 +6,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"patreon/internal/app"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,21 +27,13 @@ func (s *ProfileTestSuite) TestServeHTTP_Correct() {
 	}
 
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewProfileHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
-
+	handler := NewProfileHandler(s.logger, s.dataStorage)
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	require.NoError(s.T(), err)
 	ctx := context.WithValue(context.Background(), "user_id", userID)
-	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/login", &b)
+	reader, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/profile", &b)
 
 	s.mockUserRepository.EXPECT().FindByID(userID).Times(test.expectedMockTimes).Return(test.data.(*models.User), nil)
 	handler.ServeHTTP(recorder, reader)
@@ -68,21 +58,14 @@ func (s *ProfileTestSuite) TestServeHTTP_WitDBError() {
 	}
 
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewProfileHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
+	handler := NewProfileHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	require.NoError(s.T(), err)
 	ctx := context.WithValue(context.Background(), "user_id", userID)
-	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/login", &b)
+	reader, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/profile", &b)
 
 	s.mockUserRepository.EXPECT().FindByID(userID).Times(test.expectedMockTimes).Return(nil, store.NotFound)
 	handler.ServeHTTP(recorder, reader)
@@ -99,20 +82,13 @@ func (s *ProfileTestSuite) TestServeHTTP_WithoutContext() {
 	}
 
 	recorder := httptest.NewRecorder()
-	dataStorage := &app.DataStorage{
-		Store:          s.store,
-		SessionManager: s.mockSessionsManager,
-	}
-	handler := NewProfileHandler(dataStorage)
-	logger := logrus.New()
-	str := bytes.Buffer{}
-	logger.SetOutput(&str)
+	handler := NewProfileHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(test.data)
 
 	require.NoError(s.T(), err)
-	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
+	reader, _ := http.NewRequest(http.MethodGet, "/profile", &b)
 
 	s.mockUserRepository.EXPECT().FindByID(userID).Times(test.expectedMockTimes)
 	handler.ServeHTTP(recorder, reader)

@@ -5,9 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
-
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMainHandler_HandleRegistration(t *testing.T) {
@@ -60,8 +57,8 @@ func TestMainHandler_HandleRegistration(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			//recorder := httptest.NewRecorder()
-			handler := NewMainHandler()
-			handler.SetRouter(mux.NewRouter())
+			//handler := NewMainHandler()
+			//handler.SetRouter(mux.NewRouter())
 			//handler.SetStore(s)
 			//handler.RegisterHandlers()
 
@@ -69,7 +66,7 @@ func TestMainHandler_HandleRegistration(t *testing.T) {
 
 			//err := json.NewEncoder(&b).Encode(test.data)
 			//assert.NoError(t, err)
-			assert.NoError(t, nil)
+			//assert.NoError(t, nil)
 
 			//reader, _ := http.NewRequest(http.MethodPost, "/register", &b)
 			//handler.ServeHTTP(recorder, reader)

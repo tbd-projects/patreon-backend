@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
-	"patreon/internal/app/handlers/base_handler"
+	bh "patreon/internal/app/handlers/base_handler"
 	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/models"
@@ -15,24 +15,19 @@ import (
 )
 
 type LoginHandler struct {
-	dataStorage *app.DataStorage
-	base_handler.BaseHandler
+	dataStorage app.DataStorage
+	bh.BaseHandler
 }
 
-func NewLoginHandler(log *logrus.Logger, storage *app.DataStorage) *LoginHandler {
+func NewLoginHandler(log *logrus.Logger, storage app.DataStorage) *LoginHandler {
 	h := &LoginHandler{
-		BaseHandler: *base_handler.NewBaseHandler(log),
+		BaseHandler: *bh.NewBaseHandler(log),
 		dataStorage: storage,
 	}
 	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.Log()).CheckNotAuthorized)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager(), h.Log()).CheckNotAuthorized)
 	return h
 }
-
-//func (h *LoginHandler) Join(router *mux.Router) {
-//	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "OPTIONS")
-//	h.baseHandler.Join(router)
-//}
 
 // Login
 // @Summary login user
@@ -64,7 +59,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.dataStorage.Store.User().FindByLogin(req.Login)
+	u, err := h.dataStorage.Store().User().FindByLogin(req.Login)
 	h.Log().Debugf("Login : %s, password : %s", req.Login, req.Password)
 	if err != nil || !u.ComparePassword(req.Password) {
 		h.Log().Warnf("Fail get user or compare password %s", err)
@@ -72,7 +67,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.dataStorage.SessionManager.Create(int64(u.ID))
+	res, err := h.dataStorage.SessionManager().Create(int64(u.ID))
 	if err != nil || res.UserID != int64(u.ID) {
 		h.Log().Errorf("Error create session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateSession)

@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
-	"patreon/internal/app/handlers/base_handler"
+	bh "patreon/internal/app/handlers/base_handler"
 	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/models"
@@ -13,24 +13,19 @@ import (
 )
 
 type ProfileHandler struct {
-	dataStorage *app.DataStorage
-	base_handler.BaseHandler
+	dataStorage app.DataStorage
+	bh.BaseHandler
 }
 
-func NewProfileHandler(log *logrus.Logger, storage *app.DataStorage) *ProfileHandler {
+func NewProfileHandler(log *logrus.Logger, storage app.DataStorage) *ProfileHandler {
 	h := &ProfileHandler{
-		BaseHandler: *base_handler.NewBaseHandler(log),
+		BaseHandler: *bh.NewBaseHandler(log),
 		dataStorage: storage,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager(), h.Log()).Check)
 	return h
 }
-
-//func (h *ProfileHandler) Join(router *mux.Router) {
-//	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.Check(h)).Methods("GET", "OPTIONS")
-//	h.baseHandler.Join(router)
-//}
 
 // Profile
 // @Summary get information from user for profile
@@ -57,7 +52,7 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.dataStorage.Store.User().FindByID(userID.(int64))
+	u, err := h.dataStorage.Store().User().FindByID(userID.(int64))
 	if err != nil {
 		h.Log().Errorf("get: %s err:%s can not get user from db", u, err)
 		h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)

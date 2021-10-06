@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
-	"patreon/internal/app/handlers/base_handler"
+	bh "patreon/internal/app/handlers/base_handler"
 	"patreon/internal/app/handlers/handler_errors"
 	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/models"
@@ -14,24 +14,19 @@ import (
 )
 
 type RegisterHandler struct {
-	dataStorage *app.DataStorage
-	base_handler.BaseHandler
+	dataStorage app.DataStorage
+	bh.BaseHandler
 }
 
-func NewRegisterHandler(log *logrus.Logger, storage *app.DataStorage) *RegisterHandler {
+func NewRegisterHandler(log *logrus.Logger, storage app.DataStorage) *RegisterHandler {
 	h := &RegisterHandler{
-		BaseHandler: *base_handler.NewBaseHandler(log),
+		BaseHandler: *bh.NewBaseHandler(log),
 		dataStorage: storage,
 	}
 	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager, h.Log()).CheckNotAuthorized)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager(), h.Log()).CheckNotAuthorized)
 	return h
 }
-
-//func (h *RegisterHandler) Join(router *mux.Router) {
-//	router.Handle(h.baseHandler.GetUrl(), h.authMiddleware.CheckNotAuthorized(h)).Methods("POST", "GET", "OPTIONS")
-//	h.baseHandler.Join(router)
-//}
 
 // Registration
 // @Summary create new user
@@ -71,7 +66,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	logUser, _ := json.Marshal(u)
 	h.Log().Debug("get: ", string(logUser))
 
-	checkUser, _ := h.dataStorage.Store.User().FindByLogin(u.Login)
+	checkUser, _ := h.dataStorage.Store().User().FindByLogin(u.Login)
 	if checkUser != nil {
 		h.Log().Warn(handler_errors.UserAlreadyExist)
 		h.Error(w, r, http.StatusConflict, handler_errors.UserAlreadyExist)
@@ -90,7 +85,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.dataStorage.Store.User().Create(u); err != nil {
+	if err := h.dataStorage.Store().User().Create(u); err != nil {
 		h.Log().Errorf("Error create user in bd %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateUser)
 		return

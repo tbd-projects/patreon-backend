@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"patreon/internal/app/handlers/base_handler"
+	bh "patreon/internal/app/handlers/base_handler"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -9,12 +9,12 @@ import (
 
 type MainHandler struct {
 	router *mux.Router
-	base_handler.BaseHandler
+	bh.BaseHandler
 }
 
 func NewMainHandler() *MainHandler {
 	return &MainHandler{
-		BaseHandler: *base_handler.NewBaseHandler(logrus.New()),
+		BaseHandler: *bh.NewBaseHandler(logrus.New()),
 	}
 }
 
