@@ -6,7 +6,7 @@ import (
 	"net/http"
 	ds "patreon/internal/app/server/data_storage"
 
-	//_ "patreon/docs"
+	_ "patreon/docs"
 	"patreon/internal/app"
 	"patreon/internal/app/handlers/handler_factory"
 

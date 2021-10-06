@@ -10,7 +10,7 @@ import (
 	main_server "patreon/internal/app/server"
 	"time"
 
-	//_ "patreon/docs"
+	_ "patreon/docs"
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
