@@ -1,7 +1,10 @@
 .PHONY = build test
-build:
+
+generate-api:
 	go get -u github.com/swaggo/swag/cmd/swag
 	swag init -g ./cmd/server/main.go -o docs
+
+build: generate-api
 	go build -v ./cmd/server
 
 build-docker:
@@ -9,7 +12,10 @@ build-docker:
 
 run:
 	#sudo chown -R 5050:5050 ./pgadmin
+	mkdir -p ./logs
 	docker-compose up --build --no-deps
+
+run-with-build: build-docker run
 
 stop:
 	docker-compose stop

@@ -13,6 +13,8 @@ services:
       - "8080:8080"
     networks:
       - default
+    volumes:
+      - $PWD/logs:/app/logs
     depends_on:
       - redis
       - patreon-bd
