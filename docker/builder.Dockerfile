@@ -8,4 +8,4 @@ EXPOSE 8080 8081
 
 RUN make build
 
-CMD ./server
+CMD ./server -server-run

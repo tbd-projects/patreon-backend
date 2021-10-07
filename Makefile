@@ -1,5 +1,7 @@
 .PHONY = build test
 
+LOG_DIR=./logs
+
 generate-api:
 	go get -u github.com/swaggo/swag/cmd/swag
 	swag init -g ./cmd/server/main.go -o docs
@@ -12,10 +14,16 @@ build-docker:
 
 run:
 	#sudo chown -R 5050:5050 ./pgadmin
-	mkdir -p ./logs
+	mkdir -p $(LOG_DIR)
 	docker-compose up --build --no-deps
 
 run-with-build: build-docker run
+
+open-last-log:
+	cat $(LOG_DIR)/`ls -t $(LOG_DIR) | head -1 `
+
+clear-logs:
+	rm -r $(LOG_DIR)/*.out
 
 stop:
 	docker-compose stop

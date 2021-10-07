@@ -2,8 +2,10 @@ log_level = "debug"
 log_path = "./logs/"
 bind_addr = ":8080"
 
-#database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
+[local]
 database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
-
-#redis_url = "redis://redis/0"
 redis_url = "redis://localhost:6379"
+
+[server]
+database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
+redis_url = "redis://redis/0"

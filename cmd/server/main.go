@@ -17,7 +17,8 @@ import (
 )
 
 var (
-	configPath string
+	configPath          string
+	useServerRepository bool
 )
 
 func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() error) {
@@ -43,7 +44,7 @@ func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() err
 	return logger, f.Close
 }
 
-func newPostgresConnection(config *app.Config) (db *sql.DB, closeResource func() error) {
+func newPostgresConnection(config *app.RepositoryConnections) (db *sql.DB, closeResource func() error) {
 	db, err := sql.Open("postgres", config.DataBaseUrl)
 	if err != nil {
 		logrus.Fatal(err)
@@ -52,7 +53,7 @@ func newPostgresConnection(config *app.Config) (db *sql.DB, closeResource func()
 	return db, db.Close
 }
 
-func newRedisPool(config *app.Config) *redis.Pool {
+func newRedisPool(config *app.RepositoryConnections) *redis.Pool {
 	return &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			return redis.DialURL(config.RedisUrl)
@@ -62,6 +63,7 @@ func newRedisPool(config *app.Config) *redis.Pool {
 
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/server.toml", "path to config file")
+	flag.BoolVar(&useServerRepository, "server-run", false, "true if it server run, false if it local run")
 }
 
 // @title Patreon
@@ -88,27 +90,33 @@ func main() {
 
 	logger, closeResource := newLogger(config)
 
-	defer func(closer func() error) {
+	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
 		if err != nil {
-			logger.Fatal(err)
+			log.Fatal(err)
 		}
-	}(closeResource)
+	}(closeResource, logger)
 
-	db, closeResource := newPostgresConnection(config)
+	repositoryConfig := &config.LocalRepository
+	if useServerRepository {
+		repositoryConfig = &config.ServerRepository
+	}
 
-	defer func(closer func() error) {
+	db, closeResource := newPostgresConnection(repositoryConfig)
+
+	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
 		if err != nil {
-			logger.Fatal(err)
+			log.Fatal(err)
 		}
-	}(closeResource)
+	}(closeResource, logger)
 
 	server := main_server.New(config,
-		app.ExpectedConnections{RedisPool: newRedisPool(config), SqlConnection: db},
+		app.ExpectedConnections{RedisPool: newRedisPool(repositoryConfig), SqlConnection: db},
 		logger)
 
 	if err := server.Start(config); err != nil {
 		logger.Fatal(err)
 	}
+	logger.Info("Server was stopped")
 }

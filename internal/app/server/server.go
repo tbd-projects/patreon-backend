@@ -50,10 +50,14 @@ func (s *Server) checkConnection() error {
 		return fmt.Errorf("Can't check connection to sql with error %v ", err)
 	}
 
+	s.logger.Info("Success check connection to sql db")
+
 	conn, err := s.connections.RedisPool.Dial()
 	if err != nil {
 		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
 	}
+
+	s.logger.Info("Success check connection to redis")
 
 	err = conn.Close()
 	if err != nil {
@@ -80,6 +84,10 @@ func (s *Server) checkConnection() error {
 
 // @x-extension-openapi {"example": "value on a json format"}
 func (s *Server) Start(config *app.Config) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
+
 	router := mux.NewRouter()
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
