@@ -2,13 +2,14 @@ package server
 
 import (
 	"fmt"
-	gh "github.com/gorilla/handlers"
 	"net/http"
+	"patreon/internal/app/delivery/http/handlers/handler_factory"
 	ds "patreon/internal/app/server/data_storage"
+
+	gh "github.com/gorilla/handlers"
 
 	_ "patreon/docs"
 	"patreon/internal/app"
-	"patreon/internal/app/handlers/handler_factory"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 

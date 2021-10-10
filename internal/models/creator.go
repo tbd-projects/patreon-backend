@@ -8,7 +8,7 @@ import (
 )
 
 type Creator struct {
-	ID          int    `json:"id"`
+	ID          int64  `json:"id"`
 	Category    string `json:"category"`
 	Nickname    string `json:"nickname"`
 	Description string `json:"description"`
@@ -17,12 +17,18 @@ type Creator struct {
 }
 
 func (cr *Creator) Validate() error {
-	return validation.ValidateStruct(cr,
-		validation.Field(&cr.ID, validation.Required),
-		validation.Field(&cr.Nickname, validation.Required),
-		validation.Field(&cr.Category, validation.Required),
-		validation.Field(&cr.Description, validation.Required),
-	)
+	err := validation.Errors{
+		"id":          validation.Validate(cr.ID, validation.Required),
+		"category":    validation.Validate(cr.Category, validation.Required),
+		"description": validation.Validate(cr.Description, validation.Required),
+	}.Filter()
+	return err
+	//return validation.ValidateStruct(cr,
+	//
+	//	validation.Field(&cr.Nickname, validation.Required),
+	//	validation.Field(&cr.Category, validation.Required),
+	//	validation.Field(&cr.Description, validation.Required),
+	//)
 }
 func ToResponseCreator(cr Creator) ResponseCreator {
 	return ResponseCreator{
@@ -31,5 +37,5 @@ func ToResponseCreator(cr Creator) ResponseCreator {
 }
 
 func (u *ResponseCreator) String() string {
-	return fmt.Sprintf("{ID: %s, Nickname: %s}", strconv.Itoa(u.ID), u.Nickname)
+	return fmt.Sprintf("{ID: %s, Nickname: %s}", strconv.Itoa(int(u.ID)), u.Nickname)
 }

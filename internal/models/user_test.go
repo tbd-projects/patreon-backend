@@ -9,7 +9,7 @@ import (
 
 func TestUser_BeforeCreate(t *testing.T) {
 	user := models.TestUser(t)
-	assert.NoError(t, user.BeforeCreate())
+	assert.NoError(t, user.Encrypt())
 	assert.NotEmpty(t, user.EncryptedPassword)
 }
 func TestUser_Validate(t *testing.T) {
@@ -105,7 +105,7 @@ func TestUser_ComparePassword(t *testing.T) {
 			isValid:  false,
 		},
 		{
-			name:     "emptyPassword",
+			name:     "invalidPassword",
 			user:     models.User{},
 			password: "pswd",
 			isValid:  true,
@@ -114,7 +114,7 @@ func TestUser_ComparePassword(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.user.Password = test.password
-			assert.NoError(t, test.user.BeforeCreate())
+			assert.NoError(t, test.user.Encrypt())
 			res := test.user.ComparePassword(test.password)
 			if test.isValid {
 				assert.True(t, res)
