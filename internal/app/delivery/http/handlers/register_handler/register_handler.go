@@ -1,30 +1,34 @@
-package handlers
+package register_handler
 
 import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
+	usecase_user "patreon/internal/app/usecase/user"
 	"patreon/internal/models"
 
 	"github.com/sirupsen/logrus"
 )
 
 type RegisterHandler struct {
-	dataStorage app.DataStorage
+	sessionManager sessions.SessionsManager
+	userUsecase    usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewRegisterHandler(log *logrus.Logger, storage app.DataStorage) *RegisterHandler {
+func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+	ucUser usecase_user.Usecase) *RegisterHandler {
 	h := &RegisterHandler{
-		BaseHandler: *bh.NewBaseHandler(log),
-		dataStorage: storage,
+		sessionManager: sManager,
+		userUsecase:    ucUser,
+		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager(), h.Log()).CheckNotAuthorized)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).CheckNotAuthorized)
 	return h
 }
 
@@ -66,31 +70,35 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	logUser, _ := json.Marshal(u)
 	h.Log().Debug("get: ", string(logUser))
 
-	checkUser, _ := h.dataStorage.Store().User().FindByLogin(u.Login)
-	if checkUser != nil {
-		h.Log().Warn(handler_errors.UserAlreadyExist)
-		h.Error(w, r, http.StatusConflict, handler_errors.UserAlreadyExist)
+	id, err := h.userUsecase.Create(u)
+	if err != nil {
+		h.UsecaseError(w, r, err, codeByError)
 		return
 	}
 
-	if err := u.Validate(); err != nil {
-		h.Log().Warnf("Not valid login or password %s", err)
-		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
-		return
-	}
-
-	if err := u.Encrypt(); err != nil {
-		h.Log().Errorf("Error prepare user info %s", err)
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorPrepareUser)
-		return
-	}
-
-	if err := h.dataStorage.Store().User().Create(u); err != nil {
-		h.Log().Errorf("Error create user in bd %s", err)
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateUser)
-		return
-	}
-
+	//checkUser, _ := h.dataStorage.Store().User().FindByLogin(u.Login)
+	//if checkUser != nil {
+	//	h.Log().Warn(handler_errors.UserAlreadyExist)
+	//	h.Error(w, r, http.StatusConflict, handler_errors.UserAlreadyExist)
+	//	return
+	//}
+	//if err := u.Validate(); err != nil {
+	//	h.Log().Warnf("Not valid login or password %s", err)
+	//	h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
+	//	return
+	//}
+	//
+	//if err := u.Encrypt(); err != nil {
+	//	h.Log().Errorf("Error prepare user info %s", err)
+	//	h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorPrepareUser)
+	//	return
+	//}
+	//
+	//if err := h.dataStorage.Store().User().Create(u); err != nil {
+	//	h.Log().Errorf("Error create user in bd %s", err)
+	//	h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateUser)
+	//	return
+	//}
 	u.MakePrivateDate()
-	h.Respond(w, r, http.StatusOK, u)
+	h.Respond(w, r, http.StatusOK, id)
 }

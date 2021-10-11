@@ -5,6 +5,9 @@ import (
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
+	"patreon/internal/app/delivery/http/handlers/logout_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler"
+	"patreon/internal/app/delivery/http/handlers/register_handler"
 	"patreon/internal/app/server/data_storage"
 	"patreon/internal/app/sessions/mocks"
 	"patreon/internal/app/store"
@@ -73,10 +76,10 @@ func (s *SuiteTestBaseHandler) TearDownSuite() {
 }
 
 func TestHandler(t *testing.T) {
-	suite.Run(t, new(LogoutTestSuite))
+	suite.Run(t, new(logout_handler.LogoutTestSuite))
 	suite.Run(t, new(login_handler.LoginTestSuite))
-	suite.Run(t, new(ProfileTestSuite))
-	suite.Run(t, new(RegisterTestSuite))
+	suite.Run(t, new(profile_handler.ProfileTestSuite))
+	suite.Run(t, new(register_handler.RegisterTestSuite))
 	suite.Run(t, new(creator_handler.CreatorTestSuite))
 	/*t.Run("Join run", func(t *testing.T) {
 		defer func() {

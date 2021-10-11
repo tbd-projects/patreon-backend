@@ -1,4 +1,4 @@
-package handlers
+package logout_handler
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/models"
 
 	"github.com/stretchr/testify/assert"
@@ -14,12 +15,12 @@ import (
 )
 
 type LogoutTestSuite struct {
-	SuiteTestBaseHandler
+	handlers.SuiteTestBaseHandler
 }
 
 func (s *LogoutTestSuite) TestServeHTTP_WithSession() {
 	uniqID := "1"
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "with cookies",
 		data:              &models.User{},
 		expectedMockTimes: 1,
@@ -43,7 +44,7 @@ func (s *LogoutTestSuite) TestServeHTTP_WithSession() {
 
 func (s *LogoutTestSuite) TestServeHTTP_WithoutCookies() {
 	uniqID := "1"
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "without cookies",
 		data:              &models.User{},
 		expectedMockTimes: 0,
@@ -66,7 +67,7 @@ func (s *LogoutTestSuite) TestServeHTTP_WithoutCookies() {
 
 func (s *LogoutTestSuite) TestServeHTTP_ErrorSessions() {
 	uniqID := "1"
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "without cookies",
 		data:              &models.User{},
 		expectedMockTimes: 1,

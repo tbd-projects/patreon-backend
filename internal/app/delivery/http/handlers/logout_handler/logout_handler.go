@@ -1,11 +1,11 @@
-package handlers
+package logout_handler
 
 import (
 	"io"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"time"
 
@@ -13,17 +13,17 @@ import (
 )
 
 type LogoutHandler struct {
-	dataStorage app.DataStorage
+	sessionManager sessions.SessionsManager
 	bh.BaseHandler
 }
 
-func NewLogoutHandler(log *logrus.Logger, storage app.DataStorage) *LogoutHandler {
+func NewLogoutHandler(log *logrus.Logger, sManager sessions.SessionsManager) *LogoutHandler {
 	h := &LogoutHandler{
-		BaseHandler: *bh.NewBaseHandler(log),
-		dataStorage: storage,
+		BaseHandler:    *bh.NewBaseHandler(log),
+		sessionManager: sManager,
 	}
 	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager(), h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).Check)
 	return h
 }
 
@@ -52,7 +52,7 @@ func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	h.Log().Debugf("Logout session: %s", uniqID)
 
-	err := h.dataStorage.SessionManager().Delete(uniqID.(string))
+	err := h.sessionManager.Delete(uniqID.(string))
 	if err != nil {
 		h.Log().Errorf("can not delete session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)

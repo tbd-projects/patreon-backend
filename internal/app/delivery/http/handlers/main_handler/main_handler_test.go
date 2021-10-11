@@ -1,10 +1,11 @@
-package handlers
+package main_handler
 
 import (
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/sirupsen/logrus"
 )
 
 func TestMainHandler_HandleRegistration(t *testing.T) {

@@ -69,7 +69,7 @@ func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, err
 		Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,
 			&creator.Cover, &creator.Nickname); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, NotFound
+			return nil, repository.NotFound
 		}
 		return nil, repository.NewDBError(err)
 	}

@@ -1,4 +1,4 @@
-package handlers
+package register_handler
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/models"
 
 	"github.com/golang/mock/gomock"
@@ -13,11 +14,11 @@ import (
 )
 
 type RegisterTestSuite struct {
-	SuiteTestBaseHandler
+	handlers.SuiteTestBaseHandler
 }
 
 func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_EmptyBody() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name:              "Empty body from request",
 		data:              &models.RequestRegistration{},
 		expectedMockTimes: 0,
@@ -37,7 +38,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_EmptyBody() {
 }
 
 func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_InvalidBody() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name:              "Invalid body",
 		expectedMockTimes: 0,
 		expectedCode:      http.StatusUnprocessableEntity,
@@ -62,7 +63,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_InvalidBody() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name: "User exist in database",
 		data: models.RequestRegistration{
 			Login:    "dmitriy",
@@ -98,7 +99,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_SmallPassword() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name: "Small password in request",
 		data: models.RequestRegistration{
 			Login:    "dmitriy",
@@ -155,7 +156,7 @@ func (match *userWithPasswordMatcher) String() string {
 }
 
 func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_CreateSuccess() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name: "Success create user",
 		data: models.RequestRegistration{
 			Login:    "dmitriy",

@@ -1,4 +1,4 @@
-package handlers
+package main_handler
 
 import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"

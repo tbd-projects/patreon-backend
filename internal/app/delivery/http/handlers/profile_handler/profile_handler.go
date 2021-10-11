@@ -1,29 +1,32 @@
-package handlers
+package profile_handler
 
 import (
 	"io"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
+	usecase_user "patreon/internal/app/usecase/user"
 	"patreon/internal/models"
 
 	"github.com/sirupsen/logrus"
 )
 
 type ProfileHandler struct {
-	dataStorage app.DataStorage
+	sessionManager sessions.SessionsManager
+	userUsecase    usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewProfileHandler(log *logrus.Logger, storage app.DataStorage) *ProfileHandler {
+func NewProfileHandler(log *logrus.Logger, sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *ProfileHandler {
 	h := &ProfileHandler{
-		BaseHandler: *bh.NewBaseHandler(log),
-		dataStorage: storage,
+		sessionManager: sManager,
+		userUsecase:    ucUser,
+		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.dataStorage.SessionManager(), h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).Check)
 	return h
 }
 
@@ -52,10 +55,11 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.dataStorage.Store().User().FindByID(userID.(int64))
+	u, err := h.userUsecase.GetProfile(userID.(int64))
 	if err != nil {
-		h.Log().Errorf("get: %s err:%s can not get user from db", u, err)
-		h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
+		//h.Log().Errorf("get: %s err:%s can not get user from db", u, err)
+		h.UsecaseError(w, r, err, codeByError)
+		//h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
 		return
 	}
 

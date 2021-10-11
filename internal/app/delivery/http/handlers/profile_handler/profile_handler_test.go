@@ -1,4 +1,4 @@
-package handlers
+package profile_handler
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
 
@@ -14,12 +15,12 @@ import (
 )
 
 type ProfileTestSuite struct {
-	SuiteTestBaseHandler
+	handlers.SuiteTestBaseHandler
 }
 
 func (s *ProfileTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "correct",
 		data:              &models.User{ID: int(userID), Login: "some", Nickname: "done"},
 		expectedMockTimes: 1,
@@ -50,7 +51,7 @@ func (s *ProfileTestSuite) TestServeHTTP_Correct() {
 
 func (s *ProfileTestSuite) TestServeHTTP_WitDBError() {
 	userID := int64(1)
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "with db error",
 		data:              nil,
 		expectedMockTimes: 1,
@@ -74,7 +75,7 @@ func (s *ProfileTestSuite) TestServeHTTP_WitDBError() {
 
 func (s *ProfileTestSuite) TestServeHTTP_WithoutContext() {
 	userID := int64(1)
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "without context",
 		data:              nil,
 		expectedMockTimes: 0,
