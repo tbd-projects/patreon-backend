@@ -6,19 +6,19 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/repository/models"
+	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	usecase_user "patreon/internal/app/usecase/user"
+	useUser "patreon/internal/app/usecase/user"
 )
 
 type ProfileHandler struct {
 	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	userUsecase    useUser.Usecase
 	bh.BaseHandler
 }
 
-func NewProfileHandler(log *logrus.Logger, sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *ProfileHandler {
+func NewProfileHandler(log *logrus.Logger, sManager sessions.SessionsManager, ucUser useUser.Usecase) *ProfileHandler {
 	h := &ProfileHandler{
 		sessionManager: sManager,
 		userUsecase:    ucUser,

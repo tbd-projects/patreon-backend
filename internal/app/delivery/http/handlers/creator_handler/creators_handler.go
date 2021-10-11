@@ -5,23 +5,22 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models2 "patreon/internal/app/repository/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	usecase_creator "patreon/internal/app/usecase/creator"
-	"patreon/internal/models"
+	useCreator "patreon/internal/app/usecase/creator"
 
 	"github.com/sirupsen/logrus"
 )
 
 type CreatorHandler struct {
 	sessionManager sessions.SessionsManager
-	creatorUsecase usecase_creator.Usecase
+	creatorUsecase useCreator.Usecase
 	bh.BaseHandler
 }
 
 func NewCreatorHandler(log *logrus.Logger, sManager sessions.SessionsManager,
-	ucCreator usecase_creator.Usecase) *CreatorHandler {
+	ucCreator useCreator.Usecase) *CreatorHandler {
 	h := &CreatorHandler{
 		BaseHandler:    *bh.NewBaseHandler(log),
 		creatorUsecase: ucCreator,
@@ -48,14 +47,16 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 		}
 	}(r.Body)
 	creators, err := h.creatorUsecase.GetCreators()
+
 	if err != nil {
 		h.Log().Errorf("get: %v err:%v can not get user from db", creators, err)
 		h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
 		return
 	}
+
 	respondCreators := make([]models.ResponseCreator, len(creators))
 	for i, cr := range creators {
-		respondCreators[i] = models2.ToResponseCreator(cr)
+		respondCreators[i] = models.ToResponseCreator(cr)
 	}
 
 	h.Log().Debugf("get creators %v", respondCreators)

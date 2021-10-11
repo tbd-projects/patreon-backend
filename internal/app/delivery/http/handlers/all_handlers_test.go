@@ -90,8 +90,8 @@ func TestHandler(t *testing.T) {
 		router := mux.NewRouter()
 		dataStorage := app.NewDataStorage(config, st)
 
-		factory := handler_factory.NewFactory(logger, dataStorage)
-		hs := factory.GetHandleUrls()
+		usercase_factory := handler_factory.NewFactory(logger, dataStorage)
+		hs := usercase_factory.GetHandleUrls()
 
 		for url, h := range *hs {
 			h.Connect(router.PathPrefix(url))

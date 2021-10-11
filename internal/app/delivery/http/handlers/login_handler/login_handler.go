@@ -6,10 +6,10 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	usecase_user "patreon/internal/app/usecase/user"
-	"patreon/internal/models"
+	useUser "patreon/internal/app/usecase/user"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -17,12 +17,12 @@ import (
 
 type LoginHandler struct {
 	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	userUsecase    useUser.Usecase
 	bh.BaseHandler
 }
 
 func NewLoginHandler(log *logrus.Logger, sManager sessions.SessionsManager,
-	ucUser usecase_user.Usecase) *LoginHandler {
+	ucUser useUser.Usecase) *LoginHandler {
 	h := &LoginHandler{
 		BaseHandler:    *bh.NewBaseHandler(log),
 		sessionManager: sManager,

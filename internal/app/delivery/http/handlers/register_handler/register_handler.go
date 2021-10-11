@@ -6,23 +6,23 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models2 "patreon/internal/app/repository/models"
+	"patreon/internal/app/delivery/http/models"
+	usecaseModels "patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	usecase_user "patreon/internal/app/usecase/user"
-	"patreon/internal/models"
+	useUser "patreon/internal/app/usecase/user"
 
 	"github.com/sirupsen/logrus"
 )
 
 type RegisterHandler struct {
 	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	userUsecase    useUser.Usecase
 	bh.BaseHandler
 }
 
 func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
-	ucUser usecase_user.Usecase) *RegisterHandler {
+	ucUser useUser.Usecase) *RegisterHandler {
 	h := &RegisterHandler{
 		sessionManager: sManager,
 		userUsecase:    ucUser,
@@ -62,7 +62,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
-	u := &models2.User{
+	u := &usecaseModels.User{
 		Login:    req.Login,
 		Password: req.Password,
 		Nickname: req.Nickname,

@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models2 "patreon/internal/app/repository/models"
+	"patreon/internal/app/delivery/http/models"
+	usecaseModels "patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-	usecase_creator "patreon/internal/app/usecase/creator"
-	usecase_user "patreon/internal/app/usecase/user"
-	"patreon/internal/models"
+	useCreator "patreon/internal/app/usecase/creator"
+	useUser "patreon/internal/app/usecase/user"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -21,13 +21,13 @@ import (
 
 type CreatorCreateHandler struct {
 	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
-	creatorUsecase usecase_creator.Usecase
+	userUsecase    useUser.Usecase
+	creatorUsecase useCreator.Usecase
 	base_handler.BaseHandler
 }
 
 func NewCreatorCreateHandler(log *logrus.Logger, sManager sessions.SessionsManager,
-	ucUser usecase_user.Usecase, ucCreator usecase_creator.Usecase) *CreatorCreateHandler {
+	ucUser useUser.Usecase, ucCreator useCreator.Usecase) *CreatorCreateHandler {
 	h := &CreatorCreateHandler{
 		BaseHandler:    *base_handler.NewBaseHandler(log),
 		sessionManager: sManager,
@@ -95,7 +95,7 @@ func (h *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	//	h.Error(w, r, http.StatusConflict, handler_errors.ProfileAlreadyExist)
 	//	return
 	//}
-	cr := &models2.Creator{
+	cr := &usecaseModels.Creator{
 		ID:          u.ID,
 		Nickname:    u.Nickname,
 		Category:    req.Category,

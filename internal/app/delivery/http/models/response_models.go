@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	"patreon/internal/app/repository/models"
+	"patreon/internal/app/models"
 	"strconv"
 )
 

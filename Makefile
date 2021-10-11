@@ -3,7 +3,7 @@
 LOG_DIR=./logs
 
 generate-api:
-	#go get -u github.com/swaggo/swag/cmd/swag
+	go get -u github.com/swaggo/swag/cmd/swag
 	swag init -g ./cmd/server/main.go -o docs
 
 build: generate-api
