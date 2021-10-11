@@ -1,10 +1,11 @@
-package handlers
+package creator_handler
 
 import (
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
 
@@ -13,12 +14,12 @@ import (
 )
 
 type CreatorTestSuite struct {
-	SuiteTestBaseHandler
+	handlers.SuiteTestBaseHandler
 }
 
 func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "correct",
 		data:              &models.Creator{ID: int(userID), Avatar: "some", Nickname: "done"},
 		expectedMockTimes: 1,
@@ -51,7 +52,7 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 }
 
 func (s *CreatorTestSuite) TestServeHTTP_WitDBError() {
-	test := TestTable{
+	test := handlers.TestTable{
 		name:              "with db error",
 		data:              nil,
 		expectedMockTimes: 1,

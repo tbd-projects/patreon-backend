@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app"
 	handlers2 "patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/delivery/http/handlers/creator_create_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_handler"
+	"patreon/internal/app/delivery/http/handlers/login_handler"
 
 	"github.com/sirupsen/logrus"
 )
@@ -34,10 +36,10 @@ func NewFactory(logger *logrus.Logger, storage app.DataStorage) *Factory {
 func (f *Factory) initAllHandlers() map[int]app.Handler {
 	return map[int]app.Handler{
 		REGISTER:        handlers2.NewRegisterHandler(f.logger, f.storage),
-		LOGIN:           handlers2.NewLoginHandler(f.logger, f.storage),
+		LOGIN:           login_handler.NewLoginHandler(f.logger, f.storage),
 		LOGOUT:          handlers2.NewLogoutHandler(f.logger, f.storage),
 		PROFILE:         handlers2.NewProfileHandler(f.logger, f.storage),
-		CREATORS:        handlers2.NewCreatorHandler(f.logger, f.storage),
+		CREATORS:        creator_handler.NewCreatorHandler(f.logger, f.storage),
 		CREATOR_WITH_ID: creator_create_handler.NewCreatorCreateHandler(f.logger, f.storage),
 	}
 }

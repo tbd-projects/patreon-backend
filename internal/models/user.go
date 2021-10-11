@@ -1,7 +1,10 @@
 package models
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"patreon/internal/app"
 	"strconv"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -27,24 +30,34 @@ func (u *User) String() string {
 	return fmt.Sprintf("{ID: %s, Login: %s}", strconv.Itoa(int(u.ID)), u.Login)
 }
 func (u *User) Validate() error {
-	//_, err := govalidator.ValidateStruct(*u)
-	//if err != nil {
-	//	errs := err.(govalidator.Errors).Errors()
-	//	res := ""
-	//	for _, e := range errs {
-	//		res += e.Error() + " "
-	//	}
-	//	return errors.
-	//}
-	//return err
-	//err := validation.Errors{
-	//	"name":  validation.Validate(c.Name, validation.Required, validation.Length(5, 20)),
-	//	"email": validation.Validate(c.Name, validation.Required, is.Email),
-	//	"num":   validation.Validate(c.Num, validation.In(1, 2, 3)),
-	return validation.ValidateStruct(u,
-		validation.Field(&u.Login, validation.Required, validation.Length(5, 25)),
-		validation.Field(&u.Password, validation.By(requiredIf(u.EncryptedPassword == "")), validation.Length(6, 50)),
-	)
+	validRes := validation.Errors{
+		"login": validation.Validate(u.Login, validation.Required, validation.Length(5, 25)),
+		"password": validation.Validate(u.Password, validation.By(requiredIf(u.EncryptedPassword == "")),
+			validation.Length(6, 50)),
+	}.Filter()
+
+	var mapOfErr map[string]string
+	er, ok := json.Marshal(validRes)
+	if ok != nil {
+		return InternalError
+	}
+	ok = json.Unmarshal(er, &mapOfErr)
+	if ok != nil {
+		return InternalError
+	}
+
+	if userValidError()("login") != nil || userValidError()("password") != nil {
+		res := app.GeneralError{
+			Err: IncorrectEmailOrPassword,
+		}
+		if err, ok := mapOfErr["login"]; ok {
+			res.ExternalErr = errors.New(err)
+		} else if err, ok := mapOfErr["password"]; ok {
+			res.ExternalErr = errors.New(err)
+		}
+		return res
+	}
+	return nil
 }
 func (u *User) MakePrivateDate() {
 	u.Password = ""

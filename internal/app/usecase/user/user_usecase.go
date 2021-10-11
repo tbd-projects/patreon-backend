@@ -36,7 +36,10 @@ func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
 		return -1, UserExist
 	}
 	if err = user.Validate(); err != nil {
-		return -1, errors.Wrap(err, "user data invalid")
+		return -1, app.GeneralError{
+			Err:         err,
+			ExternalErr: errors.Wrap(err, "user data invalid"),
+		}
 	}
 
 	if err = user.Encrypt(); err != nil {

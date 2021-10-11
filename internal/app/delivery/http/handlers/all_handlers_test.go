@@ -3,6 +3,8 @@ package handlers
 import (
 	"io/ioutil"
 	"patreon/internal/app"
+	"patreon/internal/app/delivery/http/handlers/creator_handler"
+	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/server/data_storage"
 	"patreon/internal/app/sessions/mocks"
 	"patreon/internal/app/store"
@@ -72,10 +74,10 @@ func (s *SuiteTestBaseHandler) TearDownSuite() {
 
 func TestHandler(t *testing.T) {
 	suite.Run(t, new(LogoutTestSuite))
-	suite.Run(t, new(LoginTestSuite))
+	suite.Run(t, new(login_handler.LoginTestSuite))
 	suite.Run(t, new(ProfileTestSuite))
 	suite.Run(t, new(RegisterTestSuite))
-	suite.Run(t, new(CreatorTestSuite))
+	suite.Run(t, new(creator_handler.CreatorTestSuite))
 	/*t.Run("Join run", func(t *testing.T) {
 		defer func() {
 			err := recover()

@@ -1,4 +1,4 @@
-package handlers
+package login_handler
 
 import (
 	"encoding/json"
@@ -66,7 +66,8 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 	id, err := h.userUsecase.Check(req.Login, req.Password)
 	if err != nil {
 		h.Log().Warnf("Fail check user %s", err)
-		h.Error(w, r, http.StatusUnauthorized, handler_errors.IncorrectEmailOrPassword)
+		h.UsecaseError(w, r, err, codesByErrors)
+		//h.Error(w, r, http.StatusUnauthorized, handler_errors.IncorrectEmailOrPassword)
 		return
 	}
 

@@ -1,4 +1,4 @@
-package handlers
+package login_handler
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"patreon/internal/app/delivery/http/handlers"
 	session_models "patreon/internal/app/sessions/models"
 	"patreon/internal/app/sessions/sessions_manager"
 
@@ -16,11 +17,11 @@ import (
 )
 
 type LoginTestSuite struct {
-	SuiteTestBaseHandler
+	handlers.SuiteTestBaseHandler
 }
 
 func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_EmptyBody() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name:              "Empty body in request",
 		data:              &models.RequestLogin{},
 		expectedMockTimes: 0,
@@ -39,7 +40,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_EmptyBody() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_InvalidBody() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name:              "Invalid body",
 		expectedMockTimes: 0,
 		expectedCode:      http.StatusUnprocessableEntity,
@@ -64,7 +65,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_InvalidBody() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNotFound() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name: "User not found in db",
 		data: models.RequestLogin{
 			Login:    "dmitriy",
@@ -92,7 +93,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNotFound() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name: "Not authorized user",
 		data: models.RequestLogin{
 			Login:    "dmitriy",
@@ -132,7 +133,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_Ok() {
-	s.test = TestTable{
+	s.test = handlers.TestTable{
 		name: "Invalid body",
 		data: models.RequestLogin{
 			Login:    "dmitriy",

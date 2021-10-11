@@ -1,7 +1,9 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
+	"patreon/internal/app"
 	"strconv"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -18,17 +20,32 @@ type Creator struct {
 
 func (cr *Creator) Validate() error {
 	err := validation.Errors{
-		"id":          validation.Validate(cr.ID, validation.Required),
+		"id":          validation.Validate(cr.Nickname, validation.Required),
 		"category":    validation.Validate(cr.Category, validation.Required),
 		"description": validation.Validate(cr.Description, validation.Required),
 	}.Filter()
-	return err
-	//return validation.ValidateStruct(cr,
-	//
-	//	validation.Field(&cr.Nickname, validation.Required),
-	//	validation.Field(&cr.Category, validation.Required),
-	//	validation.Field(&cr.Description, validation.Required),
-	//)
+	if err == nil {
+		return err
+	}
+	var mapOfErr map[string]error
+	encoded, bad := json.Marshal(err)
+	if bad != nil {
+		return app.GeneralError{
+			Err:         InternalError,
+			ExternalErr: bad,
+		}
+	}
+	bad = json.Unmarshal(encoded, &mapOfErr)
+	if bad != nil {
+		return app.GeneralError{
+			Err:         InternalError,
+			ExternalErr: bad,
+		}
+	}
+	for key, _ := range mapOfErr {
+		return creatorValidError()(key)
+	}
+	return InternalError
 }
 func ToResponseCreator(cr Creator) ResponseCreator {
 	return ResponseCreator{
