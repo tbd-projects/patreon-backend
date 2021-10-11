@@ -1,34 +1,34 @@
-package models_test
+package models
 
 import (
-	"patreon/internal/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUser_BeforeCreate(t *testing.T) {
-	user := models.TestUser(t)
+	user := TestUser()
 	assert.NoError(t, user.Encrypt())
 	assert.NotEmpty(t, user.EncryptedPassword)
 }
+
 func TestUser_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		u       func() *models.User
+		u       func() *User
 		isValid bool
 	}{
 		{
 			name: "valid user",
-			u: func() *models.User {
-				return models.TestUser(t)
+			u: func() *User {
+				return TestUser()
 			},
 			isValid: true,
 		},
 		{
 			name: "invalid login",
-			u: func() *models.User {
-				u := models.TestUser(t)
+			u: func() *User {
+				u := TestUser()
 				u.Login = "A"
 				return u
 			},
@@ -36,8 +36,8 @@ func TestUser_Validate(t *testing.T) {
 		},
 		{
 			name: "empty password",
-			u: func() *models.User {
-				u := models.TestUser(t)
+			u: func() *User {
+				u := TestUser()
 				u.Password = ""
 				return u
 			},
@@ -45,8 +45,8 @@ func TestUser_Validate(t *testing.T) {
 		},
 		{
 			name: "short password",
-			u: func() *models.User {
-				u := models.TestUser(t)
+			u: func() *User {
+				u := TestUser()
 				u.Password = ""
 				return u
 			},
@@ -54,8 +54,8 @@ func TestUser_Validate(t *testing.T) {
 		},
 		{
 			name: "with encrypted password and empty password",
-			u: func() *models.User {
-				u := models.TestUser(t)
+			u: func() *User {
+				u := TestUser()
 				u.Password = ""
 				u.EncryptedPassword = "encrypted"
 				return u
@@ -73,14 +73,15 @@ func TestUser_Validate(t *testing.T) {
 		})
 	}
 }
+
 func TestUser_MakePrivateDate(t *testing.T) {
 	tests := []struct {
 		name string
-		u    *models.User
+		u    *User
 	}{
 		{
 			name: "Valid test",
-			u:    models.TestUser(t),
+			u:    TestUser(),
 		},
 	}
 	for _, test := range tests {
@@ -91,22 +92,17 @@ func TestUser_MakePrivateDate(t *testing.T) {
 		})
 	}
 }
+
 func TestUser_ComparePassword(t *testing.T) {
 	tests := []struct {
 		name     string
-		user     models.User
+		user     User
 		password string
 		isValid  bool
 	}{
 		{
-			name:     "emptyPassword",
-			user:     models.User{},
-			password: "",
-			isValid:  false,
-		},
-		{
 			name:     "invalidPassword",
-			user:     models.User{},
+			user:     User{},
 			password: "pswd",
 			isValid:  true,
 		},

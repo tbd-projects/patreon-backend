@@ -5,6 +5,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	models2 "patreon/internal/app/repository/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
@@ -54,7 +55,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 	respondCreators := make([]models.ResponseCreator, len(creators))
 	for i, cr := range creators {
-		respondCreators[i] = models.ToResponseCreator(cr)
+		respondCreators[i] = models2.ToResponseCreator(cr)
 	}
 
 	h.Log().Debugf("get creators %v", respondCreators)

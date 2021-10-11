@@ -36,7 +36,7 @@ func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, us
 	h.log.Errorf("Gotted error: %v", usecaseErr)
 
 	if errors.As(usecaseErr, &app.GeneralError{}) {
-		usecaseErr = usecaseErr.(app.GeneralError).Err
+		usecaseErr = errors.Cause(usecaseErr).(*app.GeneralError).Err
 	}
 
 	for err, respondErr := range codeByErr {

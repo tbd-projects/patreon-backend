@@ -6,6 +6,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	models2 "patreon/internal/app/repository/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
@@ -61,7 +62,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
-	u := &models.User{
+	u := &models2.User{
 		Login:    req.Login,
 		Password: req.Password,
 		Nickname: req.Nickname,

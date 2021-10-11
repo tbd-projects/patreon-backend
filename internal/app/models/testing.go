@@ -1,18 +1,39 @@
 package models
 
-import "testing"
+import (
+	"database/sql"
+	"errors"
+	"github.com/DATA-DOG/go-sqlmock"
+	_ "github.com/lib/pq"
+	"github.com/stretchr/testify/suite"
+)
 
-func TestUser(t *testing.T) *User {
-	t.Helper()
+var BDError = errors.New("BD error")
 
+type Suite struct {
+	suite.Suite
+	DB   *sql.DB
+	Mock sqlmock.Sqlmock
+}
+
+func (s *Suite) InitBD() {
+	s.T().Helper()
+
+	var err error
+	s.DB, s.Mock, err = sqlmock.New()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+}
+
+func TestUser() *User {
 	return &User{
 		Login:    "student1999",
 		Password: "1!2!3!",
 	}
 
 }
-func TestUsers(t *testing.T) []User {
-	t.Helper()
+func TestUsers() []User {
 	u1 := User{
 		Login:    "test1",
 		Nickname: "test1",
@@ -29,19 +50,17 @@ func TestUsers(t *testing.T) []User {
 		Password: "123456",
 	}
 	return []User{u1, u2, u3}
-
 }
-func TestCreator(t *testing.T) *Creator {
-	t.Helper()
 
+func TestCreator() *Creator {
 	return &Creator{
 		ID:          1,
 		Category:    "podcasts",
 		Description: "i love podcasts",
 	}
 }
-func TestCreators(t *testing.T) []Creator {
-	t.Helper()
+
+func TestCreators() []Creator {
 	cr1 := Creator{
 		ID:          1,
 		Category:    "podcasts",
@@ -58,5 +77,4 @@ func TestCreators(t *testing.T) []Creator {
 		Description: "i love podcasts",
 	}
 	return []Creator{cr1, cr2, cr3}
-
 }

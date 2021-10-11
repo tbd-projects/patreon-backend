@@ -1,10 +1,8 @@
 package models
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"patreon/internal/app"
+	"github.com/pkg/errors"
 	"strconv"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -29,41 +27,40 @@ type User struct {
 func (u *User) String() string {
 	return fmt.Sprintf("{ID: %s, Login: %s}", strconv.Itoa(int(u.ID)), u.Login)
 }
+
+// Validate Errors:
+//		IncorrectEmailOrPassword
+// Important can return some other error
 func (u *User) Validate() error {
-	validRes := validation.Errors{
+	err := validation.Errors{
 		"login": validation.Validate(u.Login, validation.Required, validation.Length(5, 25)),
 		"password": validation.Validate(u.Password, validation.By(requiredIf(u.EncryptedPassword == "")),
 			validation.Length(6, 50)),
 	}.Filter()
-
-	var mapOfErr map[string]string
-	er, ok := json.Marshal(validRes)
-	if ok != nil {
-		return InternalError
-	}
-	ok = json.Unmarshal(er, &mapOfErr)
-	if ok != nil {
-		return InternalError
+	if err == nil {
+		return nil
 	}
 
-	if userValidError()("login") != nil || userValidError()("password") != nil {
-		res := app.GeneralError{
-			Err: IncorrectEmailOrPassword,
-		}
-		if err, ok := mapOfErr["login"]; ok {
-			res.ExternalErr = errors.New(err)
-		} else if err, ok := mapOfErr["password"]; ok {
-			res.ExternalErr = errors.New(err)
-		}
-		return res
+	mapOfErr, knowError := parseErrorToMap(err)
+	if err != nil {
+		return errors.Wrap(err, "failed error getting in validate user")
 	}
-	return nil
+
+	if knowError = extractValidateError(userValidError(), mapOfErr); knowError != nil {
+		return knowError
+	}
+
+	return err
 }
+
 func (u *User) MakePrivateDate() {
 	u.Password = ""
 	u.EncryptedPassword = ""
 }
 
+// Encrypt Errors:
+// 		EmptyPassword
+// Important can return some other error
 func (u *User) Encrypt() error {
 	if len(u.Password) == 0 {
 		return EmptyPassword
@@ -75,6 +72,7 @@ func (u *User) Encrypt() error {
 	u.EncryptedPassword = enc
 	return nil
 }
+
 func (u *User) ComparePassword(password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password)) == nil
 }

@@ -2,8 +2,8 @@ package repository_creator
 
 import (
 	"database/sql"
+	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	"patreon/internal/models"
 )
 
 type CreatorRepository struct {
@@ -16,6 +16,9 @@ func NewCreatorRepository(st *sql.DB) *CreatorRepository {
 	}
 }
 
+// Create Errors:
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
 func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
 	if err := repo.store.QueryRow("INSERT INTO creator_profile (creator_id, category, "+
 		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+
@@ -25,6 +28,9 @@ func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
 	return cr.ID, nil
 }
 
+// GetCreators Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
 func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	count := 0
 
@@ -61,6 +67,10 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	return res, nil
 }
 
+// GetCreator Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
 func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, error) {
 	creator := &models.Creator{}
 

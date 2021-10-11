@@ -1,6 +1,11 @@
 package app
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/pkg/errors"
+)
+
+var UnknownError = errors.New("gotten unspecified error")
 
 type GeneralError struct {
 	Err         error

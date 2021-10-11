@@ -1,23 +1,22 @@
 package repository_user
 
 import (
+	"database/sql"
+	"github.com/lib/pq"
+	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	"patreon/internal/models"
-	_ "patreon/internal/models"
 	"regexp"
 	"strconv"
 	"testing"
-	_ "testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
-	_ "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 type SuiteUserRepository struct {
-	repository.Suite
+	models.Suite
 	repo *UserRepository
 }
 
@@ -31,36 +30,60 @@ func (s *SuiteUserRepository) AfterTest(_, _ string) {
 }
 
 func (s *SuiteUserRepository) TestUserRepository_Create() {
-	u := models.TestUser(s.T())
+	u := models.TestUser()
 
 	u.ID = 1
 	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar"+
 		") VALUES ($1, $2, $3, $4)"+"RETURNING user_id")).
 		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(u.ID)))
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(u.ID))))
 
 	err := s.repo.Create(u)
 	assert.NoError(s.T(), err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar"+
 		") VALUES ($1, $2, $3, $4)"+"RETURNING user_id")).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).WillReturnError(repository.BDError)
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WillReturnError(models.BDError)
 
 	err = s.repo.Create(u)
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.BDError, err)
+	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar"+
+		") VALUES ($1, $2, $3, $4)"+"RETURNING user_id")).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: loginConstraint})
+
+	err = s.repo.Create(u)
+	assert.Error(s.T(), err)
+	assert.Equal(s.T(), LoginAlreadyExist, err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar"+
+		") VALUES ($1, $2, $3, $4)"+"RETURNING user_id")).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: nicknameConstraint})
+
+	err = s.repo.Create(u)
+	assert.Error(s.T(), err)
+	assert.Equal(s.T(), NicknameAlreadyExist, err)
 }
 
 func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
-
 	login := "mail1999"
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT user_id, login, encrypted_password from users where login=$1")).
 		WithArgs(login).
-		WillReturnError(repository.BDError)
+		WillReturnError(models.BDError)
 	_, err := s.repo.FindByLogin(login)
-	assert.EqualError(s.T(), NotFound, err.Error())
+	assert.EqualError(s.T(), repository.NewDBError(models.BDError), err.Error())
 
-	u := models.TestUser(s.T())
+	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT user_id, login, encrypted_password from users where login=$1")).
+		WithArgs(login).
+		WillReturnError(sql.ErrNoRows)
+	_, err = s.repo.FindByLogin(login)
+	assert.EqualError(s.T(), repository.NotFound, err.Error())
+
+	u := models.TestUser()
 	u.Login = login
 
 	assert.NoError(s.T(), u.Encrypt())
@@ -68,7 +91,7 @@ func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT user_id, login, encrypted_password from users where login=$1")).
 		WithArgs(login).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login", "encrypted_password"}).
-			AddRow(strconv.Itoa(u.ID), u.Login, u.EncryptedPassword))
+			AddRow(strconv.Itoa(int(u.ID)), u.Login, u.EncryptedPassword))
 	var gotten *models.User
 	gotten, err = s.repo.FindByLogin(login)
 
@@ -80,23 +103,28 @@ func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
 }
 
 func (s *SuiteUserRepository) TestUserRepository_FindByID() {
-
 	ID := int64(1)
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT user_id, nickname, avatar from users where user_id=$1")).
 		WithArgs(ID).
-		WillReturnError(NotFound)
+		WillReturnError(sql.ErrNoRows)
 	_, err := s.repo.FindByID(ID)
-	assert.EqualError(s.T(), NotFound, err.Error())
+	assert.EqualError(s.T(), repository.NotFound, err.Error())
 
-	u := models.TestUser(s.T())
-	u.ID = int(ID)
+	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT user_id, nickname, avatar from users where user_id=$1")).
+		WithArgs(ID).
+		WillReturnError(models.BDError)
+	_, err = s.repo.FindByID(ID)
+	assert.EqualError(s.T(), repository.NewDBError(models.BDError), err.Error())
+
+	u := models.TestUser()
+	u.ID = ID
 
 	assert.NoError(s.T(), u.Encrypt())
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT user_id, nickname, avatar from users where user_id=$1")).
 		WithArgs(ID).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "nickname", "avatar"}).
-			AddRow(strconv.Itoa(u.ID), u.Nickname, u.Avatar))
+			AddRow(strconv.Itoa(int(u.ID)), u.Nickname, u.Avatar))
 	var gotten *models.User
 	gotten, err = s.repo.FindByID(ID)
 

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
+	models2 "patreon/internal/app/repository/models"
 	"patreon/internal/models"
 
 	"github.com/golang/mock/gomock"
@@ -78,7 +79,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_UserAlreadyExist() {
 	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	req := s.test.data.(models.RequestRegistration)
-	user := &models.User{
+	user := &models2.User{
 		Login:    req.Login,
 		Nickname: req.Nickname,
 		Password: req.Password,
@@ -113,7 +114,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_SmallPassword() {
 	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	req := s.test.data.(models.RequestRegistration)
-	user := &models.User{
+	user := &models2.User{
 		Login:    req.Login,
 		Nickname: req.Nickname,
 		Password: req.Password,
@@ -134,18 +135,18 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_SmallPassword() {
 	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
 }
 
-type userWithPasswordMatcher struct{ user *models.User }
+type userWithPasswordMatcher struct{ user *models2.User }
 
-func newUserWithPasswordMatcher(user *models.User) gomock.Matcher {
+func newUserWithPasswordMatcher(user *models2.User) gomock.Matcher {
 	return &userWithPasswordMatcher{user}
 }
 
 func (match *userWithPasswordMatcher) Matches(x interface{}) bool {
 	switch x.(type) {
-	case *models.User:
-		return x.(*models.User).ID == match.user.ID && x.(*models.User).Login == match.user.Login &&
-			x.(*models.User).Avatar == match.user.Avatar && x.(*models.User).Nickname == match.user.Nickname &&
-			x.(*models.User).Password == match.user.Password && match.user.ComparePassword(x.(*models.User).Password)
+	case *models2.User:
+		return x.(*models2.User).ID == match.user.ID && x.(*models2.User).Login == match.user.Login &&
+			x.(*models2.User).Avatar == match.user.Avatar && x.(*models2.User).Nickname == match.user.Nickname &&
+			x.(*models2.User).Password == match.user.Password && match.user.ComparePassword(x.(*models2.User).Password)
 	default:
 		return false
 	}
@@ -170,7 +171,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_ServeHTTP_CreateSuccess() {
 	handler := NewRegisterHandler(s.logger, s.dataStorage)
 
 	req := s.test.data.(models.RequestRegistration)
-	user := &models.User{
+	user := &models2.User{
 		Login:    req.Login,
 		Password: req.Password,
 		Nickname: req.Nickname,

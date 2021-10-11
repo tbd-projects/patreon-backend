@@ -1,8 +1,9 @@
 package repository_creator
 
 import (
+	"database/sql"
+	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	"patreon/internal/models"
 	"regexp"
 	"strconv"
 	"testing"
@@ -15,7 +16,7 @@ import (
 )
 
 type SuiteCreatorRepository struct {
-	repository.Suite
+	models.Suite
 	repo *CreatorRepository
 }
 
@@ -29,26 +30,27 @@ func (s *SuiteCreatorRepository) AfterTest(_, _ string) {
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
-	cr := models.TestCreator(s.T())
+	cr := models.TestCreator()
 
 	cr.ID = 1
 	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO creator_profile (creator_id, category, "+
 		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+"RETURNING creator_id")).
 		WithArgs(cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(cr.ID)))
-	err := s.repo.Create(cr)
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(cr.ID))))
+	id, err := s.repo.Create(cr)
+	assert.Equal(s.T(), id, cr.ID)
 	assert.NoError(s.T(), err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO creator_profile (creator_id, category, "+
 		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+"RETURNING creator_id")).
-		WithArgs(cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).WillReturnError(repository.BDError)
-	err = s.repo.Create(cr)
+		WithArgs(cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).WillReturnError(models.BDError)
+	_, err = s.repo.Create(cr)
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.BDError, err)
+	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreator() {
-	cr := models.TestCreator(s.T())
+	cr := models.TestCreator()
 	cr.ID = 1
 	expected := *cr
 
@@ -57,30 +59,38 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreator() {
 		WithArgs(cr.ID).
 		WillReturnRows(sqlmock.
 			NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"}).
-			AddRow(strconv.Itoa(cr.ID), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname))
+			AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname))
 
-	get, err := s.repo.GetCreator(int64(expected.ID))
+	get, err := s.repo.GetCreator(expected.ID)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), expected, *get)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
 		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
-		WithArgs(cr.ID).WillReturnError(repository.BDError)
+		WithArgs(cr.ID).WillReturnError(sql.ErrNoRows)
 
-	_, err = s.repo.GetCreator(int64(expected.ID))
+	_, err = s.repo.GetCreator(expected.ID)
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), NotFound, err)
+	assert.Equal(s.T(), repository.NotFound, err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
+		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
+		WithArgs(cr.ID).WillReturnError(models.BDError)
+
+	_, err = s.repo.GetCreator(expected.ID)
+	assert.Error(s.T(), err)
+	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreators() {
-	creators := models.TestCreators(s.T())
+	creators := models.TestCreators()
 
 	preapareRows := sqlmock.NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"})
 
 	for index, cr := range creators {
-		cr.ID = index
+		cr.ID = int64(index)
 		creators[index] = cr
-		preapareRows.AddRow(strconv.Itoa(cr.ID), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname)
+		preapareRows.AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname)
 	}
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
@@ -94,21 +104,21 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreat
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), creators, get)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).WillReturnError(repository.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).WillReturnError(models.BDError)
 
 	_, err = s.repo.GetCreators()
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.BDError, err)
+	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")).WillReturnError(repository.BDError)
+		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")).WillReturnError(models.BDError)
 
 	_, err = s.repo.GetCreators()
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.BDError, err)
+	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 }
 
 func TestCreatorRepository(t *testing.T) {

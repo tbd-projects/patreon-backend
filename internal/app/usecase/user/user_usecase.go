@@ -2,11 +2,11 @@ package usercase_user
 
 import (
 	"fmt"
-	"patreon/internal/app"
-	repoUser "patreon/internal/app/repository/user"
-	"patreon/internal/models"
-
 	"github.com/pkg/errors"
+	"patreon/internal/app"
+	"patreon/internal/app/models"
+	"patreon/internal/app/repository"
+	repoUser "patreon/internal/app/repository/user"
 )
 
 type UserUsecase struct {
@@ -19,6 +19,10 @@ func NewUserUsecase(repository repoUser.Repository) *UserUsecase {
 	}
 }
 
+// GetProfile Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
 func (usecase *UserUsecase) GetProfile(userID int64) (*models.User, error) {
 	u, err := usecase.repository.FindByID(userID)
 	if err != nil {
@@ -27,32 +31,42 @@ func (usecase *UserUsecase) GetProfile(userID int64) (*models.User, error) {
 	return u, nil
 }
 
+// Create Errors:
+//		models.EmptyPassword
+// 		models.IncorrectEmailOrPassword
+//		repository_user.LoginAlreadyExist
+//		repository_user.NicknameAlreadyExist
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
 func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
 	checkUser, err := usecase.repository.FindByLogin(user.Login)
-	if err != nil {
+	if err != nil && err != repository.NotFound {
 		return -1, errors.Wrap(err, fmt.Sprintf("error on create user with login %v", user.Login))
 	}
+
 	if checkUser != nil {
 		return -1, UserExist
 	}
+
 	if err = user.Validate(); err != nil {
-		return -1, app.GeneralError{
-			Err:         err,
-			ExternalErr: errors.Wrap(err, "user data invalid"),
+		if errors.Is(err, models.IncorrectEmailOrPassword) {
+			return -1, err
+		}
+		return -1, &app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of validation user"),
 		}
 	}
 
 	if err = user.Encrypt(); err != nil {
-		returnedErr := app.GeneralError{
-			ExternalErr: err,
-		}
-		if err == models.EmptyPassword {
-			returnedErr.Err = EmptyPassword
-		} else {
-			returnedErr.Err = BadEncrypt
+		if errors.Is(err, models.EmptyPassword) {
+			return -1, err
 		}
 
-		return -1, returnedErr
+		return -1, app.GeneralError{
+			Err: BadEncrypt,
+			ExternalErr: err,
+		}
 	}
 
 	if err = usecase.repository.Create(user); err != nil {
@@ -62,6 +76,11 @@ func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
 	return user.ID, nil
 }
 
+// Check Errors:
+//		IncorrectEmailOrPassword
+// 		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
 func (usecase *UserUsecase) Check(login string, password string) (int64, error) {
 	u, err := usecase.repository.FindByLogin(login)
 	if err != nil {

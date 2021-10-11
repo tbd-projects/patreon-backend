@@ -6,13 +6,13 @@ import (
 )
 
 var (
-	ErrDefaultDB = errors.New("something wrong DB")
+	DefaultErrDB = errors.New("something wrong DB")
 	NotFound     = errors.New("user not found")
 )
 
 func NewDBError(externalErr error) *app.GeneralError {
 	return &app.GeneralError{
-		Err:         ErrDefaultDB,
+		Err:         DefaultErrDB,
 		ExternalErr: externalErr,
 	}
 

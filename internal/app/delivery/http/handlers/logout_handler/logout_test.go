@@ -5,13 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
-	"patreon/internal/models"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"patreon/internal/app/repository/models"
 )
 
 type LogoutTestSuite struct {

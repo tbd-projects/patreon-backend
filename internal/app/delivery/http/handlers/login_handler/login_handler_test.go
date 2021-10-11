@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
+	models2 "patreon/internal/app/repository/models"
 	session_models "patreon/internal/app/sessions/models"
 	"patreon/internal/app/sessions/sessions_manager"
 
@@ -105,7 +106,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
 	recorder := httptest.NewRecorder()
 	handler := NewLoginHandler(s.logger, s.dataStorage)
 
-	user := models.User{
+	user := models2.User{
 		ID:       1,
 		Login:    s.test.data.(models.RequestLogin).Login,
 		Password: s.test.data.(models.RequestLogin).Password,
@@ -115,7 +116,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
 	s.mockUserRepository.EXPECT().
 		FindByLogin(s.test.data.(models.RequestLogin).Login).
 		Times(s.test.expectedMockTimes).
-		Return(&models.User{ID: user.ID, Login: user.Login, EncryptedPassword: user.EncryptedPassword}, nil)
+		Return(&models2.User{ID: user.ID, Login: user.Login, EncryptedPassword: user.EncryptedPassword}, nil)
 
 	s.mockSessionsManager.EXPECT().
 		Create(int64(user.ID)).
@@ -145,7 +146,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_Ok() {
 	recorder := httptest.NewRecorder()
 	handler := NewLoginHandler(s.logger, s.dataStorage)
 
-	user := models.User{
+	user := models2.User{
 		ID:       1,
 		Login:    s.test.data.(models.RequestLogin).Login,
 		Password: s.test.data.(models.RequestLogin).Password,
@@ -155,7 +156,7 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_Ok() {
 	s.mockUserRepository.EXPECT().
 		FindByLogin(s.test.data.(models.RequestLogin).Login).
 		Times(s.test.expectedMockTimes).
-		Return(&models.User{ID: user.ID, Login: user.Login, EncryptedPassword: user.EncryptedPassword}, nil)
+		Return(&models2.User{ID: user.ID, Login: user.Login, EncryptedPassword: user.EncryptedPassword}, nil)
 
 	s.mockSessionsManager.EXPECT().
 		Create(int64(user.ID)).

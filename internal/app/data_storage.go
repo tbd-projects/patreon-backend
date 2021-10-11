@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/gomodule/redigo/redis"
 	"patreon/internal/app/sessions"
-	"patreon/internal/app/store"
+	//"patreon/internal/app/store"
 )
 
 type ExpectedConnections struct {
@@ -13,6 +13,6 @@ type ExpectedConnections struct {
 }
 
 type DataStorage interface {
-	Store() store.Store
+	//Store() store.Store
 	SessionManager() sessions.SessionsManager
 }

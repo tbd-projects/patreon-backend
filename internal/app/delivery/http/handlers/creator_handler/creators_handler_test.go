@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
+	models2 "patreon/internal/app/repository/models"
 	"patreon/internal/app/store"
 	"patreon/internal/models"
 
@@ -21,7 +22,7 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
 	test := handlers.TestTable{
 		name:              "correct",
-		data:              &models.Creator{ID: int(userID), Avatar: "some", Nickname: "done"},
+		data:              &models2.Creator{ID: int(userID), Avatar: "some", Nickname: "done"},
 		expectedMockTimes: 1,
 		expectedCode:      http.StatusOK,
 	}
@@ -39,7 +40,7 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 		EXPECT().
 		GetCreators().
 		Times(test.expectedMockTimes).
-		Return([]models.Creator{*test.data.(*models.Creator)}, nil)
+		Return([]models2.Creator{*test.data.(*models2.Creator)}, nil)
 	handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), test.expectedCode, recorder.Code)
 
@@ -48,7 +49,7 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 	err = decoder.Decode(req)
 	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), req, &[]models.ResponseCreator{models.ToResponseCreator(*test.data.(*models.Creator))})
+	assert.Equal(s.T(), req, &[]models.ResponseCreator{models2.ToResponseCreator(*test.data.(*models2.Creator))})
 }
 
 func (s *CreatorTestSuite) TestServeHTTP_WitDBError() {

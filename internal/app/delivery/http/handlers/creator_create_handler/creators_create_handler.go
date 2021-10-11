@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	models2 "patreon/internal/app/repository/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
@@ -94,7 +95,7 @@ func (h *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	//	h.Error(w, r, http.StatusConflict, handler_errors.ProfileAlreadyExist)
 	//	return
 	//}
-	cr := &models.Creator{
+	cr := &models2.Creator{
 		ID:          u.ID,
 		Nickname:    u.Nickname,
 		Category:    req.Category,
