@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"patreon/internal/app/delivery/http/handlers/handler_factory"
-	ds "patreon/internal/app/server/data_storage"
 
 	gh "github.com/gorilla/handlers"
 
@@ -94,9 +93,9 @@ func (s *Server) Start(config *app.Config) error {
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	CORSConfigure(router)
 
-	dataStorage := ds.NewDataStorage(s.connections, s.logger)
+	//dataStorage := ds.NewDataStorage(s.connections, s.logger)
 
-	factory := handler_factory.NewFactory(s.logger, dataStorage)
+	factory := handler_factory.NewFactory(s.logger, s.connections)
 	hs := factory.GetHandleUrls()
 
 	for url, h := range *hs {
