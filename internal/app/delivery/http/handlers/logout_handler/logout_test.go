@@ -5,85 +5,104 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
-	"patreon/internal/app/repository/models"
+	"patreon/internal/app/models"
+	"testing"
+
+	"github.com/stretchr/testify/suite"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type LogoutTestSuite struct {
-	handlers.SuiteTestBaseHandler
+	handlers.SuiteHandler
+	handler *LogoutHandler
+}
+
+func (s *LogoutTestSuite) SetupSuite() {
+	s.SuiteHandler.SetupSuite()
+	s.handler = NewLogoutHandler(s.Logger, s.MockSessionsManager)
 }
 
 func (s *LogoutTestSuite) TestServeHTTP_WithSession() {
 	uniqID := "1"
 	test := handlers.TestTable{
-		name:              "with cookies",
-		data:              &models.User{},
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusOK,
+		Name:              "with cookies",
+		Data:              models.User{},
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusOK,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLogoutHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(test.Data)
 
 	require.NoError(s.T(), err)
 	ctx := context.WithValue(context.Background(), "uniq_id", uniqID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/logout", &b)
 
-	s.mockSessionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(nil)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+	s.MockSessionsManager.EXPECT().
+		Delete(uniqID).
+		Times(test.ExpectedMockTimes).
+		Return(nil)
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 }
 
 func (s *LogoutTestSuite) TestServeHTTP_WithoutCookies() {
 	uniqID := "1"
 	test := handlers.TestTable{
-		name:              "without cookies",
-		data:              &models.User{},
-		expectedMockTimes: 0,
-		expectedCode:      http.StatusInternalServerError,
+		Name:              "without cookies",
+		Data:              &models.User{},
+		ExpectedMockTimes: 0,
+		ExpectedCode:      http.StatusInternalServerError,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLogoutHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(test.Data)
 
 	require.NoError(s.T(), err)
 	reader, _ := http.NewRequest(http.MethodPost, "/logout", &b)
 
-	s.mockSessionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(nil)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+	s.MockSessionsManager.EXPECT().
+		Delete(uniqID).
+		Times(test.ExpectedMockTimes).
+		Return(nil)
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 }
 
 func (s *LogoutTestSuite) TestServeHTTP_ErrorSessions() {
 	uniqID := "1"
 	test := handlers.TestTable{
-		name:              "without cookies",
-		data:              &models.User{},
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusInternalServerError,
+		Name:              "without cookies",
+		Data:              &models.User{},
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusInternalServerError,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLogoutHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(test.Data)
 
 	require.NoError(s.T(), err)
 	ctx := context.WithValue(context.Background(), "uniq_id", uniqID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/logout", &b)
 
-	s.mockSessionsManager.EXPECT().Delete(uniqID).Times(test.expectedMockTimes).Return(errors.New(""))
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+	s.MockSessionsManager.EXPECT().
+		Delete(uniqID).
+		Times(test.ExpectedMockTimes).
+		Return(errors.New(""))
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
+}
+func TestLogoutSuite(t *testing.T) {
+	suite.Run(t, new(LogoutTestSuite))
 }
