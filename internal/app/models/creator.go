@@ -21,7 +21,7 @@ type Creator struct {
 // Important can return some other error
 func (cr *Creator) Validate() error {
 	err := validation.Errors{
-		"id":          validation.Validate(cr.Nickname, validation.Required),
+		"nickname":    validation.Validate(cr.Nickname, validation.Required),
 		"category":    validation.Validate(cr.Category, validation.Required),
 		"description": validation.Validate(cr.Description, validation.Required),
 	}.Filter()
@@ -30,8 +30,8 @@ func (cr *Creator) Validate() error {
 	}
 
 	mapOfErr, knowError := parseErrorToMap(err)
-	if err != nil {
-		return errors.Wrap(err, "failed error getting in validate creator")
+	if knowError != nil {
+		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
 	if knowError = extractValidateError(creatorValidError(), mapOfErr); knowError != nil {

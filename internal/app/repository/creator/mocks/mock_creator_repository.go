@@ -5,7 +5,7 @@
 package mock_repository
 
 import (
-	"patreon/internal/app/repository/models"
+	"patreon/internal/app/models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

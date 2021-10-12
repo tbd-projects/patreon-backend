@@ -1,9 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"regexp"
+
+	"github.com/pkg/errors"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 
@@ -93,27 +94,27 @@ func (c Customer) Validate() error {
 //	// 0: (City: cannot be blank; Street: cannot be blank.); 2: (Street: cannot be blank; Zip: must be in a valid format.).
 //}
 
-func Example_four() {
-	c := Customer{
-		Name:  "Qiang Xue",
-		Email: "q",
-		Num:   123,
-	}
-	err := validation.ValidateStruct(c, validation.Field(&c.Name, validation.Required, validation.Length(5, 20)),
-		validation.Field(&c.Name, validation.Required, is.Email),
-		validation.Field(&c.Num, validation.In(1, 2, 3)))
-	err := validation.Errors{
-		"name":  validation.Validate(c.Name, validation.Required, validation.Length(5, 20)),
-		"email": validation.Validate(c.Name, validation.Required, is.Email),
-		"num":   validation.Validate(c.Num, validation.In(1, 2, 3)),
-	}.Filter()
-	var ERRORS map[string]string
-	er, _ := json.Marshal(err)
-	_ = json.Unmarshal(er, &ERRORS)
-	fmt.Println(ERRORS)
-	// Output:
-	// email: must be a valid email address; zip: cannot be blank.
-}
+//func Example_four() {
+//	c := Customer{
+//		Name:  "Qiang Xue",
+//		Email: "q",
+//		Num:   123,
+//	}
+//	err := validation.ValidateStruct(c, validation.Field(&c.Name, validation.Required, validation.Length(5, 20)),
+//		validation.Field(&c.Name, validation.Required, is.Email),
+//		validation.Field(&c.Num, validation.In(1, 2, 3)))
+//	err := validation.Errors{
+//		"name":  validation.Validate(c.Name, validation.Required, validation.Length(5, 20)),
+//		"email": validation.Validate(c.Name, validation.Required, is.Email),
+//		"num":   validation.Validate(c.Num, validation.In(1, 2, 3)),
+//	}.Filter()
+//	var ERRORS map[string]string
+//	er, _ := json.Marshal(err)
+//	_ = json.Unmarshal(er, &ERRORS)
+//	fmt.Println(ERRORS)
+//	// Output:
+//	// email: must be a valid email address; zip: cannot be blank.
+//}
 
 //func Example_five() {
 //	type Employee struct {
@@ -194,6 +195,14 @@ func Example_four() {
 //	// Output:
 //	// Address: (State: must be in a valid format; Street: the length must be between 5 and 50.); Email: must be a valid email address.
 //}
+//func main() {
+//	Example_four()
+//}
+
+var myErr = errors.New("testing errors")
+
 func main() {
-	Example_four()
+	err := errors.Wrap(myErr, "blabal")
+	fmt.Println(errors.Is(err, myErr))
+	fmt.Println(err)
 }

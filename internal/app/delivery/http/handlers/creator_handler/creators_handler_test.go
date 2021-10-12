@@ -6,9 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
-	models2 "patreon/internal/app/repository/models"
-	"patreon/internal/app/store"
-	"patreon/internal/models"
+	"patreon/internal/app/models"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +20,7 @@ func (s *CreatorTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
 	test := handlers.TestTable{
 		name:              "correct",
-		data:              &models2.Creator{ID: int(userID), Avatar: "some", Nickname: "done"},
+		data:              &models.Creator{ID: int(userID), Avatar: "some", Nickname: "done"},
 		expectedMockTimes: 1,
 		expectedCode:      http.StatusOK,
 	}

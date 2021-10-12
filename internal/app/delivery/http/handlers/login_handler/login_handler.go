@@ -6,10 +6,10 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
-	"patreon/internal/models"
 	"time"
 
 	"github.com/sirupsen/logrus"

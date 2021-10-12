@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	"patreon/internal/app/repository/models"
 	usecase_creator "patreon/internal/app/usecase/creator"
 )
 

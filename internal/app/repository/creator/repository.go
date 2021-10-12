@@ -10,7 +10,6 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	Create(*models.Creator) (int64, error)
 
-
 	// GetCreators Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB

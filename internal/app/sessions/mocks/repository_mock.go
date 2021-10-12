@@ -2,7 +2,7 @@
 // Source: patreon/internal/app/sessions (interfaces: SessionRepository)
 
 // Package mocks is a generated GoMock package.
-package mocks
+package mock_sessions
 
 import (
 	models "patreon/internal/app/sessions/models"

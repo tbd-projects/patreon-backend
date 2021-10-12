@@ -6,11 +6,11 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models2 "patreon/internal/app/repository/models"
+	models_respond "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
-	"patreon/internal/models"
 
 	"github.com/sirupsen/logrus"
 )
@@ -53,7 +53,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 			h.Log().Error(err)
 		}
 	}(r.Body)
-	req := &models.RequestRegistration{}
+	req := &models_respond.RequestRegistration{}
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil || len(req.Password) == 0 ||
@@ -62,7 +62,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
-	u := &models2.User{
+	u := &models.User{
 		Login:    req.Login,
 		Password: req.Password,
 		Nickname: req.Nickname,

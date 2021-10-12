@@ -5,7 +5,7 @@
 package mock_usecase
 
 import (
-	models "patreon/internal/app/repository/models"
+	"patreon/internal/app/models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

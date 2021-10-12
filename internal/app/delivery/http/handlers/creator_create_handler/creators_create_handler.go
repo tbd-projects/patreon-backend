@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models2 "patreon/internal/app/repository/models"
+	"patreon/internal/app/delivery/http/models"
+	db_models "patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
-	"patreon/internal/models"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -95,7 +95,7 @@ func (h *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	//	h.Error(w, r, http.StatusConflict, handler_errors.ProfileAlreadyExist)
 	//	return
 	//}
-	cr := &models2.Creator{
+	cr := &db_models.Creator{
 		ID:          u.ID,
 		Nickname:    u.Nickname,
 		Category:    req.Category,
