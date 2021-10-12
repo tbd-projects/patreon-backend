@@ -2,8 +2,9 @@ package models
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"strconv"
+
+	"github.com/pkg/errors"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/bcrypt"
@@ -42,7 +43,7 @@ func (u *User) Validate() error {
 	}
 
 	mapOfErr, knowError := parseErrorToMap(err)
-	if err != nil {
+	if knowError != nil {
 		return errors.Wrap(err, "failed error getting in validate user")
 	}
 

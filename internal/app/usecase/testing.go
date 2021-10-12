@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	mock_repository_creator "patreon/internal/app/repository/creator/mocks"
 	mock_repository_user "patreon/internal/app/repository/user/mocks"
+	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
@@ -37,4 +38,8 @@ func (s *SuiteUsecase) SetupSuite() {
 }
 func (s *SuiteUsecase) TearDownSuite() {
 	s.Mock.Finish()
+}
+
+func TestUsecase(t *testing.T) {
+	suite.Run(t, new(SuiteUsecase))
 }
