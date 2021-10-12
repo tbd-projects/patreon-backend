@@ -1,4 +1,4 @@
-package usercase_factory
+package usecase_factory
 
 import (
 	"patreon/internal/app/sessions"
