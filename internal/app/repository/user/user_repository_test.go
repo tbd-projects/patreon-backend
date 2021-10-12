@@ -2,12 +2,13 @@ package repository_user
 
 import (
 	"database/sql"
-	"github.com/lib/pq"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/lib/pq"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"

@@ -16,13 +16,15 @@ import (
 
 type SuiteUserUsecase struct {
 	usecase.SuiteUsecase
-	uc Usecase
+	uc    Usecase
+	tUser *models.User
 }
 
 func (s *SuiteUserUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
 	s.uc = NewUserUsecase(s.MockUserRepository)
 }
+
 func (s *SuiteUserUsecase) TestCreatorUsecase_GetProfile_DB_Error() {
 	s.Tb = usecase.TestTable{
 		Name:              "DB error happened",
@@ -38,6 +40,7 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_GetProfile_DB_Error() {
 	assert.Nil(s.T(), u)
 	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
 }
+
 func (s *SuiteUserUsecase) TestCreatorUsecase_GetProfile_NotFound() {
 	s.Tb = usecase.TestTable{
 		Name:              "Profile not found",
@@ -135,6 +138,7 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_Check_InvalidPassword() {
 	assert.Equal(s.T(), expectedId, resId)
 	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
 }
+
 func (s *SuiteUserUsecase) TestCreatorUsecase_Check_Correct() {
 	s.Tb = usecase.TestTable{
 		Name:              "User found, password valid",
