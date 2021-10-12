@@ -6,73 +6,84 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
+	models_data "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
+	"testing"
+
+	"github.com/stretchr/testify/suite"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 type CreatorTestSuite struct {
-	handlers.SuiteTestBaseHandler
+	handlers.SuiteHandler
+	handler *CreatorHandler
 }
 
-func (s *CreatorTestSuite) TestServeHTTP_Correct() {
+func (s *CreatorTestSuite) SetupSuite() {
+	s.SuiteHandler.SetupSuite()
+	s.handler = NewCreatorHandler(s.Logger, s.MockSessionsManager, s.MockCreatorUsecase)
+}
+
+func (s *CreatorTestSuite) TestCreatorHandler_POST_Correct() {
 	userID := int64(1)
-	test := handlers.TestTable{
-		name:              "correct",
-		data:              &models.Creator{ID: int(userID), Avatar: "some", Nickname: "done"},
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusOK,
+	s.Tb = handlers.TestTable{
+		Name:              "correct",
+		Data:              &models.Creator{ID: userID, Avatar: "some", Nickname: "done"},
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusOK,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewCreatorHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
 	require.NoError(s.T(), err)
 	reader, _ := http.NewRequest(http.MethodGet, "/creators", &b)
 
-	s.mockCreatorRepository.
+	s.MockCreatorUsecase.
 		EXPECT().
 		GetCreators().
-		Times(test.expectedMockTimes).
-		Return([]models2.Creator{*test.data.(*models2.Creator)}, nil)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
-
-	req := &[]models.ResponseCreator{}
+		Times(s.Tb.ExpectedMockTimes).
+		Return([]models.Creator{*s.Tb.Data.(*models.Creator)}, nil)
+	s.handler.GET(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
+	req := &[]models_data.ResponseCreator{}
 	decoder := json.NewDecoder(recorder.Body)
 	err = decoder.Decode(req)
 	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), req, &[]models.ResponseCreator{models2.ToResponseCreator(*test.data.(*models2.Creator))})
+	assert.Equal(s.T(), req, &[]models_data.ResponseCreator{
+		models_data.ToResponseCreator(*s.Tb.Data.(*models.Creator))})
 }
 
-func (s *CreatorTestSuite) TestServeHTTP_WitDBError() {
-	test := handlers.TestTable{
-		name:              "with db error",
-		data:              nil,
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusServiceUnavailable,
+func (s *CreatorTestSuite) TestCreatorHandler_POST_EmptyCreators() {
+	s.Tb = handlers.TestTable{
+		Name:              "creators is empty",
+		Data:              nil,
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusOK,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewCreatorHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
 	require.NoError(s.T(), err)
 	reader, _ := http.NewRequest(http.MethodGet, "/creators", &b)
 
-	s.mockCreatorRepository.
+	s.MockCreatorUsecase.
 		EXPECT().
 		GetCreators().
-		Times(test.expectedMockTimes).
-		Return(nil, store.NotFound)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	s.handler.GET(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 
+}
+func TestCreatorHandler(t *testing.T) {
+	suite.Run(t, new(CreatorTestSuite))
 }
