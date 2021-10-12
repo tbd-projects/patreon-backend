@@ -159,6 +159,157 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_Check_Correct() {
 	assert.Equal(s.T(), s.Tb.ExpectedError, err)
 
 }
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_UserAlreadyExist() {
+	s.Tb = usecase.TestTable{
+		Name:              "User already exist",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     UserExist,
+	}
+	u := s.Tb.Data.(*models.User)
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(u, nil)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, err)
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_DB_Error() {
+	s.Tb = usecase.TestTable{
+		Name:              "Database error on find user",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     repository.DefaultErrDB,
+	}
+	u := s.Tb.Data.(*models.User)
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, repository.DefaultErrDB)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_InvalidLoginShort() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid login - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Login = "l"
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_InvalidLoginLong() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid login - long",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Login = "llllllllllllllllllllllllllllllllllllll"
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_InvalidPasswordShort() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Password = "l"
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_InvalidPasswordLong() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - long",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Password = "lllllllllllllllllllllllllll" +
+		"lllllllllllllllllllllllllll"
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_CreateFail() {
+	s.Tb = usecase.TestTable{
+		Name:              "Database error on create user",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     repository.DefaultErrDB,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Password = "lllllllllllllllllllllllllll"
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	s.MockUserRepository.EXPECT().
+		Create(u).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(repository.DefaultErrDB)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Create_Success() {
+	s.Tb = usecase.TestTable{
+		Name:              "Success create user",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     nil,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Password = "lllllllllllllllllllllllllll"
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	s.MockUserRepository.EXPECT().
+		Create(u).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil)
+	expectedId := u.ID
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
 
 func TestUsecaseUser(t *testing.T) {
 	suite.Run(t, new(SuiteUserUsecase))
