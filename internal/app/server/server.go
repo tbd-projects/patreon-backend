@@ -2,10 +2,11 @@ package server
 
 import (
 	"fmt"
-	"net/http"
-	"patreon/internal/app/delivery/http/handlers/handler_factory"
-
 	gh "github.com/gorilla/handlers"
+	"net/http"
+	"patreon/internal/app/delivery/http/handler_factory"
+	"patreon/internal/app/repository/repository_factory"
+	"patreon/internal/app/usecase/usercase_factory"
 
 	_ "patreon/docs"
 	"patreon/internal/app"
@@ -94,8 +95,9 @@ func (s *Server) Start(config *app.Config) error {
 	CORSConfigure(router)
 
 	//dataStorage := ds.NewDataStorage(s.connections, s.logger)
-
-	factory := handler_factory.NewFactory(s.logger, s.connections)
+	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
+	usecaseFactory := usercase_factory.NewUsecaseFactory(repositoryFactory)
+	factory := handler_factory.NewFactory(s.logger, usecaseFactory)
 	hs := factory.GetHandleUrls()
 
 	for url, h := range *hs {

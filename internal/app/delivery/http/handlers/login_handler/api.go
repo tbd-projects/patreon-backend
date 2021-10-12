@@ -12,4 +12,5 @@ var codesByErrors = base_handler.CodeMap{
 	repository.NotFound:             {http.StatusNotFound, handler_errors.UserNotFound},
 	repository.DefaultErrDB:         {http.StatusInternalServerError, handler_errors.BDError},
 	models.IncorrectEmailOrPassword: {http.StatusUnauthorized, handler_errors.IncorrectEmailOrPassword},
+	models.BDError:                  {http.StatusInternalServerError, handler_errors.InternalError},
 }
