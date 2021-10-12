@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
@@ -55,6 +56,7 @@ func TestUsers() []User {
 func TestCreator() *Creator {
 	return &Creator{
 		ID:          1,
+		Nickname:    "doggy2005",
 		Category:    "podcasts",
 		Description: "i love podcasts",
 	}

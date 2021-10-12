@@ -26,11 +26,11 @@ func (s *SuiteCreatorUsecase) SetupSuite() {
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_DB_Error() {
 	s.Tb = usecase.TestTable{
 		Name:              "Repository return error",
-		Data:              usecase.TestCreator(s.T()),
+		Data:              models.TestCreator(),
 		ExpectedMockTimes: 1,
 		ExpectedError:     repository.DefaultErrDB,
 	}
-	cr := usecase.TestCreator(s.T())
+	cr := models.TestCreator()
 	s.MockCreatorRepository.EXPECT().
 		GetCreator(cr.ID).
 		Times(s.Tb.ExpectedMockTimes).
@@ -45,11 +45,11 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_DB_Error() {
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Creator_Exist() {
 	s.Tb = usecase.TestTable{
 		Name:              "Creator already exist",
-		Data:              usecase.TestCreator(s.T()),
+		Data:              models.TestCreator(),
 		ExpectedMockTimes: 1,
 		ExpectedError:     CreatorExist,
 	}
-	cr := usecase.TestCreator(s.T())
+	cr := models.TestCreator()
 	s.MockCreatorRepository.EXPECT().
 		GetCreator(cr.ID).
 		Times(s.Tb.ExpectedMockTimes).
@@ -63,11 +63,11 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Creator_Exist() {
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Validate_Error() {
 	s.Tb = usecase.TestTable{
 		Name:              "Invalid creator data",
-		Data:              usecase.TestCreator(s.T()),
+		Data:              models.TestCreator(),
 		ExpectedMockTimes: 1,
 		ExpectedError:     models.IncorrectCreatorNickname,
 	}
-	cr := usecase.TestCreator(s.T())
+	cr := models.TestCreator()
 	cr.Nickname = ""
 	s.MockCreatorRepository.EXPECT().
 		GetCreator(cr.ID).
@@ -81,11 +81,13 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Validate_Error() {
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Success() {
 	s.Tb = usecase.TestTable{
 		Name:              "Success create creator",
-		Data:              usecase.TestCreator(s.T()),
+		Data:              models.TestCreator(),
 		ExpectedMockTimes: 1,
 		ExpectedError:     nil,
 	}
-	cr := usecase.TestCreator(s.T())
+	cr := models.TestCreator()
+	expectId := cr.ID
+
 	s.MockCreatorRepository.EXPECT().
 		GetCreator(cr.ID).
 		Times(s.Tb.ExpectedMockTimes).
@@ -97,11 +99,10 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Success() {
 		Return(cr.ID, nil)
 
 	id, err := s.uc.Create(cr)
-	expectId := int64(1)
 	assert.Equal(s.T(), expectId, id)
 	assert.Equal(s.T(), s.Tb.ExpectedError, err)
 }
 
-func TestUsecases(t *testing.T) {
+func TestUsecaseCreator(t *testing.T) {
 	suite.Run(t, new(SuiteCreatorUsecase))
 }

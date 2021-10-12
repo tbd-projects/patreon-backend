@@ -2,7 +2,7 @@
 // Source: repository.go
 
 // Package mock_creator is a generated GoMock package.
-package mock_repository
+package mock_repository_creator
 
 import (
 	"patreon/internal/app/models"

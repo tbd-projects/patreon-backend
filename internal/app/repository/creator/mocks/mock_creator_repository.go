@@ -2,7 +2,7 @@
 // Source: patreon/internal/app/repository/creator (interfaces: Repository)
 
 // Package mock_repository is a generated GoMock package.
-package mock_repository
+package mock_repository_creator
 
 import (
 	"patreon/internal/app/models"

@@ -2,7 +2,7 @@
 // Source: patreon/internal/app/usecase/user (interfaces: Usecase)
 
 // Package mock_usecase is a generated GoMock package.
-package mock_usecase
+package mock_usecase_user
 
 import (
 	"patreon/internal/app/models"
