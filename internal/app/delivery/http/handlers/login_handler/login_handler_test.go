@@ -7,44 +7,50 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
-	models2 "patreon/internal/app/repository/models"
+	"patreon/internal/app/delivery/http/models"
+	model_data "patreon/internal/app/models"
 	session_models "patreon/internal/app/sessions/models"
-	"patreon/internal/app/sessions/sessions_manager"
+	"testing"
 
-	"patreon/internal/app/store"
-	"patreon/internal/models"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/stretchr/testify/assert"
 )
 
 type LoginTestSuite struct {
-	handlers.SuiteTestBaseHandler
+	handlers.SuiteHandler
+	handler *LoginHandler
 }
 
-func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_EmptyBody() {
-	s.test = handlers.TestTable{
-		name:              "Empty body in request",
-		data:              &models.RequestLogin{},
-		expectedMockTimes: 0,
-		expectedCode:      http.StatusUnprocessableEntity,
+func (s *LoginTestSuite) SetupSuite() {
+	s.SuiteHandler.SetupSuite()
+	s.handler = NewLoginHandler(s.Logger, s.MockSessionsManager, s.MockUserUsecase)
+}
+
+func (s *LoginTestSuite) TestLoginHandler_POST_EmptyBody() {
+	s.Tb = handlers.TestTable{
+		Name:              "Empty body in request",
+		Data:              &models.RequestLogin{},
+		ExpectedMockTimes: 0,
+		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.test.data)
+	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
 	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
-func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_InvalidBody() {
-	s.test = handlers.TestTable{
-		name:              "Invalid body",
-		expectedMockTimes: 0,
-		expectedCode:      http.StatusUnprocessableEntity,
+
+func (s *LoginTestSuite) TestLoginHandler_POST_InvalidBody() {
+	s.Tb = handlers.TestTable{
+		Name:              "Invalid body",
+		ExpectedMockTimes: 0,
+		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
 	data := struct {
 		Nickname string `json:"nickname"`
@@ -54,7 +60,6 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_InvalidBody() {
 		Password: "password",
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler(s.logger, s.dataStorage)
 
 	b := bytes.Buffer{}
 	err := json.NewEncoder(&b).Encode(data)
@@ -62,114 +67,120 @@ func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_InvalidBody() {
 	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
-func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNotFound() {
-	s.test = handlers.TestTable{
-		name: "User not found in db",
-		data: models.RequestLogin{
+func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
+	s.Tb = handlers.TestTable{
+		Name: "User not found in db",
+		Data: models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusUnauthorized,
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusUnauthorized,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler(s.logger, s.dataStorage)
-
-	s.mockUserRepository.EXPECT().
-		FindByLogin(s.test.data.(models.RequestLogin).Login).
-		Times(s.test.expectedMockTimes).
-		Return(nil, store.NotFound)
+	expectedId := int64(-1)
+	s.MockUserUsecase.EXPECT().
+		Check(s.Tb.Data.(models.RequestLogin).Login,
+			s.Tb.Data.(models.RequestLogin).Password).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(expectedId, model_data.IncorrectEmailOrPassword)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.test.data)
+	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
 	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
-func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_UserNoAuthorized() {
-	s.test = handlers.TestTable{
-		name: "Not authorized user",
-		data: models.RequestLogin{
+
+func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
+	s.Tb = handlers.TestTable{
+		Name: "Create Session Error",
+		Data: models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusInternalServerError,
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusInternalServerError,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler(s.logger, s.dataStorage)
 
-	user := models2.User{
+	user := model_data.User{
 		ID:       1,
-		Login:    s.test.data.(models.RequestLogin).Login,
-		Password: s.test.data.(models.RequestLogin).Password,
+		Login:    s.Tb.Data.(models.RequestLogin).Login,
+		Password: s.Tb.Data.(models.RequestLogin).Password,
 	}
 	err := user.Encrypt()
 	assert.NoError(s.T(), err)
-	s.mockUserRepository.EXPECT().
-		FindByLogin(s.test.data.(models.RequestLogin).Login).
-		Times(s.test.expectedMockTimes).
-		Return(&models2.User{ID: user.ID, Login: user.Login, EncryptedPassword: user.EncryptedPassword}, nil)
+	s.MockUserUsecase.EXPECT().
+		Check(s.Tb.Data.(models.RequestLogin).Login,
+			s.Tb.Data.(models.RequestLogin).Password).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(user.ID, nil)
 
-	s.mockSessionsManager.EXPECT().
+	s.MockSessionsManager.EXPECT().
 		Create(int64(user.ID)).
-		Times(s.test.expectedMockTimes).
-		Return(session_models.Result{UserID: sessions_manager.UnknownUser},
+		Times(s.Tb.ExpectedMockTimes).
+		Return(session_models.Result{
+			UserID: -1,
+		},
 			errors.New("error"))
 
 	b := bytes.Buffer{}
-	err = json.NewEncoder(&b).Encode(s.test.data)
+	err = json.NewEncoder(&b).Encode(s.Tb.Data)
 
 	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
-func (s *LoginTestSuite) TestLoginHandler_ServeHTTP_Ok() {
-	s.test = handlers.TestTable{
-		name: "Invalid body",
-		data: models.RequestLogin{
+func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
+	s.Tb = handlers.TestTable{
+		Name: "Invalid body",
+		Data: models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusOK,
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusOK,
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewLoginHandler(s.logger, s.dataStorage)
 
-	user := models2.User{
+	user := model_data.User{
 		ID:       1,
-		Login:    s.test.data.(models.RequestLogin).Login,
-		Password: s.test.data.(models.RequestLogin).Password,
+		Login:    s.Tb.Data.(models.RequestLogin).Login,
+		Password: s.Tb.Data.(models.RequestLogin).Password,
 	}
 	err := user.Encrypt()
 	assert.NoError(s.T(), err)
-	s.mockUserRepository.EXPECT().
-		FindByLogin(s.test.data.(models.RequestLogin).Login).
-		Times(s.test.expectedMockTimes).
-		Return(&models2.User{ID: user.ID, Login: user.Login, EncryptedPassword: user.EncryptedPassword}, nil)
+	s.MockUserUsecase.EXPECT().
+		Check(s.Tb.Data.(models.RequestLogin).Login,
+			s.Tb.Data.(models.RequestLogin).Password).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(user.ID, nil)
 
-	s.mockSessionsManager.EXPECT().
+	s.MockSessionsManager.EXPECT().
 		Create(int64(user.ID)).
-		Times(s.test.expectedMockTimes).
+		Times(s.Tb.ExpectedMockTimes).
 		Return(session_models.Result{UserID: 1, UniqID: "123"}, nil)
 
 	b := bytes.Buffer{}
-	err = json.NewEncoder(&b).Encode(s.test.data)
+	err = json.NewEncoder(&b).Encode(s.Tb.Data)
 
 	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/login", &b)
-	handler.ServeHTTP(recorder, reader)
+	s.handler.POST(recorder, reader)
 
-	assert.Equal(s.T(), s.test.expectedCode, recorder.Code)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
+}
+func TestLoginHandler(t *testing.T) {
+	suite.Run(t, new(LoginTestSuite))
 }

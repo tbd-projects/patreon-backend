@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
-	gh "github.com/gorilla/handlers"
 	"net/http"
 	"patreon/internal/app/delivery/http/handler_factory"
 	"patreon/internal/app/repository/repository_factory"
-	"patreon/internal/app/usecase/usercase_factory"
+	"patreon/internal/app/usecase/usecase_factory"
+
+	gh "github.com/gorilla/handlers"
 
 	_ "patreon/docs"
 	"patreon/internal/app"
@@ -96,7 +97,7 @@ func (s *Server) Start(config *app.Config) error {
 
 	//dataStorage := ds.NewDataStorage(s.connections, s.logger)
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
-	usecaseFactory := usercase_factory.NewUsecaseFactory(repositoryFactory)
+	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
 	factory := handler_factory.NewFactory(s.logger, usecaseFactory)
 	hs := factory.GetHandleUrls()
 

@@ -27,7 +27,7 @@ func (s *LogoutTestSuite) SetupSuite() {
 	s.handler = NewLogoutHandler(s.Logger, s.MockSessionsManager)
 }
 
-func (s *LogoutTestSuite) TestServeHTTP_WithSession() {
+func (s *LogoutTestSuite) TestPOST_WithSession() {
 	uniqID := "1"
 	test := handlers.TestTable{
 		Name:              "with cookies",
@@ -53,7 +53,7 @@ func (s *LogoutTestSuite) TestServeHTTP_WithSession() {
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 }
 
-func (s *LogoutTestSuite) TestServeHTTP_WithoutCookies() {
+func (s *LogoutTestSuite) TestPOST_WithoutCookies() {
 	uniqID := "1"
 	test := handlers.TestTable{
 		Name:              "without cookies",
@@ -78,7 +78,7 @@ func (s *LogoutTestSuite) TestServeHTTP_WithoutCookies() {
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 }
 
-func (s *LogoutTestSuite) TestServeHTTP_ErrorSessions() {
+func (s *LogoutTestSuite) TestPOST_ErrorSessions() {
 	uniqID := "1"
 	test := handlers.TestTable{
 		Name:              "without cookies",
