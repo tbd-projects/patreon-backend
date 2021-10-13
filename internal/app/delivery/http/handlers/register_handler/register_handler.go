@@ -29,7 +29,7 @@ func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).CheckNotAuthorized)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)
 	return h
 }
 
@@ -50,7 +50,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.Log().Error(err)
+			h.Log(r).Error(err)
 		}
 	}(r.Body)
 	req := &models_respond.RequestRegistration{}
@@ -58,7 +58,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil || len(req.Password) == 0 ||
 		len(req.Nickname) == 0 || len(req.Login) == 0 {
-		h.Log().Warnf("can not parse request %s", err)
+		h.Log(r).Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
@@ -69,7 +69,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logUser, _ := json.Marshal(u)
-	h.Log().Debug("get: ", string(logUser))
+	h.Log(r).Debug("get: ", string(logUser))
 
 	id, err := h.userUsecase.Create(u)
 	if err != nil {

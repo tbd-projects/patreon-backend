@@ -26,7 +26,7 @@ func NewProfileHandler(log *logrus.Logger, sManager sessions.SessionsManager, uc
 		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
 	return h
 }
 
@@ -44,13 +44,13 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.Log().Error(err)
+			h.Log(r).Error(err)
 		}
 	}(r.Body)
 
 	userID := r.Context().Value("user_id")
 	if userID == nil {
-		h.Log().Error("can not get user_id from context")
+		h.Log(r).Error("can not get user_id from context")
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
 		return
 	}
@@ -61,6 +61,6 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Log().Debugf("get user %s", u)
+	h.Log(r).Debugf("get user %s", u)
 	h.Respond(w, r, http.StatusOK, models.Profile{Nickname: u.Nickname, Avatar: u.Avatar})
 }

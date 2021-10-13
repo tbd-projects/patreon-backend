@@ -26,7 +26,7 @@ func NewCreatorHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 		sessionManager: sManager,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
 	return h
 }
 
@@ -42,7 +42,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.Log().Error(err)
+			h.Log(r).Error(err)
 		}
 	}(r.Body)
 	creators, err := h.creatorUsecase.GetCreators()
@@ -56,6 +56,6 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 		respondCreators[i] = models.ToResponseCreator(cr)
 	}
 
-	h.Log().Debugf("get creators %v", respondCreators)
+	h.Log(r).Debugf("get creators %v", respondCreators)
 	h.Respond(w, r, http.StatusOK, respondCreators)
 }

@@ -18,14 +18,27 @@ type RespondError struct {
 type CodeMap map[error]RespondError
 
 type RespondHandler struct {
-	log *logrus.Logger
+	log   *logrus.Logger
+	entry *logrus.Entry
 }
 
-func (h *RespondHandler) Log() *logrus.Logger {
-	return h.log
+func (h *RespondHandler) Log(r *http.Request) *logrus.Entry {
+	if h.entry != nil {
+		return h.entry
+	}
+	ctxLogger := r.Context().Value("logger")
+	logger := h.log.WithContext(r.Context())
+	if ctxLogger != nil {
+		if log, ok := ctxLogger.(*logrus.Entry); ok {
+			logger = log
+		}
+	}
+	h.entry = logger
+	return h.entry
 }
+
 func (h *RespondHandler) PrintRequest(r *http.Request) {
-	h.log.Infof("Request: %s. From URL: %s", r.Method, r.URL.Host+r.URL.Path)
+	h.Log(r).Infof("Request: %s. From URL: %s", r.Method, r.URL.Host+r.URL.Path)
 }
 
 func (h *RespondHandler) Error(w http.ResponseWriter, r *http.Request, code int, err error) {
@@ -33,7 +46,7 @@ func (h *RespondHandler) Error(w http.ResponseWriter, r *http.Request, code int,
 }
 
 func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, usecaseErr error, codeByErr CodeMap) {
-	h.log.Errorf("Gotted error: %v", usecaseErr)
+	h.Log(r).Errorf("Gotted error: %v", usecaseErr)
 
 	var generalError *app.GeneralError
 	if errors.As(usecaseErr, &generalError) {
@@ -59,5 +72,5 @@ func (h *RespondHandler) Respond(w http.ResponseWriter, r *http.Request, code in
 		}
 	}
 	logUser, _ := json.Marshal(data)
-	h.log.Info("Respond data: ", string(logUser))
+	h.Log(r).Info("Respond data: ", string(logUser))
 }

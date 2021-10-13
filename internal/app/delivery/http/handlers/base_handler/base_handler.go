@@ -32,7 +32,7 @@ func NewBaseHandler(log *logrus.Logger) *BaseHandler {
 	h := &BaseHandler{handlerMethods: map[string]HandlerFunc{}, middlewares: []MiddlewareFunc{},
 		utilitiesMiddleware: middleware.NewUtilitiesMiddleware(log)}
 	h.log = log
-	h.AddMiddleware(h.utilitiesMiddleware.UpgradeLogger, h.utilitiesMiddleware.UpgradeLogger)
+	h.AddMiddleware(h.utilitiesMiddleware.UpgradeLogger, h.utilitiesMiddleware.CheckPanic)
 	return h
 }
 

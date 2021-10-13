@@ -29,7 +29,7 @@ func NewLoginHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 		userUsecase:    ucUser,
 	}
 	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).CheckNotAuthorized)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)
 	return h
 }
 
@@ -49,7 +49,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.Log().Fatal(err)
+			h.Log(r).Fatal(err)
 		}
 	}(r.Body)
 
@@ -58,12 +58,12 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	if err := decoder.Decode(req); err != nil ||
 		len(req.Login) == 0 || len(req.Password) == 0 {
-		h.Log().Warnf("can not decode body %s", err)
+		h.Log(r).Warnf("can not decode body %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 
-	h.Log().Debugf("Login : %s, password : %s", req.Login, req.Password)
+	h.Log(r).Debugf("Login : %s, password : %s", req.Login, req.Password)
 
 	id, err := h.userUsecase.Check(req.Login, req.Password)
 	if err != nil {
@@ -73,7 +73,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.sessionManager.Create(id)
 	if err != nil || res.UserID != id {
-		h.Log().Errorf("Error create session %s", err)
+		h.Log(r).Errorf("Error create session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateSession)
 		return
 	}

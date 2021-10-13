@@ -23,7 +23,7 @@ func NewLogoutHandler(log *logrus.Logger, sManager sessions.SessionsManager) *Lo
 		sessionManager: sManager,
 	}
 	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
 	return h
 }
 
@@ -40,21 +40,21 @@ func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.Log().Fatal(err)
+			h.Log(r).Fatal(err)
 		}
 	}(r.Body)
 	uniqID := r.Context().Value("uniq_id")
 	if uniqID == nil {
-		h.Log().Error("can not get uniq_id from context")
+		h.Log(r).Error("can not get uniq_id from context")
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
 		return
 	}
 
-	h.Log().Debugf("Logout session: %s", uniqID)
+	h.Log(r).Debugf("Logout session: %s", uniqID)
 
 	err := h.sessionManager.Delete(uniqID.(string))
 	if err != nil {
-		h.Log().Errorf("can not delete session %s", err)
+		h.Log(r).Errorf("can not delete session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)
 		return
 	}

@@ -37,19 +37,11 @@ func NewCreatorCreateHandler(log *logrus.Logger, sManager sessions.SessionsManag
 	h.AddMethod(http.MethodGet, h.GET)
 	h.AddMethod(http.MethodPost, h.POST)
 
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, h.Log()).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
 	return h
 }
 
-// Get Creator
-// @Summary get creator
-// @Description get creator with id from path
-// @Produce json
-// @Param id path int true "Get creator with id"
-// @Success 200 {object} models.Creator "Get user successfully"
-// @Failure 503 {object} models.BaseResponse "Internal error"
-// @Router /creators/{:id} [GET]
-// Create Creator
+// POST Create Creator
 // @Summary create creator
 // @Description create creator with id from path, and respond created creator
 // @Produce json
@@ -65,23 +57,23 @@ func (s *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			s.Log().Error(err)
+			s.Log(r).Error(err)
 		}
 	}(r.Body)
 
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
-	s.Log().Info("in /creators/id")
+	s.Log(r).Info("in /creators/id")
 	idInt, err := strconv.Atoi(id)
 	if len(vars) > 1 || !ok || err != nil {
-		s.Log().Info(vars)
+		s.Log(r).Info(vars)
 		s.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 	req := &models.RequestCreator{}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil {
-		s.Log().Warnf("can not parse request %s", err)
+		s.Log(r).Warnf("can not parse request %s", err)
 		s.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
@@ -105,20 +97,28 @@ func (s *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	s.Respond(w, r, http.StatusOK, creatorId)
 }
 
+// GET Creator
+// @Summary get creator
+// @Description get creator with id from path
+// @Produce json
+// @Param id path int true "Get creator with id"
+// @Success 200 {object} models.Creator "Get user successfully"
+// @Failure 503 {object} models.BaseResponse "Internal error"
+// @Router /creators/{:id} [GET]
 func (s *CreatorCreateHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			s.Log().Error(err)
+			s.Log(r).Error(err)
 		}
 	}(r.Body)
 
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
-	s.Log().Info("in /creators/id")
+	s.Log(r).Info("in /creators/id")
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	if len(vars) > 1 || !ok || err != nil {
-		s.Log().Info(vars)
+		s.Log(r).Info(vars)
 		s.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
@@ -130,7 +130,7 @@ func (s *CreatorCreateHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.Log().Debugf("get creator %v with id %v", creator, id)
+	s.Log(r).Debugf("get creator %v with id %v", creator, id)
 	s.Respond(w, r, http.StatusOK, creator)
 
 }
