@@ -1,6 +1,9 @@
 package models
 
 import (
+	"fmt"
+	"strconv"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
 )
@@ -12,6 +15,10 @@ type Creator struct {
 	Description string `json:"description"`
 	Avatar      string `json:"avatar,omitempty"`
 	Cover       string `json:"cover,omitempty"`
+}
+
+func (cr *Creator) String() string {
+	return fmt.Sprintf("{ID: %s, Nickname: %s Category: %s}", strconv.Itoa(int(cr.ID)), cr.Nickname, cr.Category)
 }
 
 // Validate Errors:
