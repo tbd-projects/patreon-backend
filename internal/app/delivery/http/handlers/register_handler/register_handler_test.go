@@ -80,7 +80,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_UserAlreadyExist() {
 			Password: "mail.ru",
 		},
 		ExpectedMockTimes: 1,
-		ExpectedCode:      http.StatusConflict,
+		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
 
 	recorder := httptest.NewRecorder()
@@ -115,7 +115,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_SmallPassword() {
 			Password: "mail",
 		},
 		ExpectedMockTimes: 1,
-		ExpectedCode:      http.StatusBadRequest,
+		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
 	recorder := httptest.NewRecorder()
 

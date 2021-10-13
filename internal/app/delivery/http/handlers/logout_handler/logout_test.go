@@ -103,6 +103,7 @@ func (s *LogoutTestSuite) TestPOST_ErrorSessions() {
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 }
+
 func TestLogoutSuite(t *testing.T) {
 	suite.Run(t, new(LogoutTestSuite))
 }

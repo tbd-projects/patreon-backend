@@ -82,8 +82,8 @@ func (s *CreatorTestSuite) TestCreatorHandler_POST_EmptyCreators() {
 		Return(nil, nil)
 	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
-
 }
+
 func TestCreatorHandler(t *testing.T) {
 	suite.Run(t, new(CreatorTestSuite))
 }

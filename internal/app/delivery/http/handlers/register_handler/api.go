@@ -6,12 +6,13 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	usecase_user "patreon/internal/app/usecase/user"
+	repository_user "patreon/internal/app/repository/user"
 )
 
 var codeByError = base_handler.CodeMap{
-	repository.NotFound:             {http.StatusNotFound, handler_errors.UserNotFound},
-	usecase_user.UserExist:          {http.StatusBadRequest, handler_errors.UserAlreadyExist},
-	models.IncorrectEmailOrPassword: {http.StatusBadRequest, handler_errors.IncorrectEmailOrPassword},
-	repository.DefaultErrDB:         {http.StatusInternalServerError, handler_errors.BDError},
+	repository.NotFound:                  {http.StatusNotFound, handler_errors.UserNotFound},
+	repository_user.LoginAlreadyExist:    {http.StatusUnprocessableEntity, handler_errors.UserAlreadyExist},
+	repository_user.NicknameAlreadyExist: {http.StatusUnprocessableEntity, handler_errors.NicknameAlreadyExist},
+	models.IncorrectEmailOrPassword:      {http.StatusUnprocessableEntity, handler_errors.IncorrectEmailOrPassword},
+	repository.DefaultErrDB:              {http.StatusInternalServerError, handler_errors.BDError},
 }

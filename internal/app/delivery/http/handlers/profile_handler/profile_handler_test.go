@@ -110,6 +110,7 @@ func (s *ProfileTestSuite) TestProfileHandler_GET_WithoutContext() {
 	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
+
 func TestProfileHandler(t *testing.T) {
 	suite.Run(t, new(ProfileTestSuite))
 }

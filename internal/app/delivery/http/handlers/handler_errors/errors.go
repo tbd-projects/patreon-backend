@@ -4,6 +4,7 @@ import "errors"
 
 var (
 	UserAlreadyExist           = errors.New("user already exist")
+	NicknameAlreadyExist       = errors.New("nickname already exist")
 	IncorrectEmailOrPassword   = errors.New("incorrect email or password")
 	UserNotFound               = errors.New("user with this id not found")
 	GetProfileFail             = errors.New("can not get user from db")

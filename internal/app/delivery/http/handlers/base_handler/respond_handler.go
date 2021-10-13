@@ -35,7 +35,8 @@ func (h *RespondHandler) Error(w http.ResponseWriter, r *http.Request, code int,
 func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, usecaseErr error, codeByErr CodeMap) {
 	h.log.Errorf("Gotted error: %v", usecaseErr)
 
-	if errors.As(usecaseErr, &app.GeneralError{}) {
+	var generalError *app.GeneralError
+	if errors.As(usecaseErr, &generalError) {
 		usecaseErr = errors.Cause(usecaseErr).(*app.GeneralError).Err
 	}
 

@@ -73,7 +73,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_No_Params() {
 	s.Tb = handlers.TestTable{
 		Name:              "No url params",
 		Data:              int64(-1),
-		ExpectedMockTimes: 1,
+		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusBadRequest,
 	}
 
@@ -89,8 +89,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_No_Params() {
 	s.MockUserUsecase.
 		EXPECT().
 		GetProfile(s.Tb.Data.(int64)).
-		Times(s.Tb.ExpectedMockTimes).
-		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
+		Times(s.Tb.ExpectedMockTimes)
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
@@ -125,7 +124,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_DB_Error() {
 		Name:              "Invalid request body",
 		Data:              int64(1),
 		ExpectedMockTimes: 1,
-		ExpectedCode:      http.StatusUnprocessableEntity,
+		ExpectedCode:      http.StatusInternalServerError,
 	}
 	reqBody := models.RequestCreator{
 		Description: "description",
@@ -146,7 +145,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_DB_Error() {
 		EXPECT().
 		GetProfile(s.Tb.Data.(int64)).
 		Times(s.Tb.ExpectedMockTimes).
-		Return(nil, &app.GeneralError{})
+		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
@@ -248,9 +247,11 @@ func (match *creatorWithFieldMatcher) Matches(x interface{}) bool {
 		return false
 	}
 }
+
 func (match *creatorWithFieldMatcher) String() string {
 	return fmt.Sprintf("Creator: %s", match.creator.String())
 }
+
 func TestCreatorCreateSuite(t *testing.T) {
 	suite.Run(t, new(CreatorCreateTestSuite))
 }

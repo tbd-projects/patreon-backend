@@ -182,6 +182,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
+
 func TestLoginHandler(t *testing.T) {
 	suite.Run(t, new(LoginTestSuite))
 }
