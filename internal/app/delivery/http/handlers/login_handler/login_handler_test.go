@@ -141,6 +141,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
+
 func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 	s.Tb = handlers.TestTable{
 		Name: "Invalid body",
