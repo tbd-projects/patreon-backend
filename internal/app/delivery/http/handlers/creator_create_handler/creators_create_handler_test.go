@@ -155,7 +155,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Create_Err() {
 		Name:              "CreateError in create usecase",
 		Data:              int64(1),
 		ExpectedMockTimes: 1,
-		ExpectedCode:      http.StatusBadRequest,
+		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
 	reqBody := models.RequestCreator{
 		Description: "description",

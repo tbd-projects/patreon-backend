@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
@@ -48,10 +47,10 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}(r.Body)
 	creators, err := h.creatorUsecase.GetCreators()
 	if err != nil {
-		h.Log().Errorf("get: %v err:%v can not get user from db", creators, err)
-		h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
+		h.UsecaseError(w, r, err, codesByErrors)
 		return
 	}
+
 	respondCreators := make([]models.ResponseCreator, len(creators))
 	for i, cr := range creators {
 		respondCreators[i] = models.ToResponseCreator(cr)

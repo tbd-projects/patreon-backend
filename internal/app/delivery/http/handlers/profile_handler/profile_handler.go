@@ -57,9 +57,7 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 	u, err := h.userUsecase.GetProfile(userID.(int64))
 	if err != nil {
-		//h.Log().Errorf("get: %s err:%s can not get user from db", u, err)
 		h.UsecaseError(w, r, err, codeByError)
-		//h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
 		return
 	}
 

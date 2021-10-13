@@ -77,29 +77,6 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//checkUser, _ := h.dataStorage.Store().User().FindByLogin(u.Login)
-	//if checkUser != nil {
-	//	h.Log().Warn(handler_errors.UserAlreadyExist)
-	//	h.Error(w, r, http.StatusConflict, handler_errors.UserAlreadyExist)
-	//	return
-	//}
-	//if err := u.Validate(); err != nil {
-	//	h.Log().Warnf("Not valid login or password %s", err)
-	//	h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
-	//	return
-	//}
-	//
-	//if err := u.Encrypt(); err != nil {
-	//	h.Log().Errorf("Error prepare user info %s", err)
-	//	h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorPrepareUser)
-	//	return
-	//}
-	//
-	//if err := h.dataStorage.Store().User().Create(u); err != nil {
-	//	h.Log().Errorf("Error create user in bd %s", err)
-	//	h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateUser)
-	//	return
-	//}
 	u.MakePrivateDate()
 	h.Respond(w, r, http.StatusOK, id)
 }

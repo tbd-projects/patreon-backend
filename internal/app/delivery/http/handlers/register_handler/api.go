@@ -10,7 +10,7 @@ import (
 )
 
 var codeByError = base_handler.CodeMap{
-	repository.NotFound:                  {http.StatusNotFound, handler_errors.UserNotFound},
+	models.EmptyPassword:                 {http.StatusUnprocessableEntity, handler_errors.InvalidBody},
 	repository_user.LoginAlreadyExist:    {http.StatusUnprocessableEntity, handler_errors.UserAlreadyExist},
 	repository_user.NicknameAlreadyExist: {http.StatusUnprocessableEntity, handler_errors.NicknameAlreadyExist},
 	models.IncorrectEmailOrPassword:      {http.StatusUnprocessableEntity, handler_errors.IncorrectEmailOrPassword},

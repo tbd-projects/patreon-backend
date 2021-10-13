@@ -27,6 +27,7 @@ func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+
 		uniqID := sessionID.Value
 		if res, err := m.SessionManager.Check(uniqID); err != nil {
 			m.log.Warnf("Error in checking session: %v", err)

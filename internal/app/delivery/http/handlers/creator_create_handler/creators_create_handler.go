@@ -87,14 +87,9 @@ func (s *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 	u, err := s.userUsecase.GetProfile(int64(idInt))
 	if err != nil {
-		s.UsecaseError(w, r, err, codesByErrors)
+		s.UsecaseError(w, r, err, codesByErrorsPOST)
 		return
 	}
-	//if _, err = h.creatorUsecase.GetCreator(int64(idInt)); err == nil {
-	//	h.Log().Errorf("get: %s err:%s", u, handler_errors.ProfileAlreadyExist)
-	//	h.Error(w, r, http.StatusConflict, handler_errors.ProfileAlreadyExist)
-	//	return
-	//}
 	cr := &db_models.Creator{
 		ID:          u.ID,
 		Nickname:    u.Nickname,
@@ -103,22 +98,10 @@ func (s *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 	creatorId, err := s.creatorUsecase.Create(cr)
 	if err != nil {
-		s.UsecaseError(w, r, err, codesByErrors)
-		//h.Log().Errorf("get: %v err:%v can not create user", cr, err)
-		//h.Error(w, r, http.StatusServiceUnavailable, err)
+		s.UsecaseError(w, r, err, codesByErrorsPOST)
 		return
 	}
-	//if err = cr.Validate(); err != nil {
-	//	toLog, _ := json.Marshal(err)
-	//	h.Log().Errorf("get: %v err:%v ", cr, string(toLog))
-	//	h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
-	//	return
-	//}
-	//if err := h.dataStorage.Store().Creator().Create(cr); err != nil {
-	//	h.Log().Errorf("get: %v err:%v can not create user", cr, err)
-	//	h.Error(w, r, http.StatusServiceUnavailable, handler_errors.BDError)
-	//	return
-	//}
+
 	s.Respond(w, r, http.StatusOK, creatorId)
 }
 
@@ -133,18 +116,17 @@ func (s *CreatorCreateHandler) GET(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	s.Log().Info("in /creators/id")
-	idInt, err := strconv.Atoi(id)
+	idInt, err := strconv.ParseInt(id, 10, 64)
 	if len(vars) > 1 || !ok || err != nil {
 		s.Log().Info(vars)
 		s.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
-	creator, err := s.creatorUsecase.GetCreator(int64(idInt))
-	//creator, err := h.dataStorage.Store().Creator().GetCreator(int64(idInt))
+
+	creator, err := s.creatorUsecase.GetCreator(idInt)
 	if err != nil {
-		s.UsecaseError(w, r, err, codesByErrors)
-		//h.Log().Errorf("get: %v err:%v can not get user from db", creator, err)
-		//h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
+		s.UsecaseError(w, r, err, codesByErrorsGET)
+
 		return
 	}
 

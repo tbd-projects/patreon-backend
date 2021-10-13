@@ -1,4 +1,4 @@
-package profile_handler
+package creator_handler
 
 import (
 	"net/http"
@@ -7,7 +7,6 @@ import (
 	"patreon/internal/app/repository"
 )
 
-var codeByError = base_handler.CodeMap{
-	repository.NotFound: {http.StatusNotFound, handler_errors.UserNotFound},
+var codesByErrors = base_handler.CodeMap{
 	repository.DefaultErrDB: {http.StatusInternalServerError, handler_errors.BDError},
 }

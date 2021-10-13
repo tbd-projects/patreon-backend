@@ -2,6 +2,7 @@ package base_handler
 
 import (
 	"net/http"
+	"patreon/internal/app/middleware"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -21,14 +22,17 @@ type HandlerFunc func(w http.ResponseWriter, r *http.Request)
 type MiddlewareFunc func(handler http.Handler) http.Handler
 
 type BaseHandler struct {
-	handlerMethods map[string]HandlerFunc
-	middlewares    []MiddlewareFunc
+	utilitiesMiddleware middleware.UtilitiesMiddleware
+	handlerMethods      map[string]HandlerFunc
+	middlewares         []MiddlewareFunc
 	RespondHandler
 }
 
 func NewBaseHandler(log *logrus.Logger) *BaseHandler {
-	h := &BaseHandler{handlerMethods: map[string]HandlerFunc{}, middlewares: []MiddlewareFunc{}}
+	h := &BaseHandler{handlerMethods: map[string]HandlerFunc{}, middlewares: []MiddlewareFunc{},
+		utilitiesMiddleware: middleware.NewUtilitiesMiddleware(log)}
 	h.log = log
+	h.AddMiddleware(h.utilitiesMiddleware.UpgradeLogger, h.utilitiesMiddleware.UpgradeLogger)
 	return h
 }
 
