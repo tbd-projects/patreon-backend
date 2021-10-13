@@ -1,74 +1,225 @@
 package creator_create_handler
 
-import "patreon/internal/app/delivery/http/handlers"
+import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"patreon/internal/app"
+	"patreon/internal/app/delivery/http/handlers"
+	"patreon/internal/app/delivery/http/models"
+	models_data "patreon/internal/app/models"
+	"patreon/internal/app/repository"
+	"strconv"
+	"testing"
+
+	"github.com/gorilla/mux"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+)
 
 type CreatorCreateTestSuite struct {
-	handlers.SuiteTestBaseHandler
+	handlers.SuiteHandler
+	handler *CreatorCreateHandler
 }
 
-/*
+func (s *CreatorCreateTestSuite) SetupSuite() {
+	s.SuiteHandler.SetupSuite()
+	s.handler = NewCreatorCreateHandler(s.Logger, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
+}
+
 func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
-	test := TestTable{
-		name:              "correct",
-		data:              &models.Creator{ID: int(userID), Avatar: "some", Nickname: "done"},
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusOK,
+	test := handlers.TestTable{
+		Name:              "correct",
+		Data:              userID,
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusOK,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewCreatorHandler(s.logger, s.dataStorage)
-
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(test.Data)
 
 	require.NoError(s.T(), err)
-	reader, _ := http.NewRequest(http.MethodPost, "/creators", &b)
-
-	s.mockCreatorRepository.
+	req, _ := http.NewRequest(http.MethodGet, "/creators", &b)
+	vars := map[string]string{
+		"id": strconv.Itoa(int(userID)),
+	}
+	creator := models_data.Creator{
+		ID: userID, Avatar: "some", Nickname: "done"}
+	reader := mux.SetURLVars(req, vars)
+	s.MockCreatorUsecase.
 		EXPECT().
-		GetCreators().
-		Times(test.expectedMockTimes).
-		Return([]models.Creator{*test.data.(*models.Creator)}, nil)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
-
-	req := &[]models.ResponseCreator{}
+		GetCreator(userID).
+		Times(test.ExpectedMockTimes).
+		Return(&creator, nil)
+	s.handler.GET(recorder, reader)
+	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 	decoder := json.NewDecoder(recorder.Body)
-	err = decoder.Decode(req)
-	require.NoError(s.T(), err)
-
-	assert.Equal(s.T(), req, &[]models.ResponseCreator{models.ToResponseCreator(*test.data.(*models.Creator))})
+	res := &models_data.Creator{}
+	err = decoder.Decode(res)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), &creator, res)
 }
 
-func (s *CreatorCreateTestSuite) TestServeHTTP_WitDBError() {
-
-	test := TestTable{
-		name:              "with db error",
-		data:              nil,
-		expectedMockTimes: 1,
-		expectedCode:      http.StatusServiceUnavailable,
+func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_No_Params() {
+	s.Tb = handlers.TestTable{
+		Name:              "No url params",
+		Data:              int64(-1),
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusBadRequest,
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewCreatorHandler()
-	logrus.SetOutput(ioutil.Discard)
-	handler.SetStore(s.store)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.data)
+	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
 	require.NoError(s.T(), err)
+
 	reader, _ := http.NewRequest(http.MethodPost, "/creators", &b)
 
-	s.mockCreatorRepository.
+	s.MockUserUsecase.
 		EXPECT().
-		GetCreators().
-		Times(test.expectedMockTimes).
-		Return(nil, store.NotFound)
-	handler.ServeHTTP(recorder, reader)
-	assert.Equal(s.T(), test.expectedCode, recorder.Code)
+		GetProfile(s.Tb.Data.(int64)).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
+}
+func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Invalid_Body() {
+	s.Tb = handlers.TestTable{
+		Name:              "Invalid request body",
+		Data:              int64(1),
+		ExpectedMockTimes: 0,
+		ExpectedCode:      http.StatusUnprocessableEntity,
+	}
+	recorder := httptest.NewRecorder()
+
+	b := bytes.Buffer{}
+	err := json.NewEncoder(&b).Encode(s.Tb.Data)
+
+	require.NoError(s.T(), err)
+	req, _ := http.NewRequest(http.MethodPost, "/creators", &b)
+	vars := map[string]string{
+		"id": strconv.Itoa(int(s.Tb.Data.(int64))),
+	}
+	reader := mux.SetURLVars(req, vars)
+	s.MockUserUsecase.
+		EXPECT().
+		GetProfile(s.Tb.Data.(int64)).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
+}
+func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_DB_Error() {
+	s.Tb = handlers.TestTable{
+		Name:              "Invalid request body",
+		Data:              int64(1),
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusUnprocessableEntity,
+	}
+	reqBody := models.RequestCreator{
+		Description: "description",
+		Category:    "category",
+	}
+	recorder := httptest.NewRecorder()
+
+	b := bytes.Buffer{}
+	err := json.NewEncoder(&b).Encode(reqBody)
+
+	require.NoError(s.T(), err)
+	req, _ := http.NewRequest(http.MethodPost, "/creators", &b)
+	vars := map[string]string{
+		"id": strconv.Itoa(int(s.Tb.Data.(int64))),
+	}
+	reader := mux.SetURLVars(req, vars)
+	s.MockUserUsecase.
+		EXPECT().
+		GetProfile(s.Tb.Data.(int64)).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
+	s.handler.POST(recorder, reader)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
+}
+
+//func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Create_Err() {
+//	s.Tb = handlers.TestTable{
+//		Name:              "CreateError in create usecase",
+//		Data:              int64(1),
+//		ExpectedMockTimes: 1,
+//		ExpectedCode:      http.StatusBadRequest,
+//	}
+//	reqBody := models.RequestCreator{
+//		Description: "description",
+//		Category:    "category",
+//	}
+//	recorder := httptest.NewRecorder()
+//
+//	b := bytes.Buffer{}
+//	err := json.NewEncoder(&b).Encode(reqBody)
+//
+//	require.NoError(s.T(), err)
+//	req, _ := http.NewRequest(http.MethodPost, "/creators", &b)
+//	vars := map[string]string{
+//		"id": strconv.Itoa(int(s.Tb.Data.(int64))),
+//	}
+//	reader := mux.SetURLVars(req, vars)
+//	s.MockUserUsecase.
+//		EXPECT().
+//		GetProfile(s.Tb.Data.(int64)).
+//		Times(s.Tb.ExpectedMockTimes).
+//		Return(nil, models_data.IncorrectCreatorCategory)
+//	s.handler.POST(recorder, reader)
+//	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
+//}
+func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Correct() {
+	userId := int64(1)
+	s.Tb = handlers.TestTable{
+		Name:              "Correct creator create",
+		Data:              userId,
+		ExpectedMockTimes: 1,
+		ExpectedCode:      http.StatusOK,
+	}
+	reqBody := models.RequestCreator{
+		Description: "description",
+		Category:    "category",
+	}
+	creator := &models_data.Creator{
+		ID:          userId,
+		Category:    reqBody.Category,
+		Description: reqBody.Description,
+	}
+	recorder := httptest.NewRecorder()
+
+	b := bytes.Buffer{}
+	err := json.NewEncoder(&b).Encode(reqBody)
+
+	require.NoError(s.T(), err)
+	req, _ := http.NewRequest(http.MethodPost, "/creators", &b)
+	vars := map[string]string{
+		"id": strconv.Itoa(int(s.Tb.Data.(int64))),
+	}
+	reader := mux.SetURLVars(req, vars)
+	s.MockUserUsecase.
+		EXPECT().
+		Create(creator.ID).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(creator.ID, nil)
+	s.handler.POST(recorder, reader)
+	decoder := json.NewDecoder(recorder.Body)
+	var res int64
+	err = decoder.Decode(res)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
+	assert.Equal(s.T(), userId, res)
 
 }
-*/
+func TestCreatorCreateSuite(t *testing.T) {
+	suite.Run(t, new(CreatorCreateTestSuite))
+}

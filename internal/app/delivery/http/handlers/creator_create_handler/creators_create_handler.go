@@ -61,33 +61,33 @@ func NewCreatorCreateHandler(log *logrus.Logger, sManager sessions.SessionsManag
 // @Failure 422 {object} models.BaseResponse "Invalid request body"
 // @Failure 503 {object} models.BaseResponse "Internal error"
 // @Router /creators/{:id} [POST]
-func (h *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
+func (s *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.Log().Error(err)
+			s.Log().Error(err)
 		}
 	}(r.Body)
 
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
-	h.Log().Info("in /creators/id")
+	s.Log().Info("in /creators/id")
 	idInt, err := strconv.Atoi(id)
 	if len(vars) > 1 || !ok || err != nil {
-		h.Log().Info(vars)
-		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		s.Log().Info(vars)
+		s.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 	req := &models.RequestCreator{}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil {
-		h.Log().Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		s.Log().Warnf("can not parse request %s", err)
+		s.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
-	u, err := h.userUsecase.GetProfile(int64(idInt))
+	u, err := s.userUsecase.GetProfile(int64(idInt))
 	if err != nil {
-		h.UsecaseError(w, r, err, codesByErrors)
+		s.UsecaseError(w, r, err, codesByErrors)
 		return
 	}
 	//if _, err = h.creatorUsecase.GetCreator(int64(idInt)); err == nil {
@@ -101,9 +101,9 @@ func (h *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Category:    req.Category,
 		Description: req.Description,
 	}
-	creatorId, err := h.creatorUsecase.Create(cr)
+	creatorId, err := s.creatorUsecase.Create(cr)
 	if err != nil {
-		h.UsecaseError(w, r, err, codesByErrors)
+		s.UsecaseError(w, r, err, codesByErrors)
 		//h.Log().Errorf("get: %v err:%v can not create user", cr, err)
 		//h.Error(w, r, http.StatusServiceUnavailable, err)
 		return
@@ -119,36 +119,36 @@ func (h *CreatorCreateHandler) POST(w http.ResponseWriter, r *http.Request) {
 	//	h.Error(w, r, http.StatusServiceUnavailable, handler_errors.BDError)
 	//	return
 	//}
-	h.Respond(w, r, http.StatusOK, creatorId)
+	s.Respond(w, r, http.StatusOK, creatorId)
 }
 
-func (h *CreatorCreateHandler) GET(w http.ResponseWriter, r *http.Request) {
+func (s *CreatorCreateHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			h.Log().Error(err)
+			s.Log().Error(err)
 		}
 	}(r.Body)
 
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
-	h.Log().Info("in /creators/id")
+	s.Log().Info("in /creators/id")
 	idInt, err := strconv.Atoi(id)
 	if len(vars) > 1 || !ok || err != nil {
-		h.Log().Info(vars)
-		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		s.Log().Info(vars)
+		s.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
-	creator, err := h.creatorUsecase.GetCreator(int64(idInt))
+	creator, err := s.creatorUsecase.GetCreator(int64(idInt))
 	//creator, err := h.dataStorage.Store().Creator().GetCreator(int64(idInt))
 	if err != nil {
-		h.UsecaseError(w, r, err, codesByErrors)
+		s.UsecaseError(w, r, err, codesByErrors)
 		//h.Log().Errorf("get: %v err:%v can not get user from db", creator, err)
 		//h.Error(w, r, http.StatusServiceUnavailable, handler_errors.GetProfileFail)
 		return
 	}
 
-	h.Log().Debugf("get creator %v with id %v", creator, id)
-	h.Respond(w, r, http.StatusOK, creator)
+	s.Log().Debugf("get creator %v with id %v", creator, id)
+	s.Respond(w, r, http.StatusOK, creator)
 
 }
