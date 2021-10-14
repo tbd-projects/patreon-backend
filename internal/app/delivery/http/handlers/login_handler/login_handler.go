@@ -9,6 +9,7 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
+	"patreon/internal/app/sessions/sessions_manager"
 	usecase_user "patreon/internal/app/usecase/user"
 	"time"
 
@@ -81,7 +82,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    res.UniqID,
-		Expires:  time.Now().Add(10 * time.Hour),
+		Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime),
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)

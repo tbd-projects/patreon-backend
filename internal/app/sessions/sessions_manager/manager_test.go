@@ -60,7 +60,7 @@ func (s *SuiteTestSesManager) TestCreateSession() {
 	var uniqID string
 	s.mockSessionRepository.EXPECT().
 		Set(SkipUniqIDMatcher(models.Session{UserID: fmt.Sprintf("%d", userID), UniqID: "some uniqID",
-			Expiration: expiredCookiesTime})).
+			Expiration: ExpiredCookiesTime})).
 		Times(1).
 		Do(func(session *models.Session) error {
 			uniqID = session.UniqID
