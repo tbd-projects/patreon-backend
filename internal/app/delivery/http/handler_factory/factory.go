@@ -1,7 +1,6 @@
 package handler_factory
 
 import (
-	"github.com/sirupsen/logrus"
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/creator_create_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
@@ -9,6 +8,9 @@ import (
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
 	handlers2 "patreon/internal/app/delivery/http/handlers/register_handler"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -23,14 +25,19 @@ const (
 
 type HandlerFactory struct {
 	usecaseFactory UsecaseFactory
-	logger     *logrus.Logger
-	urlHandler *map[string]app.Handler
+	logger         *logrus.Logger
+	router         *mux.Router
+	cors           *app.CorsConfig
+	urlHandler     *map[string]app.Handler
 }
 
-func NewFactory(logger *logrus.Logger, usecaseFactory UsecaseFactory) *HandlerFactory {
+func NewFactory(logger *logrus.Logger, router *mux.Router,
+	cors *app.CorsConfig, usecaseFactory UsecaseFactory) *HandlerFactory {
 	return &HandlerFactory{
 		usecaseFactory: usecaseFactory,
-		logger: logger,
+		logger:         logger,
+		router:         router,
+		cors:           cors,
 	}
 }
 
@@ -39,12 +46,12 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucCreator := f.usecaseFactory.GetCreatorUsecase()
 	sManager := f.usecaseFactory.GetSessionManager()
 	return map[int]app.Handler{
-		REGISTER:        handlers2.NewRegisterHandler(f.logger, sManager, ucUser),
-		LOGIN:           login_handler.NewLoginHandler(f.logger, sManager, ucUser),
-		LOGOUT:          logout_handler.NewLogoutHandler(f.logger, sManager),
-		PROFILE:         profile_handler.NewProfileHandler(f.logger, sManager, ucUser),
-		CREATORS:        creator_handler.NewCreatorHandler(f.logger, sManager, ucCreator),
-		CREATOR_WITH_ID: creator_create_handler.NewCreatorCreateHandler(f.logger, sManager, ucUser, ucCreator),
+		REGISTER:        handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		LOGIN:           login_handler.NewLoginHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		LOGOUT:          logout_handler.NewLogoutHandler(f.logger, f.router, f.cors, sManager),
+		PROFILE:         profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		CREATORS:        creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator),
+		CREATOR_WITH_ID: creator_create_handler.NewCreatorCreateHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
 	}
 }
 

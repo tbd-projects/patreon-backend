@@ -9,3 +9,18 @@ redis_url = "redis://localhost:6379"
 [server]
 database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
 redis_url = "redis://redis/0"
+
+[cors]
+headers = [
+    "Accept", "Content-Type",
+    "Content-Length", "Accept-Encoding",
+    "X-CSRF-Token", "csrf-token",
+    "Authorization"
+]
+methods = ["GET", "HEAD", "POST", "PUT", "OPTIONS"]
+urls =[
+    "http://localhost:3001", "https://patreon-dev.herokuapp.com",
+    "https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",
+    "http://patreon-dev.herokuapp.com", "http://front2.tp.volodyalarin.site",
+    "http://pyaterochka-team.site"
+]

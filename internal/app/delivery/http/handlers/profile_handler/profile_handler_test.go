@@ -23,7 +23,7 @@ type ProfileTestSuite struct {
 
 func (s *ProfileTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewProfileHandler(s.Logger, s.MockSessionsManager, s.MockUserUsecase)
+	s.handler = NewProfileHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase)
 }
 
 func (s *ProfileTestSuite) TestProfileHandler_GET_Correct() {

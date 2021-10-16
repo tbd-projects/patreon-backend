@@ -3,11 +3,14 @@ package creator_handler
 import (
 	"io"
 	"net/http"
+	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -18,10 +21,10 @@ type CreatorHandler struct {
 	bh.BaseHandler
 }
 
-func NewCreatorHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
 	ucCreator usecase_creator.Usecase) *CreatorHandler {
 	h := &CreatorHandler{
-		BaseHandler:    *bh.NewBaseHandler(log),
+		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 		creatorUsecase: ucCreator,
 		sessionManager: sManager,
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
@@ -11,6 +12,8 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -21,12 +24,12 @@ type RegisterHandler struct {
 	bh.BaseHandler
 }
 
-func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewRegisterHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
 	ucUser usecase_user.Usecase) *RegisterHandler {
 	h := &RegisterHandler{
 		sessionManager: sManager,
 		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log),
+		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
 	h.AddMethod(http.MethodPost, h.POST)
 	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)

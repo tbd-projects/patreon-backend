@@ -30,7 +30,7 @@ type CreatorCreateTestSuite struct {
 
 func (s *CreatorCreateTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorCreateHandler(s.Logger, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
+	s.handler = NewCreatorCreateHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
 }
 
 func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
@@ -60,7 +60,7 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 		GetCreator(userID).
 		Times(test.ExpectedMockTimes).
 		Return(&creator, nil)
-	s.handler.GET(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 	decoder := json.NewDecoder(recorder.Body)
 	res := &models_data.Creator{}
@@ -90,7 +90,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_No_Params() {
 		EXPECT().
 		GetProfile(s.Tb.Data.(int64)).
 		Times(s.Tb.ExpectedMockTimes)
-	s.handler.POST(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Invalid_Body() {
@@ -116,7 +116,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Invalid_Body() {
 		GetProfile(s.Tb.Data.(int64)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
-	s.handler.POST(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_DB_Error() {
@@ -146,7 +146,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_DB_Error() {
 		GetProfile(s.Tb.Data.(int64)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
-	s.handler.POST(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 
@@ -177,7 +177,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Create_Err() {
 		GetProfile(s.Tb.Data.(int64)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(nil, models_data.IncorrectCreatorCategory)
-	s.handler.POST(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Correct() {
@@ -222,7 +222,7 @@ func (s *CreatorCreateTestSuite) TestCreatorCreateHandler_POST_Correct() {
 		Create(newCreatorWithFieldMatcher(creator)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(creator.ID, nil)
-	s.handler.POST(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	decoder := json.NewDecoder(recorder.Body)
 	var res interface{}
 	err = decoder.Decode(&res)

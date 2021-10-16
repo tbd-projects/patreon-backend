@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
 )
 
 type UtilitiesMiddleware struct {

@@ -23,7 +23,7 @@ type CreatorTestSuite struct {
 
 func (s *CreatorTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorHandler(s.Logger, s.MockSessionsManager, s.MockCreatorUsecase)
+	s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase)
 }
 
 func (s *CreatorTestSuite) TestCreatorHandler_POST_Correct() {
@@ -48,7 +48,7 @@ func (s *CreatorTestSuite) TestCreatorHandler_POST_Correct() {
 		GetCreators().
 		Times(s.Tb.ExpectedMockTimes).
 		Return([]models.Creator{*s.Tb.Data.(*models.Creator)}, nil)
-	s.handler.GET(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 	req := &[]models_data.ResponseCreator{}
 	decoder := json.NewDecoder(recorder.Body)
@@ -80,7 +80,7 @@ func (s *CreatorTestSuite) TestCreatorHandler_POST_EmptyCreators() {
 		GetCreators().
 		Times(s.Tb.ExpectedMockTimes).
 		Return(nil, nil)
-	s.handler.GET(recorder, reader)
+	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 

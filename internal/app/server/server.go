@@ -7,8 +7,6 @@ import (
 	"patreon/internal/app/repository/repository_factory"
 	"patreon/internal/app/usecase/usecase_factory"
 
-	gh "github.com/gorilla/handlers"
-
 	_ "patreon/docs"
 	"patreon/internal/app"
 
@@ -29,21 +27,6 @@ func New(config *app.Config, connections app.ExpectedConnections, logger *log.Lo
 		config:      config,
 		logger:      logger,
 		connections: connections,
-	}
-}
-
-func CORSConfigure(router *mux.Router) {
-	if router != nil {
-		router.Use(gh.CORS(
-			gh.AllowedOrigins([]string{"http://localhost:3001", "https://patreon-dev.herokuapp.com",
-				"https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",
-				"http://patreon-dev.herokuapp.com", "http://front2.tp.volodyalarin.site", "http://pyaterochka-team.site"}),
-			gh.AllowedHeaders([]string{
-				"Accept", "Content-Type", "Content-Length",
-				"Accept-Encoding", "X-CSRF-Token", "csrf-token", "Authorization"}),
-			gh.AllowCredentials(),
-			gh.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
-		))
 	}
 }
 
@@ -93,12 +76,10 @@ func (s *Server) Start(config *app.Config) error {
 	router := mux.NewRouter()
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
-	CORSConfigure(router)
 
-	//dataStorage := ds.NewDataStorage(s.connections, s.logger)
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
-	factory := handler_factory.NewFactory(s.logger, usecaseFactory)
+	factory := handler_factory.NewFactory(s.logger, router, &config.Cors, usecaseFactory)
 	hs := factory.GetHandleUrls()
 
 	for url, h := range *hs {

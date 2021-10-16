@@ -25,7 +25,7 @@ type RegisterTestSuite struct {
 
 func (s *RegisterTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewRegisterHandler(s.Logger, s.MockSessionsManager, s.MockUserUsecase)
+	s.handler = NewRegisterHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase)
 }
 
 func (s *RegisterTestSuite) TestRegisterHandler_POST_EmptyBody() {

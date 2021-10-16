@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -26,10 +27,10 @@ type CreatorCreateHandler struct {
 	base_handler.BaseHandler
 }
 
-func NewCreatorCreateHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewCreatorCreateHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
 	ucUser usecase_user.Usecase, ucCreator usecase_creator.Usecase) *CreatorCreateHandler {
 	h := &CreatorCreateHandler{
-		BaseHandler:    *base_handler.NewBaseHandler(log),
+		BaseHandler:    *base_handler.NewBaseHandler(log, router, cors),
 		sessionManager: sManager,
 		userUsecase:    ucUser,
 		creatorUsecase: ucCreator,

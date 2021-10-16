@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -12,6 +13,8 @@ import (
 	"patreon/internal/app/sessions/sessions_manager"
 	usecase_user "patreon/internal/app/usecase/user"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -22,10 +25,10 @@ type LoginHandler struct {
 	bh.BaseHandler
 }
 
-func NewLoginHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewLoginHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
 	ucUser usecase_user.Usecase) *LoginHandler {
 	h := &LoginHandler{
-		BaseHandler:    *bh.NewBaseHandler(log),
+		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 		sessionManager: sManager,
 		userUsecase:    ucUser,
 	}

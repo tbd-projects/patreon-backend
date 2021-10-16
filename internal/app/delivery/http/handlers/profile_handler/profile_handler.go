@@ -3,12 +3,15 @@ package profile_handler
 import (
 	"io"
 	"net/http"
+	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -19,11 +22,12 @@ type ProfileHandler struct {
 	bh.BaseHandler
 }
 
-func NewProfileHandler(log *logrus.Logger, sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *ProfileHandler {
+func NewProfileHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+	sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *ProfileHandler {
 	h := &ProfileHandler{
 		sessionManager: sManager,
 		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log),
+		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
 	h.AddMethod(http.MethodGet, h.GET)
 	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)

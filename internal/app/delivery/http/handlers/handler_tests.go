@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"io/ioutil"
+	"patreon/internal/app"
 	mock_sessions "patreon/internal/app/sessions/mocks"
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
 	mock_usecase_user "patreon/internal/app/usecase/user/mocks"
+
+	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
@@ -26,6 +29,8 @@ type SuiteHandler struct {
 	MockSessionsManager *mock_sessions.MockSessionsManager
 	Tb                  TestTable
 	Logger              *logrus.Logger
+	Router              *mux.Router
+	Cors                *app.CorsConfig
 }
 
 func (s *SuiteHandler) SetupSuite() {

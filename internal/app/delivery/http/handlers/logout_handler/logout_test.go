@@ -24,7 +24,7 @@ type LogoutTestSuite struct {
 
 func (s *LogoutTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewLogoutHandler(s.Logger, s.MockSessionsManager)
+	s.handler = NewLogoutHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager)
 }
 
 func (s *LogoutTestSuite) TestPOST_WithSession() {
