@@ -8,4 +8,6 @@ var (
 	UserExist                = errors.New("user already exist")
 	BadEncrypt               = errors.New("unsuccessful encrypt user")
 	IncorrectEmailOrPassword = errors.New("incorrect email or password")
+	OldPasswordEqualNew      = errors.New("the new password must be different from the old one")
+	IncorrectNewPassword     = errors.New("new password not valid")
 )

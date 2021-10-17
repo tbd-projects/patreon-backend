@@ -2,11 +2,12 @@ package usercase_user
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repoUser "patreon/internal/app/repository/user"
+
+	"github.com/pkg/errors"
 )
 
 type UserUsecase struct {
@@ -64,7 +65,7 @@ func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
 		}
 
 		return -1, app.GeneralError{
-			Err: BadEncrypt,
+			Err:         BadEncrypt,
 			ExternalErr: err,
 		}
 	}
@@ -91,4 +92,59 @@ func (usecase *UserUsecase) Check(login string, password string) (int64, error) 
 		return -1, IncorrectEmailOrPassword
 	}
 	return u.ID, nil
+}
+
+// UpdatePassword Errors:
+// 		repository.NotFound
+//		OldPasswordEqualNew
+//		IncorrectNewPassword
+//		models.EmptyPassword
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+//			BadEncrypt
+//			app.UnknownError
+func (usecase *UserUsecase) UpdatePassword(userId int64, newPassword string) error {
+	u, err := usecase.GetProfile(userId)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("profile with id %v not found", userId))
+	}
+	if u.ComparePassword(newPassword) {
+		return OldPasswordEqualNew
+	}
+	u.MakeEmptyPassword()
+
+	u.Password = newPassword
+	if err = u.Encrypt(); err != nil {
+		if errors.Is(err, models.EmptyPassword) {
+			return err
+		}
+		return app.GeneralError{
+			Err:         BadEncrypt,
+			ExternalErr: err,
+		}
+	}
+	if err = u.Validate(); err != nil {
+		if errors.Is(err, models.IncorrectEmailOrPassword) {
+			return IncorrectNewPassword
+		}
+		return app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of validation user"),
+		}
+	}
+	err = usecase.repository.UpdatePassword(userId, u.EncryptedPassword)
+	return err
+}
+
+// UpdateAvatar Errors:
+// 		app.GeneralError with Errors
+//			app.UnknownError
+func (usecase *UserUsecase) UpdateAvatar(userId int64, newAvatar string) error {
+	if err := usecase.repository.UpdatePassword(userId, newAvatar); err != nil {
+		return app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of update avatar"),
+		}
+	}
+	return nil
 }

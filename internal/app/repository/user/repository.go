@@ -23,4 +23,14 @@ type Repository interface {
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	FindByID(int64) (*models.User, error)
+
+	// UpdatePassword Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	UpdatePassword(int64, string) error
+
+	// UpdateAvatar Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	UpdateAvatar(int64, string) error
 }

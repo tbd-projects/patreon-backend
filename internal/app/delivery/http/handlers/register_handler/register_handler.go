@@ -80,6 +80,6 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.MakePrivateDate()
+	u.MakeEmptyPassword()
 	h.Respond(w, r, http.StatusOK, id)
 }

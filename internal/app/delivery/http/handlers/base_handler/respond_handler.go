@@ -61,6 +61,15 @@ func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, us
 	}
 	h.Error(w, r, http.StatusServiceUnavailable, errors.New("UnknownError"))
 }
+func (h *RespondHandler) HandlerError(w http.ResponseWriter, r *http.Request, code int, err error) {
+	h.Log(r).Errorf("Gotted error: %v", err)
+
+	var generalError *app.GeneralError
+	if errors.As(err, &generalError) {
+		err = errors.Cause(err).(*app.GeneralError).Err
+	}
+	h.Error(w, r, code, err)
+}
 
 func (h *RespondHandler) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
 	encoder := json.NewEncoder(w)

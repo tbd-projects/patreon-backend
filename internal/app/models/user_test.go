@@ -86,7 +86,7 @@ func TestUser_MakePrivateDate(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.u.MakePrivateDate()
+			test.u.MakeEmptyPassword()
 			assert.Empty(t, test.u.Password)
 			assert.Empty(t, test.u.EncryptedPassword)
 		})

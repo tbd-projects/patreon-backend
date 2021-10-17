@@ -7,6 +7,8 @@ import (
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
 	handlers2 "patreon/internal/app/delivery/http/handlers/register_handler"
 
 	"github.com/gorilla/mux"
@@ -21,6 +23,8 @@ const (
 	PROFILE
 	CREATORS
 	CREATOR_WITH_ID
+	UPDATE_PASSWORD
+	UPDATE_AVATAR
 )
 
 type HandlerFactory struct {
@@ -52,6 +56,8 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		PROFILE:         profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		CREATORS:        creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator),
 		CREATOR_WITH_ID: creator_create_handler.NewCreatorCreateHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
+		UPDATE_PASSWORD: password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		UPDATE_AVATAR:   avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
 	}
 }
 
@@ -69,6 +75,8 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user":                 hs[PROFILE],
 		"/creators":             hs[CREATORS],
 		"/creators/{id:[0-9]+}": hs[CREATOR_WITH_ID],
+		"/user/update/password": hs[UPDATE_PASSWORD],
+		"/user/update/avatar":   hs[UPDATE_AVATAR],
 	}
 	return f.urlHandler
 }

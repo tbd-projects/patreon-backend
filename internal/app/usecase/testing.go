@@ -20,7 +20,7 @@ type SuiteUsecase struct {
 	suite.Suite
 	Mock                  *gomock.Controller
 	MockCreatorRepository *mock_repository_creator.CreatorRepository
-	MockUserRepository    *mock_repository_user.UserRepository
+	MockUserRepository    *mock_repository_user.MockRepository
 
 	Logger *logrus.Logger
 	Tb     TestTable
@@ -29,7 +29,7 @@ type SuiteUsecase struct {
 func (s *SuiteUsecase) SetupSuite() {
 	s.Mock = gomock.NewController(s.T())
 	s.MockCreatorRepository = mock_repository_creator.NewCreatorRepository(s.Mock)
-	s.MockUserRepository = mock_repository_user.NewUserRepository(s.Mock)
+	s.MockUserRepository = mock_repository_user.NewMockRepository(s.Mock)
 
 	s.Logger = logrus.New()
 	s.Logger.SetOutput(ioutil.Discard)

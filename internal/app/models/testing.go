@@ -31,6 +31,8 @@ func TestUser() *User {
 	return &User{
 		Login:    "student1999",
 		Password: "1!2!3!",
+		Nickname: "patron",
+		Avatar:   "default.png",
 	}
 
 }
