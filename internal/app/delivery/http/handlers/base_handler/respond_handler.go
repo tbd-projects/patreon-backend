@@ -13,6 +13,7 @@ import (
 type RespondError struct {
 	Code  int
 	Error error
+	Level logrus.Level
 }
 
 type CodeMap map[error]RespondError
@@ -23,11 +24,8 @@ type RespondHandler struct {
 }
 
 func (h *RespondHandler) Log(r *http.Request) *logrus.Entry {
-	if h.entry != nil {
-		return h.entry
-	}
 	ctxLogger := r.Context().Value("logger")
-	logger := h.log.WithContext(r.Context())
+	logger := h.log.WithField("urls", r.URL)
 	if ctxLogger != nil {
 		if log, ok := ctxLogger.(*logrus.Entry); ok {
 			logger = log
@@ -46,20 +44,24 @@ func (h *RespondHandler) Error(w http.ResponseWriter, r *http.Request, code int,
 }
 
 func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, usecaseErr error, codeByErr CodeMap) {
-	h.Log(r).Errorf("Gotted error: %v", usecaseErr)
-
 	var generalError *app.GeneralError
+
 	if errors.As(usecaseErr, &generalError) {
 		usecaseErr = errors.Cause(usecaseErr).(*app.GeneralError).Err
 	}
 
+	respond := RespondError{http.StatusServiceUnavailable,
+		errors.New("UnknownError"), logrus.ErrorLevel}
 	for err, respondErr := range codeByErr {
 		if errors.Is(usecaseErr, err) {
-			h.Error(w, r, respondErr.Code, respondErr.Error)
+			respond = respondErr
+
 			return
 		}
 	}
-	h.Error(w, r, http.StatusServiceUnavailable, errors.New("UnknownError"))
+
+	h.Log(r).Logf(respond.Level, "Gotted error: %v", usecaseErr)
+	h.Error(w, r, respond.Code, respond.Error)
 }
 
 func (h *RespondHandler) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {

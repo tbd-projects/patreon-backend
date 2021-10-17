@@ -36,5 +36,9 @@ run-coverage:
 	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs"  | fgrep -v "config" | fgrep -v "main" > cover2
 	go tool cover -func=cover2
 
+parse-last-log:
+	go build -o logger.out -v ./cmd/utilits
+	./logger.out -level=warn
+
 test:
 	go test -v -race ./...

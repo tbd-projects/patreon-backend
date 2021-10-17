@@ -31,7 +31,7 @@ func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() err
 	currentTime := time.Now()
 	formatted := config.LogAddr + fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
 		currentTime.Year(), currentTime.Month(), currentTime.Day(),
-		currentTime.Hour(), currentTime.Minute(), currentTime.Second()) + ".out"
+		currentTime.Hour(), currentTime.Minute(), currentTime.Second()) + ".log"
 
 	f, err := os.OpenFile(formatted, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -40,7 +40,7 @@ func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() err
 
 	logger.SetOutput(f)
 	logger.SetLevel(level)
-
+	logger.SetFormatter(&logrus.JSONFormatter{})
 	return logger, f.Close
 }
 

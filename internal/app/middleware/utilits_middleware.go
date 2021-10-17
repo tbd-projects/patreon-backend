@@ -19,8 +19,7 @@ func NewUtilitiesMiddleware(log *logrus.Logger) UtilitiesMiddleware {
 func (mw *UtilitiesMiddleware) CheckPanic(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctxLogger := r.Context().Value("logger")
-		var logger *logrus.Entry
-		logger.Logger = mw.log
+		logger := mw.log.WithField("base_log with url:", r.URL)
 		if ctxLogger != nil {
 			if log, ok := ctxLogger.(*logrus.Entry); ok {
 				logger = log
@@ -40,11 +39,13 @@ func (mw *UtilitiesMiddleware) UpgradeLogger(handler http.Handler) http.Handler 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		upgradeLogger := mw.log.WithFields(logrus.Fields{
+			"urls":        r.URL,
 			"method":      r.Method,
 			"remote_addr": r.RemoteAddr,
-			"work_time":   time.Since(start),
+			"work_time":   time.Since(start).Milliseconds(),
 		})
 		r = r.WithContext(context.WithValue(r.Context(), "logger", upgradeLogger)) //nolint
+		upgradeLogger.Info("Log was upgraded")
 		handler.ServeHTTP(w, r)
 	})
 }
