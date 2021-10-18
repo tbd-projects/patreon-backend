@@ -1,6 +1,7 @@
 .PHONY = build test
 
 LOG_DIR=./logs
+CHECK_DIR=go list ./... | grep -v /cmd/utilits
 
 generate-api:
 	go get -u github.com/swaggo/swag/cmd/swag
@@ -32,7 +33,7 @@ rm-docker:
 	docker rm -vf $$(docker ps -a -q) || true
 
 run-coverage:
-	go test -covermode=atomic -coverpkg=./... -coverprofile=cover ./...
+	go test -covermode=atomic -coverpkg=$(go list ./... | grep -v "/cmd/utilits") -coverprofile=cover ./... | grep -v /cmd/utilits
 	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs"  | fgrep -v "config" | fgrep -v "main" > cover2
 	go tool cover -func=cover2
 
@@ -41,4 +42,4 @@ parse-last-log:
 	./logger.out -level=warn
 
 test:
-	go test -v -race ./...
+	go test -v -race ./... | grep -v /cmd/utilits
