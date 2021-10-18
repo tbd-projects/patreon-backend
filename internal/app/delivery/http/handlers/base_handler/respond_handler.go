@@ -63,6 +63,15 @@ func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, us
 	h.Log(r).Logf(respond.Level, "Gotted error: %v", usecaseErr)
 	h.Error(w, r, respond.Code, respond.Error)
 }
+func (h *RespondHandler) HandlerError(w http.ResponseWriter, r *http.Request, code int, err error) {
+	h.Log(r).Errorf("Gotted error: %v", err)
+
+	var generalError *app.GeneralError
+	if errors.As(err, &generalError) {
+		err = errors.Cause(err).(*app.GeneralError).Err
+	}
+	h.Error(w, r, code, err)
+}
 
 func (h *RespondHandler) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
 	encoder := json.NewEncoder(w)

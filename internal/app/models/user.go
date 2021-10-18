@@ -54,7 +54,7 @@ func (u *User) Validate() error {
 	return err
 }
 
-func (u *User) MakePrivateDate() {
+func (u *User) MakeEmptyPassword() {
 	u.Password = ""
 	u.EncryptedPassword = ""
 }

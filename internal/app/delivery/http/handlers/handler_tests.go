@@ -24,7 +24,7 @@ type TestTable struct {
 type SuiteHandler struct {
 	suite.Suite
 	Mock                *gomock.Controller
-	MockUserUsecase     *mock_usecase_user.UserUsecase
+	MockUserUsecase     *mock_usecase_user.MockUsecase
 	MockCreatorUsecase  *mock_usecase_creator.CreatorUsecase
 	MockSessionsManager *mock_sessions.MockSessionsManager
 	Tb                  TestTable
@@ -35,7 +35,7 @@ type SuiteHandler struct {
 
 func (s *SuiteHandler) SetupSuite() {
 	s.Mock = gomock.NewController(s.T())
-	s.MockUserUsecase = mock_usecase_user.NewUserUsecase(s.Mock)
+	s.MockUserUsecase = mock_usecase_user.NewMockUsecase(s.Mock)
 	s.MockCreatorUsecase = mock_usecase_creator.NewCreatorUsecase(s.Mock)
 	s.MockSessionsManager = mock_sessions.NewMockSessionsManager(s.Mock)
 
