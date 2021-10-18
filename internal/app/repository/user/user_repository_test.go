@@ -142,6 +142,49 @@ func (s *SuiteUserRepository) TestUserRepository_FindByID() {
 	assert.Equal(s.T(), gotten.Nickname, u.Nickname)
 	assert.Equal(s.T(), gotten.Avatar, u.Avatar)
 }
+func (s *SuiteUserRepository) TestUserRepository_UpdateAvatar_Correct() {
+	user := models.TestUser()
+	newAvatar := "newAvatar.png"
+	s.Mock.ExpectQuery(regexp.QuoteMeta("UPDATE users SET avatar = $1"+
+		"WHERE user_id = $2")).
+		WithArgs(newAvatar, user.ID).
+		WillReturnRows(sqlmock.NewRows([]string{}).AddRow())
+	res := s.repo.UpdateAvatar(user.ID, newAvatar)
+	assert.NoError(s.T(), res)
+}
+func (s *SuiteUserRepository) TestUserRepository_UpdateAvatar_Error() {
+	user := models.TestUser()
+	newAvatar := "newAvatar.png"
+	s.Mock.ExpectQuery(regexp.QuoteMeta("UPDATE users SET avatar = $1"+
+		"WHERE user_id = $2")).
+		WithArgs(newAvatar, user.ID).
+		WillReturnError(models.BDError)
+	res := s.repo.UpdateAvatar(user.ID, newAvatar)
+	assert.EqualError(s.T(), models.BDError, res.Error())
+}
+
+func (s *SuiteUserRepository) TestUserRepository_UpdatePassword_Correct() {
+	user := models.TestUser()
+	assert.NoError(s.T(), user.Encrypt())
+	s.Mock.ExpectQuery(regexp.QuoteMeta("UPDATE users SET encrypted_password = $1"+
+		"WHERE user_id = $2")).
+		WithArgs(user.EncryptedPassword, user.ID).
+		WillReturnRows(sqlmock.NewRows([]string{}).AddRow())
+
+	res := s.repo.UpdatePassword(user.ID, user.EncryptedPassword)
+	assert.NoError(s.T(), res)
+}
+func (s *SuiteUserRepository) TestUserRepository_UpdatePassword_Error() {
+	user := models.TestUser()
+	assert.NoError(s.T(), user.Encrypt())
+	s.Mock.ExpectQuery(regexp.QuoteMeta("UPDATE users SET encrypted_password = $1"+
+		"WHERE user_id = $2")).
+		WithArgs(user.EncryptedPassword, user.ID).
+		WillReturnError(models.BDError)
+
+	res := s.repo.UpdatePassword(user.ID, user.EncryptedPassword)
+	assert.Error(s.T(), models.BDError, res)
+}
 
 func TestUserRepository(t *testing.T) {
 	suite.Run(t, new(SuiteUserRepository))
