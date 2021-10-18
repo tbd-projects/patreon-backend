@@ -55,8 +55,7 @@ func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, us
 	for err, respondErr := range codeByErr {
 		if errors.Is(usecaseErr, err) {
 			respond = respondErr
-
-			return
+			break
 		}
 	}
 

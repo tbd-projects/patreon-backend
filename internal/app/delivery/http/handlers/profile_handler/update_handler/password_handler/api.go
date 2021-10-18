@@ -8,14 +8,16 @@ import (
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	usercase_user "patreon/internal/app/usecase/user"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var codeByError = base_handler.CodeMap{
-	repository.NotFound:                {http.StatusNotFound, handler_errors.UserNotFound},
-	usercase_user.IncorrectNewPassword: {http.StatusBadRequest, handler_errors.IncorrectNewPassword},
-	models.EmptyPassword:               {http.StatusBadRequest, handler_errors.IncorrectNewPassword},
-	repository.DefaultErrDB:            {http.StatusInternalServerError, handler_errors.BDError},
-	usercase_user.BadEncrypt:           {http.StatusInternalServerError, handler_errors.InternalError},
-	app.UnknownError:                   {http.StatusInternalServerError, handler_errors.InternalError},
-	usercase_user.OldPasswordEqualNew:  {http.StatusInternalServerError, handler_errors.BDError},
+	repository.NotFound:                {http.StatusNotFound, handler_errors.UserNotFound, log.WarnLevel},
+	usercase_user.IncorrectNewPassword: {http.StatusBadRequest, handler_errors.IncorrectNewPassword, log.InfoLevel},
+	models.EmptyPassword:               {http.StatusBadRequest, handler_errors.IncorrectNewPassword, log.InfoLevel},
+	repository.DefaultErrDB:            {http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
+	usercase_user.BadEncrypt:           {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
+	app.UnknownError:                   {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
+	usercase_user.OldPasswordEqualNew:  {http.StatusInternalServerError, handler_errors.BDError, log.InfoLevel},
 }
