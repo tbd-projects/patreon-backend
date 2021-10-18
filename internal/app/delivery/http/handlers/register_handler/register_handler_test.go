@@ -80,7 +80,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_UserAlreadyExist() {
 			Password: "mail.ru",
 		},
 		ExpectedMockTimes: 1,
-		ExpectedCode:      http.StatusUnprocessableEntity,
+		ExpectedCode:      http.StatusConflict,
 	}
 
 	recorder := httptest.NewRecorder()
@@ -171,7 +171,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_CreateSuccess() {
 			Nickname: "linux1998",
 		},
 		ExpectedMockTimes: 1,
-		ExpectedCode:      http.StatusOK,
+		ExpectedCode:      http.StatusCreated,
 	}
 	recorder := httptest.NewRecorder()
 

@@ -34,15 +34,16 @@ func NewProfileHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 	return h
 }
 
-// Profile
+// GET Profile
 // @Summary get information from user for user
 // @Description get nickname and avatar for user
 // @Accept  json
 // @Produce json
 // @Success 201 {object} models.ProfileResponse "Successfully get user"
 // @Failure 401 "User are not authorized"
-// @Failure 503 {object} models.BaseResponse "Not found user"
-// @Failure 500 {object} models.BaseResponse "Error context"
+// @Failure 404 {object} models.ErrResponse "user with this id not found"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation"
+// @Failure 500 {object} models.ErrResponse "can not get info from context"
 // @Router /user [GET]
 func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {

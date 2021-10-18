@@ -1,9 +1,9 @@
 package sessions_manager
 
 import (
-	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"golang.org/x/crypto/sha3"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/models"
 	"strconv"
@@ -63,7 +63,7 @@ func (manager *SessionManager) Check(uniqID string) (models.Result, error) {
 
 func generateUniqID(userID string) string {
 	value := append([]byte(userID), uuid.NewV4().Bytes()...)
-	hash := md5.Sum(value)
+	hash := sha3.Sum512(value)
 
 	return hex.EncodeToString(hash[:])
 }

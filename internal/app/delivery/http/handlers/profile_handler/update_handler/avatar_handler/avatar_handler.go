@@ -45,11 +45,11 @@ func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.Co
 // @Accept  mpfd
 // @Produce json
 // @Param file formData file true "Avatar file with ext jpeg/png"
-// @Success 200 {object} "successfully upload avatar"
-// @Failure 400 {object} "size of file very big"
-// @Failure 400 {object} "invalid form field name"
-// @Failure 400 {object} "invalid avatar extension"
-// @Failure 500 {object} "server error"
+// @Success 200 "successfully upload avatar"
+// @Failure 400 {object} models.ErrResponse "size of file very big"
+// @Failure 400 {object} models.ErrResponse "invalid form field name"
+// @Failure 400 {object} models.ErrResponse "invalid avatar extension"
+// @Failure 500 {object} models.ErrResponse "server error"
 // @Router /user/update/avatar [PUT]
 func (h *UpdateAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -143,5 +143,5 @@ func (h *UpdateAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByError)
 	}
-	h.Respond(w, r, http.StatusOK, map[string]string{"respond": "successfully upload avatar"})
+	w.WriteHeader(http.StatusOK)
 }

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/tools/container/intsets"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"patreon/internal/app"
 	"strings"
@@ -21,9 +21,10 @@ type Log struct {
 	Method   string    `json:"method,omitempty"`
 	Msg      string    `json:"msg,omitempty"`
 	Adr      string    `json:"remote_addr,omitempty"`
-	Url      string    `json:"urls,omitempty"`
+	Url      url.URL   `json:"urls,omitempty"`
 	Time     time.Time `json:"time,omitempty"`
 	WorkTime int64     `json:"work_time,omitempty"`
+	ReqID    string    `json:"req_id,omitempty"`
 }
 
 var (
@@ -68,10 +69,11 @@ func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time
 		}
 
 		logger.WithTime(lg.Time.Add(diff)).WithFields(logrus.Fields{
-			"urls":        lg.Url,
+			"urls":        lg.Url.String(),
 			"method":      lg.Method,
 			"remote_addr": lg.Adr,
 			"work_time":   lg.WorkTime,
+			"req_id":      lg.ReqID,
 		}).Log(level, lg.Msg)
 	}
 
@@ -150,13 +152,14 @@ func main() {
 
 	var lastestFile string
 	var lastestTime time.Time
-	lastestTime.AddDate(intsets.MaxInt, intsets.MaxInt, intsets.MaxInt)
+	first := true
 	for _, file := range files {
-		if lastestTime.Second() < file.ModTime().Second() {
-			lastestTime = file.ModTime()
+		tmp, err := parseTimeFromFileName(file.Name())
+		if err == nil && (lastestTime.Before(tmp) || first) {
+			lastestTime = tmp
 			lastestFile = file.Name()
+			first = false
 		}
-		file.ModTime()
 	}
 
 	fmt.Printf("Log from : %s\n", lastestFile)

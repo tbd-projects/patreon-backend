@@ -6,14 +6,12 @@ import (
 	"strconv"
 )
 
-type BaseResponse struct {
-	Code int    `json:"status"`
-	Err  string `json:"error"`
+type ErrResponse struct {
+	Err string `json:"error"`
 }
 
 type UserResponse struct {
-	ID    int    `json:"id"`
-	Login string `json:"login"`
+	ID int64 `json:"id"`
 }
 
 type ProfileResponse struct {

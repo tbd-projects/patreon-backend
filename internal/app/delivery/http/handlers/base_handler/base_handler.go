@@ -19,19 +19,20 @@ const (
 	OPTIONS = http.MethodOptions
 )
 
-type HandlerFunc func(w http.ResponseWriter, r *http.Request)
-type MiddlewareFunc func(handler http.Handler) http.Handler
+type HandlerFunc func(http.ResponseWriter, *http.Request)
+type HMiddlewareFunc func(http.Handler) http.Handler
+type HFMiddlewareFunc func(HandlerFunc) HandlerFunc
 
 type BaseHandler struct {
 	utilitiesMiddleware middleware.UtilitiesMiddleware
 	corsMiddleware      middleware.CorsMiddleware
 	handlerMethods      map[string]HandlerFunc
-	middlewares         []MiddlewareFunc
+	middlewares         []HMiddlewareFunc
 	RespondHandler
 }
 
 func NewBaseHandler(log *logrus.Logger, router *mux.Router, config *app.CorsConfig) *BaseHandler {
-	h := &BaseHandler{handlerMethods: map[string]HandlerFunc{}, middlewares: []MiddlewareFunc{},
+	h := &BaseHandler{handlerMethods: map[string]HandlerFunc{}, middlewares: []HMiddlewareFunc{},
 		utilitiesMiddleware: middleware.NewUtilitiesMiddleware(log),
 		corsMiddleware:      middleware.NewCorsMiddleware(config, router)}
 	h.log = log
@@ -40,12 +41,21 @@ func NewBaseHandler(log *logrus.Logger, router *mux.Router, config *app.CorsConf
 	return h
 }
 
-func (h *BaseHandler) AddMiddleware(middleware ...MiddlewareFunc) {
+func (h *BaseHandler) AddMiddleware(middleware ...HMiddlewareFunc) {
 	h.middlewares = append(h.middlewares, middleware...)
 }
 
-func (h *BaseHandler) AddMethod(method string, handlerMethod HandlerFunc) {
-	h.handlerMethods[method] = handlerMethod
+func (h *BaseHandler) AddMethod(method string, handlerMethod HandlerFunc, middlewares ...HFMiddlewareFunc) {
+	h.handlerMethods[method] = h.applyHFMiddleware(handlerMethod, middlewares...)
+}
+
+func (h *BaseHandler) applyHFMiddleware(handler HandlerFunc,
+	middlewares ...HFMiddlewareFunc) HandlerFunc {
+	resultHandler := handler
+	for _, mw := range middlewares {
+		resultHandler = mw(resultHandler)
+	}
+	return resultHandler
 }
 
 func (h *BaseHandler) applyMiddleware(handler http.Handler) http.Handler {

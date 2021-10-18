@@ -17,7 +17,7 @@ var (
 	BDError                    = errors.New("can not do bd operation")
 	InvalidParameters          = errors.New("invalid parameters")
 	NotAllowedMethod           = errors.New("method not allowed")
-	ProfileAlreadyExist        = errors.New("user already exist")
+	CreatorAlreadyExist        = errors.New("creator already exist")
 	InvalidNickname            = errors.New("invalid creator nickname")
 	InvalidCategory            = errors.New("invalid creator category")
 	InvalidCategoryDescription = errors.New("invalid creator category-description")

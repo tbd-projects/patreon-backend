@@ -31,13 +31,13 @@ func NewLogoutHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConf
 	return h
 }
 
-// Profile
+// POST Logout
 // @Summary logout user
 // @Description logout user
 // @Accept  json
 // @Produce json
-// @Success 201 {object} models.BaseResponse "Successfully logout"
-// @Failure 500 {object} models.BaseResponse "Error logout session"
+// @Success 201 "Successfully logout"
+// @Failure 500 {object} models.ErrResponse "can not get info from context"
 // @Failure 401 "User not are authorized"
 // @Router /logout [POST]
 func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
@@ -69,5 +69,5 @@ func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now().AddDate(0, 0, -1),
 	}
 	http.SetCookie(w, cookie)
-	h.Respond(w, r, http.StatusOK, "successfully logout")
+	h.Respond(w, r, http.StatusOK, nil)
 }

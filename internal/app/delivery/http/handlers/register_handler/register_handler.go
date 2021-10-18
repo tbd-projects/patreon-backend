@@ -36,17 +36,18 @@ func NewRegisterHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 	return h
 }
 
-// Registration
+// POST Registration
 // @Summary create new user
 // @Description create new account and get cookies
 // @Accept  json
 // @Produce json
 // @Param user body models.RequestRegistration true "Request body for user registration"
 // @Success 201 {object} models.UserResponse "Create user successfully"
-// @Failure 400 {object} models.BaseResponse "Invalid body"
-// @Failure 409 {object} models.BaseResponse "User already exist"
-// @Failure 422 {object} models.BaseResponse "Not valid body"
-// @Failure 500 {object} models.BaseResponse "Creation error in base data"
+// @Failure 422 {object} models.ErrResponse "invalid body in request"
+// @Failure 409 {object} models.ErrResponse "user already exist"
+// @Failure 422 {object} models.ErrResponse "nickname already exist"
+// @Failure 422 {object} models.ErrResponse "incorrect email or password"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 418 "User are authorized"
 // @Router /register [POST]
 func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
@@ -81,5 +82,5 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u.MakeEmptyPassword()
-	h.Respond(w, r, http.StatusOK, id)
+	h.Respond(w, r, http.StatusCreated, models_respond.UserResponse{ID: id})
 }
