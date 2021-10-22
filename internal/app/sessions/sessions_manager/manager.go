@@ -7,12 +7,13 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/models"
 	"strconv"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
 
 const (
-	oneDayInMillisecond = 86400
+	oneDayInMillisecond = 24 * time.Hour / time.Millisecond
 	ExpiredCookiesTime  = oneDayInMillisecond * 2
 	UnknownUser         = -1
 )
