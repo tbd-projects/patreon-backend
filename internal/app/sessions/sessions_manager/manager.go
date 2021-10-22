@@ -1,19 +1,19 @@
 package sessions_manager
 
 import (
-	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"golang.org/x/crypto/sha3"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/models"
 	"strconv"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
 
 const (
-	oneDayInMillisecond = 86400
-	ExpiredCookiesTime  = oneDayInMillisecond * 2
+	ExpiredCookiesTime  = 48 * time.Hour
 	UnknownUser         = -1
 )
 
@@ -33,7 +33,7 @@ func (manager *SessionManager) Create(userID int64) (models.Result, error) {
 	session := &models.Session{
 		UserID:     strUserID,
 		UniqID:     generateUniqID(strUserID),
-		Expiration: ExpiredCookiesTime,
+		Expiration: int(ExpiredCookiesTime.Milliseconds()),
 	}
 	if err := manager.sessionRepository.Set(session); err != nil {
 		return models.Result{UserID: UnknownUser}, err
@@ -63,7 +63,7 @@ func (manager *SessionManager) Check(uniqID string) (models.Result, error) {
 
 func generateUniqID(userID string) string {
 	value := append([]byte(userID), uuid.NewV4().Bytes()...)
-	hash := md5.Sum(value)
+	hash := sha3.Sum512(value)
 
 	return hex.EncodeToString(hash[:])
 }

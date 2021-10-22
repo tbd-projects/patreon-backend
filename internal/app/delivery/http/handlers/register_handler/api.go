@@ -11,14 +11,14 @@ import (
 )
 
 var codeByError = base_handler.CodeMap{
-	models.EmptyPassword:                 {
+	models.EmptyPassword: {
 		http.StatusUnprocessableEntity, handler_errors.InvalidBody, logrus.InfoLevel},
-	repository_user.LoginAlreadyExist:    {
-		http.StatusUnprocessableEntity, handler_errors.UserAlreadyExist, logrus.InfoLevel},
+	repository_user.LoginAlreadyExist: {
+		http.StatusConflict, handler_errors.UserAlreadyExist, logrus.InfoLevel},
 	repository_user.NicknameAlreadyExist: {
 		http.StatusUnprocessableEntity, handler_errors.NicknameAlreadyExist, logrus.InfoLevel},
-	models.IncorrectEmailOrPassword:      {
+	models.IncorrectEmailOrPassword: {
 		http.StatusUnprocessableEntity, handler_errors.IncorrectEmailOrPassword, logrus.InfoLevel},
-	repository.DefaultErrDB:              {
+	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 }

@@ -8,7 +8,7 @@ generate-api:
 	swag init -g ./cmd/server/main.go -o docs
 
 build: generate-api
-	go build -v ./cmd/server
+	go build -o server.out -v ./cmd/server
 
 build-docker:
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
@@ -39,7 +39,7 @@ run-coverage:
 
 parse-last-log:
 	go build -o logger.out -v ./cmd/utilits
-	./logger.out -level=warn
+	./logger.out
 
 test:
 	go test -v -race ./internal/...

@@ -41,13 +41,13 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 // @Accept  json
 // @Produce json
 // @Param user body models.RequestChangePassword true "Request body for change password"
-// @Success 200 {object} "success update password"
-// @Failure 400 {object} "incorrect new password"
-// @Failure 404 {object} "User not found"
+// @Success 200 "success update password"
+// @Failure 400 {object} models.ErrResponse "incorrect new password"
+// @Failure 404 {object} models.ErrResponse "User not found"
 // @Failure 418 "User are authorized"
-// @Failure 422 {object} "Not valid body"
-// @Failure 500 {object} "server error"
-// @Failure 500 {object} "database error"
+// @Failure 422 {object} models.ErrResponse "Not valid body"
+// @Failure 500 {object} models.ErrResponse "server error"
+// @Failure 500 {object} models.ErrResponse "database error"
 // @Router /user/update/password [PUT]
 func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -75,5 +75,5 @@ func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		h.UsecaseError(w, r, err, codeByError)
 		return
 	}
-	h.Respond(w, r, http.StatusOK, map[string]string{"respond": "success update password"})
+	w.WriteHeader(http.StatusOK)
 }

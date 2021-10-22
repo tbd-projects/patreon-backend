@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"time"
 
@@ -43,6 +44,7 @@ func (mw *UtilitiesMiddleware) UpgradeLogger(handler http.Handler) http.Handler 
 			"method":      r.Method,
 			"remote_addr": r.RemoteAddr,
 			"work_time":   time.Since(start).Milliseconds(),
+			"req_id":      uuid.NewV4(),
 		})
 		r = r.WithContext(context.WithValue(r.Context(), "logger", upgradeLogger)) //nolint
 		upgradeLogger.Info("Log was upgraded")

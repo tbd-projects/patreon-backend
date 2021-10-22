@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"patreon/internal/app"
+	"patreon/internal/app/delivery/http/models"
 
 	"github.com/pkg/errors"
 
@@ -40,7 +41,7 @@ func (h *RespondHandler) PrintRequest(r *http.Request) {
 }
 
 func (h *RespondHandler) Error(w http.ResponseWriter, r *http.Request, code int, err error) {
-	h.Respond(w, r, code, map[string]string{"error": err.Error()})
+	h.Respond(w, r, code, models.ErrResponse{Err: err.Error()})
 }
 
 func (h *RespondHandler) UsecaseError(w http.ResponseWriter, r *http.Request, usecaseErr error, codeByErr CodeMap) {

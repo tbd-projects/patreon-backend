@@ -37,16 +37,18 @@ func NewLoginHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 	return h
 }
 
-// Login
+// POST Login
 // @Summary login user
 // @Description login user
 // @Accept  json
 // @Produce json
 // @Param user body models.RequestLogin true "Request body for login"
-// @Success 201 {object} models.BaseResponse "Successfully login"
-// @Failure 401 {object} models.BaseResponse "Incorrect password or email"
-// @Failure 422 {object} models.BaseResponse "Not valid body"
-// @Failure 500 {object} models.BaseResponse "Creation error in sessions"
+// @Success 200 "Successfully login"
+// @Failure 404 {object} models.ErrResponse "user with this id not found"
+// @Failure 422 {object} models.ErrResponse "invalid body in request"
+// @Failure 500 {object} models.ErrResponse "can not create session"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation"
+// @Failure 401 {object} models.ErrResponse "incorrect email or password"
 // @Failure 418 "User are authorized"
 // @Router /login [POST]
 func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
@@ -89,5 +91,5 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
-	h.Respond(w, r, http.StatusOK, "successfully login")
+	w.WriteHeader(http.StatusOK)
 }

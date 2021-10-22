@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/sessions"
 
 	"github.com/sirupsen/logrus"
@@ -19,8 +20,9 @@ func NewSessionMiddleware(sessionManager sessions.SessionsManager, log *logrus.L
 		log:            log,
 	}
 }
-func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+func (m *SessionMiddleware) CheckFunc(next bh.HandlerFunc) bh.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
 			m.log.Warnf("in parsing cookie: %v", err)
@@ -38,8 +40,12 @@ func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID)) //nolint
 			r = r.WithContext(context.WithValue(r.Context(), "uniq_id", res.UniqID)) //nolint
 		}
-		next.ServeHTTP(w, r)
-	})
+		next(w, r)
+	}
+}
+
+func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
+	return http.HandlerFunc(m.CheckFunc(next.ServeHTTP))
 }
 
 func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
