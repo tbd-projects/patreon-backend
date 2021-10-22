@@ -87,10 +87,9 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    res.UniqID,
-		Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime * time.Microsecond),
+		Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime * time.Millisecond),
 		HttpOnly: true,
 	}
-	h.Log(r).Debugf("Set cpokie: %s", cookie.String())
 	http.SetCookie(w, cookie)
-	h.Respond(w, r, http.StatusOK, "suc")
+	w.WriteHeader(http.StatusOK)
 }

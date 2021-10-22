@@ -70,6 +70,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // POST Create Creator
 // @Summary create creator
 // @Description create creator with id from path, and respond created creator
+// @Param user body models.RequestCreator true "Request body for creators"
 // @Produce json
 // @Success 201 {object} models.Creator
 // @Failure 422 {object} models.ErrResponse "invalid body in request"

@@ -69,5 +69,5 @@ func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now().AddDate(0, 0, -1),
 	}
 	http.SetCookie(w, cookie)
-	h.Respond(w, r, http.StatusOK, nil)
+	w.WriteHeader(http.StatusOK)
 }
