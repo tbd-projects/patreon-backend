@@ -87,7 +87,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    res.UniqID,
-		Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime * time.Millisecond),
+		Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime),
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)

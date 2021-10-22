@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	oneDayInMillisecond = 24 * time.Hour / time.Millisecond
-	ExpiredCookiesTime  = oneDayInMillisecond * 2
+	ExpiredCookiesTime  = 48 * time.Hour
 	UnknownUser         = -1
 )
 
@@ -34,7 +33,7 @@ func (manager *SessionManager) Create(userID int64) (models.Result, error) {
 	session := &models.Session{
 		UserID:     strUserID,
 		UniqID:     generateUniqID(strUserID),
-		Expiration: ExpiredCookiesTime,
+		Expiration: int(ExpiredCookiesTime.Milliseconds()),
 	}
 	if err := manager.sessionRepository.Set(session); err != nil {
 		return models.Result{UserID: UnknownUser}, err
