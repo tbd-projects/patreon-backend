@@ -108,8 +108,8 @@ func (h *UpdateAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	avatarPath := rootPath + "static/img/" + strconv.Itoa(int(userId)) + filepath.Ext(fHeader.Filename)
-	err = os.Mkdir("static/img/", os.ModePerm)
+	avatarPath := rootPath + "internal/media/img/" + strconv.Itoa(int(userId)) + filepath.Ext(fHeader.Filename)
+	err = os.MkdirAll("internal/media/img/", os.ModePerm)
 	if err != nil {
 		h.HandlerError(w, r, http.StatusInternalServerError, app.GeneralError{
 			Err:         handler_errors.InternalError,
