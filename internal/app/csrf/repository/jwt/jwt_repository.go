@@ -1,6 +1,7 @@
 package repository_jwt
 
 import (
+	"patreon/internal/app"
 	"patreon/internal/app/csrf/models"
 	"time"
 
@@ -37,10 +38,16 @@ func (tk *JwtRepository) parseClaims(token *jwt.Token) (interface{}, error) {
 func (tk *JwtRepository) Check(sources models.TokenSources, tokenString models.Token) error {
 	claims := &jwtCsrfClaims{}
 	if _, err := jwt.ParseWithClaims(string(tokenString), claims, tk.parseClaims); err != nil {
-		return err
+		return &app.GeneralError{
+			Err:         ParseClaimsError,
+			ExternalErr: err,
+		}
 	}
-	if claims.Valid() != nil {
-		return TokenExpired
+	if err := claims.Valid(); err != nil {
+		return &app.GeneralError{
+			Err:         TokenExpired,
+			ExternalErr: err,
+		}
 	}
 	if claims.UserId != sources.UserId || claims.SessionId != sources.SessionId {
 		return BadToken
@@ -60,7 +67,10 @@ func (tk *JwtRepository) Create(sources models.TokenSources) (models.Token, erro
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, data)
 	res, err := token.SignedString(tk.Secret)
 	if err != nil {
-		return "", ErrorSignedToken
+		return "", &app.GeneralError{
+			Err:         ErrorSignedToken,
+			ExternalErr: err,
+		}
 	}
 	return models.Token(res), nil
 }
