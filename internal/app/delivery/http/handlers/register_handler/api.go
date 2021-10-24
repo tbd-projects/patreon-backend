@@ -7,7 +7,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_user "patreon/internal/app/repository/user"
+	repository_user "patreon/internal/app/repository/user/postgresql"
 )
 
 var codeByError = base_handler.CodeMap{

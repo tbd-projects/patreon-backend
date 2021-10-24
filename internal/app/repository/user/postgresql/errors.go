@@ -1,4 +1,4 @@
-package repository_user
+package repository_postgresql
 
 import (
 	"errors"
@@ -16,7 +16,6 @@ const (
 var (
 	LoginAlreadyExist    = errors.New("login already exist")
 	NicknameAlreadyExist = errors.New("nickname already exist")
-	UserNotFound         = errors.New("user not found")
 )
 
 func parsePQError(err *pq.Error) error {

@@ -1,4 +1,4 @@
-package repository_creator
+package repository_postgresql
 
 import (
 	"database/sql"

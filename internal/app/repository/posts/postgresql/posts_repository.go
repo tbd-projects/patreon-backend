@@ -1,4 +1,4 @@
-package repository_creator
+package repository_postgresql
 
 import (
 	"database/sql"
@@ -6,12 +6,12 @@ import (
 	"patreon/internal/app/repository"
 )
 
-type CreatorRepository struct {
+type PostsRepository struct {
 	store *sql.DB
 }
 
-func NewCreatorRepository(st *sql.DB) *CreatorRepository {
-	return &CreatorRepository{
+func NewPostsRepository(st *sql.DB) *PostsRepository {
+	return &PostsRepository{
 		store: st,
 	}
 }
@@ -19,7 +19,7 @@ func NewCreatorRepository(st *sql.DB) *CreatorRepository {
 // Create Errors:
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
+func (repo *PostsRepository) Create(cr *models.Creator) (int64, error) {
 	if err := repo.store.QueryRow("INSERT INTO creator_profile (creator_id, category, "+
 		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+
 		"RETURNING creator_id", cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
@@ -31,7 +31,7 @@ func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
 // GetCreators Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
+func (repo *PostsRepository) GetCreators() ([]models.Creator, error) {
 	count := 0
 
 	if err := repo.store.QueryRow("SELECT count(*) from creator_profile").Scan(&count); err != nil {
@@ -71,7 +71,7 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 // 		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, error) {
+func (repo *PostsRepository) GetCreator(creatorId int64) (*models.Creator, error) {
 	creator := &models.Creator{}
 
 	if err := repo.store.QueryRow("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname "+

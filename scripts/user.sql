@@ -41,41 +41,50 @@ CREATE TABLE IF NOT EXISTS posts_type
     type          text      not null
 );
 
+
 CREATE TABLE IF NOT EXISTS awards
 (
     awards_id   bigserial not null primary key,
     name        text      not null,
     description text      not null,
     price       integer   not null,
-    creator_id  bigint references creator_profile (creator_id) on delete cascade
+    creator_id  bigint references creator_profile (creator_id) on delete cascade,
+    UNIQUE (name, creator_id)
 );
 
 CREATE TABLE IF NOT EXISTS posts
 (
-    posts_id    bigserial not null primary key,
-    title       text      not null,
-    description text      not null,
-    type        bigserial not null references posts_type (posts_type_id) on delete cascade,
-    data_path   text      not null,
+    posts_id    bigserial           not null primary key,
+    title       text                not null,
+    description text                not null,
     likes       bigint    default 0 not null,
-    type_awards bigint    references awards (awards_id) on delete cascade,
-    creator_id  bigint    references creator_profile (creator_id) on delete cascade
+    date        timestamp default now(),
+    type_awards bigint references awards (awards_id),
+    creator_id  bigint references creator_profile (creator_id) on delete cascade
+);
+
+CREATE TABLE IF NOT EXISTS posts_data
+(
+    data_id   bigserial not null primary key,
+    post_id   bigint references posts (posts_id) on delete cascade,
+    type      bigint    not null references posts_type (posts_type_id) on delete cascade,
+    data_path text      not null
 );
 
 CREATE TABLE IF NOT EXISTS likes
 (
-    likes_id    bigserial not null primary key,
-    value       bool      not null,
-    post_id     bigint   references posts (posts_id) on delete cascade,
-    users_id    bigint references users (users_id)
+    likes_id bigserial not null primary key,
+    value    bool      not null,
+    post_id  bigint not null references posts (posts_id) on delete cascade,
+    users_id bigint not null references users (users_id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS comments
 (
     comments_id bigserial not null primary key,
     body        text      not null,
-    posts_id    bigserial references posts (posts_id) on delete cascade,
-    users_id    bigserial references users (users_id) on delete cascade
+    posts_id    bigint references posts (posts_id) on delete cascade,
+    users_id    bigint references users (users_id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS payments
@@ -84,7 +93,7 @@ CREATE TABLE IF NOT EXISTS payments
     amount      integer   not null,
     date        date      not null,
     creator_id  bigint references creator_profile (creator_id) on delete cascade,
-    users_id    bigserial references users (users_id) on delete cascade
+    users_id    bigint references users (users_id) on delete cascade
 )
 
 \disconnect

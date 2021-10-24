@@ -4,7 +4,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"patreon/internal/app"
 	repCreator "patreon/internal/app/repository/creator"
+	repCreatorPsql "patreon/internal/app/repository/creator/postgresql"
 	repUser "patreon/internal/app/repository/user"
+	repUserPsql "patreon/internal/app/repository/user/postgresql"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/repository"
 )
@@ -26,14 +28,14 @@ func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.Expecte
 
 func (f *RepositoryFactory) GetUserRepository() repUser.Repository {
 	if f.userRepository == nil {
-		f.userRepository = repUser.NewUserRepository(f.expectedConnections.SqlConnection)
+		f.userRepository = repUserPsql.NewUserRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.userRepository
 }
 
 func (f *RepositoryFactory) GetCreatorRepository() repCreator.Repository {
 	if f.creatorRepository == nil {
-		f.creatorRepository = repCreator.NewCreatorRepository(f.expectedConnections.SqlConnection)
+		f.creatorRepository = repCreatorPsql.NewCreatorRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.creatorRepository
 }

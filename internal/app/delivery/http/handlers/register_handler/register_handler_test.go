@@ -9,7 +9,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/delivery/http/models"
 	models_data "patreon/internal/app/models"
-	repository_user "patreon/internal/app/repository/user"
+	repository_user "patreon/internal/app/repository/user/postgresql"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
