@@ -47,9 +47,9 @@ func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 			h.Log(r).Fatal(err)
 		}
 	}(r.Body)
-	uniqID := r.Context().Value("uniq_id")
+	uniqID := r.Context().Value("session_id")
 	if uniqID == nil {
-		h.Log(r).Error("can not get uniq_id from context")
+		h.Log(r).Error("can not get session_id from context")
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
 		return
 	}

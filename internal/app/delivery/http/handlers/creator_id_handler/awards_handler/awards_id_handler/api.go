@@ -1,4 +1,4 @@
-package creator_create_handler
+package awards_id_handler
 
 import (
 	"github.com/sirupsen/logrus"
@@ -8,9 +8,9 @@ import (
 	"patreon/internal/app/repository"
 )
 
-var codesByErrors = base_handler.CodeMap{
+var codesByErrorsDelete = base_handler.CodeMap{
 	repository.NotFound: {
-		http.StatusNotFound, handler_errors.UserNotFound, logrus.WarnLevel},
+		http.StatusNotFound, handler_errors.AwardNotFound, logrus.ErrorLevel},
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 }

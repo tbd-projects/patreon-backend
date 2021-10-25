@@ -14,6 +14,10 @@ type UserResponse struct {
 	ID int64 `json:"id"`
 }
 
+type AwardsResponse struct {
+	ID int64 `json:"id"`
+}
+
 type ProfileResponse struct {
 	Login    string `json:"login"`
 	Nickname string `json:"nickname"`
@@ -24,9 +28,27 @@ type ResponseCreator struct {
 	models.Creator
 }
 
+type ResponseAwards struct {
+	ID          int64  `json:"awards_id"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Price       int64  `json:"price,omitempty"`
+	Color      	uint64 `json:"color.omitempty"`
+}
+
 func ToResponseCreator(cr models.Creator) ResponseCreator {
 	return ResponseCreator{
 		cr,
+	}
+}
+
+func ToResponseAwards(aw models.Awards) ResponseAwards {
+	return ResponseAwards{
+		ID: aw.ID,
+		Name: aw.Name,
+		Price: aw.Price,
+		Description: aw.Description,
+		Color: aw.Color,
 	}
 }
 

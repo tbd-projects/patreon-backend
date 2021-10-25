@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	"strconv"
 )
 
 type CreatorRepository struct {
@@ -20,9 +21,10 @@ func NewCreatorRepository(st *sql.DB) *CreatorRepository {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
+	category, _ := strconv.Atoi(cr.Category)
 	if err := repo.store.QueryRow("INSERT INTO creator_profile (creator_id, category, "+
 		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+
-		"RETURNING creator_id", cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
+		"RETURNING creator_id", cr.ID, category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
 		return -1, repository.NewDBError(err)
 	}
 	return cr.ID, nil
@@ -41,7 +43,7 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 
 	rows, err := repo.store.Query(
 		"SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-			"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")
+			"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id")
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}
@@ -75,7 +77,7 @@ func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, err
 	creator := &models.Creator{}
 
 	if err := repo.store.QueryRow("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname "+
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1", creatorId).
+		"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id where creator_id=$1", creatorId).
 		Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,
 			&creator.Cover, &creator.Nickname); err != nil {
 		if err == sql.ErrNoRows {

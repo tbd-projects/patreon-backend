@@ -13,6 +13,7 @@ type Awards struct {
 	Description string `json:"description,omitempty"`
 	Price       int64  `json:"price,omitempty"`
 	CreatorId   int64  `json:"creator_id"`
+	Color      	uint64 `json:"color.omitempty"`
 }
 
 func (aw *Awards) String() string {

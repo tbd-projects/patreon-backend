@@ -29,7 +29,7 @@ func (usecase *AwardsUsecase) GetAwards(creatorId int64) ([]models.Awards, error
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (usecase *AwardsUsecase) Delete(id int64) error {
-	return usecase.Delete(id)
+	return usecase.repository.Delete(id)
 }
 
 // Update Errors:
@@ -40,7 +40,7 @@ func (usecase *AwardsUsecase) Delete(id int64) error {
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *AwardsUsecase) Update(awards *models.Awards, withNameUpdate bool) error {
+func (usecase *AwardsUsecase) Update(awards *models.Awards) error {
 	if err := awards.Validate(); err != nil {
 		if errors.Is(err, models.EmptyName) || errors.Is(err, models.IncorrectAwardsPrice) {
 			return err
@@ -51,13 +51,7 @@ func (usecase *AwardsUsecase) Update(awards *models.Awards, withNameUpdate bool)
 		}
 	}
 
-	if withNameUpdate {
-		if err := usecase.repository.UpdateName(awards.ID, awards.Name); err != nil {
-			return err
-		}
-	}
-
-	return usecase.repository.UpdatePriceDescription(awards.ID, awards.Price, awards.Description)
+	return usecase.repository.Update(awards)
 }
 
 // Create Errors:
@@ -79,4 +73,12 @@ func (usecase *AwardsUsecase) Create(awards *models.Awards) (int64, error) {
 	}
 
 	return usecase.repository.Create(awards)
+}
+
+func (usecase *AwardsUsecase) GetCreatorId(awardsId int64) (int64, error) {
+	aw, err := usecase.repository.GetByID(awardsId)
+	if err != nil {
+		return -1, err
+	}
+	return aw.CreatorId, nil
 }

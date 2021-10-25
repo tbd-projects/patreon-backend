@@ -42,7 +42,7 @@ func (s *LogoutTestSuite) TestPOST_WithSession() {
 	err := json.NewEncoder(&b).Encode(test.Data)
 
 	require.NoError(s.T(), err)
-	ctx := context.WithValue(context.Background(), "uniq_id", uniqID)
+	ctx := context.WithValue(context.Background(), "session_id", uniqID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/logout", &b)
 
 	s.MockSessionsManager.EXPECT().
@@ -93,7 +93,7 @@ func (s *LogoutTestSuite) TestPOST_ErrorSessions() {
 	err := json.NewEncoder(&b).Encode(test.Data)
 
 	require.NoError(s.T(), err)
-	ctx := context.WithValue(context.Background(), "uniq_id", uniqID)
+	ctx := context.WithValue(context.Background(), "session_id", uniqID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/logout", &b)
 
 	s.MockSessionsManager.EXPECT().

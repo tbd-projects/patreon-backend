@@ -1,4 +1,4 @@
-package creator_handler
+package awards_handler
 
 import (
 	"github.com/sirupsen/logrus"
@@ -8,7 +8,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	usecase_creator "patreon/internal/app/usecase/creator"
+	repository_postgresql "patreon/internal/app/repository/awards/postgresql"
 )
 
 var codesByErrorsGET = base_handler.CodeMap{
@@ -17,18 +17,14 @@ var codesByErrorsGET = base_handler.CodeMap{
 }
 
 var codesByErrorsPOST = base_handler.CodeMap{
-	usecase_creator.CreatorExist: {
-		http.StatusConflict, handler_errors.CreatorAlreadyExist, logrus.InfoLevel},
-	repository.NotFound: {
-		http.StatusNotFound, handler_errors.UserNotFound, logrus.WarnLevel},
+	repository_postgresql.NameAlreadyExist: {
+		http.StatusConflict, handler_errors.AwardsAlredyExists, logrus.InfoLevel},
+	models.EmptyName: {
+		http.StatusBadRequest, handler_errors.EmptyName, logrus.WarnLevel},
+	models.IncorrectAwardsPrice: {
+		http.StatusBadRequest, handler_errors.IncorrectPrice, logrus.WarnLevel},
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 	app.UnknownError: {
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
-	models.IncorrectCreatorCategory: {
-		http.StatusUnprocessableEntity, handler_errors.InvalidCategory, logrus.InfoLevel},
-	models.IncorrectCreatorNickname: {
-		http.StatusUnprocessableEntity, handler_errors.InvalidNickname, logrus.InfoLevel},
-	models.IncorrectCreatorCategoryDescription: {
-		http.StatusUnprocessableEntity, handler_errors.InvalidCategoryDescription, logrus.InfoLevel},
 }

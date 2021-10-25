@@ -2,8 +2,10 @@ package handler_factory
 
 import (
 	"patreon/internal/app"
-	"patreon/internal/app/delivery/http/handlers/creator_create_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
@@ -25,6 +27,8 @@ const (
 	CREATOR_WITH_ID
 	UPDATE_PASSWORD
 	UPDATE_AVATAR
+	AWARDS
+	AWARDS_WITH_ID
 )
 
 type HandlerFactory struct {
@@ -48,6 +52,7 @@ func NewFactory(logger *logrus.Logger, router *mux.Router,
 func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucUser := f.usecaseFactory.GetUserUsecase()
 	ucCreator := f.usecaseFactory.GetCreatorUsecase()
+	ucAwards := f.usecaseFactory.GetAwardsUsecase()
 	sManager := f.usecaseFactory.GetSessionManager()
 	return map[int]app.Handler{
 		REGISTER:        handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
@@ -55,9 +60,11 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		LOGOUT:          logout_handler.NewLogoutHandler(f.logger, f.router, f.cors, sManager),
 		PROFILE:         profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		CREATORS:        creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator, ucUser),
-		CREATOR_WITH_ID: creator_create_handler.NewCreatorCreateHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
+		CREATOR_WITH_ID: creator_id_handler.NewCreatorIdHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
 		UPDATE_PASSWORD: password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		UPDATE_AVATAR:   avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		AWARDS:          awards_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS_WITH_ID:  awards_id_handler.NewAwardsIDHandler(f.logger, f.router, f.cors, ucAwards, sManager),
 	}
 }
 
@@ -69,14 +76,16 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 	hs := f.initAllHandlers()
 	f.urlHandler = &map[string]app.Handler{
 		//"/":                     "I am a joke?",
-		"/login":                hs[LOGIN],
-		"/logout":               hs[LOGOUT],
-		"/register":             hs[REGISTER],
-		"/user":                 hs[PROFILE],
-		"/creators":             hs[CREATORS],
-		"/creators/{id:[0-9]+}": hs[CREATOR_WITH_ID],
-		"/user/update/password": hs[UPDATE_PASSWORD],
-		"/user/update/avatar":   hs[UPDATE_AVATAR],
+		"/login":                               hs[LOGIN],
+		"/logout":                              hs[LOGOUT],
+		"/register":                            hs[REGISTER],
+		"/user":                                hs[PROFILE],
+		"/creators":                            hs[CREATORS],
+		"/creators/{creator_id:[0-9]+}":        hs[CREATOR_WITH_ID],
+		"/user/update/password":                hs[UPDATE_PASSWORD],
+		"/user/update/avatar":                  hs[UPDATE_AVATAR],
+		"/creators/{creator_id:[0-9]+}/awards": hs[AWARDS],
+		"/creators/{creator_id:[0-9]+}/awards/{awards_id:[0-9]+}": hs[AWARDS_WITH_ID],
 	}
 	return f.urlHandler
 }

@@ -11,7 +11,7 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	db_models "patreon/internal/app/models"
 	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
+	middleSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
 
@@ -34,7 +34,7 @@ func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 		userUsecase:    ucUser,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodPost, h.POST, middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
+	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
 	return h
 }
 

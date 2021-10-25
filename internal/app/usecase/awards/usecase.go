@@ -10,19 +10,31 @@ type Usecase interface {
 	// 			repository.DefaultErrDB
 	GetAwards(creatorId int64) ([]models.Awards, error)
 
+	// GetCreatorId Errors:
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	GetCreatorId(awardsId int64) (int64, error)
+
 	// Delete Errors:
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:
-	// 			repository.DefaultErrDB
+	// 			repository.DefaultErrDBB
 	Delete(id int64) error
 
-	Update(awards *models.Awards, withNameUpdate bool) error
+	// Update Errors:
+	// 		repository.NotFound
+	//		repository_postgresql.NameAlreadyExist
+	//		models.IncorrectAwardsPrice
+	//		models.EmptyName
+	//		app.GeneralError with Errors:
+	//			app.UnknownError
+	//			repository.DefaultErrDB
+	Update(awards *models.Awards) error
 
 	// Create Errors:
-	//		CreatorExist
-	//		models.IncorrectCreatorNickname
-	//		models.IncorrectCreatorCategory
-	//		models.IncorrectCreatorCategoryDescription
+	//		repository_postgresql.NameAlreadyExist
+	//		models.IncorrectAwardsPrice
+	//		models.EmptyName
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB

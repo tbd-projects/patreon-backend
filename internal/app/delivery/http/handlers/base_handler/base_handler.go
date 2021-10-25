@@ -4,11 +4,13 @@ import (
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/middleware"
+	"patreon/internal/app/utilits"
 	"strings"
 
 	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
+	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
 )
 
 const (
@@ -19,49 +21,48 @@ const (
 	OPTIONS = http.MethodOptions
 )
 
-type HandlerFunc func(http.ResponseWriter, *http.Request)
-type HMiddlewareFunc func(http.Handler) http.Handler
-type HFMiddlewareFunc func(HandlerFunc) HandlerFunc
-
 type BaseHandler struct {
 	utilitiesMiddleware middleware.UtilitiesMiddleware
 	corsMiddleware      middleware.CorsMiddleware
-	handlerMethods      map[string]HandlerFunc
-	middlewares         []HMiddlewareFunc
-	RespondHandler
+	handlerMethods      map[string]hf.HandlerFunc
+	middlewares         []hf.HMiddlewareFunc
+	HelpHandlers
 }
 
 func NewBaseHandler(log *logrus.Logger, router *mux.Router, config *app.CorsConfig) *BaseHandler {
-	h := &BaseHandler{handlerMethods: map[string]HandlerFunc{}, middlewares: []HMiddlewareFunc{},
+	h := &BaseHandler{handlerMethods: map[string]hf.HandlerFunc{}, middlewares: []hf.HMiddlewareFunc{},
 		utilitiesMiddleware: middleware.NewUtilitiesMiddleware(log),
-		corsMiddleware:      middleware.NewCorsMiddleware(config, router)}
-	h.log = log
+		corsMiddleware:      middleware.NewCorsMiddleware(config, router),
+		HelpHandlers: HelpHandlers{
+			Responder: utilits.Responder{LogObject: utilits.NewLogObject(log)},
+		},
+	}
 	h.AddMiddleware(h.corsMiddleware.SetCors)
 	h.AddMiddleware(h.utilitiesMiddleware.UpgradeLogger, h.utilitiesMiddleware.CheckPanic)
 	return h
 }
 
-func (h *BaseHandler) AddMiddleware(middleware ...HMiddlewareFunc) {
+func (h *BaseHandler) AddMiddleware(middleware ...hf.HMiddlewareFunc) {
 	h.middlewares = append(h.middlewares, middleware...)
 }
 
-func (h *BaseHandler) AddMethod(method string, handlerMethod HandlerFunc, middlewares ...HFMiddlewareFunc) {
+func (h *BaseHandler) AddMethod(method string, handlerMethod hf.HandlerFunc, middlewares ...hf.HFMiddlewareFunc) {
 	h.handlerMethods[method] = h.applyHFMiddleware(handlerMethod, middlewares...)
 }
 
-func (h *BaseHandler) applyHFMiddleware(handler HandlerFunc,
-	middlewares ...HFMiddlewareFunc) HandlerFunc {
+func (h *BaseHandler) applyHFMiddleware(handler hf.HandlerFunc,
+	middlewares ...hf.HFMiddlewareFunc) hf.HandlerFunc {
 	resultHandler := handler
-	for _, mw := range middlewares {
-		resultHandler = mw(resultHandler)
+	for index := len(middlewares) - 1; index >= 0; index-- {
+		resultHandler = middlewares[index](resultHandler)
 	}
 	return resultHandler
 }
 
 func (h *BaseHandler) applyMiddleware(handler http.Handler) http.Handler {
 	resultHandler := handler
-	for _, mw := range h.middlewares {
-		resultHandler = mw(resultHandler)
+	for index := len(h.middlewares) - 1; index >= 0; index-- {
+		resultHandler = h.middlewares[index](resultHandler)
 	}
 	return resultHandler
 }
@@ -81,13 +82,13 @@ func (h *BaseHandler) Connect(route *mux.Route) {
 func (h *BaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.PrintRequest(r)
 	ok := true
-	var handler HandlerFunc
+	var handler hf.HandlerFunc
 
 	handler, ok = h.handlerMethods[r.Method]
 	if ok {
 		handler(w, r)
 	} else {
-		h.log.Errorf("Unexpected http method: %s", r.Method)
+		h.Log(r).Errorf("Unexpected http method: %s", r.Method)
 		w.Header().Set("Allow", strings.Join(h.getListMethods(), ", "))
 		w.WriteHeader(http.StatusInternalServerError)
 	}

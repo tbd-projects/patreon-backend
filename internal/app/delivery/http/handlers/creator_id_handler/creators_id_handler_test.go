@@ -1,4 +1,4 @@
-package creator_create_handler
+package creator_id_handler
 
 import (
 	"bytes"
@@ -19,12 +19,12 @@ import (
 
 type CreatorCreateTestSuite struct {
 	handlers.SuiteHandler
-	handler *CreatorCreateHandler
+	handler *CreatorIdHandler
 }
 
 func (s *CreatorCreateTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorCreateHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
+	s.handler = NewCreatorIdHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
 }
 
 func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {

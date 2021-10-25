@@ -28,7 +28,7 @@ func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() err
 	}
 
 	logger := logrus.New()
-	currentTime := time.Now()
+	currentTime := time.Now().In(time.UTC)
 	formatted := config.LogAddr + fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
 		currentTime.Year(), currentTime.Month(), currentTime.Day(),
 		currentTime.Hour(), currentTime.Minute(), currentTime.Second()) + ".log"

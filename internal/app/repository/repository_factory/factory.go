@@ -3,6 +3,8 @@ package repository_factory
 import (
 	"github.com/sirupsen/logrus"
 	"patreon/internal/app"
+	repoAwrds "patreon/internal/app/repository/awards"
+	repAwardsPsql "patreon/internal/app/repository/awards/postgresql"
 	repCreator "patreon/internal/app/repository/creator"
 	repCreatorPsql "patreon/internal/app/repository/creator/postgresql"
 	repUser "patreon/internal/app/repository/user"
@@ -16,7 +18,8 @@ type RepositoryFactory struct {
 	logger              *logrus.Logger
 	userRepository      repUser.Repository
 	creatorRepository   repCreator.Repository
-	sessinRepository    sessions.SessionRepository
+	sessionRepository   sessions.SessionRepository
+	awardsRepository    repoAwrds.Repository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -41,8 +44,15 @@ func (f *RepositoryFactory) GetCreatorRepository() repCreator.Repository {
 }
 
 func (f *RepositoryFactory) GetSessionRepository() sessions.SessionRepository {
-	if f.sessinRepository == nil {
-		f.sessinRepository = repository.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
+	if f.sessionRepository == nil {
+		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
 	}
-	return f.sessinRepository
+	return f.sessionRepository
+}
+
+func (f *RepositoryFactory) GetAwardsRepository() repoAwrds.Repository {
+	if f.awardsRepository == nil {
+		f.awardsRepository = repAwardsPsql.NewAwardsRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.awardsRepository
 }

@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS awards
     name        text      not null,
     description text      not null,
     price       integer   not null,
+    color       bigint    default 0,
     creator_id  bigint references creator_profile (creator_id) on delete cascade,
     UNIQUE (name, creator_id)
 );

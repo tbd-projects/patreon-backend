@@ -3,6 +3,7 @@ package usecase_factory
 import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/sessions_manager"
+	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
 	useUser "patreon/internal/app/usecase/user"
 )
@@ -11,6 +12,7 @@ type UsecaseFactory struct {
 	repositoryFactory RepositoryFactory
 	userUsercase      useUser.Usecase
 	creatorUsercase   useCreator.Usecase
+	awardsUsercase    useAwards.Usecase
 	sessinManager     sessions.SessionsManager
 }
 
@@ -39,4 +41,11 @@ func (f *UsecaseFactory) GetSessionManager() sessions.SessionsManager {
 		f.sessinManager = sessions_manager.NewSessionManager(f.repositoryFactory.GetSessionRepository())
 	}
 	return f.sessinManager
+}
+
+func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
+	if f.awardsUsercase == nil {
+		f.awardsUsercase = useAwards.NewAwardsUsecase(f.repositoryFactory.GetAwardsRepository())
+	}
+	return f.awardsUsercase
 }

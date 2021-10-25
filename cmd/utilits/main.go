@@ -53,7 +53,8 @@ func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time
 		}
 	}()
 
-	diff := time.Now().Sub(fileTime)
+	tmp := time.Now().In(time.UTC)
+	diff := tmp.Sub(fileTime)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		bytes := scanner.Bytes()
@@ -68,7 +69,7 @@ func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time
 			return err
 		}
 
-		logger.WithTime(lg.Time.Add(diff)).WithFields(logrus.Fields{
+		logger.WithTime(lg.Time.In(time.Now().Location()).Add(diff)).WithFields(logrus.Fields{
 			"urls":        lg.Url.String(),
 			"method":      lg.Method,
 			"remote_addr": lg.Adr,

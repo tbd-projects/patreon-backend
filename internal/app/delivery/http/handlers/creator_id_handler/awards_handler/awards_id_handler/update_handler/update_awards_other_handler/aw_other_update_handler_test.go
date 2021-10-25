@@ -1,4 +1,4 @@
-package creator_handler
+package aw_other_update_handler
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
 	"patreon/internal/app/delivery/http/models"
 	models_data "patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -21,18 +22,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type CreatorTestSuite struct {
+type AwardsUpOtherTestSuite struct {
 	handlers.SuiteHandler
-	handler *CreatorHandler
+	handler *awards_handler.AwardsHandler
 }
 
-func (s *CreatorTestSuite) SetupSuite() {
+func (s *AwardsUpOtherTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase,
-		s.MockUserUsecase)
+	s.handler = awards_handler.NewAwardsHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
 }
 
-func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {
+func (s *AwardsUpOtherTestSuite) TestCreatorIdHandler_POST_No_Params() {
 	s.Tb = handlers.TestTable{
 		Name:              "No url params",
 		Data:              int64(-1),
@@ -60,7 +60,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
-func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Invalid_Body() {
+func (s *AwardsUpOtherTestSuite) TestCreatorIdHandler_POST_Invalid_Body() {
 	s.Tb = handlers.TestTable{
 		Name:              "Invalid request body",
 		Data:              int64(1),
@@ -83,7 +83,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Invalid_Body() {
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
-func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
+func (s *AwardsUpOtherTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 	s.Tb = handlers.TestTable{
 		Name:              "Invalid request body",
 		Data:              int64(1),
@@ -111,7 +111,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 
-func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Create_Err() {
+func (s *AwardsUpOtherTestSuite) TestCreatorIdHandler_POST_Create_Err() {
 	s.Tb = handlers.TestTable{
 		Name:              "CreateError in create usecase",
 		Data:              int64(1),
@@ -139,7 +139,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Create_Err() {
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 
-func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Correct() {
+func (s *AwardsUpOtherTestSuite) TestCreatorIdHandler_POST_Correct() {
 	userId := int64(1)
 	user := models_data.TestUser()
 	user.ID = userId
@@ -208,7 +208,7 @@ func (match *creatorWithFieldMatcher) String() string {
 	return fmt.Sprintf("Creator: %s", match.creator.String())
 }
 
-func (s *CreatorTestSuite) TestCreatorHandler_GET_Correct() {
+func (s *AwardsUpOtherTestSuite) TestAwardsHandler_GET_Correct() {
 	userID := int64(1)
 	s.Tb = handlers.TestTable{
 		Name:              "correct",
@@ -241,7 +241,7 @@ func (s *CreatorTestSuite) TestCreatorHandler_GET_Correct() {
 		models.ToResponseCreator(*s.Tb.Data.(*models_data.Creator))})
 }
 
-func (s *CreatorTestSuite) TestCreatorHandler_GET_EmptyCreators() {
+func (s *AwardsUpOtherTestSuite) TestAwardsHandler_GET_EmptyCreators() {
 	s.Tb = handlers.TestTable{
 		Name:              "creators is empty",
 		Data:              nil,
@@ -266,6 +266,6 @@ func (s *CreatorTestSuite) TestCreatorHandler_GET_EmptyCreators() {
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
 
-func TestCreatorHandler(t *testing.T) {
-	suite.Run(t, new(CreatorTestSuite))
+func TestAwardsHandler(t *testing.T) {
+	suite.Run(t, new(AwardsUpOtherTestSuite))
 }

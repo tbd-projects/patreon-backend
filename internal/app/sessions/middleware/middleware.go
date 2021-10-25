@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
+	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
 	"patreon/internal/app/sessions"
 
 	"github.com/sirupsen/logrus"
@@ -21,7 +21,7 @@ func NewSessionMiddleware(sessionManager sessions.SessionsManager, log *logrus.L
 	}
 }
 
-func (m *SessionMiddleware) CheckFunc(next bh.HandlerFunc) bh.HandlerFunc {
+func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
@@ -38,7 +38,7 @@ func (m *SessionMiddleware) CheckFunc(next bh.HandlerFunc) bh.HandlerFunc {
 		} else {
 			m.log.Infof("Get session for user: %d", res.UserID)
 			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID)) //nolint
-			r = r.WithContext(context.WithValue(r.Context(), "uniq_id", res.UniqID)) //nolint
+			r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID)) //nolint
 		}
 		next(w, r)
 	}
