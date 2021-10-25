@@ -4,6 +4,7 @@ import (
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/creator_create_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
+	"patreon/internal/app/delivery/http/handlers/csrf_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
@@ -25,6 +26,7 @@ const (
 	CREATOR_WITH_ID
 	UPDATE_PASSWORD
 	UPDATE_AVATAR
+	GET_CSRF_TOKEN
 )
 
 type HandlerFactory struct {
@@ -48,7 +50,9 @@ func NewFactory(logger *logrus.Logger, router *mux.Router,
 func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucUser := f.usecaseFactory.GetUserUsecase()
 	ucCreator := f.usecaseFactory.GetCreatorUsecase()
+	ucCsrf := f.usecaseFactory.GetCsrfUsecase()
 	sManager := f.usecaseFactory.GetSessionManager()
+
 	return map[int]app.Handler{
 		REGISTER:        handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		LOGIN:           login_handler.NewLoginHandler(f.logger, f.router, f.cors, sManager, ucUser),
@@ -58,6 +62,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		CREATOR_WITH_ID: creator_create_handler.NewCreatorCreateHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
 		UPDATE_PASSWORD: password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		UPDATE_AVATAR:   avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		GET_CSRF_TOKEN:  csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
 	}
 }
 
@@ -77,6 +82,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{id:[0-9]+}": hs[CREATOR_WITH_ID],
 		"/user/update/password": hs[UPDATE_PASSWORD],
 		"/user/update/avatar":   hs[UPDATE_AVATAR],
+		"/token":                hs[GET_CSRF_TOKEN],
 	}
 	return f.urlHandler
 }

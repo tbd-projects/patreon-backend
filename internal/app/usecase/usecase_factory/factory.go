@@ -1,6 +1,7 @@
 package usecase_factory
 
 import (
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/sessions_manager"
 	useCreator "patreon/internal/app/usecase/creator"
@@ -9,9 +10,10 @@ import (
 
 type UsecaseFactory struct {
 	repositoryFactory RepositoryFactory
-	userUsercase      useUser.Usecase
-	creatorUsercase   useCreator.Usecase
-	sessinManager     sessions.SessionsManager
+	userUsecase       useUser.Usecase
+	creatorUsecase    useCreator.Usecase
+	csrfUsecase       usecase_csrf.Usecase
+	sessionsManager   sessions.SessionsManager
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
@@ -21,22 +23,28 @@ func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
 }
 
 func (f *UsecaseFactory) GetUserUsecase() useUser.Usecase {
-	if f.userUsercase == nil {
-		f.userUsercase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository())
+	if f.userUsecase == nil {
+		f.userUsecase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository())
 	}
-	return f.userUsercase
+	return f.userUsecase
 }
 
 func (f *UsecaseFactory) GetCreatorUsecase() useCreator.Usecase {
-	if f.creatorUsercase == nil {
-		f.creatorUsercase = useCreator.NewCreatorUsecase(f.repositoryFactory.GetCreatorRepository())
+	if f.creatorUsecase == nil {
+		f.creatorUsecase = useCreator.NewCreatorUsecase(f.repositoryFactory.GetCreatorRepository())
 	}
-	return f.creatorUsercase
+	return f.creatorUsecase
+}
+func (f *UsecaseFactory) GetCsrfUsecase() usecase_csrf.Usecase {
+	if f.csrfUsecase == nil {
+		f.csrfUsecase = usecase_csrf.NewCsrfUsecase(f.repositoryFactory.GetCsrfRepository())
+	}
+	return f.csrfUsecase
 }
 
 func (f *UsecaseFactory) GetSessionManager() sessions.SessionsManager {
-	if f.sessinManager == nil {
-		f.sessinManager = sessions_manager.NewSessionManager(f.repositoryFactory.GetSessionRepository())
+	if f.sessionsManager == nil {
+		f.sessionsManager = sessions_manager.NewSessionManager(f.repositoryFactory.GetSessionRepository())
 	}
-	return f.sessinManager
+	return f.sessionsManager
 }

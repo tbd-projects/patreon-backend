@@ -38,8 +38,8 @@ func NewCsrfHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig
 // @Summary get CSRF Token
 // @Description generate usecase token and return to client
 // @Produce json
-// @Success 201 {array} models.ResponseCreator
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
+// @Success 200 {object} models_respond.TokenResponse
+// @Failure 500 {object} models.ErrResponse "server error"
 // @Router /token [GET]
 func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {

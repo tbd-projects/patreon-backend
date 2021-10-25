@@ -1,17 +1,17 @@
-package repository_token
+package repository_jwt
 
 import "patreon/internal/app/csrf/models"
 
 type Repository interface {
 	// Check Errors:
-	// 		repository_jwt.BadToken
+	// 		BadToken
 	// 		app.GeneralError with Error
-	// 			repository_jwt.ParseClaimsError
-	// 			repository_jwt.TokenExpired
+	// 			ParseClaimsError
+	// 			TokenExpired
 	Check(sources models.TokenSources, tokenString models.Token) error
 
 	// Create Errors:
 	// 		app.GeneralError with Error
-	// 			repository_jwt.ErrorSignedToken
+	// 			ErrorSignedToken
 	Create(sources models.TokenSources) (models.Token, error)
 }

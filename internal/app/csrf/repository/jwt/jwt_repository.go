@@ -24,7 +24,7 @@ type jwtCsrfClaims struct {
 	SessionId string `json:"session_id"`
 }
 
-func NewJwtToken() *JwtRepository {
+func NewJwtRepository() *JwtRepository {
 	return &JwtRepository{Secret: secretToken.Bytes()}
 }
 

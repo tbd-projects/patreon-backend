@@ -1,12 +1,14 @@
 package repository_factory
 
 import (
-	"github.com/sirupsen/logrus"
 	"patreon/internal/app"
+	repCsrf "patreon/internal/app/csrf/repository/jwt"
 	repCreator "patreon/internal/app/repository/creator"
 	repUser "patreon/internal/app/repository/user"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/repository"
+
+	"github.com/sirupsen/logrus"
 )
 
 type RepositoryFactory struct {
@@ -14,7 +16,8 @@ type RepositoryFactory struct {
 	logger              *logrus.Logger
 	userRepository      repUser.Repository
 	creatorRepository   repCreator.Repository
-	sessinRepository    sessions.SessionRepository
+	csrfRepository      repCsrf.Repository
+	sessionRepository   sessions.SessionRepository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -38,9 +41,16 @@ func (f *RepositoryFactory) GetCreatorRepository() repCreator.Repository {
 	return f.creatorRepository
 }
 
-func (f *RepositoryFactory) GetSessionRepository() sessions.SessionRepository {
-	if f.sessinRepository == nil {
-		f.sessinRepository = repository.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
+func (f *RepositoryFactory) GetCsrfRepository() repCsrf.Repository {
+	if f.creatorRepository == nil {
+		f.csrfRepository = repCsrf.NewJwtRepository()
 	}
-	return f.sessinRepository
+	return f.csrfRepository
+}
+
+func (f *RepositoryFactory) GetSessionRepository() sessions.SessionRepository {
+	if f.sessionRepository == nil {
+		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
+	}
+	return f.sessionRepository
 }

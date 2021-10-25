@@ -2,7 +2,7 @@ package usecase_csrf
 
 import (
 	"patreon/internal/app/csrf/models"
-	repository_token "patreon/internal/app/csrf/repository"
+	repository_token "patreon/internal/app/csrf/repository/jwt"
 	"time"
 )
 
@@ -23,12 +23,12 @@ func NewCsrfUsecase(repo repository_token.Repository) *CsrfUsecase {
 // 		app.GeneralError with Error
 // 			repository_jwt.ParseClaimsError
 //			repository_jwt.TokenExpired
-func (u *CsrfUsecase) Check(sessionId string, userId int64, token models.Token) error {
+func (u *CsrfUsecase) Check(sessionId string, userId int64, token string) error {
 	sources := models.TokenSources{
 		UserId:    userId,
 		SessionId: sessionId,
 	}
-	return u.repository.Check(sources, token)
+	return u.repository.Check(sources, models.Token(token))
 
 }
 
