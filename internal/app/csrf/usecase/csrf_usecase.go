@@ -18,6 +18,11 @@ func NewCsrfUsecase(repo repository_token.Repository) *CsrfUsecase {
 	}
 }
 
+// Check Errors:
+//      repository_jwt.BadToken
+// 		app.GeneralError with Error
+// 			repository_jwt.ParseClaimsError
+//			repository_jwt.TokenExpired
 func (u *CsrfUsecase) Check(sessionId string, userId int64, token models.Token) error {
 	sources := models.TokenSources{
 		UserId:    userId,
@@ -26,6 +31,10 @@ func (u *CsrfUsecase) Check(sessionId string, userId int64, token models.Token) 
 	return u.repository.Check(sources, token)
 
 }
+
+// Create Errors:
+// 		app.GeneralError with Error
+// 			repository_jwt.ErrorSignedToken
 func (u *CsrfUsecase) Create(sessionId string, userId int64) (models.Token, error) {
 	data := models.TokenSources{
 		UserId:      userId,

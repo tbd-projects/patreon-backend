@@ -2,10 +2,14 @@ package models
 
 import (
 	"fmt"
+	models_csrf "patreon/internal/app/csrf/models"
 	"patreon/internal/app/models"
 	"strconv"
 )
 
+type TokenResponse struct {
+	Token models_csrf.Token `json:"token"`
+}
 type ErrResponse struct {
 	Err string `json:"error"`
 }

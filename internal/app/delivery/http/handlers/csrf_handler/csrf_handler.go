@@ -6,7 +6,10 @@ import (
 	"patreon/internal/app"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
+	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	models_respond "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
+	"patreon/internal/app/sessions/middleware"
 
 	"github.com/gorilla/mux"
 
@@ -19,12 +22,15 @@ type CsrfHandler struct {
 	bh.BaseHandler
 }
 
-func NewCsrfHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager) *CsrfHandler {
+func NewCsrfHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+	uc usecase_csrf.Usecase) *CsrfHandler {
 	h := &CsrfHandler{
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 		sessionManager: sManager,
+		csrfUsecase:    uc,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
+	h.AddMiddleware(middleware.NewSessionMiddleware(sManager, log).Check)
 	return h
 }
 
@@ -42,16 +48,24 @@ func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
 			h.Log(r).Error(err)
 		}
 	}(r.Body)
-	sessionId := r.Context().Value("session_id").(string)
-	userId := r.Context().Value("user_id").(int64)
+	sessionId, ok := r.Context().Value("session_id").(string)
+	if !ok {
+		h.Log(r).Error("invalid conversation session_id from context to string")
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
+		return
+	}
+	userId, ok := r.Context().Value("user_id").(int64)
+	if !ok {
+		h.Log(r).Error("invalid conversation userId from context to int64")
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
+		return
+	}
 	token, err := h.csrfUsecase.Create(sessionId, userId)
 	if err != nil {
 		h.Log(r).Error("can not get user_id from context")
-		//h.Error(w, r, http.StatusForbidden)
+		h.UsecaseError(w, r, err, codeByErrors)
 		return
 	}
 	h.Log(r).Debugf("get token %v", token)
-	h.Respond(w, r, http.StatusOK, token)
-	//h.Log(r).Debugf("get creators %v", respondCreators)
-	//h.Respond(w, r, http.StatusOK, respondCreators)
+	h.Respond(w, r, http.StatusOK, models_respond.TokenResponse{Token: token})
 }
