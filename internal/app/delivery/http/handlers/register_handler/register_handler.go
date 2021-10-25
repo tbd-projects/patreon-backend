@@ -5,6 +5,9 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
@@ -31,8 +34,10 @@ func NewRegisterHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 		userUsecase:    ucUser,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
-	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)
+	h.AddMethod(http.MethodPost, h.POST,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized,
+	)
 	return h
 }
 

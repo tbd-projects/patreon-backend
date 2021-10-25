@@ -63,30 +63,27 @@ func (s *Server) checkConnection() error {
 // @host localhost:8080
 // @BasePath /
 
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-
 // @x-extension-openapi {"example": "value on a json format"}
+
 func (s *Server) Start(config *app.Config) error {
 	if err := s.checkConnection(); err != nil {
 		return err
 	}
 
 	router := mux.NewRouter()
-
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	routerApi := router.PathPrefix("/api/v1/").Subrouter()
+	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
-	factory := handler_factory.NewFactory(s.logger, router, &config.Cors, usecaseFactory)
+	factory := handler_factory.NewFactory(s.logger, routerApi, &config.Cors, usecaseFactory)
 	hs := factory.GetHandleUrls()
 
 	for url, h := range *hs {
-		h.Connect(router.PathPrefix(url))
+		h.Connect(routerApi.PathPrefix(url))
 	}
 
 	s.logger.Info("starting server")
 
-	return http.ListenAndServe(config.BindAddr, router)
+	return http.ListenAndServe(config.BindAddr, routerApi)
 }

@@ -29,8 +29,7 @@ func NewCsrfHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig
 		sessionManager: sManager,
 		csrfUsecase:    uc,
 	}
-	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMiddleware(middleware.NewSessionMiddleware(sManager, log).Check)
+	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(sManager, log).Check)
 	return h
 }
 

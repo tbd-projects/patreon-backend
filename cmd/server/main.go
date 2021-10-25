@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"os"
 	"patreon/internal/app"
 	main_server "patreon/internal/app/server"
 	"time"
+
+	"github.com/gomodule/redigo/redis"
 
 	_ "patreon/docs"
 
@@ -72,10 +73,6 @@ func init() {
 
 // @host localhost:8080
 // @BasePath /api/v1
-
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
 
 // @x-extension-openapi {"example": "value on a json format"}
 

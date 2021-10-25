@@ -6,6 +6,9 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -30,8 +33,10 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 		userUsecase:    ucUser,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
-	h.AddMethod(http.MethodPut, h.PUT)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMethod(http.MethodPut, h.PUT,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewSessionMiddleware(h.sessionManager, log).Check,
+	)
 	return h
 }
 
@@ -43,6 +48,7 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 // @Param user body models.RequestChangePassword true "Request body for change password"
 // @Success 200 "success update password"
 // @Failure 400 {object} models.ErrResponse "incorrect new password"
+// @Failure 403 "csrf token is invalid, get new token"
 // @Failure 404 {object} models.ErrResponse "User not found"
 // @Failure 418 "User are authorized"
 // @Failure 422 {object} models.ErrResponse "Not valid body"

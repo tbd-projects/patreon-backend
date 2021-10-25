@@ -2,10 +2,12 @@ package creator_handler
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -14,6 +16,8 @@ import (
 	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -34,7 +38,10 @@ func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 		userUsecase:    ucUser,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodPost, h.POST, middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
+	h.AddMethod(http.MethodPost, h.POST,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+	)
 	return h
 }
 
@@ -43,7 +50,9 @@ func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Description get list of creators which register on service
 // @Produce json
 // @Success 201 {array} models.ResponseCreator
+// @Failure 403 "csrf token is invalid, get new token"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
+
 // @Router /creators [GET]
 func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {

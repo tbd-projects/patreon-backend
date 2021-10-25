@@ -32,9 +32,10 @@ func NewCreatorCreateHandler(log *logrus.Logger, router *mux.Router, cors *app.C
 		userUsecase:    ucUser,
 		creatorUsecase: ucCreator,
 	}
-	h.AddMethod(http.MethodGet, h.GET)
+	h.AddMethod(http.MethodGet, h.GET,
+		middleware.NewSessionMiddleware(h.sessionManager, log).Check,
+	)
 
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
 	return h
 }
 

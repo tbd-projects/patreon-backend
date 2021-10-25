@@ -42,7 +42,7 @@ func (f *RepositoryFactory) GetCreatorRepository() repCreator.Repository {
 }
 
 func (f *RepositoryFactory) GetCsrfRepository() repCsrf.Repository {
-	if f.creatorRepository == nil {
+	if f.csrfRepository == nil {
 		f.csrfRepository = repCsrf.NewJwtRepository()
 	}
 	return f.csrfRepository
