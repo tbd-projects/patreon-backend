@@ -44,22 +44,23 @@ CREATE TABLE IF NOT EXISTS posts_type
 
 CREATE TABLE IF NOT EXISTS awards
 (
-    awards_id   bigserial not null primary key,
-    name        text      not null,
-    description text      not null,
-    price       integer   not null,
-    color       bigint    default 0,
+    awards_id   bigserial        not null primary key,
+    name        text             not null,
+    description text             not null,
+    price       integer          not null,
+    color       bigint default 0 not null,
     creator_id  bigint references creator_profile (creator_id) on delete cascade,
     UNIQUE (name, creator_id)
 );
 
 CREATE TABLE IF NOT EXISTS posts
 (
-    posts_id    bigserial           not null primary key,
-    title       text                not null,
-    description text                not null,
-    likes       bigint    default 0 not null,
-    date        timestamp default now(),
+    posts_id    bigserial               not null primary key,
+    title       text                    not null,
+    description text                    not null,
+    likes       bigint    default 0     not null,
+    date        timestamp default now() not null,
+    cover       text,
     type_awards bigint references awards (awards_id),
     creator_id  bigint references creator_profile (creator_id) on delete cascade
 );
@@ -76,8 +77,8 @@ CREATE TABLE IF NOT EXISTS likes
 (
     likes_id bigserial not null primary key,
     value    bool      not null,
-    post_id  bigint not null references posts (posts_id) on delete cascade,
-    users_id bigint not null references users (users_id) on delete cascade
+    post_id  bigint    not null references posts (posts_id) on delete cascade,
+    users_id bigint    not null references users (users_id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS comments
