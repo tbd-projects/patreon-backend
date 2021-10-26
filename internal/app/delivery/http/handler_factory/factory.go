@@ -6,6 +6,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler"
+	aw_other_update_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler/update_handler/update_awards_other_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
@@ -29,6 +30,7 @@ const (
 	UPDATE_AVATAR
 	AWARDS
 	AWARDS_WITH_ID
+	AWARDS_OTHER_UPD
 )
 
 type HandlerFactory struct {
@@ -65,6 +67,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		UPDATE_AVATAR:   avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		AWARDS:          awards_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
 		AWARDS_WITH_ID:  awards_id_handler.NewAwardsIDHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS_OTHER_UPD:  aw_other_update_handler.NewAwardsUpOtherHandler(f.logger, f.router, f.cors, ucAwards, sManager),
 	}
 }
 
@@ -79,13 +82,18 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/login":                               hs[LOGIN],
 		"/logout":                              hs[LOGOUT],
 		"/register":                            hs[REGISTER],
+	// /user     ---------------------------------------------------------////
 		"/user":                                hs[PROFILE],
-		"/creators":                            hs[CREATORS],
-		"/creators/{creator_id:[0-9]+}":        hs[CREATOR_WITH_ID],
 		"/user/update/password":                hs[UPDATE_PASSWORD],
 		"/user/update/avatar":                  hs[UPDATE_AVATAR],
+	// /creators ---------------------------------------------------------////
+		"/creators":                            hs[CREATORS],
+		"/creators/{creator_id:[0-9]+}":        hs[CREATOR_WITH_ID],
+	// ../awards ---------------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/awards": hs[AWARDS],
 		"/creators/{creator_id:[0-9]+}/awards/{awards_id:[0-9]+}": hs[AWARDS_WITH_ID],
+		"/creators/{creator_id:[0-9]+}/awards/{awards_id:[0-9]+}/update/other": hs[AWARDS_OTHER_UPD],
+	// ../posts  ---------------------------------------------------------////
 	}
 	return f.urlHandler
 }

@@ -15,6 +15,7 @@
 .idea
 .vscode
 logs
+local
 
 cover2
 cover

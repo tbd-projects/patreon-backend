@@ -24,7 +24,7 @@ open-last-log:
 	cat $(LOG_DIR)/`ls -t $(LOG_DIR) | head -1 `
 
 clear-logs:
-	rm -r $(LOG_DIR)/*.out
+	rm -r $(LOG_DIR)/*.log
 
 stop:
 	docker-compose stop

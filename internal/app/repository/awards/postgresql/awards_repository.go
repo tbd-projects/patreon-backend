@@ -7,6 +7,8 @@ import (
 	"patreon/internal/app/repository"
 )
 
+const NotSkipAwards = -1
+
 type AwardsRepository struct {
 	store *sql.DB
 }
@@ -21,10 +23,11 @@ func NewAwardsRepository(st *sql.DB) *AwardsRepository {
 //		repository_postgresql.NameAlreadyExist
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *AwardsRepository) checkUniqName(name string, creatorId int64) error {
+func (repo *AwardsRepository) checkUniqName(name string, creatorId int64, skipAwardsid int64) error {
 	count := 0
 	err := repo.store.QueryRow(
-		"SELECT count(*) from awards where awards.creator_id = $1 and awards.name = $2", creatorId, name).Scan(&count)
+		"SELECT count(*) from awards where awards.creator_id = $1 and awards.name = $2 and awards.awards_id != $3",
+		creatorId, name, skipAwardsid).Scan(&count)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
@@ -41,13 +44,14 @@ func (repo *AwardsRepository) checkUniqName(name string, creatorId int64) error 
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) Create(aw *models.Awards) (int64, error) {
-	if err := repo.checkUniqName(aw.Name, aw.CreatorId); err != nil {
+	if err := repo.checkUniqName(aw.Name, aw.CreatorId, NotSkipAwards); err != nil {
 		return -1, err
 	}
 
 	if err := repo.store.QueryRow("INSERT INTO awards (name, "+
 		"description, price, color, creator_id) VALUES ($1, $2, $3, $4, $5)"+
-		"RETURNING awards_id", aw.Name, aw.Description, aw.Price, aw.Color, aw.CreatorId).Scan(&aw.ID); err != nil {
+		"RETURNING awards_id", aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.CreatorId).
+		Scan(&aw.ID); err != nil {
 		return -1, repository.NewDBError(err)
 	}
 	return aw.ID, nil
@@ -59,13 +63,15 @@ func (repo *AwardsRepository) Create(aw *models.Awards) (int64, error) {
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) GetByID(awardsID int64) (*models.Awards, error) {
 	aw := &models.Awards{ID: awardsID}
+	var clr uint64
 	if err := repo.store.QueryRow("SELECT name, description, price, color, creator_id FROM awards where awards_id = $1",
-		aw.ID).Scan(&aw.Name, &aw.Description, &aw.Price, &aw.Color, &aw.CreatorId); err != nil {
+		aw.ID).Scan(&aw.Name, &aw.Description, &aw.Price, &clr, &aw.CreatorId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
 		}
 		return nil, repository.NewDBError(err)
 	}
+	aw.Color = convertUint64ToRGBA(clr)
 	return aw, nil
 }
 
@@ -86,12 +92,12 @@ func (repo *AwardsRepository) Update(aw *models.Awards) error {
 		return repository.NewDBError(err)
 	}
 
-	if err := repo.checkUniqName(aw.Name, creatorId); err != nil {
+	if err := repo.checkUniqName(aw.Name, creatorId, aw.ID); err != nil {
 		return err
 	}
 
 	if _, err := repo.store.Query("UPDATE awards SET name = $1, description = $2, price = $3, color = $4 WHERE awards_id = $5",
-		aw.Name, aw.Description, aw.Price, aw.Color, aw.ID); err != nil {
+		aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.ID); err != nil {
 		return repository.NewDBError(err)
 	}
 	return nil
@@ -104,7 +110,7 @@ func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Awards, error
 	var res []models.Awards
 
 	rows, err := repo.store.Query(
-		"SELECT awards_id, name, description, price from awards where awards.creator_id = $1", creatorId)
+		"SELECT awards_id, name, description, price, color from awards where awards.creator_id = $1", creatorId)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}
@@ -112,9 +118,11 @@ func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Awards, error
 	i := 0
 	for rows.Next() {
 		var awards models.Awards
-		if err = rows.Scan(&awards.ID, &awards.Name, &awards.Description, &awards.Price); err != nil {
+		var clr uint64
+		if err = rows.Scan(&awards.ID, &awards.Name, &awards.Description, &awards.Price, &clr); err != nil {
 			return nil, repository.NewDBError(err)
 		}
+		awards.Color = convertUint64ToRGBA(clr)
 		res = append(res, awards)
 		i++
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"image/color"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -28,7 +29,7 @@ func NewAwardsUpOtherHandler(log *logrus.Logger, router *mux.Router, cors *app.C
 		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
 		awardsUsecase: ucAwards,
 	}
-	h.AddMethod(http.MethodDelete, h.PUT, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
+	h.AddMethod(http.MethodPut, h.PUT, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
 		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc)
 	return h
@@ -50,7 +51,7 @@ func NewAwardsUpOtherHandler(log *logrus.Logger, router *mux.Router, cors *app.C
 // @Failure 400 {object} models.ErrResponse "empty name in request"
 // @Failure 400 {object} models.ErrResponse "incorrect value of price"
 // @Failure 500 {object} models.ErrResponse "server error"
-// @Router /creators/{:creator_id}/awards/{:awards_id}/update/other [DELETE]
+// @Router /creators/{:creator_id}/awards/{:awards_id}/update/other [PUT]
 func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -58,7 +59,7 @@ func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
 			h.Log(r).Error(err)
 		}
 	}(r.Body)
-	
+
 	awardsId, ok := h.GetInt64FromParam(w, r, "awards_id")
 	if !ok {
 		return
@@ -69,7 +70,7 @@ func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
-	
+
 	req := &models.RequestAwards{}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(req); err != nil {
@@ -77,15 +78,15 @@ func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
-	
+
 	award := &bd_modle.Awards{
-		ID: awardsId,
-		Name: req.Name,
+		ID:          awardsId,
+		Name:        req.Name,
 		Description: req.Description,
-		Price: req.Price,
-		Color: req.Color,
+		Price:       req.Price,
+		Color:       color.RGBA{R: req.Color.R, B: req.Color.B, G: req.Color.G, A: req.Color.A},
 	}
-	
+
 	err := h.awardsUsecase.Update(award)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)

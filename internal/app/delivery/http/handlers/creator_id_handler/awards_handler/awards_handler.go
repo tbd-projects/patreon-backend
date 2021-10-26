@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"image/color"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -116,7 +117,7 @@ func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Name:        req.Name,
 		Price:       req.Price,
 		Description: req.Description,
-		Color:       req.Color,
+		Color:       color.RGBA{R: req.Color.R, G: req.Color.G, B: req.Color.B, A: req.Color.A},
 		CreatorId:   idInt,
 	}
 

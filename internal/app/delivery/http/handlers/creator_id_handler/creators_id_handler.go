@@ -42,7 +42,7 @@ func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Failure 404 {object} models.ErrResponse "user with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Router /creators/{creator_id:}/ [GET]
+// @Router /creators/{creator_id:} [GET]
 func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

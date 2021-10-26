@@ -45,7 +45,7 @@ func (h* HelpHandlers) GetInt64FromParam(w http.ResponseWriter, r *http.Request,
 
 func (h *HelpHandlers) UsecaseError(w http.ResponseWriter, r *http.Request, usecaseErr error, codeByErr CodeMap) {
 	var generalError *app.GeneralError
-
+	orginalError := usecaseErr
 	if errors.As(usecaseErr, &generalError) {
 		usecaseErr = errors.Cause(usecaseErr).(*app.GeneralError).Err
 	}
@@ -59,7 +59,7 @@ func (h *HelpHandlers) UsecaseError(w http.ResponseWriter, r *http.Request, usec
 		}
 	}
 
-	h.Log(r).Logf(respond.Level, "Gotted error: %v", usecaseErr)
+	h.Log(r).Logf(respond.Level, "Gotted error: %v", orginalError)
 	h.Error(w, r, respond.Code, respond.Error)
 }
 

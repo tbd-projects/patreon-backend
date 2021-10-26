@@ -7,7 +7,7 @@ type Posts struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Likes       int64     `json:"likes"`
-	Awards      int64     `json:"type_awards"`
+	Awards      string    `json:"type_awards"`
 	Cover       int64     `json:"cover"`
 	CreatorId   int64     `json:"creator_id"`
 	Date        time.Time `json:"date"`

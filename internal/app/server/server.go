@@ -61,7 +61,7 @@ func (s *Server) checkConnection() error {
 // @contact.email support@swagger.io
 
 // @host localhost:8080
-// @BasePath /
+// @BasePath /api/v1/
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
@@ -83,7 +83,7 @@ func (s *Server) Start(config *app.Config) error {
 	hs := factory.GetHandleUrls()
 
 	for url, h := range *hs {
-		h.Connect(router.PathPrefix(url))
+		h.Connect(router.Path(url))
 	}
 
 	s.logger.Info("starting server")

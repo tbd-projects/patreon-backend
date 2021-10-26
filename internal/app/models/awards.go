@@ -4,16 +4,17 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
+	"image/color"
 	"strconv"
 )
 
 type Awards struct {
-	ID          int64  `json:"awards_id"`
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	Price       int64  `json:"price,omitempty"`
-	CreatorId   int64  `json:"creator_id"`
-	Color      	uint64 `json:"color.omitempty"`
+	ID          int64      `json:"awards_id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description,omitempty"`
+	Price       int64      `json:"price,omitempty"`
+	CreatorId   int64      `json:"creator_id"`
+	Color       color.RGBA `json:"color.omitempty"`
 }
 
 func (aw *Awards) String() string {
@@ -27,8 +28,8 @@ func (aw *Awards) String() string {
 // Important can return some other error
 func (aw *Awards) Validate() error {
 	err := validation.Errors{
-		"Name":    validation.Validate(aw.Name, validation.Required),
-		"Price":    validation.Validate(aw.Price, validation.Min(0)),
+		"name":  validation.Validate(aw.Name, validation.Required),
+		"price": validation.Validate(aw.Price, validation.Min(0)),
 	}.Filter()
 	if err == nil {
 		return nil

@@ -33,7 +33,7 @@ type ResponseAwards struct {
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 	Price       int64  `json:"price,omitempty"`
-	Color      	uint64 `json:"color.omitempty"`
+	Color      	Color `json:"color,omitempty"`
 }
 
 func ToResponseCreator(cr models.Creator) ResponseCreator {
@@ -48,7 +48,7 @@ func ToResponseAwards(aw models.Awards) ResponseAwards {
 		Name: aw.Name,
 		Price: aw.Price,
 		Description: aw.Description,
-		Color: aw.Color,
+		Color: NewColor(aw.Color),
 	}
 }
 
