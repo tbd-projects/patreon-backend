@@ -140,7 +140,7 @@ func (repo *RedisRepository) CheckBlackList(key string, userIp string) (bool, er
 		if err == redis.ErrNil {
 			return false, NotFound
 		} else {
-			return false, app.GeneralError{
+			return true, app.GeneralError{
 				Err: InvalidStorageData,
 				ExternalErr: errors.Wrapf(err,
 					"error when try get user from black list with ip: %v in blackList", userIp),
