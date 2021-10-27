@@ -15,5 +15,5 @@ type Repository interface {
 	// Increment Errors:
 	// 		app.GeneralError with Errors
 	// 			InvalidStorageData
-	Increment(userIp string) (string, error)
+	Increment(userIp string) (int64, error)
 }

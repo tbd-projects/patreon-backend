@@ -3,6 +3,7 @@ package base_handler
 import (
 	"net/http"
 	"patreon/internal/app"
+	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
 	"patreon/internal/app/middleware"
 	"strings"
 
@@ -19,20 +20,16 @@ const (
 	OPTIONS = http.MethodOptions
 )
 
-type HandlerFunc func(http.ResponseWriter, *http.Request)
-type HMiddlewareFunc func(http.Handler) http.Handler
-type HFMiddlewareFunc func(HandlerFunc) HandlerFunc
-
 type BaseHandler struct {
 	utilitiesMiddleware middleware.UtilitiesMiddleware
 	corsMiddleware      middleware.CorsMiddleware
-	handlerMethods      map[string]HandlerFunc
-	middlewares         []HMiddlewareFunc
+	handlerMethods      map[string]hf.HandlerFunc
+	middlewares         []hf.HMiddlewareFunc
 	RespondHandler
 }
 
 func NewBaseHandler(log *logrus.Logger, router *mux.Router, config *app.CorsConfig) *BaseHandler {
-	h := &BaseHandler{handlerMethods: map[string]HandlerFunc{}, middlewares: []HMiddlewareFunc{},
+	h := &BaseHandler{handlerMethods: map[string]hf.HandlerFunc{}, middlewares: []hf.HMiddlewareFunc{},
 		utilitiesMiddleware: middleware.NewUtilitiesMiddleware(log),
 		corsMiddleware:      middleware.NewCorsMiddleware(config, router)}
 	h.log = log
@@ -41,16 +38,16 @@ func NewBaseHandler(log *logrus.Logger, router *mux.Router, config *app.CorsConf
 	return h
 }
 
-func (h *BaseHandler) AddMiddleware(middleware ...HMiddlewareFunc) {
+func (h *BaseHandler) AddMiddleware(middleware ...hf.HMiddlewareFunc) {
 	h.middlewares = append(h.middlewares, middleware...)
 }
 
-func (h *BaseHandler) AddMethod(method string, handlerMethod HandlerFunc, middlewares ...HFMiddlewareFunc) {
+func (h *BaseHandler) AddMethod(method string, handlerMethod hf.HandlerFunc, middlewares ...hf.HFMiddlewareFunc) {
 	h.handlerMethods[method] = h.applyHFMiddleware(handlerMethod, middlewares...)
 }
 
-func (h *BaseHandler) applyHFMiddleware(handler HandlerFunc,
-	middlewares ...HFMiddlewareFunc) HandlerFunc {
+func (h *BaseHandler) applyHFMiddleware(handler hf.HandlerFunc,
+	middlewares ...hf.HFMiddlewareFunc) hf.HandlerFunc {
 	resultHandler := handler
 	for _, mw := range middlewares {
 		resultHandler = mw(resultHandler)
@@ -81,7 +78,7 @@ func (h *BaseHandler) Connect(route *mux.Route) {
 func (h *BaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.PrintRequest(r)
 	ok := true
-	var handler HandlerFunc
+	var handler hf.HandlerFunc
 
 	handler, ok = h.handlerMethods[r.Method]
 	if ok {

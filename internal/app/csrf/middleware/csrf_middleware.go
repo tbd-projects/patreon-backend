@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
+	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
 
 	"github.com/sirupsen/logrus"
 )
@@ -20,7 +20,7 @@ func NewCsrfMiddleware(log *logrus.Logger, uc usecase_csrf.Usecase) *CsrfMiddlew
 	}
 }
 
-func (mw *CsrfMiddleware) CheckCsrfToken(next bh.HandlerFunc) bh.HandlerFunc {
+func (mw *CsrfMiddleware) CheckCsrfToken(next hf.HandlerFunc) hf.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		csrfTokenFromHeader := r.Header.Get("X-Csrf-Token")
 		sessionId, okSession := r.Context().Value("session_id").(string)

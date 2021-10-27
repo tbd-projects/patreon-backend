@@ -1,9 +1,11 @@
 package app
 
 type RepositoryConnections struct {
-	DataBaseUrl string `toml:"database_url"`
-	RedisUrl    string `toml:"redis_url"`
+	DataBaseUrl     string `toml:"database_url"`
+	SessionRedisUrl string `toml:"session-redis_url"`
+	AccessRedisUrl  string `toml:"access-redis_url"`
 }
+
 type CorsConfig struct {
 	Urls    []string `toml:"urls"`
 	Headers []string `toml:"headers"`

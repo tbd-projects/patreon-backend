@@ -40,6 +40,7 @@ func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() err
 	}
 
 	logger.SetOutput(f)
+
 	logger.SetLevel(level)
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	return logger, f.Close
@@ -54,10 +55,10 @@ func newPostgresConnection(config *app.RepositoryConnections) (db *sql.DB, close
 	return db, db.Close
 }
 
-func newRedisPool(config *app.RepositoryConnections) *redis.Pool {
+func newRedisPool(redisUrl string) *redis.Pool {
 	return &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			return redis.DialURL(config.RedisUrl)
+			return redis.DialURL(redisUrl)
 		},
 	}
 }
@@ -109,10 +110,15 @@ func main() {
 	}(closeResource, logger)
 
 	server := main_server.New(config,
-		app.ExpectedConnections{RedisPool: newRedisPool(repositoryConfig), SqlConnection: db},
-		logger)
+		app.ExpectedConnections{
+			SessionRedisPool: newRedisPool(repositoryConfig.SessionRedisUrl),
+			AccessRedisPool:  newRedisPool(repositoryConfig.AccessRedisUrl),
+			SqlConnection:    db,
+		},
+		logger,
+	)
 
-	if err := server.Start(config); err != nil {
+	if err = server.Start(config); err != nil {
 		logger.Fatal(err)
 	}
 	logger.Info("Server was stopped")

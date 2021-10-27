@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"patreon/internal/app/delivery/http/handler_factory"
+	"patreon/internal/app/middleware"
 	"patreon/internal/app/repository/repository_factory"
 	"patreon/internal/app/usecase/usecase_factory"
 
@@ -37,14 +38,26 @@ func (s *Server) checkConnection() error {
 
 	s.logger.Info("Success check connection to sql db")
 
-	conn, err := s.connections.RedisPool.Dial()
+	connSession, err := s.connections.SessionRedisPool.Dial()
 	if err != nil {
 		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
 	}
 
 	s.logger.Info("Success check connection to redis")
 
-	err = conn.Close()
+	err = connSession.Close()
+	if err != nil {
+		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
+	}
+
+	connAccess, err := s.connections.SessionRedisPool.Dial()
+	if err != nil {
+		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
+	}
+
+	s.logger.Info("Success check connection to redis")
+
+	err = connAccess.Close()
 	if err != nil {
 		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
 	}
@@ -76,6 +89,9 @@ func (s *Server) Start(config *app.Config) error {
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
+	mw := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
+	routerApi.Use(mw.CheckAccess)
+
 	factory := handler_factory.NewFactory(s.logger, routerApi, &config.Cors, usecaseFactory)
 	hs := factory.GetHandleUrls()
 

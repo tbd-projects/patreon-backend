@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	queryLimit  int = 100
+	queryLimit      = 2
 	timeLimit   int = int(time.Minute.Milliseconds())
 	blackList       = "BLACK_LIST"
 	timeBlocked     = int(time.Minute.Milliseconds() * 2)
@@ -67,15 +67,18 @@ func (u *AccessUsecase) Create(userIp string) (bool, error) {
 }
 
 // Update Errors:
-//		strconv.NumError
+//		NoAccess
 // 		app.GeneralError with Errors
 // 			repository_access.InvalidStorageData
-func (u *AccessUsecase) Update(userIp string) (int, error) {
-	ok, err := u.repository.Increment(userIp)
+func (u *AccessUsecase) Update(userIp string) (int64, error) {
+	num, err := u.repository.Increment(userIp)
 	if err != nil {
 		return -1, err
 	}
-	return strconv.Atoi(ok)
+	if int(num) >= queryLimit {
+		return -1, NoAccess
+	}
+	return num, nil
 }
 
 // AddToBlackList Errors:

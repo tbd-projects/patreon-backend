@@ -75,7 +75,7 @@ func (repo *RedisRepository) Get(key string) (string, error) {
 // Increment Errors:
 // 		app.GeneralError with Errors
 // 			InvalidStorageData
-func (repo *RedisRepository) Increment(userIp string) (string, error) {
+func (repo *RedisRepository) Increment(userIp string) (int64, error) {
 	con := repo.redisPool.Get()
 	defer func(con redis.Conn) {
 		err := con.Close()
@@ -84,9 +84,9 @@ func (repo *RedisRepository) Increment(userIp string) (string, error) {
 				err.Error(), userIp)
 		}
 	}(con)
-	res, err := redis.String(con.Do("INCR", userIp))
+	res, err := redis.Int64(con.Do("INCR", userIp))
 	if err != nil {
-		return "", app.GeneralError{
+		return -1, app.GeneralError{
 			Err: InvalidStorageData,
 			ExternalErr: errors.Wrapf(err,
 				"error when try update userAccessCounter with userIp: %s", userIp),

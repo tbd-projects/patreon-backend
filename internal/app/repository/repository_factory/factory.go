@@ -52,13 +52,13 @@ func (f *RepositoryFactory) GetCsrfRepository() repCsrf.Repository {
 
 func (f *RepositoryFactory) GetSessionRepository() sessions.SessionRepository {
 	if f.sessionRepository == nil {
-		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
+		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.SessionRedisPool, f.logger)
 	}
 	return f.sessionRepository
 }
 func (f *RepositoryFactory) GetAccessRepository() repository_access.Repository {
 	if f.accessRepository == nil {
-		f.accessRepository = repository_access.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
+		f.accessRepository = repository_access.NewRedisRepository(f.expectedConnections.SessionRedisPool, f.logger)
 	}
 	return f.accessRepository
 }

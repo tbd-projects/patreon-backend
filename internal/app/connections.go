@@ -7,6 +7,7 @@ import (
 )
 
 type ExpectedConnections struct {
-	RedisPool     *redis.Pool
-	SqlConnection *sql.DB
+	SessionRedisPool *redis.Pool
+	AccessRedisPool  *redis.Pool
+	SqlConnection    *sql.DB
 }
