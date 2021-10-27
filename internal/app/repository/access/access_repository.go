@@ -72,10 +72,10 @@ func (repo *RedisRepository) Get(key string) (string, error) {
 	return res, nil
 }
 
-// Update Errors:
+// Increment Errors:
 // 		app.GeneralError with Errors
 // 			InvalidStorageData
-func (repo *RedisRepository) Update(userIp string) (string, error) {
+func (repo *RedisRepository) Increment(userIp string) (string, error) {
 	con := repo.redisPool.Get()
 	defer func(con redis.Conn) {
 		err := con.Close()

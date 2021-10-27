@@ -71,7 +71,7 @@ func (u *AccessUsecase) Create(userIp string) (bool, error) {
 // 		app.GeneralError with Errors
 // 			repository_access.InvalidStorageData
 func (u *AccessUsecase) Update(userIp string) (int, error) {
-	ok, err := u.repository.Update(userIp)
+	ok, err := u.repository.Increment(userIp)
 	if err != nil {
 		return -1, err
 	}

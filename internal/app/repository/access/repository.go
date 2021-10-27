@@ -12,8 +12,8 @@ type Repository interface {
 	// 			InvalidStorageData
 	Get(key string) (string, error)
 
-	// Update Errors:
+	// Increment Errors:
 	// 		app.GeneralError with Errors
 	// 			InvalidStorageData
-	Update(userIp string) (string, error)
+	Increment(userIp string) (string, error)
 }
