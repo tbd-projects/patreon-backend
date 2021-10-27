@@ -14,9 +14,10 @@ type Usecase interface {
 	Create(userIp string) (bool, error)
 
 	// Update Errors:
+	//		strconv.NumError
 	// 		app.GeneralError with Errors
 	// 			repository_access.InvalidStorageData
-	Update(userIp string) (bool, error)
+	Update(userIp string) (int, error)
 
 	// AddToBlackList Errors:
 	// 		app.GeneralError with Errors

@@ -1,16 +1,19 @@
 package usecase_access
 
 import (
-	"patreon/internal/app/models"
+	"patreon/internal/app"
 	repository_access "patreon/internal/app/repository/access"
+	"strconv"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 var (
-	queryLimit  int64 = 100
-	timeLimit   int   = int(time.Minute.Milliseconds())
-	blackList         = "BLACK_LIST"
-	timeBlocked       = int(time.Minute.Milliseconds() * 2)
+	queryLimit  int = 100
+	timeLimit   int = int(time.Minute.Milliseconds())
+	blackList       = "BLACK_LIST"
+	timeBlocked     = int(time.Minute.Milliseconds() * 2)
 )
 
 type AccessUsecase struct {
@@ -37,13 +40,15 @@ func (u *AccessUsecase) CheckAccess(userIp string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	accessCounter := models.AccessCounter{
-		Counter: userCounter,
-		Limit:   queryLimit,
+	accessCounter, err := strconv.Atoi(userCounter)
+	if err != nil {
+		return false, app.GeneralError{
+			Err: repository_access.InvalidStorageData,
+			ExternalErr: errors.Wrapf(err, "AccessUsecase: can not convert string from repo to int string: %s",
+				accessCounter),
+		}
 	}
-
-	if accessCounter.Overflow() {
+	if accessCounter >= queryLimit {
 		return false, NoAccess
 	}
 
@@ -54,27 +59,31 @@ func (u *AccessUsecase) CheckAccess(userIp string) (bool, error) {
 // 		app.GeneralError with Errors
 // 			repository_access.SetError
 func (u *AccessUsecase) Create(userIp string) (bool, error) {
-	if err := u.repository.Set(userIp, *models.NewAccessCounter(queryLimit), timeLimit); err != nil {
+	countAccesses := "0"
+	if err := u.repository.Set(userIp, countAccesses, timeLimit); err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
 // Update Errors:
+//		strconv.NumError
 // 		app.GeneralError with Errors
 // 			repository_access.InvalidStorageData
-func (u *AccessUsecase) Update(userIp string) (bool, error) {
-	if ok, err := u.repository.Update(userIp); err != nil || ok == -1 {
-		return false, err
+func (u *AccessUsecase) Update(userIp string) (int, error) {
+	ok, err := u.repository.Update(userIp)
+	if err != nil {
+		return -1, err
 	}
-	return true, nil
+	return strconv.Atoi(ok)
 }
 
 // AddToBlackList Errors:
 // 		app.GeneralError with Errors
 // 			repository_access.SetError
 func (u *AccessUsecase) AddToBlackList(userIp string) error {
-	if err := u.repository.AddToBlackList(blackList, userIp, timeBlocked); err != nil {
+	blackListKey := blackList + userIp
+	if err := u.repository.Set(blackListKey, userIp, timeBlocked); err != nil {
 		return err
 	}
 	return nil
@@ -84,7 +93,9 @@ func (u *AccessUsecase) AddToBlackList(userIp string) error {
 // 		app.GeneralError with Errors
 // 			repository_access.InvalidStorageData
 func (u *AccessUsecase) CheckBlackList(userIp string) (bool, error) {
-	_, err := u.repository.CheckBlackList(blackList, userIp)
+	blackListKey := blackList + userIp
+	_, err := u.repository.Get(blackListKey)
+
 	switch err {
 	case repository_access.NotFound:
 		return false, nil

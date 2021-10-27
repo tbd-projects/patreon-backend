@@ -51,13 +51,14 @@ func (mw *DDosMiddleware) CheckAccess(next bh.HandlerFunc) bh.HandlerFunc {
 				return
 			}
 		} else {
-			ok, err = mw.accessUsecase.Update(userIp)
+			res, err := mw.accessUsecase.Update(userIp)
 			if err != nil {
 				mw.log.Infof("DDOS_Middleware - error on add user with ip: %v to BlackList err: %v",
 					userIp, err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			mw.log.Infof("DDOS_Middleware - Count of querys: %v from userIp: %v", res, userIp)
 			next(w, r)
 		}
 	}

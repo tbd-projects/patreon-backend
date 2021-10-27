@@ -2,6 +2,7 @@ package usecase_factory
 
 import (
 	repCsrf "patreon/internal/app/csrf/repository/jwt"
+	repAccess "patreon/internal/app/repository/access"
 	repCreator "patreon/internal/app/repository/creator"
 	repUser "patreon/internal/app/repository/user"
 
@@ -13,4 +14,5 @@ type RepositoryFactory interface {
 	GetCreatorRepository() repCreator.Repository
 	GetCsrfRepository() repCsrf.Repository
 	GetSessionRepository() sessions.SessionRepository
+	GetAccessRepository() repAccess.Repository
 }

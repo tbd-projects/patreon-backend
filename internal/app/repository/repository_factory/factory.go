@@ -3,6 +3,7 @@ package repository_factory
 import (
 	"patreon/internal/app"
 	repCsrf "patreon/internal/app/csrf/repository/jwt"
+	repository_access "patreon/internal/app/repository/access"
 	repCreator "patreon/internal/app/repository/creator"
 	repUser "patreon/internal/app/repository/user"
 	"patreon/internal/app/sessions"
@@ -18,6 +19,7 @@ type RepositoryFactory struct {
 	creatorRepository   repCreator.Repository
 	csrfRepository      repCsrf.Repository
 	sessionRepository   sessions.SessionRepository
+	accessRepository    repository_access.Repository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -53,4 +55,10 @@ func (f *RepositoryFactory) GetSessionRepository() sessions.SessionRepository {
 		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
 	}
 	return f.sessionRepository
+}
+func (f *RepositoryFactory) GetAccessRepository() repository_access.Repository {
+	if f.accessRepository == nil {
+		f.accessRepository = repository_access.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
+	}
+	return f.accessRepository
 }
