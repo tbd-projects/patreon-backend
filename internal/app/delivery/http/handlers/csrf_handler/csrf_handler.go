@@ -61,7 +61,7 @@ func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 	token, err := h.csrfUsecase.Create(sessionId, userId)
 	if err != nil {
-		h.Log(r).Error("can not get user_id from context")
+		h.Log(r).Error("can not create token")
 		h.UsecaseError(w, r, err, codeByErrors)
 		return
 	}
