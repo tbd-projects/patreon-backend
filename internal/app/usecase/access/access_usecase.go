@@ -44,7 +44,7 @@ func (u *AccessUsecase) CheckAccess(userIp string) (bool, error) {
 	if err != nil {
 		return false, app.GeneralError{
 			Err: repository_access.InvalidStorageData,
-			ExternalErr: errors.Wrapf(err, "AccessUsecase: can not convert string from repo to int string: %s",
+			ExternalErr: errors.Wrapf(err, "AccessUsecase: can not convert string from repo to int string: %v",
 				accessCounter),
 		}
 	}

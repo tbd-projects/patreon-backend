@@ -70,7 +70,6 @@ func (s *CreatorCreateHandler) GET(w http.ResponseWriter, r *http.Request) {
 	creator, err := s.creatorUsecase.GetCreator(idInt)
 	if err != nil {
 		s.UsecaseError(w, r, err, codesByErrors)
-
 		return
 	}
 

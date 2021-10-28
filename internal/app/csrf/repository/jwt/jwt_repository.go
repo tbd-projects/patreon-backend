@@ -43,18 +43,22 @@ func (tk *JwtRepository) parseClaims(token *jwt.Token) (interface{}, error) {
 // 			repository_jwt.TokenExpired
 func (tk *JwtRepository) Check(sources models.TokenSources, tokenString models.Token) error {
 	claims := &jwtCsrfClaims{}
-	if _, err := jwt.ParseWithClaims(string(tokenString), claims, tk.parseClaims); err != nil {
-		return &app.GeneralError{
-			Err:         ParseClaimsError,
-			ExternalErr: err,
+	token, err := jwt.ParseWithClaims(string(tokenString), claims, tk.parseClaims)
+	if err != nil || !token.Valid {
+		retErr := &app.GeneralError{ExternalErr: err}
+
+		switch err.(*jwt.ValidationError).Errors {
+		case jwt.ValidationErrorExpired:
+			retErr.Err = TokenExpired
+		case jwt.ValidationErrorUnverifiable:
+			retErr.ExternalErr = IncorrectTokenSigningMethod
+			retErr.Err = ParseClaimsError
+		default:
+			retErr.Err = ParseClaimsError
 		}
+		return retErr
 	}
-	if err := claims.Valid(); err != nil {
-		return &app.GeneralError{
-			Err:         TokenExpired,
-			ExternalErr: err,
-		}
-	}
+
 	if claims.UserId != sources.UserId || claims.SessionId != sources.SessionId {
 		return BadToken
 	}
