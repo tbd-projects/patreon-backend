@@ -5,21 +5,21 @@ import (
 	"patreon/internal/app/models"
 )
 
-type SuitePostsRepository struct {
+type SuiteLikesRepository struct {
 	models.Suite
-	repo *PostsRepository
+	repo *LikesRepository
 }
 
-func (s *SuitePostsRepository) SetupSuite() {
+func (s *SuiteLikesRepository) SetupSuite() {
 	s.InitBD()
-	s.repo = NewPostsRepository(s.DB)
+	s.repo = NewLikesRepository(s.DB)
 }
 
-func (s *SuitePostsRepository) AfterTest(_, _ string) {
+func (s *SuiteLikesRepository) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.Mock.ExpectationsWereMet())
 }
 /*
-func (s *SuitePostsRepository) TestPostsRepository_Create() {
+func (s *SuiteLikesRepository) TestLikesRepository_Create() {
 	cr := models.TestCreator()
 
 	cr.ID = 1
@@ -39,7 +39,7 @@ func (s *SuitePostsRepository) TestPostsRepository_Create() {
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 }
 
-func (s *SuitePostsRepository) TestPostsRepository_GetCreator() {
+func (s *SuiteLikesRepository) TestLikesRepository_GetCreator() {
 	cr := models.TestCreator()
 	cr.ID = 1
 	expected := *cr
@@ -72,7 +72,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetCreator() {
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 }
 
-func (s *SuitePostsRepository) TestPostsRepository_GetCreators_AllUsersCreators() {
+func (s *SuiteLikesRepository) TestLikesRepository_GetCreators_AllUsersCreators() {
 	creators := models.TestCreators()
 
 	preapareRows := sqlmock.NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"})
@@ -111,7 +111,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetCreators_AllUsersCreators(
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 }
 
-func TestPostsRepository(t *testing.T) {
-	suite.Run(t, new(SuitePostsRepository))
+func TestLikesRepository(t *testing.T) {
+	suite.Run(t, new(SuiteLikesRepository))
 }
 */

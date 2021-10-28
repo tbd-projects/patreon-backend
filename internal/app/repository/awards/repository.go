@@ -1,4 +1,4 @@
-package awards
+package repository_awards
 
 import "patreon/internal/app/models"
 

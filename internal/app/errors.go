@@ -5,6 +5,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+
+const InvalidInt = -1
+
 var UnknownError = errors.New("gotten unspecified error")
 
 type GeneralError struct {

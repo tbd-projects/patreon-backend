@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/gorilla/mux"
-	"io/ioutil"
+	"io"
 	"patreon/internal/app"
 	mock_sessions "patreon/internal/app/sessions/mocks"
 	mock_usecase_awards "patreon/internal/app/usecase/awards/mocks"
@@ -43,7 +43,7 @@ func (s *SuiteHandler) SetupSuite() {
 
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()
-	s.Logger.SetOutput(ioutil.Discard)
+	s.Logger.SetOutput(io.Discard)
 }
 
 func (s *SuiteHandler) TearDownSuite() {

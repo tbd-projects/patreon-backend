@@ -12,6 +12,7 @@ var (
 	IncorrectAwardsPrice                = errors.New("incorrect awards price")
 	IncorrectCreatorCategory            = errors.New("incorrect creator category")
 	IncorrectCreatorCategoryDescription = errors.New("incorrect creator category description")
+	UnvalidLikeValue                    = errors.New("like contain not valid value")
 )
 
 // userValidError Errors:
@@ -47,13 +48,28 @@ func creatorValidError() extractorErrorByName {
 	}
 }
 
-// creatorValidError Errors:
+// awardsValidError Errors:
 //		EmptyName
 //		IncorrectAwardsPrice
 func awardsValidError() extractorErrorByName {
 	validMap := mapOfValidateError{
 		"name":  EmptyName,
 		"price": IncorrectAwardsPrice,
+	}
+	return func(key string) error {
+		if val, ok := validMap[key]; ok {
+			return val
+		}
+		return nil
+	}
+}
+
+// likeValidError Errors:
+//		EmptyName
+//		IncorrectAwardsPrice
+func likeValidError() extractorErrorByName {
+	validMap := mapOfValidateError{
+		"value": UnvalidLikeValue,
 	}
 	return func(key string) error {
 		if val, ok := validMap[key]; ok {

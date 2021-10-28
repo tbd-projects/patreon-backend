@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	repository_awards "patreon/internal/app/repository/awards"
 )
 
 const NotSkipAwards = -1
@@ -12,6 +13,8 @@ const NotSkipAwards = -1
 type AwardsRepository struct {
 	store *sql.DB
 }
+
+var _ = repository_awards.Repository(&AwardsRepository{})
 
 func NewAwardsRepository(st *sql.DB) *AwardsRepository {
 	return &AwardsRepository{

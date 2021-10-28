@@ -2,20 +2,20 @@ package models
 
 import "time"
 
-type Posts struct {
+type Post struct {
 	ID          int64     `json:"posts_id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Likes       int64     `json:"likes"`
-	Awards      string    `json:"type_awards"`
-	Cover       int64     `json:"cover"`
+	Awards      int64     `json:"type_awards"`
+	Cover       string    `json:"cover"`
 	CreatorId   int64     `json:"creator_id"`
 	Date        time.Time `json:"date"`
 }
 
-type PostsData struct {
-	ID       int64  `json:"data_id"`
-	PostId   string `json:"posts_id"`
-	DataPath string `json:"data_path"`
-	Type     int64  `json:"type"`
+type PostData struct {
+	ID     int64  `json:"data_id"`
+	PostId int64 `json:"posts_id"`
+	Data   string `json:"data"`
+	Type   string `json:"type"`
 }

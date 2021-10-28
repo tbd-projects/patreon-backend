@@ -1,40 +1,34 @@
-package repository_like
+package repository_posts_data
 
 import (
 	"patreon/internal/app/models"
 )
 
-const NoAwards = -1
-
 type Repository interface {
 	// Create Errors:
+	//		UnknownDataFormat
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(post *models.Post) (int64, error)
+	Create(postData *models.PostData) (int64, error)
 
-	// GetPost Errors:
+	// Get Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPost(postID int64) (*models.Post, error)
+	Get(dataID int64) (*models.PostData, error)
 
-	// GetPosts Errors:
+	// GetData Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPosts(page int64) ([]models.Creator, error)
+	GetData(postsId int64) ([]models.PostData, error)
 
-	// UpdatePost Errors:
+	// Update Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	UpdatePost(post *models.Post) error
-
-	// UpdateCoverPost Errors:
-	// 		app.GeneralError with Errors:
-	// 			repository.DefaultErrDB
-	UpdateCoverPost(postId int64, cover string) error
+	Update(postData *models.PostData) error
 
 	// Delete Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Delete(postId int64) error
+	Delete(dataId int64) error
 }

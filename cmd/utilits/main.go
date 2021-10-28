@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -130,7 +129,7 @@ func main() {
 		return
 	}
 
-	files, err := ioutil.ReadDir(config.LogAddr)
+	files, err := os.ReadDir(config.LogAddr)
 	if err != nil {
 		log.Fatal(err)
 	}

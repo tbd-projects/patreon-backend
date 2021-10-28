@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"io/ioutil"
+	"io"
 	mock_repository_creator "patreon/internal/app/repository/creator/mocks"
 	mock_repository_user "patreon/internal/app/repository/user/mocks"
 
@@ -32,7 +32,7 @@ func (s *SuiteUsecase) SetupSuite() {
 	s.MockUserRepository = mock_repository_user.NewMockRepository(s.Mock)
 
 	s.Logger = logrus.New()
-	s.Logger.SetOutput(ioutil.Discard)
+	s.Logger.SetOutput(io.Discard)
 
 }
 func (s *SuiteUsecase) TearDownSuite() {
