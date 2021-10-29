@@ -6,16 +6,18 @@ import (
 	"patreon/internal/app/sessions/sessions_manager"
 	useAccess "patreon/internal/app/usecase/access"
 	useCreator "patreon/internal/app/usecase/creator"
+	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
 )
 
 type UsecaseFactory struct {
-	repositoryFactory RepositoryFactory
-	userUsecase       useUser.Usecase
-	creatorUsecase    useCreator.Usecase
-	csrfUsecase       usecase_csrf.Usecase
-	sessionsManager   sessions.SessionsManager
-	accessUsecase     useAccess.Usecase
+	repositoryFactory  RepositoryFactory
+	userUsecase        useUser.Usecase
+	creatorUsecase     useCreator.Usecase
+	csrfUsecase        usecase_csrf.Usecase
+	sessionsManager    sessions.SessionsManager
+	accessUsecase      useAccess.Usecase
+	subscribersUsecase useSubscr.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
@@ -55,4 +57,10 @@ func (f *UsecaseFactory) GetAccessUsecase() useAccess.Usecase {
 		f.accessUsecase = useAccess.NewAccessUsecase(f.repositoryFactory.GetAccessRepository())
 	}
 	return f.accessUsecase
+}
+func (f *UsecaseFactory) GetSubscribersUsecase() useSubscr.Usecase {
+	if f.subscribersUsecase == nil {
+		f.subscribersUsecase = useSubscr.NewSubscribersUsecase(f.repositoryFactory.GetSubscribersRepository())
+	}
+	return f.subscribersUsecase
 }

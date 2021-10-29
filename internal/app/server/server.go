@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"patreon/internal/app/delivery/http/handler_factory"
-	"patreon/internal/app/middleware"
 	"patreon/internal/app/repository/repository_factory"
 	"patreon/internal/app/usecase/usecase_factory"
 
@@ -89,14 +88,14 @@ func (s *Server) Start(config *app.Config) error {
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
-	mw := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
-	routerApi.Use(mw.CheckAccess)
+	//mw := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
+	//routerApi.Use(mw.CheckAccess)
 
 	factory := handler_factory.NewFactory(s.logger, routerApi, &config.Cors, usecaseFactory)
 	hs := factory.GetHandleUrls()
 
 	for url, h := range *hs {
-		h.Connect(routerApi.PathPrefix(url))
+		h.Connect(routerApi.Path(url))
 	}
 
 	s.logger.Info("starting server")

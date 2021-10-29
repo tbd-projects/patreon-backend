@@ -8,6 +8,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler/subscriptions_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
 	handlers2 "patreon/internal/app/delivery/http/handlers/register_handler"
@@ -27,6 +28,7 @@ const (
 	UPDATE_PASSWORD
 	UPDATE_AVATAR
 	GET_CSRF_TOKEN
+	GET_USER_SUBSCRIPTIONS
 )
 
 type HandlerFactory struct {
@@ -52,17 +54,19 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucCreator := f.usecaseFactory.GetCreatorUsecase()
 	ucCsrf := f.usecaseFactory.GetCsrfUsecase()
 	sManager := f.usecaseFactory.GetSessionManager()
+	ucSubscr := f.usecaseFactory.GetSubscribersUsecase()
 
 	return map[int]app.Handler{
-		REGISTER:        handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		LOGIN:           login_handler.NewLoginHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		LOGOUT:          logout_handler.NewLogoutHandler(f.logger, f.router, f.cors, sManager),
-		PROFILE:         profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		CREATORS:        creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator, ucUser),
-		CREATOR_WITH_ID: creator_create_handler.NewCreatorCreateHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
-		UPDATE_PASSWORD: password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		UPDATE_AVATAR:   avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		GET_CSRF_TOKEN:  csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
+		REGISTER:               handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		LOGIN:                  login_handler.NewLoginHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		LOGOUT:                 logout_handler.NewLogoutHandler(f.logger, f.router, f.cors, sManager),
+		PROFILE:                profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		CREATORS:               creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator, ucUser),
+		CREATOR_WITH_ID:        creator_create_handler.NewCreatorCreateHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
+		UPDATE_PASSWORD:        password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		UPDATE_AVATAR:          avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		GET_CSRF_TOKEN:         csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
+		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
 	}
 }
 
@@ -83,6 +87,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/password": hs[UPDATE_PASSWORD],
 		"/user/update/avatar":   hs[UPDATE_AVATAR],
 		"/token":                hs[GET_CSRF_TOKEN],
+		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 	}
 	return f.urlHandler
 }
