@@ -13,14 +13,14 @@ import (
 	useAwards "patreon/internal/app/usecase/awards"
 )
 
-type AwardsIDHandler struct {
+type AwardsIdHandler struct {
 	awardsUsecase useAwards.Usecase
 	bh.BaseHandler
 }
 
-func NewAwardsIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsIDHandler {
-	h := &AwardsIDHandler{
+func NewAwardsIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsIdHandler {
+	h := &AwardsIdHandler{
 		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
 		awardsUsecase: ucAwards,
 	}
@@ -39,11 +39,12 @@ func NewAwardsIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 // @Failure 404 {object} models.ErrResponse "award with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 500 {object} models.ErrResponse "can not get info from context"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
+// @Failure 403 {object} models.ErrResponse "this awards not belongs this creators"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Router /creators/{:creator_id}/awards/{:awards_id} [DELETE]
-func (h *AwardsIDHandler) DELETE(w http.ResponseWriter, r *http.Request) {
-	awardsId, ok := h.GetInt64FromParam(w, r, "awards_id")
+// @Failure 401 "User are not authorized"
+// @Router /creators/{:creator_id}/awards/{:award_id} [DELETE]
+func (h *AwardsIdHandler) DELETE(w http.ResponseWriter, r *http.Request) {
+	awardsId, ok := h.GetInt64FromParam(w, r, "award_id")
 	if !ok {
 		return
 	}
@@ -56,7 +57,7 @@ func (h *AwardsIDHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 
 	err := h.awardsUsecase.Delete(awardsId)
 	if err != nil {
-		h.UsecaseError(w, r, err, codesByErrorsDelete)
+		h.UsecaseError(w, r, err, codesByErrorsDELETE)
 		return
 	}
 

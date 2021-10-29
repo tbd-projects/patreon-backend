@@ -8,7 +8,7 @@ type Usecase interface {
 	// GetAwards Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetAwards(creatorId int64) ([]models.Awards, error)
+	GetAwards(creatorId int64) ([]models.Award, error)
 
 	// GetCreatorId Errors:
 	// 		app.GeneralError with Errors:
@@ -29,7 +29,7 @@ type Usecase interface {
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB
-	Update(awards *models.Awards) error
+	Update(awards *models.Award) error
 
 	// Create Errors:
 	//		repository_postgresql.NameAlreadyExist
@@ -38,5 +38,5 @@ type Usecase interface {
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB
-	Create(awards *models.Awards) (int64, error)
+	Create(awards *models.Award) (int64, error)
 }

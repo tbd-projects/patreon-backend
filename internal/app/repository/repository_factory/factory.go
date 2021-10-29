@@ -9,6 +9,12 @@ import (
 	repCreator "patreon/internal/app/repository/creator"
 	repCreatorPsql "patreon/internal/app/repository/creator/postgresql"
 	repository_subscribers "patreon/internal/app/repository/subscribers"
+	repoLikes "patreon/internal/app/repository/likes"
+	repLikesPsql "patreon/internal/app/repository/likes/postgresql"
+	repoPosts "patreon/internal/app/repository/posts"
+	repPostsPsql "patreon/internal/app/repository/posts/postgresql"
+	repoPostsData "patreon/internal/app/repository/posts_data"
+	repoPostsDataPsql "patreon/internal/app/repository/posts_data/postgresql"
 	repUser "patreon/internal/app/repository/user"
 	repUserPsql "patreon/internal/app/repository/user/postgresql"
 	"patreon/internal/app/sessions"
@@ -18,12 +24,15 @@ import (
 )
 
 type RepositoryFactory struct {
-	expectedConnections   app.ExpectedConnections
-	logger                *logrus.Logger
-	userRepository        repUser.Repository
-	creatorRepository     repCreator.Repository
-	sessionRepository     sessions.SessionRepository
-	awardsRepository      repoAwrds.Repository
+	expectedConnections app.ExpectedConnections
+	logger              *logrus.Logger
+	userRepository      repUser.Repository
+	creatorRepository   repCreator.Repository
+	sessionRepository   sessions.SessionRepository
+	awardsRepository    repoAwrds.Repository
+	postsRepository     repoPosts.Repository
+	likesRepository     repoLikes.Repository
+	PostDataRepository  repoPostsData.Repository
 	csrfRepository        repCsrf.Repository
 	accessRepository      repository_access.Repository
 	subscribersRepository repository_subscribers.Repository
@@ -81,4 +90,25 @@ func (f *RepositoryFactory) GetSubscribersRepository() repository_subscribers.Re
 		f.subscribersRepository = repository_subscribers.NewSubscribersRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.subscribersRepository
+}
+
+func (f *RepositoryFactory) GetPostsRepository() repoPosts.Repository {
+	if f.postsRepository == nil {
+		f.postsRepository = repPostsPsql.NewPostsRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.postsRepository
+}
+
+func (f *RepositoryFactory) GetLikesRepository() repoLikes.Repository {
+	if f.likesRepository == nil {
+		f.likesRepository = repLikesPsql.NewLikesRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.likesRepository
+}
+
+func (f *RepositoryFactory) GetPostsDataRepository() repoPostsData.Repository {
+	if f.PostDataRepository == nil {
+		f.PostDataRepository = repoPostsDataPsql.NewPostsDataRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.PostDataRepository
 }

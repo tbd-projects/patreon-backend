@@ -8,7 +8,7 @@ import (
 	"patreon/internal/app/repository"
 )
 
-var codesByErrorsDelete = base_handler.CodeMap{
+var codesByErrorsDELETE = base_handler.CodeMap{
 	repository.NotFound: {
 		http.StatusNotFound, handler_errors.AwardNotFound, logrus.ErrorLevel},
 	repository.DefaultErrDB: {

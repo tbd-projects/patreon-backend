@@ -1,7 +1,6 @@
 package profile_handler
 
 import (
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -47,13 +46,6 @@ func NewProfileHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Failure 500 {object} models.ErrResponse "can not get info from context"
 // @Router /user [GET]
 func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
-
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")

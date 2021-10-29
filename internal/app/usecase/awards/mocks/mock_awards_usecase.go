@@ -35,7 +35,7 @@ func (m *AwardsUsecase) EXPECT() *AwardsUsecaseMockRecorder {
 }
 
 // Create mocks base method.
-func (m *AwardsUsecase) Create(arg0 *models.Awards) (int64, error) {
+func (m *AwardsUsecase) Create(arg0 *models.Award) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(int64)
@@ -64,10 +64,10 @@ func (mr *AwardsUsecaseMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 }
 
 // GetAwards mocks base method.
-func (m *AwardsUsecase) GetAwards(arg0 int64) ([]models.Awards, error) {
+func (m *AwardsUsecase) GetAwards(arg0 int64) ([]models.Award, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAwards", arg0)
-	ret0, _ := ret[0].([]models.Awards)
+	ret0, _ := ret[0].([]models.Award)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -94,7 +94,7 @@ func (mr *AwardsUsecaseMockRecorder) GetCreatorId(arg0 interface{}) *gomock.Call
 }
 
 // Update mocks base method.
-func (m *AwardsUsecase) Update(arg0 *models.Awards) error {
+func (m *AwardsUsecase) Update(arg0 *models.Award) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0)
 	ret0, _ := ret[0].(error)

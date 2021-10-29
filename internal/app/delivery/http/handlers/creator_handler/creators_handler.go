@@ -54,12 +54,6 @@ func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Router /creators [GET]
 func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
 	creators, err := h.creatorUsecase.GetCreators()
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsGET)
@@ -90,7 +84,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 422 {object} models.ErrResponse "invalid creator category"
 // @Failure 422 {object} models.ErrResponse "invalid creator nickname"
 // @Failure 422 {object} models.ErrResponse "invalid creator category-description"
-// @Failure 404 "User are not authorized"
+// @Failure 401 "User are not authorized"
 // @Router /creators [POST]
 func (s *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -102,6 +96,7 @@ func (s *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	req := &models.RequestCreator{}
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(req); err != nil {
 		s.Log(r).Warnf("can not parse request %s", err)
 		s.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)

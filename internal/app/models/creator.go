@@ -24,7 +24,7 @@ func (cr *Creator) String() string {
 // Validate Errors:
 //		IncorrectCreatorNickname
 //		IncorrectCreatorCategory
-//		IncorrectCreatorCategoryDescription
+//		IncorrectCreatorDescription
 // Important can return some other error
 func (cr *Creator) Validate() error {
 	err := validation.Errors{

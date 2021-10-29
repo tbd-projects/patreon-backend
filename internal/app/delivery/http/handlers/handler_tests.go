@@ -50,7 +50,7 @@ func (s *SuiteHandler) SetupSuite() {
 
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()
-	s.Logger.SetOutput(ioutil.Discard)
+	s.Logger.SetOutput(io.Discard)
 }
 
 func (s *SuiteHandler) TearDownSuite() {

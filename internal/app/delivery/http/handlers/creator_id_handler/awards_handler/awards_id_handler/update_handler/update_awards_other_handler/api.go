@@ -17,11 +17,11 @@ var codesByErrorsPUT = base_handler.CodeMap{
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 	repository_postgresql.NameAlreadyExist: {
-		http.StatusConflict, handler_errors.AwardsAlredyExists, logrus.InfoLevel},
+		http.StatusConflict, handler_errors.AwardsAlreadyExists, logrus.InfoLevel},
 	models.EmptyName: {
-		http.StatusBadRequest, handler_errors.EmptyName, logrus.WarnLevel},
+		http.StatusUnprocessableEntity, handler_errors.EmptyName, logrus.WarnLevel},
 	models.IncorrectAwardsPrice: {
-		http.StatusBadRequest, handler_errors.IncorrectPrice, logrus.WarnLevel},
+		http.StatusUnprocessableEntity, handler_errors.IncorrectPrice, logrus.WarnLevel},
 	app.UnknownError: {
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
 }

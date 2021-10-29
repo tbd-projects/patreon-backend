@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-type Awards struct {
+type Award struct {
 	ID          int64      `json:"awards_id"`
 	Name        string     `json:"name"`
 	Description string     `json:"description,omitempty"`
@@ -17,7 +17,7 @@ type Awards struct {
 	Color       color.RGBA `json:"color.omitempty"`
 }
 
-func (aw *Awards) String() string {
+func (aw *Award) String() string {
 	return fmt.Sprintf("{ID: %s, Name: %s Price: %s}", strconv.Itoa(int(aw.ID)),
 		aw.Name, strconv.Itoa(int(aw.Price)))
 }
@@ -26,7 +26,7 @@ func (aw *Awards) String() string {
 //		EmptyName
 //		IncorrectAwardsPrice
 // Important can return some other error
-func (aw *Awards) Validate() error {
+func (aw *Award) Validate() error {
 	err := validation.Errors{
 		"name":  validation.Validate(aw.Name, validation.Required),
 		"price": validation.Validate(aw.Price, validation.Min(0)),

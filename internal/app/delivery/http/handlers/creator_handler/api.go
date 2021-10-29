@@ -8,6 +8,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	repository_postgresql "patreon/internal/app/repository/creator/postgresql"
 	usecase_creator "patreon/internal/app/usecase/creator"
 )
 
@@ -27,8 +28,10 @@ var codesByErrorsPOST = base_handler.CodeMap{
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
 	models.IncorrectCreatorCategory: {
 		http.StatusUnprocessableEntity, handler_errors.InvalidCategory, logrus.InfoLevel},
+	repository_postgresql.IncorrectCategory: {
+		http.StatusUnprocessableEntity, handler_errors.InvalidCategory, logrus.InfoLevel},
 	models.IncorrectCreatorNickname: {
 		http.StatusUnprocessableEntity, handler_errors.InvalidNickname, logrus.InfoLevel},
-	models.IncorrectCreatorCategoryDescription: {
-		http.StatusUnprocessableEntity, handler_errors.InvalidCategoryDescription, logrus.InfoLevel},
+	models.IncorrectCreatorDescription: {
+		http.StatusUnprocessableEntity, handler_errors.InvalidDescription, logrus.InfoLevel},
 }

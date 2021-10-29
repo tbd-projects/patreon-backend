@@ -78,7 +78,7 @@ func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
 }
 
 // Check Errors:
-//		IncorrectEmailOrPassword
+//		models.IncorrectEmailOrPassword
 // 		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
@@ -89,7 +89,7 @@ func (usecase *UserUsecase) Check(login string, password string) (int64, error) 
 	}
 
 	if !u.ComparePassword(password) {
-		return -1, IncorrectEmailOrPassword
+		return -1, models.IncorrectEmailOrPassword
 	}
 	return u.ID, nil
 }

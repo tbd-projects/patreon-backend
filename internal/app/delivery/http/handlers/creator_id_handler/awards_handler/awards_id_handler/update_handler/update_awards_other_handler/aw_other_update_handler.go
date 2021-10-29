@@ -48,10 +48,11 @@ func NewAwardsUpOtherHandler(log *logrus.Logger, router *mux.Router, cors *app.C
 // @Failure 500 {object} models.ErrResponse "can not get info from context"
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 400 {object} models.ErrResponse "empty name in request"
-// @Failure 400 {object} models.ErrResponse "incorrect value of price"
+// @Failure 422 {object} models.ErrResponse "empty name in request"
+// @Failure 422 {object} models.ErrResponse "incorrect value of price"
 // @Failure 500 {object} models.ErrResponse "server error"
-// @Router /creators/{:creator_id}/awards/{:awards_id}/update/other [PUT]
+// @Failure 401 "User are not authorized"
+// @Router /creators/{:creator_id}/awards/{:award_id}/update/other [PUT]
 func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -60,7 +61,7 @@ func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		}
 	}(r.Body)
 
-	awardsId, ok := h.GetInt64FromParam(w, r, "awards_id")
+	awardsId, ok := h.GetInt64FromParam(w, r, "award_id")
 	if !ok {
 		return
 	}
@@ -79,7 +80,7 @@ func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	award := &bd_modle.Awards{
+	award := &bd_modle.Award{
 		ID:          awardsId,
 		Name:        req.Name,
 		Description: req.Description,

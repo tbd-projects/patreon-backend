@@ -13,6 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const EmptyQuery = -2
+
 type RespondError struct {
 	Code  int
 	Error error
@@ -31,14 +33,31 @@ func (h *HelpHandlers) PrintRequest(r *http.Request) {
 
 // GetInt64FromParam HTTPErrors
 //		Status 400 handler_errors.InvalidParameters
-func (h* HelpHandlers) GetInt64FromParam(w http.ResponseWriter, r *http.Request, name string) (int64, bool) {
+func (h *HelpHandlers) GetInt64FromParam(w http.ResponseWriter, r *http.Request, name string) (int64, bool) {
 	vars := mux.Vars(r)
 	number, ok := vars[name]
 	numberInt, err := strconv.ParseInt(number, 10, 64)
 	if !ok || err != nil {
 		h.Log(r).Infof("can'not get parametrs %s, was got %v)", name, vars)
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
-		return -1, false
+		return app.InvalidInt, false
+	}
+	return numberInt, true
+}
+
+// GetInt64FromQueries HTTPErrors
+//		Status 400 handler_errors.InvalidQueries
+func (h *HelpHandlers) GetInt64FromQueries(w http.ResponseWriter, r *http.Request, name string) (int64, bool) {
+	number := r.URL.Query().Get(name)
+	if number == "" {
+		return EmptyQuery, false
+	}
+
+	numberInt, err := strconv.ParseInt(number, 10, 64)
+	if err != nil {
+		h.Log(r).Infof("can'not get parametrs %s from query url %s)", name, r.URL)
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidQueries)
+		return app.InvalidInt, false
 	}
 	return numberInt, true
 }

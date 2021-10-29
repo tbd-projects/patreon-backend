@@ -20,7 +20,7 @@ type Usecase interface {
 	//		CreatorExist
 	//		models.IncorrectCreatorNickname
 	//		models.IncorrectCreatorCategory
-	//		models.IncorrectCreatorCategoryDescription
+	//		models.IncorrectCreatorDescription
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB

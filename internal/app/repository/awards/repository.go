@@ -1,4 +1,4 @@
-package awards
+package repository_awards
 
 import "patreon/internal/app/models"
 
@@ -7,24 +7,25 @@ type Repository interface {
 	//		repository_postgresql.NameAlreadyExist
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(aw *models.Awards) (int64, error)
+	Create(aw *models.Award) (int64, error)
 
 	// Update Errors:
 	//		repository.NotFound
 	//		repository_postgresql.NameAlreadyExist
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Update(aw *models.Awards) error
+	Update(aw *models.Award) error
 
 	// GetAwards Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetAwards(creatorId int64) ([]models.Awards, error)
+	GetAwards(creatorId int64) ([]models.Award, error)
 
+	// GetByID Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	GetByID(awardsID int64) (*models.Awards, error)
+	GetByID(awardsID int64) (*models.Award, error)
 
 	// Delete Errors:
 	// 		app.GeneralError with Errors:
