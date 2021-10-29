@@ -4,9 +4,11 @@ import (
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"patreon/internal/app"
+	mock_usecase_csrf "patreon/internal/app/csrf/usecase/mocks"
 	mock_sessions "patreon/internal/app/sessions/mocks"
 	mock_usecase_awards "patreon/internal/app/usecase/awards/mocks"
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
+	mock_subscribers "patreon/internal/app/usecase/subscribers/mocks"
 	mock_usecase_user "patreon/internal/app/usecase/user/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -23,15 +25,17 @@ type TestTable struct {
 
 type SuiteHandler struct {
 	suite.Suite
-	Mock                *gomock.Controller
-	MockUserUsecase     *mock_usecase_user.MockUsecase
-	MockCreatorUsecase  *mock_usecase_creator.CreatorUsecase
-	MockAwardsUsecase   *mock_usecase_awards.AwardsUsecase
-	MockSessionsManager *mock_sessions.MockSessionsManager
-	Tb                  TestTable
-	Logger              *logrus.Logger
-	Router              *mux.Router
-	Cors                *app.CorsConfig
+	Mock                   *gomock.Controller
+	MockUserUsecase        *mock_usecase_user.MockUsecase
+	MockCreatorUsecase     *mock_usecase_creator.CreatorUsecase
+	MockAwardsUsecase      *mock_usecase_awards.AwardsUsecase
+	MockSessionsManager    *mock_sessions.MockSessionsManager
+	Tb                     TestTable
+	Logger                 *logrus.Logger
+	Router                 *mux.Router
+	Cors                   *app.CorsConfig
+	MockCsrfUsecase        *mock_usecase_csrf.MockUsecase
+	MockSubscribersUsecase *mock_subscribers.MockUsecase
 }
 
 func (s *SuiteHandler) SetupSuite() {
@@ -40,6 +44,8 @@ func (s *SuiteHandler) SetupSuite() {
 	s.MockCreatorUsecase = mock_usecase_creator.NewCreatorUsecase(s.Mock)
 	s.MockAwardsUsecase = mock_usecase_awards.NewAwardsUsecase(s.Mock)
 	s.MockSessionsManager = mock_sessions.NewMockSessionsManager(s.Mock)
+	s.MockCsrfUsecase = mock_usecase_csrf.NewMockUsecase(s.Mock)
+	s.MockSubscribersUsecase = mock_subscribers.NewMockUsecase(s.Mock)
 
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()

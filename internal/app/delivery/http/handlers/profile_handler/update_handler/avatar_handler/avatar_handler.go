@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/sessions"
@@ -35,8 +38,10 @@ func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.Co
 		userUsecase:    ucUser,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
-	h.AddMethod(http.MethodPut, h.PUT)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMethod(http.MethodPut, h.PUT,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewSessionMiddleware(h.sessionManager, log).Check,
+	)
 	return h
 }
 
@@ -49,6 +54,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.Co
 // @Failure 400 {object} models.ErrResponse "size of file very big"
 // @Failure 400 {object} models.ErrResponse "invalid form field name"
 // @Failure 400 {object} models.ErrResponse "invalid avatar extension"
+// @Failure 403 "csrf token is invalid, get new token"
 // @Failure 500 {object} models.ErrResponse "server error"
 // @Router /user/update/avatar [PUT]
 func (h *UpdateAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
@@ -108,8 +114,8 @@ func (h *UpdateAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	avatarPath := rootPath + "static/img/" + strconv.Itoa(int(userId)) + filepath.Ext(fHeader.Filename)
-	err = os.Mkdir("static/img/", os.ModePerm)
+	avatarPath := rootPath + "internal/media/img/" + strconv.Itoa(int(userId)) + filepath.Ext(fHeader.Filename)
+	err = os.MkdirAll("internal/media/img/", os.ModePerm)
 	if err != nil {
 		h.HandlerError(w, r, http.StatusInternalServerError, app.GeneralError{
 			Err:         handler_errors.InternalError,

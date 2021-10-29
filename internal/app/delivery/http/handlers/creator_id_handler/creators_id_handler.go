@@ -65,7 +65,6 @@ func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
 	creator, err := s.creatorUsecase.GetCreator(creatorId)
 	if err != nil {
 		s.UsecaseError(w, r, err, codesByErrors)
-
 		return
 	}
 

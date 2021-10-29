@@ -4,7 +4,6 @@ import (
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
 
 	"github.com/gorilla/mux"
@@ -26,6 +25,6 @@ func NewProfileUpdateHandler(log *logrus.Logger, router *mux.Router, cors *app.C
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
 	//h.AddMethod(http.MethodPut, h.)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	//h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
 	return h
 }

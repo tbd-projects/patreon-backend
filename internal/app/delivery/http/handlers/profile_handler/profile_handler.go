@@ -29,8 +29,9 @@ func NewProfileHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 		userUsecase:    ucUser,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
-	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMethod(http.MethodGet, h.GET,
+		middleware.NewSessionMiddleware(h.sessionManager, log).Check,
+	)
 	return h
 }
 

@@ -26,8 +26,9 @@ func NewLogoutHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConf
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 		sessionManager: sManager,
 	}
-	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMethod(http.MethodPost, h.POST,
+		middleware.NewSessionMiddleware(h.sessionManager, log).Check,
+	)
 	return h
 }
 

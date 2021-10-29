@@ -54,7 +54,7 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 		GetCreator(userID).
 		Times(test.ExpectedMockTimes).
 		Return(&creator, nil)
-	s.handler.ServeHTTP(recorder, reader)
+	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 	decoder := json.NewDecoder(recorder.Body)
 	res := &models_data.Creator{}

@@ -37,14 +37,26 @@ func (s *Server) checkConnection() error {
 
 	s.logger.Info("Success check connection to sql db")
 
-	conn, err := s.connections.RedisPool.Dial()
+	connSession, err := s.connections.SessionRedisPool.Dial()
 	if err != nil {
 		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
 	}
 
 	s.logger.Info("Success check connection to redis")
 
-	err = conn.Close()
+	err = connSession.Close()
+	if err != nil {
+		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
+	}
+
+	connAccess, err := s.connections.SessionRedisPool.Dial()
+	if err != nil {
+		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
+	}
+
+	s.logger.Info("Success check connection to redis")
+
+	err = connAccess.Close()
 	if err != nil {
 		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
 	}
@@ -63,19 +75,16 @@ func (s *Server) checkConnection() error {
 // @host localhost:8080
 // @BasePath /api/v1/
 
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-
 // @x-extension-openapi {"example": "value on a json format"}
+
 func (s *Server) Start(config *app.Config) error {
 	if err := s.checkConnection(); err != nil {
 		return err
 	}
 
 	router := mux.NewRouter()
-
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	routerApi := router.PathPrefix("/api/v1/").Subrouter()
+	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
@@ -83,10 +92,10 @@ func (s *Server) Start(config *app.Config) error {
 	hs := factory.GetHandleUrls()
 
 	for url, h := range *hs {
-		h.Connect(router.Path(url))
+		h.Connect(routerApi.Path(url))
 	}
 
 	s.logger.Info("starting server")
 
-	return http.ListenAndServe(config.BindAddr, router)
+	return http.ListenAndServe(config.BindAddr, routerApi)
 }

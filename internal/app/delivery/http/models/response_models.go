@@ -2,10 +2,14 @@ package models
 
 import (
 	"fmt"
+	models_csrf "patreon/internal/app/csrf/models"
 	"patreon/internal/app/models"
 	"strconv"
 )
 
+type TokenResponse struct {
+	Token models_csrf.Token `json:"token"`
+}
 type ErrResponse struct {
 	Err string `json:"error"`
 }
@@ -54,4 +58,14 @@ func ToResponseAwards(aw models.Awards) ResponseAwards {
 
 func (u *ResponseCreator) String() string {
 	return fmt.Sprintf("{ID: %s, Nickname: %s}", strconv.Itoa(int(u.ID)), u.Nickname)
+}
+
+type SubscriptionsUserResponse struct {
+	Creators []int64 `json:"creator_id"`
+}
+
+func ToSubscriptionsUser(creators []int64) SubscriptionsUserResponse {
+	return SubscriptionsUserResponse{
+		Creators: creators,
+	}
 }

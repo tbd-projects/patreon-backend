@@ -32,8 +32,9 @@ func NewLoginHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 		sessionManager: sManager,
 		userUsecase:    ucUser,
 	}
-	h.AddMethod(http.MethodPost, h.POST)
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)
+	h.AddMethod(http.MethodPost, h.POST,
+		middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized,
+	)
 	return h
 }
 
