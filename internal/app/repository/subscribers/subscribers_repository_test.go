@@ -33,7 +33,7 @@ func (s *SuiteSubscribersRepository) AfterTest(_, _ string) {
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_Ok() {
 	subscriber := models.TestSubscriber()
 
-	expQuery := "INSERT into subscribers(users_id, creator_id) VALUES ($1, $2)"
+	expQuery := "INSERT INTO subscribers(users_id, creator_id) VALUES ($1, $2)"
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(expQuery)).
 		WithArgs(subscriber.UserID, subscriber.CreatorID).
@@ -44,7 +44,7 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_Ok() {
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_DbError() {
 	subscriber := models.TestSubscriber()
 
-	expQuery := "INSERT into subscribers(users_id, creator_id) VALUES ($1, $2)"
+	expQuery := "INSERT INTO subscribers(users_id, creator_id) VALUES ($1, $2)"
 	expError := repository.NewDBError(models.BDError)
 	s.Mock.ExpectQuery(regexp.QuoteMeta(expQuery)).
 		WithArgs(subscriber.UserID, subscriber.CreatorID).

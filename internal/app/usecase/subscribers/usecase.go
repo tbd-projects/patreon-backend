@@ -1,10 +1,11 @@
-package repository_subscribers
+package usecase_subscribers
 
 import "patreon/internal/app/models"
 
-type Repository interface {
+type Usecase interface {
 	// Create Errors:
-	//		app.GeneralError with Errors
+	//		SubscriptionAlreadyExists
+	//		app.generalError with Errors
 	//			repository.DefaultErrDB
 	Create(subscriber *models.Subscriber) error
 	// GetCreators Errors:
@@ -15,8 +16,4 @@ type Repository interface {
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB
 	GetSubscribers(creatorID int64) ([]int64, error)
-	// Get Errors:
-	//		app.GeneralError with Errors
-	//			repository.DefaultErrDB
-	Get(userID int64, creatorID int64) (bool, error)
 }

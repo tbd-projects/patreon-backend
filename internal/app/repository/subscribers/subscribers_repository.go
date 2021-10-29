@@ -20,7 +20,7 @@ func NewSubscribersRepository(store *sql.DB) *SubscribersRepository {
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) Create(subscriber *models.Subscriber) error {
-	query := "INSERT into subscribers(users_id, creator_id) VALUES ($1, $2)"
+	query := "INSERT INTO subscribers(users_id, creator_id) VALUES ($1, $2)"
 	if err := repo.store.QueryRow(query, subscriber.UserID, &subscriber.CreatorID); err.Err() != nil {
 		return repository.NewDBError(err.Err())
 	}
@@ -92,4 +92,19 @@ func (repo *SubscribersRepository) GetSubscribers(creatorID int64) ([]int64, err
 		return nil, repository.NewDBError(err)
 	}
 	return res, nil
+}
+
+// Get Errors:
+//		app.GeneralError with Errors
+//			repository.DefaultErrDB
+func (repo *SubscribersRepository) Get(userID int64, creatorID int64) (bool, error) {
+	query := "SELECT * from subscribers where users_id = $1 and creator_id = $2"
+
+	if row := repo.store.QueryRow(query, userID, creatorID); row.Err() != nil {
+		if row.Err() == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, repository.NewDBError(row.Err())
+	}
+	return true, nil
 }
