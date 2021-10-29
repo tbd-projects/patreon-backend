@@ -37,3 +37,13 @@ func ToResponseCreator(cr models.Creator) ResponseCreator {
 func (u *ResponseCreator) String() string {
 	return fmt.Sprintf("{ID: %s, Nickname: %s}", strconv.Itoa(int(u.ID)), u.Nickname)
 }
+
+type SubscriptionsUserResponse struct {
+	Creators []int64 `json:"creator_id"`
+}
+
+func ToSubscriptionsUser(creators []int64) SubscriptionsUserResponse {
+	return SubscriptionsUserResponse{
+		Creators: creators,
+	}
+}
