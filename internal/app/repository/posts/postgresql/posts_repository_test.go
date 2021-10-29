@@ -1,18 +1,9 @@
 package repository_postgresql
 
 import (
-	"database/sql"
 	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	"regexp"
-	"strconv"
-	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
-
-	"github.com/stretchr/testify/assert"
 )
 
 type SuitePostsRepository struct {
@@ -29,6 +20,7 @@ func (s *SuitePostsRepository) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.Mock.ExpectationsWereMet())
 }
 
+/*
 func (s *SuitePostsRepository) TestPostsRepository_Create() {
 	cr := models.TestCreator()
 
@@ -124,3 +116,4 @@ func (s *SuitePostsRepository) TestPostsRepository_GetCreators_AllUsersCreators(
 func TestPostsRepository(t *testing.T) {
 	suite.Run(t, new(SuitePostsRepository))
 }
+*/

@@ -20,7 +20,7 @@ func NewCsrfMiddleware(log *logrus.Logger, uc usecase_csrf.Usecase) *CsrfMiddlew
 	}
 }
 
-func (mw *CsrfMiddleware) CheckCsrfToken(next hf.HandlerFunc) hf.HandlerFunc {
+func (mw *CsrfMiddleware) CheckCsrfTokenFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		csrfTokenFromHeader := r.Header.Get("X-Csrf-Token")
 		sessionId, okSession := r.Context().Value("session_id").(string)
@@ -44,4 +44,8 @@ func (mw *CsrfMiddleware) CheckCsrfToken(next hf.HandlerFunc) hf.HandlerFunc {
 		}
 		next(w, r)
 	}
+}
+
+func (mw *CsrfMiddleware) CheckCsrfToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(mw.CheckCsrfTokenFunc(next.ServeHTTP))
 }

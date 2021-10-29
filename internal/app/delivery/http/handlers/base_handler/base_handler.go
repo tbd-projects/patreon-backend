@@ -9,8 +9,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/sirupsen/logrus"
 	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (

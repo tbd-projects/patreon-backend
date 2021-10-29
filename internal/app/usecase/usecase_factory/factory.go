@@ -19,7 +19,7 @@ type UsecaseFactory struct {
 	sessionsManager    sessions.SessionsManager
 	accessUsecase      useAccess.Usecase
 	subscribersUsecase useSubscr.Usecase
-	awardsUsercase    useAwards.Usecase
+	awardsUsercase     useAwards.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {

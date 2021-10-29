@@ -37,7 +37,7 @@ func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 			return
 		} else {
 			m.log.Infof("Get session for user: %d", res.UserID)
-			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID)) //nolint
+			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID))    //nolint
 			r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID)) //nolint
 		}
 		next(w, r)

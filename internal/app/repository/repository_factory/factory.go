@@ -7,8 +7,8 @@ import (
 	repoAwrds "patreon/internal/app/repository/awards"
 	repAwardsPsql "patreon/internal/app/repository/awards/postgresql"
 	repCreator "patreon/internal/app/repository/creator"
-	repository_subscribers "patreon/internal/app/repository/subscribers"
 	repCreatorPsql "patreon/internal/app/repository/creator/postgresql"
+	repository_subscribers "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 	repUserPsql "patreon/internal/app/repository/user/postgresql"
 	"patreon/internal/app/sessions"
@@ -18,13 +18,12 @@ import (
 )
 
 type RepositoryFactory struct {
-	expectedConnections app.ExpectedConnections
-	logger              *logrus.Logger
-	userRepository      repUser.Repository
-	creatorRepository   repCreator.Repository
-	sessionRepository   sessions.SessionRepository
-	awardsRepository    repoAwrds.Repository
 	expectedConnections   app.ExpectedConnections
+	logger                *logrus.Logger
+	userRepository        repUser.Repository
+	creatorRepository     repCreator.Repository
+	sessionRepository     sessions.SessionRepository
+	awardsRepository      repoAwrds.Repository
 	csrfRepository        repCsrf.Repository
 	accessRepository      repository_access.Repository
 	subscribersRepository repository_subscribers.Repository
@@ -60,7 +59,7 @@ func (f *RepositoryFactory) GetCsrfRepository() repCsrf.Repository {
 
 func (f *RepositoryFactory) GetSessionRepository() sessions.SessionRepository {
 	if f.sessionRepository == nil {
-		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.RedisPool, f.logger)
+		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.SessionRedisPool, f.logger)
 	}
 	return f.sessionRepository
 }

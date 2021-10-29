@@ -44,7 +44,7 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 	require.NoError(s.T(), err)
 	req, _ := http.NewRequest(http.MethodGet, "/creators", &b)
 	vars := map[string]string{
-		"id": strconv.Itoa(int(userID)),
+		"creator_id": strconv.Itoa(int(userID)),
 	}
 	creator := models_data.Creator{
 		ID: userID, Avatar: "some", Nickname: "done"}

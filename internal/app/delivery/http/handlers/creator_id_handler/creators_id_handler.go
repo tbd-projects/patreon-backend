@@ -1,7 +1,6 @@
 package creator_id_handler
 
 import (
-	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -10,6 +9,8 @@ import (
 	"patreon/internal/app/sessions"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
 )

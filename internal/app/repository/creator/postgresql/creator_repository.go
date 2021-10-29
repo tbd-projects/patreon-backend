@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 type CreatorRepository struct {
@@ -21,10 +22,19 @@ func NewCreatorRepository(st *sql.DB) *CreatorRepository {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
-	category, _ := strconv.Atoi(cr.Category)
+	queryCategory := `SELECT category_id FROM creator_category WHERE name = $1`
+
+	category := int64(0)
+	if err := repo.store.QueryRow(queryCategory, cr.Category).Scan(&category); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return -1, IncorrectCategory
+		}
+		return -1, repository.NewDBError(err)
+	}
+
 	if err := repo.store.QueryRow("INSERT INTO creator_profile (creator_id, category, "+
 		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+
-		"RETURNING creator_id", cr.ID, category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
+		" RETURNING creator_id", cr.ID, category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
 		return -1, repository.NewDBError(err)
 	}
 	return cr.ID, nil

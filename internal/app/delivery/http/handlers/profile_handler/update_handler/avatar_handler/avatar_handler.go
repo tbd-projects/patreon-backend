@@ -38,10 +38,10 @@ func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.Co
 		userUsecase:    ucUser,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
-	h.AddMethod(http.MethodPut, h.PUT,
-		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
-		middleware.NewSessionMiddleware(h.sessionManager, log).Check,
-	)
+	h.AddMiddleware(csrf_middleware.NewCsrfMiddleware(log,
+		usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMethod(http.MethodPut, h.PUT)
 	return h
 }
 

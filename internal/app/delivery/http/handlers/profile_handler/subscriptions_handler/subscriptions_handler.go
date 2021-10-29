@@ -30,7 +30,7 @@ func NewSubscriptionsHandler(log *logrus.Logger, router *mux.Router,
 		BaseHandler:        *bh.NewBaseHandler(log, router, cors),
 	}
 	h.AddMethod(http.MethodGet, h.GET,
-		middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
 	return h
 }
 

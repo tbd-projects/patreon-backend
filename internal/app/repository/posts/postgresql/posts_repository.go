@@ -33,7 +33,7 @@ func (repo *PostsRepository) Create(post *models.Posts) (int64, error) {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) GetPost(postID int64) (*models.Posts, error) {
-	post := &models.Posts{ID: postID}
+	//post := &models.Posts{ID: postID}
 
 	rows, err := repo.store.Query(
 		"SELECT title, description, likes, date, cover, aw.name " +
@@ -49,7 +49,7 @@ func (repo *PostsRepository) GetPost(postID int64) (*models.Posts, error) {
 			&creator.Cover, &creator.Nickname); err != nil {
 			return nil, repository.NewDBError(err)
 		}
-		res[i] = creator
+		//res[i] = creator
 		i++
 
 		if err = rows.Err(); err != nil {
@@ -60,7 +60,7 @@ func (repo *PostsRepository) GetPost(postID int64) (*models.Posts, error) {
 		return nil, repository.NewDBError(err)
 	}
 
-	return res, nil
+	return &models.Posts{}, nil
 }
 
 // GetPosts Errors:

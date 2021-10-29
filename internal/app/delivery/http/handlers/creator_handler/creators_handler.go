@@ -39,8 +39,8 @@ func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 	}
 	h.AddMethod(http.MethodGet, h.GET)
 	h.AddMethod(http.MethodPost, h.POST,
-		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
-		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
+		middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
 	)
 	return h
 }

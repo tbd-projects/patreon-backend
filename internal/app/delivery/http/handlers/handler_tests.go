@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"patreon/internal/app"
 	mock_usecase_csrf "patreon/internal/app/csrf/usecase/mocks"
@@ -10,6 +9,8 @@ import (
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
 	mock_subscribers "patreon/internal/app/usecase/subscribers/mocks"
 	mock_usecase_user "patreon/internal/app/usecase/user/mocks"
+
+	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"

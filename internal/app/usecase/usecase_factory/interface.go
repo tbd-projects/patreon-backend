@@ -1,9 +1,9 @@
 package usecase_factory
 
 import (
-	repoAwrds "patreon/internal/app/repository/awards"
 	repCsrf "patreon/internal/app/csrf/repository/jwt"
 	repAccess "patreon/internal/app/repository/access"
+	repoAwrds "patreon/internal/app/repository/awards"
 	repCreator "patreon/internal/app/repository/creator"
 	useSubscr "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"

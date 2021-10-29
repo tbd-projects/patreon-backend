@@ -1,12 +1,13 @@
 package middleware
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
 	"patreon/internal/app/utilits"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type CreatorsMiddleware struct {
@@ -35,7 +36,7 @@ func (mw *CreatorsMiddleware) CheckAllowUserFunc(next hf.HandlerFunc) hf.Handler
 		id, ok := vars["creator_id"]
 		idInt, err := strconv.ParseInt(id, 10, 64)
 		if !ok || err != nil {
-			mw.log.Log(r).Infof("invalid parametrs creator_id %d", vars)
+			mw.log.Log(r).Infof("invalid parametrs creator_id %v", vars)
 			respond.Error(w, r, http.StatusBadRequest, InvalidParameters)
 			return
 		}

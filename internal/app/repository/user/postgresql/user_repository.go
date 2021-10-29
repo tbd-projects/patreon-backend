@@ -88,8 +88,7 @@ func (repo *UserRepository) UpdatePassword(id int64, newEncryptedPassword string
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *UserRepository) UpdateAvatar(id int64, newAvatar string) error {
-	if _, err := repo.store.Query("UPDATE users SET avatar = $1"+
-		"WHERE users_id = $2", newAvatar, id); err != nil {
+	if _, err := repo.store.Query("UPDATE users SET avatar = $1 WHERE users_id = $2", newAvatar, id); err != nil {
 		return repository.NewDBError(err)
 	}
 	return nil
