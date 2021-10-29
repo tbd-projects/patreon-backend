@@ -82,3 +82,11 @@ func TestCreators() []Creator {
 	}
 	return []Creator{cr1, cr2, cr3}
 }
+func TestSubscriber() *Subscriber {
+	return &Subscriber{
+		ID:        1,
+		UserID:    1,
+		CreatorID: 2,
+	}
+
+}
