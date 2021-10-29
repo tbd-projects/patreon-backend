@@ -26,7 +26,7 @@ func NewAwardsMiddleware(log *logrus.Logger, usecaseAwards usecase_awards.Usecas
 //		Status 500 middleware.ContextError
 //		Status 400 middleware.InvalidParameters
 //		Status 500 middleware.BDError
-//		Status 403 middleware.IncorrectCreatorForPost
+//		Status 403 middleware.IncorrectCreatorForAward
 func (mw *AwardsMiddleware) CheckCorrectAwardFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		respond := utilits.Responder{LogObject: mw.log}
@@ -42,7 +42,7 @@ func (mw *AwardsMiddleware) CheckCorrectAwardFunc(next hf.HandlerFunc) hf.Handle
 			return
 		}
 
-		id, ok = vars["awards_id"]
+		id, ok = vars["award_id"]
 
 		awardsId, err = strconv.ParseInt(id, 10, 64)
 		if !ok || err != nil {
@@ -60,7 +60,7 @@ func (mw *AwardsMiddleware) CheckCorrectAwardFunc(next hf.HandlerFunc) hf.Handle
 				return
 			}
 			mw.log.Log(r).Warnf("this post %d not belongs to this creator %d", awardsId, cretorId)
-			respond.Error(w, r, http.StatusForbidden, IncorrectCreatorForPost)
+			respond.Error(w, r, http.StatusForbidden, IncorrectCreatorForAward)
 			return
 		}
 

@@ -46,7 +46,7 @@ func (repo *AwardsRepository) checkUniqName(name string, creatorId int64, skipAw
 //		repository_postgresql.NameAlreadyExist
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *AwardsRepository) Create(aw *models.Awards) (int64, error) {
+func (repo *AwardsRepository) Create(aw *models.Award) (int64, error) {
 	if err := repo.checkUniqName(aw.Name, aw.CreatorId, NotSkipAwards); err != nil {
 		return -1, err
 	}
@@ -64,8 +64,8 @@ func (repo *AwardsRepository) Create(aw *models.Awards) (int64, error) {
 //		repository.NotFound
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *AwardsRepository) GetByID(awardsID int64) (*models.Awards, error) {
-	aw := &models.Awards{ID: awardsID}
+func (repo *AwardsRepository) GetByID(awardsID int64) (*models.Award, error) {
+	aw := &models.Award{ID: awardsID}
 	var clr uint64
 	if err := repo.store.QueryRow("SELECT name, description, price, color, creator_id FROM awards where awards_id = $1",
 		aw.ID).Scan(&aw.Name, &aw.Description, &aw.Price, &clr, &aw.CreatorId); err != nil {
@@ -83,7 +83,7 @@ func (repo *AwardsRepository) GetByID(awardsID int64) (*models.Awards, error) {
 //		repository_postgresql.NameAlreadyExist
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *AwardsRepository) Update(aw *models.Awards) error {
+func (repo *AwardsRepository) Update(aw *models.Award) error {
 	creatorId := int64(0)
 
 	if err := repo.store.QueryRow(
@@ -109,8 +109,8 @@ func (repo *AwardsRepository) Update(aw *models.Awards) error {
 // GetAwards Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Awards, error) {
-	var res []models.Awards
+func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Award, error) {
+	var res []models.Award
 
 	rows, err := repo.store.Query(
 		"SELECT awards_id, name, description, price, color from awards where awards.creator_id = $1", creatorId)
@@ -120,7 +120,7 @@ func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Awards, error
 
 	i := 0
 	for rows.Next() {
-		var awards models.Awards
+		var awards models.Award
 		var clr uint64
 		if err = rows.Scan(&awards.ID, &awards.Name, &awards.Description, &awards.Price, &clr); err != nil {
 			return nil, repository.NewDBError(err)

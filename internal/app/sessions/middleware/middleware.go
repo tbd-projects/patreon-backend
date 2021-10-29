@@ -36,8 +36,8 @@ func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		} else {
-			m.log.Infof("Get session for user: %d", res.UserID)
-			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID)) //nolint
+			m.log.Debugf("Get session for user: %d", res.UserID)
+			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID))    //nolint
 			r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID)) //nolint
 		}
 		next(w, r)
@@ -67,4 +67,23 @@ func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 		}
 		w.WriteHeader(http.StatusTeapot)
 	})
+}
+
+func (m *SessionMiddleware) AddUserIdFunc(next hf.HandlerFunc) hf.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sessionID, err := r.Cookie("session_id")
+		if err == nil {
+			uniqID := sessionID.Value
+			if res, err := m.SessionManager.Check(uniqID); err == nil {
+				m.log.Debugf("Get session for user: %d", res.UserID)
+				r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID))
+				r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID))
+			}
+		}
+		next(w, r)
+	}
+}
+
+func (m *SessionMiddleware) AddUserId(next http.Handler) http.Handler {
+	return http.HandlerFunc(m.CheckFunc(next.ServeHTTP))
 }

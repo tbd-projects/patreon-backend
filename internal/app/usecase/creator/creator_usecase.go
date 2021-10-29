@@ -23,47 +23,40 @@ func NewCreatorUsecase(repository repoCreator.Repository) *CreatorUsecase {
 //		CreatorExist
 //		models.IncorrectCreatorNickname
 //		models.IncorrectCreatorCategory
-//		models.IncorrectCreatorCategoryDescription
+//		models.IncorrectCreatorDescription
+//		repository_postgresql.IncorrectCategory
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
 func (usecase *CreatorUsecase) Create(creator *models.Creator) (int64, error) {
 	check, err := usecase.repository.GetCreator(creator.ID)
 	if err != nil && err != repository.NotFound {
-		return -1, errors.Wrap(err, fmt.Sprintf("METHOD: usecase_creator.Create; "+
+		return app.InvalidInt, errors.Wrap(err, fmt.Sprintf("METHOD: usecase_creator.Create; "+
 			"ERR: error on get creator with ID = %v", creator.ID))
 	}
 	if check != nil {
-		return -1, CreatorExist
+		return app.InvalidInt, CreatorExist
 	}
 
 	if err = creator.Validate(); err != nil {
 		if errors.Is(err, models.IncorrectCreatorCategory) || errors.Is(err, models.IncorrectCreatorNickname) ||
-			errors.Is(err, models.IncorrectCreatorCategoryDescription) {
+			errors.Is(err, models.IncorrectCreatorDescription) {
 			return -1, err
 		}
-		return -1, &app.GeneralError{
+		return app.InvalidInt, &app.GeneralError{
 			Err:         app.UnknownError,
 			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
 		}
 	}
 
-	id, err := usecase.repository.Create(creator)
-	if err != nil {
-		return -1, err
-	}
-	return id, nil
+	return usecase.repository.Create(creator)
 }
 
 // GetCreators Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (usecase *CreatorUsecase) GetCreators() ([]models.Creator, error) {
-	creators, err := usecase.repository.GetCreators()
-	if err != nil {
-		return nil, err
-	}
-	return creators, nil
+	return usecase.repository.GetCreators()
 }
 
 // GetCreator Errors:

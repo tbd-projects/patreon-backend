@@ -10,25 +10,33 @@ type Repository interface {
 	// Create Errors:
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(post *models.Post) (int64, error)
+	Create(post *models.CreatePost) (int64, error)
 
 	// GetPost Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPost(postID int64) (*models.Post, error)
+	GetPost(postID int64, userId int64) (*models.Post, error)
+
+	// GetPostCreator Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	GetPostCreator(postID int64) (int64, error)
 
 	// GetPosts Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPosts(page int64) ([]models.Creator, error)
+	GetPosts(creatorsId int64, userId int64, pag *models.Pagination) ([]models.Post, error)
 
 	// UpdatePost Errors:
+	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	UpdatePost(post *models.Post) error
+	UpdatePost(post *models.UpdatePost) error
 
 	// UpdateCoverPost Errors:
+	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	UpdateCoverPost(postId int64, cover string) error

@@ -42,7 +42,7 @@ func NewRegisterHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 // @Accept  json
 // @Produce json
 // @Param user body models.RequestRegistration true "Request body for user registration"
-// @Success 201 {object} models.UserResponse "Create user successfully"
+// @Success 201 {object} models.IdResponse "Create user successfully"
 // @Failure 422 {object} models.ErrResponse "invalid body in request"
 // @Failure 409 {object} models.ErrResponse "user already exist"
 // @Failure 422 {object} models.ErrResponse "nickname already exist"
@@ -60,6 +60,7 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	req := &models_respond.RequestRegistration{}
 
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(req); err != nil || len(req.Password) == 0 ||
 		len(req.Nickname) == 0 || len(req.Login) == 0 {
 		h.Log(r).Warnf("can not parse request %s", err)
@@ -82,5 +83,5 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u.MakeEmptyPassword()
-	h.Respond(w, r, http.StatusCreated, models_respond.UserResponse{ID: id})
+	h.Respond(w, r, http.StatusCreated, models_respond.IdResponse{ID: id})
 }

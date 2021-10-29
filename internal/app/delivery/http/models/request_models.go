@@ -1,6 +1,10 @@
 package models
 
-import "image/color"
+import (
+	"encoding/json"
+	"image/color"
+	repPosts "patreon/internal/app/repository/posts"
+)
 
 type RequestCreator struct {
 	Category    string `json:"category"`
@@ -44,4 +48,24 @@ type RequestAwards struct {
 	Description string `json:"description,omitempty"`
 	Price       int64  `json:"price"`
 	Color       Color  `json:"color,omitempty"`
+}
+
+type RequestPosts struct {
+	Title       string `json:"title"`
+	AwardsId    int64  `json:"awards_id,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+func (o *RequestPosts) UnmarshalJSON(text []byte) error {
+	type options RequestPosts
+	opts := options{
+		AwardsId: repPosts.NoAwards,
+	}
+
+	if err := json.Unmarshal(text, &opts); err != nil {
+		return err
+	}
+
+	*o = RequestPosts(opts)
+	return nil
 }

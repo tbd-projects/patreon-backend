@@ -2,33 +2,54 @@ package handler_errors
 
 import "errors"
 
+/// NOT FOUND
 var (
-	UserAlreadyExist           = errors.New("user already exist")
-	NicknameAlreadyExist       = errors.New("nickname already exist")
-	IncorrectEmailOrPassword   = errors.New("incorrect email or password")
-	UserNotFound               = errors.New("user with this id not found")
-	AwardNotFound              = errors.New("award with this id not found")
-	GetProfileFail             = errors.New("can not get user from db")
-	DeleteCookieFail           = errors.New("can not delete cookie from session store")
-	InvalidBody                = errors.New("invalid body in request")
-	ErrorCreateUser            = errors.New("can not create user")
-	ErrorPrepareUser           = errors.New("can not prepare user info")
-	ContextError               = errors.New("can not get info from context")
-	ErrorCreateSession         = errors.New("can not create session")
-	BDError                    = errors.New("can not do bd operation")
-	InvalidParameters          = errors.New("invalid parameters")
-	NotAllowedMethod           = errors.New("method not allowed")
-	CreatorAlreadyExist        = errors.New("creator already exist")
-	InvalidNickname            = errors.New("invalid creator nickname")
-	InvalidCategory            = errors.New("invalid creator category")
-	InvalidCategoryDescription = errors.New("invalid creator category-description")
-	InternalError              = errors.New("server error")
-	FileSizeError              = errors.New("size of file very big")
-	InvalidFormFieldName       = errors.New("invalid form field name for load file")
-	InvalidAvatarExt           = errors.New("please upload a JPEG, JPG or PNG image")
-	EmptyPassword              = errors.New("empty password in request")
-	EmptyName                  = errors.New("empty name in request")
-	AwardsAlredyExists         = errors.New("awards with this name already exists")
-	IncorrectPrice             = errors.New("incorrect value of price")
-	IncorrectNewPassword       = errors.New("invalid new password")
+	UserNotFound  = errors.New("user with this id not found")
+	AwardNotFound = errors.New("award with this id not found")
+	PostNotFound  = errors.New("post with this id not found")
+	LikeNotFound  = errors.New("like with this id not found")
 )
+
+/// Fields Incorrect
+var (
+	InvalidNickname          = errors.New("invalid creator nickname")
+	InvalidCategory          = errors.New("invalid creator category")
+	InvalidDescription       = errors.New("invalid creator description")
+	IncorrectAwardsId        = errors.New("this awards id not know")
+	IncorrectCreatorId       = errors.New("this creator id not know")
+	EmptyTitle               = errors.New("empty title")
+	EmptyName                = errors.New("empty name in request")
+	IncorrectEmailOrPassword = errors.New("incorrect email or password")
+	IncorrectPrice           = errors.New("incorrect value of price")
+	IncorrectNewPassword     = errors.New("invalid new password")
+)
+
+// BD Error
+var (
+	LikesAlreadyDel      = errors.New("this user not have like for this post")
+	LikesAlreadyExists   = errors.New("this user already add like for this post")
+	AwardsAlreadyExists  = errors.New("awards with this name already exists")
+	UserAlreadyExist     = errors.New("user already exist")
+	NicknameAlreadyExist = errors.New("nickname already exist")
+	CreatorAlreadyExist  = errors.New("creator already exist")
+	BDError              = errors.New("can not do bd operation")
+)
+
+// Session Error
+var (
+	ErrorCreateSession = errors.New("can not create session")
+	DeleteCookieFail   = errors.New("can not delete cookie from session store")
+)
+
+// Request Error
+var (
+	InvalidBody          = errors.New("invalid body in request")
+	InvalidParameters    = errors.New("invalid parameters")
+	InvalidQueries       = errors.New("invalid parameters in query")
+	ContextError         = errors.New("can not get info from context")
+	FileSizeError        = errors.New("size of file very big")
+	InvalidFormFieldName = errors.New("invalid form field name for load file")
+	InvalidAvatarExt     = errors.New("please upload a JPEG, JPG or PNG image")
+)
+
+var InternalError = errors.New("server error")

@@ -35,7 +35,7 @@ func (m *AwardsRepository) EXPECT() *AwardsRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *AwardsRepository) Create(arg0 *models.Awards) (int64, error) {
+func (m *AwardsRepository) Create(arg0 *models.Award) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(int64)
@@ -64,10 +64,10 @@ func (mr *AwardsRepositoryMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 }
 
 // GetAwards mocks base method.
-func (m *AwardsRepository) GetAwards(arg0 int64) ([]models.Awards, error) {
+func (m *AwardsRepository) GetAwards(arg0 int64) ([]models.Award, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAwards", arg0)
-	ret0, _ := ret[0].([]models.Awards)
+	ret0, _ := ret[0].([]models.Award)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *AwardsRepositoryMockRecorder) GetAwards(arg0 interface{}) *gomock.Call
 }
 
 // GetByID mocks base method.
-func (m *AwardsRepository) GetByID(arg0 int64) (*models.Awards, error) {
+func (m *AwardsRepository) GetByID(arg0 int64) (*models.Award, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByID", arg0)
-	ret0, _ := ret[0].(*models.Awards)
+	ret0, _ := ret[0].(*models.Award)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -94,7 +94,7 @@ func (mr *AwardsRepositoryMockRecorder) GetByID(arg0 interface{}) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *AwardsRepository) Update(arg0 *models.Awards) error {
+func (m *AwardsRepository) Update(arg0 *models.Award) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0)
 	ret0, _ := ret[0].(error)

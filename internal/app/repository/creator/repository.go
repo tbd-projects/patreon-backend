@@ -6,6 +6,7 @@ import (
 
 type Repository interface {
 	// Create Errors:
+	//		repository_postgresql.IncorrectCategory
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	Create(*models.Creator) (int64, error)

@@ -61,6 +61,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	req := &models.RequestLogin{}
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(req); err != nil ||
 		len(req.Login) == 0 || len(req.Password) == 0 {

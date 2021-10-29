@@ -40,7 +40,7 @@ func NewAwardsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConf
 // @Summary get list of awards of some creator
 // @Description get list of awards which belongs the creator
 // @Produce json
-// @Success 201 {array} models.ResponseCreator
+// @Success 201 {array} models.ResponseAward
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Router /creators/{:creator_id}/awards [GET]
@@ -62,9 +62,9 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondAwards := make([]models.ResponseAwards, len(awards))
+	respondAwards := make([]models.ResponseAward, len(awards))
 	for i, aw := range awards {
-		respondAwards[i] = models.ToResponseAwards(aw)
+		respondAwards[i] = models.ToResponseAward(aw)
 	}
 
 	h.Log(r).Debugf("get creators %v", respondAwards)
@@ -76,16 +76,16 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Description create awards to creator with id from path
 // @Param user body models.RequestAwards true "Request body for awards"
 // @Produce json
-// @Success 201 {object} models.AwardsResponse "id awards"
+// @Success 201 {object} models.IdResponse "id awards"
 // @Failure 422 {object} models.ErrResponse "invalid body in request"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 400 {object} models.ErrResponse "empty name in request"
-// @Failure 400 {object} models.ErrResponse "incorrect value of price"
+// @Failure 422 {object} models.ErrResponse "empty name in request"
+// @Failure 422 {object} models.ErrResponse "incorrect value of price"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 500 {object} models.ErrResponse "server error"
 // @Failure 500 {object} models.ErrResponse "can not get info from context"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 404 "User are not authorized"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards [POST]
 func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
@@ -107,13 +107,14 @@ func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	req := &models.RequestAwards{}
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(req); err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 
-	aw := &db_models.Awards{
+	aw := &db_models.Award{
 		Name:        req.Name,
 		Price:       req.Price,
 		Description: req.Description,
@@ -127,5 +128,5 @@ func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, &models.AwardsResponse{ID: awardsId})
+	h.Respond(w, r, http.StatusCreated, &models.IdResponse{ID: awardsId})
 }

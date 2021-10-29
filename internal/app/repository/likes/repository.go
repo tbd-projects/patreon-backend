@@ -11,6 +11,12 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	Get(userId int64) (*models.Like, error)
 
+	// GetLikeId Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	GetLikeId(userId int64, postId int64) (int64, error)
+
 	// Add Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB

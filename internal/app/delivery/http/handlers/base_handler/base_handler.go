@@ -21,11 +21,18 @@ const (
 	OPTIONS = http.MethodOptions
 )
 
+type queriesMethods struct {
+	method     string
+	methodFunc hf.HandlerFunc
+	MethodInfo
+}
+
 type BaseHandler struct {
 	utilitiesMiddleware middleware.UtilitiesMiddleware
 	corsMiddleware      middleware.CorsMiddleware
 	handlerMethods      map[string]hf.HandlerFunc
 	middlewares         []hf.HMiddlewareFunc
+	methodsWithQueries  []queriesMethods
 	HelpHandlers
 }
 
@@ -46,8 +53,24 @@ func (h *BaseHandler) AddMiddleware(middleware ...hf.HMiddlewareFunc) {
 	h.middlewares = append(h.middlewares, middleware...)
 }
 
+func (h *BaseHandler) AddMethodWithQueries(method string, handlerMethod hf.HandlerFunc,
+	middlewares ...hf.HFMiddlewareFunc) *MethodInfo {
+	h.methodsWithQueries = append(h.methodsWithQueries, queriesMethods{
+		methodFunc: h.applyHFMiddleware(handlerMethod, middlewares...),
+		method:     method,
+		MethodInfo: MethodInfo{},
+	})
+	return &h.methodsWithQueries[len(h.methodsWithQueries)-1].MethodInfo
+}
+
 func (h *BaseHandler) AddMethod(method string, handlerMethod hf.HandlerFunc, middlewares ...hf.HFMiddlewareFunc) {
 	h.handlerMethods[method] = h.applyHFMiddleware(handlerMethod, middlewares...)
+}
+
+func (h *BaseHandler) applyQueriesMethods(route *mux.Route) {
+	for _, method := range h.methodsWithQueries {
+		route.Path("").Queries(method.queries...).HandlerFunc(method.methodFunc).Methods(method.method)
+	}
 }
 
 func (h *BaseHandler) applyHFMiddleware(handler hf.HandlerFunc,
@@ -77,6 +100,7 @@ func (h *BaseHandler) getListMethods() []string {
 
 func (h *BaseHandler) Connect(route *mux.Route) {
 	route.Handler(h.applyMiddleware(h)).Methods(h.getListMethods()...)
+	h.applyQueriesMethods(route)
 }
 
 func (h *BaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -20,7 +20,7 @@ func NewAwardsUsecase(repository repoAwrds.Repository) *AwardsUsecase {
 // GetAwards Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *AwardsUsecase) GetAwards(creatorId int64) ([]models.Awards, error) {
+func (usecase *AwardsUsecase) GetAwards(creatorId int64) ([]models.Award, error) {
 	return usecase.repository.GetAwards(creatorId)
 }
 
@@ -40,7 +40,7 @@ func (usecase *AwardsUsecase) Delete(id int64) error {
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *AwardsUsecase) Update(awards *models.Awards) error {
+func (usecase *AwardsUsecase) Update(awards *models.Award) error {
 	if err := awards.Validate(); err != nil {
 		if errors.Is(err, models.EmptyName) || errors.Is(err, models.IncorrectAwardsPrice) {
 			return err
@@ -61,12 +61,12 @@ func (usecase *AwardsUsecase) Update(awards *models.Awards) error {
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *AwardsUsecase) Create(awards *models.Awards) (int64, error) {
+func (usecase *AwardsUsecase) Create(awards *models.Award) (int64, error) {
 	if err := awards.Validate(); err != nil {
 		if errors.Is(err, models.EmptyName) || errors.Is(err, models.IncorrectAwardsPrice) {
-			return -1, err
+			return app.InvalidInt, err
 		}
-		return -1, &app.GeneralError{
+		return app.InvalidInt, &app.GeneralError{
 			Err:         app.UnknownError,
 			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
 		}
@@ -75,10 +75,14 @@ func (usecase *AwardsUsecase) Create(awards *models.Awards) (int64, error) {
 	return usecase.repository.Create(awards)
 }
 
+// GetCreatorId Errors:
+//  	repository.NotFound
+//  	app.GeneralError with Errors
+//   		repository.DefaultErrDB
 func (usecase *AwardsUsecase) GetCreatorId(awardsId int64) (int64, error) {
 	aw, err := usecase.repository.GetByID(awardsId)
 	if err != nil {
-		return -1, err
+		return app.InvalidInt, err
 	}
 	return aw.CreatorId, nil
 }

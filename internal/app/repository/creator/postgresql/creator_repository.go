@@ -2,9 +2,10 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"github.com/pkg/errors"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	"strconv"
 )
 
 type CreatorRepository struct {
@@ -18,14 +19,27 @@ func NewCreatorRepository(st *sql.DB) *CreatorRepository {
 }
 
 // Create Errors:
+//		IncorrectCategory
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
-	category, _ := strconv.Atoi(cr.Category)
-	if err := repo.store.QueryRow("INSERT INTO creator_profile (creator_id, category, "+
-		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+
-		"RETURNING creator_id", cr.ID, category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
-		return -1, repository.NewDBError(err)
+	queryCategory := `SELECT category_id FROM creator_category WHERE name = $1`
+
+	query := `INSERT INTO creator_profile (creator_id, category,
+		description, avatar, cover) VALUES ($1, $2, $3, $4, $5)
+		RETURNING creator_id
+	`
+
+	category := int64(0)
+	if err := repo.store.QueryRow(queryCategory, cr.Category).Scan(&category); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return app.InvalidInt, IncorrectCategory
+		}
+		return app.InvalidInt, repository.NewDBError(err)
+	}
+
+	if err := repo.store.QueryRow(query, cr.ID, category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 	return cr.ID, nil
 }
@@ -34,16 +48,18 @@ func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
+	queryCount := `SELECT count(*) from creator_profile`
+	queryCreator := `SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
+					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
+					JOIN creator_category As cc ON creator_profile.category = cc.category_id`
 	count := 0
 
-	if err := repo.store.QueryRow("SELECT count(*) from creator_profile").Scan(&count); err != nil {
+	if err := repo.store.QueryRow(queryCount).Scan(&count); err != nil {
 		return nil, repository.NewDBError(err)
 	}
 	res := make([]models.Creator, count)
 
-	rows, err := repo.store.Query(
-		"SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-			"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id")
+	rows, err := repo.store.Query(queryCreator)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}
@@ -74,10 +90,13 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, error) {
+	query := `SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
+			FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id 
+			JOIN creator_category As cc ON creator_profile.category = cc.category_id 
+			where creator_id=$1`
 	creator := &models.Creator{}
 
-	if err := repo.store.QueryRow("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname "+
-		"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id where creator_id=$1", creatorId).
+	if err := repo.store.QueryRow(query, creatorId).
 		Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,
 			&creator.Cover, &creator.Nickname); err != nil {
 		if err == sql.ErrNoRows {

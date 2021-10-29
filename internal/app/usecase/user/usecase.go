@@ -21,7 +21,7 @@ type Usecase interface {
 	Create(user *models.User) (int64, error)
 
 	// Check Errors:
-	//		IncorrectEmailOrPassword
+	//		models.IncorrectEmailOrPassword
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB

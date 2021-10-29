@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS posts
     likes       bigint    default 0     not null,
     date        timestamp default now() not null,
     cover       text                    not null,
+    views       bigint    default 0     not null,
     type_awards bigint                  null references awards (awards_id),
     creator_id  bigint                  not null references creator_profile (creator_id) on delete cascade
 );

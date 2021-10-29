@@ -5,15 +5,19 @@ import (
 	"patreon/internal/app/sessions/sessions_manager"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
+	useLikes "patreon/internal/app/usecase/likes"
+	usePosts "patreon/internal/app/usecase/posts"
 	useUser "patreon/internal/app/usecase/user"
 )
 
 type UsecaseFactory struct {
 	repositoryFactory RepositoryFactory
-	userUsercase      useUser.Usecase
-	creatorUsercase   useCreator.Usecase
-	awardsUsercase    useAwards.Usecase
+	userUsecase       useUser.Usecase
+	creatorUsecase    useCreator.Usecase
+	awardsUsecase     useAwards.Usecase
 	sessinManager     sessions.SessionsManager
+	postsUsecase      usePosts.Usecase
+	likesUsecase      useLikes.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
@@ -23,17 +27,17 @@ func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
 }
 
 func (f *UsecaseFactory) GetUserUsecase() useUser.Usecase {
-	if f.userUsercase == nil {
-		f.userUsercase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository())
+	if f.userUsecase == nil {
+		f.userUsecase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository())
 	}
-	return f.userUsercase
+	return f.userUsecase
 }
 
 func (f *UsecaseFactory) GetCreatorUsecase() useCreator.Usecase {
-	if f.creatorUsercase == nil {
-		f.creatorUsercase = useCreator.NewCreatorUsecase(f.repositoryFactory.GetCreatorRepository())
+	if f.creatorUsecase == nil {
+		f.creatorUsecase = useCreator.NewCreatorUsecase(f.repositoryFactory.GetCreatorRepository())
 	}
-	return f.creatorUsercase
+	return f.creatorUsecase
 }
 
 func (f *UsecaseFactory) GetSessionManager() sessions.SessionsManager {
@@ -44,8 +48,23 @@ func (f *UsecaseFactory) GetSessionManager() sessions.SessionsManager {
 }
 
 func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
-	if f.awardsUsercase == nil {
-		f.awardsUsercase = useAwards.NewAwardsUsecase(f.repositoryFactory.GetAwardsRepository())
+	if f.awardsUsecase == nil {
+		f.awardsUsecase = useAwards.NewAwardsUsecase(f.repositoryFactory.GetAwardsRepository())
 	}
-	return f.awardsUsercase
+	return f.awardsUsecase
+}
+
+func (f *UsecaseFactory) GetPostsUsecase() usePosts.Usecase {
+	if f.postsUsecase == nil {
+		f.postsUsecase = usePosts.NewPostsUsecase(f.repositoryFactory.GetPostsRepository(),
+			f.repositoryFactory.GetPostsDataRepository())
+	}
+	return f.postsUsecase
+}
+
+func (f *UsecaseFactory) GetLikesUsecase() useLikes.Usecase {
+	if f.likesUsecase == nil {
+		f.likesUsecase = useLikes.NewLikesUsecase(f.repositoryFactory.GetLikesRepository())
+	}
+	return f.likesUsecase
 }
