@@ -1,4 +1,4 @@
-package posts_update_handler
+package posts_upd_handler
 
 import (
 	"encoding/json"

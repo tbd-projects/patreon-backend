@@ -121,7 +121,7 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_Check_InvalidPassword() {
 		Name:              "Invalid password",
 		Data:              models.TestUser(),
 		ExpectedMockTimes: 1,
-		ExpectedError:     IncorrectEmailOrPassword,
+		ExpectedError:     models.IncorrectEmailOrPassword,
 	}
 	u := s.Tb.Data.(*models.User)
 	u.Password = "doggy123"

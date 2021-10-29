@@ -1,4 +1,4 @@
-package aw_other_update_handler
+package aw_upd_handler
 
 import (
 	"encoding/json"
@@ -18,14 +18,14 @@ import (
 	useAwards "patreon/internal/app/usecase/awards"
 )
 
-type AwardsUpOtherHandler struct {
+type AwardsUpdHandler struct {
 	awardsUsecase useAwards.Usecase
 	bh.BaseHandler
 }
 
-func NewAwardsUpOtherHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsUpOtherHandler {
-	h := &AwardsUpOtherHandler{
+func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsUpdHandler {
+	h := &AwardsUpdHandler{
 		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
 		awardsUsecase: ucAwards,
 	}
@@ -53,7 +53,7 @@ func NewAwardsUpOtherHandler(log *logrus.Logger, router *mux.Router, cors *app.C
 // @Failure 500 {object} models.ErrResponse "server error"
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/update/other [PUT]
-func (h *AwardsUpOtherHandler) PUT(w http.ResponseWriter, r *http.Request) {
+func (h *AwardsUpdHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {

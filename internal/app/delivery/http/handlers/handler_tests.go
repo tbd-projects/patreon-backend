@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"io/ioutil"
+	"io"
 	"patreon/internal/app"
 	mock_usecase_csrf "patreon/internal/app/csrf/usecase/mocks"
 	mock_sessions "patreon/internal/app/sessions/mocks"

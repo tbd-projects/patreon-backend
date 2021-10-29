@@ -22,7 +22,7 @@ func NewLikesUsecase(repository repoLikes.Repository) *LikesUsecase {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (usecase *LikesUsecase) Add(like *models.Like) error {
-	_, err := usecase.repository.GetLikeId(like.PostId, like.UserId)
+	_, err := usecase.repository.GetLikeId(like.UserId, like.PostId)
 	if err != nil {
 		if errors.Is(err, repository.NotFound) {
 			like.Value = 1
@@ -39,7 +39,7 @@ func (usecase *LikesUsecase) Add(like *models.Like) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (usecase *LikesUsecase) Delete(postId int64, userId int64) error {
-	likeId, err := usecase.repository.GetLikeId(postId, userId)
+	likeId, err := usecase.repository.GetLikeId(userId, postId)
 	if err != nil {
 		if errors.Is(err, repository.NotFound) {
 			return IncorrectDelLike

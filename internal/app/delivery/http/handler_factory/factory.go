@@ -6,12 +6,12 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler"
-	aw_other_update_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler/update_handler/update_awards_other_handler"
-	"patreon/internal/app/delivery/http/handlers/csrf_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler/upd_awards_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/likes_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/update_posts_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/update_handler"
+	"patreon/internal/app/delivery/http/handlers/csrf_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
@@ -74,21 +74,21 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucSubscr := f.usecaseFactory.GetSubscribersUsecase()
 
 	return map[int]app.Handler{
-		REGISTER:         handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		LOGIN:            login_handler.NewLoginHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		LOGOUT:           logout_handler.NewLogoutHandler(f.logger, f.router, f.cors, sManager),
-		PROFILE:          profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		CREATORS:         creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator, ucUser),
-		CREATOR_WITH_ID:  creator_id_handler.NewCreatorIdHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
-		UPDATE_PASSWORD:  password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		UPDATE_AVATAR:    avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		AWARDS:           awards_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		AWARDS_WITH_ID:   awards_id_handler.NewAwardsIdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		AWARDS_OTHER_UPD: aw_other_update_handler.NewAwardsUpOtherHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		POSTS:            posts_handler.NewPostsHandler(f.logger, f.router, f.cors, ucPosts, sManager),
-		POSTS_WITH_ID:    posts_id_handler.NewPostsIDHandler(f.logger, f.router, f.cors, ucPosts, sManager),
-		POSTS_UPD:        posts_update_handler.NewPostsUpdateHandler(f.logger, f.router, f.cors, ucPosts, sManager),
-		POSTS_LIKES:      likes_handler.NewLikesHandler(f.logger, f.router, f.cors, ucLikes, ucPosts, sManager),
+		REGISTER:               handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		LOGIN:                  login_handler.NewLoginHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		LOGOUT:                 logout_handler.NewLogoutHandler(f.logger, f.router, f.cors, sManager),
+		PROFILE:                profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		CREATORS:               creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator, ucUser),
+		CREATOR_WITH_ID:        creator_id_handler.NewCreatorIdHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
+		UPDATE_PASSWORD:        password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		UPDATE_AVATAR:          avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
+		AWARDS:                 awards_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS_WITH_ID:         awards_id_handler.NewAwardsIdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS_OTHER_UPD:       aw_upd_handler.NewAwardsUpdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		POSTS:                  posts_handler.NewPostsHandler(f.logger, f.router, f.cors, ucPosts, sManager),
+		POSTS_WITH_ID:          posts_id_handler.NewPostsIDHandler(f.logger, f.router, f.cors, ucPosts, sManager),
+		POSTS_UPD:              posts_upd_handler.NewPostsUpdateHandler(f.logger, f.router, f.cors, ucPosts, sManager),
+		POSTS_LIKES:            likes_handler.NewLikesHandler(f.logger, f.router, f.cors, ucLikes, ucPosts, sManager),
 		GET_CSRF_TOKEN:         csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
 		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
 	}

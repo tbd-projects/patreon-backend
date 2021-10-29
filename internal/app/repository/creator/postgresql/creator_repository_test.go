@@ -63,8 +63,10 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreator() {
 	cr.ID = 1
 	expected := *cr
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id where creator_id=$1")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(`SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
+		FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
+		JOIN creator_category As cc ON creator_profile.category = cc.category_id
+		where creator_id=$1`)).
 		WithArgs(cr.ID).
 		WillReturnRows(sqlmock.
 			NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"}).
@@ -74,16 +76,20 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreator() {
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), expected, *get)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id where creator_id=$1")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(`SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
+		FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
+		JOIN creator_category As cc ON creator_profile.category = cc.category_id
+		where creator_id=$1`)).
 		WithArgs(cr.ID).WillReturnError(sql.ErrNoRows)
 
 	_, err = s.repo.GetCreator(expected.ID)
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NotFound, err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id where creator_id=$1")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(`SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
+		FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
+		JOIN creator_category As cc ON creator_profile.category = cc.category_id
+		where creator_id=$1`)).
 		WithArgs(cr.ID).WillReturnError(models.BDError)
 
 	_, err = s.repo.GetCreator(expected.ID)
@@ -105,8 +111,9 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreat
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(`SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
+					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
+					JOIN creator_category As cc ON creator_profile.category = cc.category_id`)).
 		WillReturnRows(preapareRows)
 
 	get, err := s.repo.GetCreators()
@@ -122,8 +129,9 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreat
 	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.users_id = creator_profile.creator_id")).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(`SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
+					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
+					JOIN creator_category As cc ON creator_profile.category = cc.category_id`)).WillReturnError(models.BDError)
 
 	_, err = s.repo.GetCreators()
 	assert.Error(s.T(), err)

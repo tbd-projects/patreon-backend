@@ -1,4 +1,4 @@
-package aw_other_update_handler
+package aw_upd_handler
 
 import (
 	"patreon/internal/app/delivery/http/handlers"

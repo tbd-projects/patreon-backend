@@ -16,7 +16,7 @@ import (
 )
 
 type LikesHandler struct {
-	awardsUsecase useLikes.Usecase
+	likesUsecase useLikes.Usecase
 	bh.BaseHandler
 }
 
@@ -24,7 +24,7 @@ func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *LikesHandler {
 	h := &LikesHandler{
 		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
-		awardsUsecase: ucLikes,
+		likesUsecase: ucLikes,
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
@@ -64,10 +64,12 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 
 	userId, ok = r.Context().Value("user_id").(int64)
 	if !ok {
-		userId = usePosts.EmptyUser
+		h.Log(r).Error("can not get user_id from context")
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
+		return
 	}
 
-	err := h.awardsUsecase.Delete(postsId, userId)
+	err := h.likesUsecase.Delete(postsId, userId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsDELETE)
 		return
@@ -105,10 +107,12 @@ func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 
 	userId, ok = r.Context().Value("user_id").(int64)
 	if !ok {
-		userId = usePosts.EmptyUser
+		h.Log(r).Error("can not get user_id from context")
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
+		return
 	}
 
-	err := h.awardsUsecase.Add(&models.Like{PostId: postsId, UserId: userId})
+	err := h.likesUsecase.Add(&models.Like{PostId: postsId, UserId: userId})
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)
 		return

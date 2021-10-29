@@ -2,16 +2,6 @@ package awards_id_handler
 
 import (
 	"patreon/internal/app/delivery/http/handlers"
-	"patreon/internal/app/delivery/http/models"
-	models_data "patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	"testing"
-
-	"github.com/stretchr/testify/suite"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
 )
 
 type AwardsIdTestSuite struct {
