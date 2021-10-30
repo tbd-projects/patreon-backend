@@ -23,7 +23,6 @@ func NewAwardsMiddleware(log *logrus.Logger, usecaseAwards usecase_awards.Usecas
 }
 
 // CheckCorrectAwardFunc Errors
-//		Status 500 middleware.ContextError
 //		Status 400 middleware.InvalidParameters
 //		Status 500 middleware.BDError
 //		Status 403 middleware.IncorrectCreatorForAward

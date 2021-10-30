@@ -13,8 +13,9 @@ INSERT INTO creator_category (name)
 INSERT INTO posts_type (type)
 VALUES('music'),
       ('video'),
-      ('image'),
-      ('text');
+      ('files'),
+      ('text'),
+      ('image');
 
 \disconnect
 

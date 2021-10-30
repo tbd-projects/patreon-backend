@@ -86,6 +86,9 @@ func (s *Server) Start(config *app.Config) error {
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	fileServer := http.FileServer(http.Dir(config.MediaDir + "/"))
+	routerApi.PathPrefix("/" + app.LoadFileUrl).Handler(http.StripPrefix("/" + app.LoadFileUrl, fileServer))
+
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
 	factory := handler_factory.NewFactory(s.logger, router, &config.Cors, usecaseFactory)

@@ -45,7 +45,7 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Failure 404 {object} models.ErrResponse "award with this id not found"
 // @Failure 422 {object} models.ErrResponse "invalid body in request"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
 // @Failure 422 {object} models.ErrResponse "empty name in request"

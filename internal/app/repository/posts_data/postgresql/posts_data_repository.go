@@ -26,7 +26,7 @@ func NewPostsDataRepository(st *sql.DB) *PostsDataRepository {
 //		UnknownDataFormat
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *PostsDataRepository) getAndCheckDataTypeId(dataType string) (int64, error) {
+func (repo *PostsDataRepository) getAndCheckDataTypeId(dataType models.DataType) (int64, error) {
 	query := `SELECT posts_type_id FROM posts_type WHERE type = $1`
 	var dataTypeId int64
 	if err := repo.store.QueryRow(query, dataType).
@@ -42,9 +42,9 @@ func (repo *PostsDataRepository) getAndCheckDataTypeId(dataType string) (int64, 
 // getDataType Errors:
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *PostsDataRepository) getDataType(dataTypeId int64) (string, error) {
+func (repo *PostsDataRepository) getDataType(dataTypeId int64) (models.DataType, error) {
 	query := `SELECT type FROM posts_type WHERE posts_type_id = $1`
-	var dataType string
+	var dataType models.DataType
 	if err := repo.store.QueryRow(query, dataTypeId).
 		Scan(&dataType); err != nil {
 		return "", repository.NewDBError(err)
@@ -133,6 +133,8 @@ func (repo *PostsDataRepository) GetData(postsId int64) ([]models.PostData, erro
 }
 
 // Update Errors:
+//		UnknownDataFormat
+//		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsDataRepository) Update(postData *models.PostData) error {
@@ -145,6 +147,9 @@ func (repo *PostsDataRepository) Update(postData *models.PostData) error {
 
 	if err = repo.store.QueryRow(query, type_id, postData.Data, postData.PostId).
 		Scan(&postData.ID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return repository.NotFound
+		}
 		return repository.NewDBError(err)
 	}
 	return nil

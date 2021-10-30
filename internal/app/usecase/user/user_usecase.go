@@ -2,21 +2,25 @@ package usercase_user
 
 import (
 	"fmt"
+	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	repoFiles "patreon/internal/app/repository/files"
 	repoUser "patreon/internal/app/repository/user"
 
 	"github.com/pkg/errors"
 )
 
 type UserUsecase struct {
-	repository repoUser.Repository
+	repository     repoUser.Repository
+	repositoryFile repoFiles.Repository
 }
 
-func NewUserUsecase(repository repoUser.Repository) *UserUsecase {
+func NewUserUsecase(repository repoUser.Repository, repositoryFile repoFiles.Repository) *UserUsecase {
 	return &UserUsecase{
-		repository: repository,
+		repository:     repository,
+		repositoryFile: repositoryFile,
 	}
 }
 
@@ -139,8 +143,15 @@ func (usecase *UserUsecase) UpdatePassword(userId int64, newPassword string) err
 // UpdateAvatar Errors:
 // 		app.GeneralError with Errors
 //			app.UnknownError
-func (usecase *UserUsecase) UpdateAvatar(userId int64, newAvatar string) error {
-	if err := usecase.repository.UpdatePassword(userId, newAvatar); err != nil {
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
+func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error {
+	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
+	if err != nil {
+		return err
+	}
+
+	if err := usecase.repository.UpdateAvatar(userId, path); err != nil {
 		return app.GeneralError{
 			Err:         app.UnknownError,
 			ExternalErr: errors.Wrap(err, "failed process of update avatar"),

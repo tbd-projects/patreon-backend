@@ -2,10 +2,13 @@ package base_handler
 
 import (
 	"github.com/gorilla/mux"
+	"io"
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	repFiles "patreon/internal/app/repository/files"
 	"patreon/internal/app/utilits"
+	"sort"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -13,7 +16,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const EmptyQuery = -2
+const (
+	EmptyQuery      = -2
+	MAX_UPLOAD_SIZE = 1024 * 1024 * 4 // 4MB
+)
 
 type RespondError struct {
 	Code  int
@@ -90,4 +96,57 @@ func (h *HelpHandlers) HandlerError(w http.ResponseWriter, r *http.Request, code
 		err = errors.Cause(err).(*app.GeneralError).Err
 	}
 	h.Error(w, r, code, err)
+}
+
+// GerFilesFromRequest http Errors:
+// 		Status 400 handler_errors.FileSizeError
+// 		Status 400 handler_errors.InvalidFormFieldName
+// 		Status 400 handler_errors.InvalidImageExt
+// 		Status 500 handler_errors.InternalError
+func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Request, maxSize int64,
+	name string, validTypes []string) (io.Reader, repFiles.FileName, int, error) {
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			h.Log(r).Error(err)
+		}
+	}(r.Body)
+
+	r.Body = http.MaxBytesReader(w, r.Body, maxSize)
+	if err := r.ParseMultipartForm(maxSize); err != nil {
+		return nil, "", http.StatusBadRequest, app.GeneralError{
+			ExternalErr: err,
+			Err:         handler_errors.FileSizeError,
+		}
+	}
+
+	f, fHeader, err := r.FormFile(name)
+	if err != nil {
+		return nil, "", http.StatusBadRequest, app.GeneralError{
+			ExternalErr: err,
+			Err:         handler_errors.InvalidFormFieldName,
+		}
+	}
+
+	buff := make([]byte, 512)
+	if _, err = f.Read(buff); err != nil {
+		return nil, "", http.StatusInternalServerError, app.GeneralError{
+			ExternalErr: err,
+			Err:         handler_errors.InternalError,
+		}
+	}
+
+	fType := http.DetectContentType(buff)
+	if pos := sort.SearchStrings(validTypes, fType); pos == len(validTypes) {
+		return nil, "", http.StatusBadRequest, handler_errors.InvalidImageExt
+	}
+
+	if _, err = f.Seek(0, io.SeekStart); err != nil {
+		return nil, "", http.StatusInternalServerError, app.GeneralError{
+			ExternalErr: err,
+			Err:         handler_errors.InternalError,
+		}
+	}
+
+	return f, repFiles.FileName(fHeader.Filename), 0, nil
 }

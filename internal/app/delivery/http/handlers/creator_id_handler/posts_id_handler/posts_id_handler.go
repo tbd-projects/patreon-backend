@@ -39,7 +39,7 @@ func NewPostsIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "post with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
 // @Router /creators/{:creator_id}/posts/{:post_id} [GET]

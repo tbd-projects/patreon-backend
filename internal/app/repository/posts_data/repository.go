@@ -6,7 +6,7 @@ import (
 
 type Repository interface {
 	// Create Errors:
-	//		UnknownDataFormat
+	//		repository_postgresql.UnknownDataFormat
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	Create(postData *models.PostData) (int64, error)
@@ -23,6 +23,8 @@ type Repository interface {
 	GetData(postsId int64) ([]models.PostData, error)
 
 	// Update Errors:
+	//		repository_postgresql.UnknownDataFormat
+	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	Update(postData *models.PostData) error

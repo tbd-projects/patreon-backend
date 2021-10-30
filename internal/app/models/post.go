@@ -97,11 +97,46 @@ func (ps *CreatePost) Validate() error {
 	return err
 }
 
+type DataType string
+
 type PostData struct {
-	ID     int64  `json:"data_id"`
-	PostId int64  `json:"posts_id"`
-	Data   string `json:"data"`
-	Type   string `json:"type"`
+	ID     int64    `json:"data_id"`
+	PostId int64    `json:"posts_id"`
+	Data   string   `json:"data"`
+	Type   DataType `json:"type"`
+}
+
+const (
+	Music DataType = "music"
+	Video DataType = "video"
+	Files DataType = "files"
+	Text  DataType = "text"
+	Image DataType = "image"
+)
+
+// Validate Errors:
+//		InvalidType
+//		InvalidPostId
+// Important can return some other error
+func (ps *PostData) Validate() error {
+	err := validation.Errors{
+		"post": validation.Validate(ps.PostId, validation.Min(0)),
+		"type": validation.Validate(ps.Type, validation.In(Music, Video, Files, Text, Image)),
+	}.Filter()
+	if err == nil {
+		return nil
+	}
+
+	mapOfErr, knowError := parseErrorToMap(err)
+	if knowError != nil {
+		return errors.Wrap(knowError, "failed error getting in validate creator")
+	}
+
+	if knowError = extractValidateError(postValidError(), mapOfErr); knowError != nil {
+		return knowError
+	}
+
+	return err
 }
 
 type PostWithData struct {

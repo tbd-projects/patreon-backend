@@ -48,7 +48,7 @@ func NewPostsUpdateHandler(log *logrus.Logger, router *mux.Router, cors *app.Cor
 // @Failure 422 {object} models.ErrResponse "this awards id not know"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
 // @Failure 401 "User are not authorized"

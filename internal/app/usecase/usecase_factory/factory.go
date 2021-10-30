@@ -7,9 +7,10 @@ import (
 	useAccess "patreon/internal/app/usecase/access"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
-	useSubscr "patreon/internal/app/usecase/subscribers"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+	usePostsData "patreon/internal/app/usecase/posts_data"
+	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
 )
 
@@ -22,10 +23,11 @@ type UsecaseFactory struct {
 	accessUsecase      useAccess.Usecase
 	subscribersUsecase useSubscr.Usecase
 	awardsUsercase     useAwards.Usecase
-	awardsUsecase     useAwards.Usecase
-	sessinManager     sessions.SessionsManager
-	postsUsecase      usePosts.Usecase
-	likesUsecase      useLikes.Usecase
+	awardsUsecase      useAwards.Usecase
+	sessinManager      sessions.SessionsManager
+	postsUsecase       usePosts.Usecase
+	postsDataUsecase   usePostsData.Usecase
+	likesUsecase       useLikes.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
@@ -36,7 +38,7 @@ func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
 
 func (f *UsecaseFactory) GetUserUsecase() useUser.Usecase {
 	if f.userUsecase == nil {
-		f.userUsecase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository())
+		f.userUsecase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository(), f.repositoryFactory.GetFilesRepository())
 	}
 	return f.userUsecase
 }
@@ -83,7 +85,7 @@ func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
 func (f *UsecaseFactory) GetPostsUsecase() usePosts.Usecase {
 	if f.postsUsecase == nil {
 		f.postsUsecase = usePosts.NewPostsUsecase(f.repositoryFactory.GetPostsRepository(),
-			f.repositoryFactory.GetPostsDataRepository())
+			f.repositoryFactory.GetPostsDataRepository(), f.repositoryFactory.GetFilesRepository())
 	}
 	return f.postsUsecase
 }
@@ -93,4 +95,12 @@ func (f *UsecaseFactory) GetLikesUsecase() useLikes.Usecase {
 		f.likesUsecase = useLikes.NewLikesUsecase(f.repositoryFactory.GetLikesRepository())
 	}
 	return f.likesUsecase
+}
+
+func (f *UsecaseFactory) GetPostsDataUsecase() usePostsData.Usecase {
+	if f.postsDataUsecase == nil {
+		f.postsDataUsecase = usePostsData.NewPostsDataUsecase(f.repositoryFactory.GetPostsDataRepository(),
+			f.repositoryFactory.GetFilesRepository())
+	}
+	return f.postsDataUsecase
 }

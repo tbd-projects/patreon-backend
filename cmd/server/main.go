@@ -40,7 +40,7 @@ func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() err
 	}
 
 	logger.SetOutput(f)
-
+	logger.Writer()
 	logger.SetLevel(level)
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	return logger, f.Close
@@ -114,6 +114,7 @@ func main() {
 			SessionRedisPool: newRedisPool(repositoryConfig.SessionRedisUrl),
 			AccessRedisPool:  newRedisPool(repositoryConfig.AccessRedisUrl),
 			SqlConnection:    db,
+			PathFiles:        config.MediaDir,
 		},
 		logger,
 	)

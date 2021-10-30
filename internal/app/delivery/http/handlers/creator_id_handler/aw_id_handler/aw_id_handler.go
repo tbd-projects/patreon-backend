@@ -38,7 +38,7 @@ func NewAwardsIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "award with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 403 {object} models.ErrResponse "this awards not belongs this creators"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
 // @Failure 401 "User are not authorized"

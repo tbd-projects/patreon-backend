@@ -1,6 +1,8 @@
 package likes_handler
 
 import (
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -11,9 +13,6 @@ import (
 	sessionMid "patreon/internal/app/sessions/middleware"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
-
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 )
 
 type LikesHandler struct {
@@ -44,7 +43,7 @@ func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "like with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 409 {object} models.ErrResponse "this user not have like for this post"
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
@@ -87,7 +86,7 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "like with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 409 {object} models.ErrResponse "this user already add like for this post"
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"

@@ -5,6 +5,7 @@ import (
 	repAccess "patreon/internal/app/repository/access"
 	repoAwrds "patreon/internal/app/repository/awards"
 	repCreator "patreon/internal/app/repository/creator"
+	repoFiles "patreon/internal/app/repository/files"
 	repoLikes "patreon/internal/app/repository/likes"
 	repoPosts "patreon/internal/app/repository/posts"
 	repoPostsData "patreon/internal/app/repository/posts_data"
@@ -25,4 +26,5 @@ type RepositoryFactory interface {
 	GetPostsRepository() repoPosts.Repository
 	GetLikesRepository() repoLikes.Repository
 	GetPostsDataRepository() repoPostsData.Repository
+	GetFilesRepository() repoFiles.Repository
 }

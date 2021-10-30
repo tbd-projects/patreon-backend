@@ -7,6 +7,7 @@ import (
 	useCreator "patreon/internal/app/usecase/creator"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+	usePostsData "patreon/internal/app/usecase/posts_data"
 	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
 )
@@ -20,4 +21,5 @@ type UsecaseFactory interface {
 	GetSessionManager() sessions.SessionsManager
 	GetSubscribersUsecase() useSubscr.Usecase
 	GetLikesUsecase() useLikes.Usecase
+	GetPostsDataUsecase() usePostsData.Usecase
 }
