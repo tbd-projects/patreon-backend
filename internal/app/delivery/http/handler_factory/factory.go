@@ -44,8 +44,7 @@ const (
 	POSTS_LIKES
 	GET_CSRF_TOKEN
 	GET_USER_SUBSCRIPTIONS
-	GET_CREATOR_SUBSCRIBERS //@todo
-	USER_SUBSCRIBES
+	SUBSCRIBES
 )
 
 type HandlerFactory struct {
@@ -94,7 +93,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		POSTS_LIKES:            likes_handler.NewLikesHandler(f.logger, f.router, f.cors, ucLikes, ucPosts, sManager),
 		GET_CSRF_TOKEN:         csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
 		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
-		USER_SUBSCRIBES:        subscribe_handler.NewSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
+		SUBSCRIBES:             subscribe_handler.NewSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
 	}
 }
 
@@ -117,8 +116,9 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		// /creators ---------------------------------------------------------////
 		"/creators":                           hs[CREATORS],
 		"/creators/{creator_id:[0-9]+}":       hs[CREATOR_WITH_ID],
-		"/creators/{:creator_id}/subscribe":   hs[USER_SUBSCRIBES],
-		"/creators/{:creator_id}/unsubscribe": hs[USER_SUBSCRIBES],
+		"/creators/{:creator_id}/subscribe":   hs[SUBSCRIBES],
+		"/creators/{:creator_id}/unsubscribe": hs[SUBSCRIBES],
+		"/creators/{:creator_id}/subscribers": hs[SUBSCRIBES],
 		// ../awards ---------------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/awards":                                hs[AWARDS],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}":              hs[AWARDS_WITH_ID],

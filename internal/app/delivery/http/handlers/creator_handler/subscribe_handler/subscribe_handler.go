@@ -9,6 +9,7 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	responseModels "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	middleSes "patreon/internal/app/sessions/middleware"
@@ -38,6 +39,7 @@ func NewSubscribeHandler(log *logrus.Logger, router *mux.Router,
 	h.AddMethod(http.MethodPost, h.DELETE, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 	)
+	h.AddMethod(http.MethodGet, h.GET, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
 	return h
 }
 
@@ -66,6 +68,8 @@ func (h *SubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	}
 	creatorID, ok := h.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
+		h.Log(r).Warnf("invalid creator_id %v", mux.Vars(r))
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 	if len(mux.Vars(r)) > 1 {
@@ -79,7 +83,7 @@ func (h *SubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	}
 	err := h.subscriberUsecase.UnSubscribe(subscriber)
 	if err != nil {
-		h.UsecaseError(w, r, err, codesByErrorsPOST)
+		h.UsecaseError(w, r, err, codesByErrorsDELETE)
 		return
 	}
 	h.Log(r).Debugf("unsubscribe from creator_id = %v", creatorID)
@@ -111,6 +115,8 @@ func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 	creatorID, ok := h.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
+		h.Log(r).Warnf("invalid creator_id %v", mux.Vars(r))
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 	if len(mux.Vars(r)) > 1 {
@@ -129,4 +135,41 @@ func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 	h.Log(r).Debugf("subscribe on creator_id = %v", creatorID)
 	w.WriteHeader(http.StatusCreated)
+}
+
+// GET Subscribers
+// @Summary subscribers of the creator
+// @Description get subscribers of the creators with id = creator_id
+// @Produce json
+// @Success 200 "Successfully get creator subscribers with creator id = creator_id"
+// @Failure 400 "invalid parameters - creator_id"
+// @Failure 401 "User are not authorized"
+// @Failure 500 {object} models.ErrResponse "serverError"
+// @Router /creators/{:creator_id}/subscribers [GET]
+func (h *SubscribeHandler) GET(w http.ResponseWriter, r *http.Request) {
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			h.Log(r).Error(err)
+		}
+	}(r.Body)
+	creatorID, ok := h.GetInt64FromParam(w, r, "creator_id")
+	if !ok {
+		h.Log(r).Warnf("invalid creator_id %v", mux.Vars(r))
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		return
+	}
+	if len(mux.Vars(r)) > 1 {
+		h.Log(r).Warnf("Too many parameters %v", mux.Vars(r))
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		return
+	}
+	subscribers, err := h.subscriberUsecase.GetSubscribers(creatorID)
+	if err != nil {
+		h.UsecaseError(w, r, err, codesByErrorsGET)
+		return
+	}
+	res := responseModels.ToSubscribersCreatorResponse(subscribers)
+	h.Log(r).Debugf("get users %v", subscribers)
+	h.Respond(w, r, http.StatusOK, res)
 }

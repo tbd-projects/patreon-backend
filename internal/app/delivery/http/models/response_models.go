@@ -2,8 +2,8 @@ package models
 
 import (
 	"fmt"
-	models_csrf "patreon/internal/app/csrf/models"
 	"math"
+	models_csrf "patreon/internal/app/csrf/models"
 	"patreon/internal/app/models"
 	"strconv"
 	"time"
@@ -116,5 +116,15 @@ type SubscriptionsUserResponse struct {
 func ToSubscriptionsUser(creators []int64) SubscriptionsUserResponse {
 	return SubscriptionsUserResponse{
 		Creators: creators,
+	}
+}
+
+type SubscribersCreatorResponse struct {
+	Users []int64 `json:"user_id"`
+}
+
+func ToSubscribersCreatorResponse(users []int64) SubscribersCreatorResponse {
+	return SubscribersCreatorResponse{
+		Users: users,
 	}
 }

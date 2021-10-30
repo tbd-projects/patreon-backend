@@ -11,8 +11,18 @@ import (
 )
 
 var codesByErrorsPOST = base_handler.CodeMap{
+	usecase_subscribers.SubscriptionAlreadyExists: {
+		http.StatusConflict, handler_errors.UserAlreadySubscribe, logrus.ErrorLevel},
+	repository.DefaultErrDB: {
+		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
+}
+var codesByErrorsDELETE = base_handler.CodeMap{
 	usecase_subscribers.SubscriptionsNotFound: {
 		http.StatusConflict, handler_errors.SubscribesNotFound, logrus.ErrorLevel},
+	repository.DefaultErrDB: {
+		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
+}
+var codesByErrorsGET = base_handler.CodeMap{
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 }
