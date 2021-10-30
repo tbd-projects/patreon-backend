@@ -1,4 +1,4 @@
-package awards_handler
+package aw_handler
 
 import (
 	"encoding/json"

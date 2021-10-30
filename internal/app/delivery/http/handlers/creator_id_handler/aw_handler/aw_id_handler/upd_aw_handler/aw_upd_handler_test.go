@@ -2,17 +2,17 @@ package aw_upd_handler
 
 import (
 	"patreon/internal/app/delivery/http/handlers"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
 )
 
 type AwardsUpOtherTestSuite struct {
 	handlers.SuiteHandler
-	handler *awards_handler.AwardsHandler
+	handler *aw_handler.AwardsHandler
 }
 
 func (s *AwardsUpOtherTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = awards_handler.NewAwardsHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
+	s.handler = aw_handler.NewAwardsHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
 }
 
 /*

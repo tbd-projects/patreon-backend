@@ -5,9 +5,9 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_handler/subscribe_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler"
-	aw_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler/upd_awards_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler/aw_id_handler"
+	aw_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler/aw_id_handler/upd_aw_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/likes_handler"
@@ -85,8 +85,8 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		CREATOR_WITH_ID:        creator_id_handler.NewCreatorIdHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
 		UPDATE_PASSWORD:        password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		UPDATE_AVATAR:          avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		AWARDS:                 awards_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		AWARDS_WITH_ID:         awards_id_handler.NewAwardsIdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS:                 aw_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS_WITH_ID:         aw_id_handler.NewAwardsIdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
 		AWARDS_OTHER_UPD:       aw_upd_handler.NewAwardsUpdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
 		POSTS:                  posts_handler.NewPostsHandler(f.logger, f.router, f.cors, ucPosts, sManager),
 		POSTS_WITH_ID:          posts_id_handler.NewPostsIDHandler(f.logger, f.router, f.cors, ucPosts, sManager),
