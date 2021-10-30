@@ -7,6 +7,6 @@ var (
 	IncorrectCreatorForPost  = errors.New("this post not belongs this creators")
 	IncorrectCreatorForAward = errors.New("this award not belongs this creators")
 	InvalidParameters        = errors.New("invalid parameters")
-	ContextError             = errors.New("can not get info from context")
 	BDError                  = errors.New("can not do bd operation")
+	InternalError            = errors.New("server error")
 )

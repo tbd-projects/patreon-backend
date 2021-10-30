@@ -7,6 +7,10 @@ type Repository interface {
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB
 	Create(subscriber *models.Subscriber) error
+	// Delete Errors:
+	//		app.GeneralError with Errors
+	//			repository.DefaultErrDB
+	Delete(subscriber *models.Subscriber) error
 	// GetCreators Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB

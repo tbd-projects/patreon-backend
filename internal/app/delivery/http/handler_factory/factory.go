@@ -3,14 +3,15 @@ package handler_factory
 import (
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_handler/subscribe_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/awards_handler/awards_id_handler/upd_awards_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler/aw_id_handler"
+	aw_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler/aw_id_handler/upd_aw_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/likes_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/update_handler"
+	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/update_handler"
 	"patreon/internal/app/delivery/http/handlers/csrf_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
@@ -43,6 +44,8 @@ const (
 	POSTS_LIKES
 	GET_CSRF_TOKEN
 	GET_USER_SUBSCRIPTIONS
+	GET_CREATOR_SUBSCRIBERS //@todo
+	USER_SUBSCRIBES
 )
 
 type HandlerFactory struct {
@@ -82,8 +85,8 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		CREATOR_WITH_ID:        creator_id_handler.NewCreatorIdHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
 		UPDATE_PASSWORD:        password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
 		UPDATE_AVATAR:          avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		AWARDS:                 awards_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		AWARDS_WITH_ID:         awards_id_handler.NewAwardsIdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS:                 aw_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
+		AWARDS_WITH_ID:         aw_id_handler.NewAwardsIdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
 		AWARDS_OTHER_UPD:       aw_upd_handler.NewAwardsUpdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
 		POSTS:                  posts_handler.NewPostsHandler(f.logger, f.router, f.cors, ucPosts, sManager),
 		POSTS_WITH_ID:          posts_id_handler.NewPostsIDHandler(f.logger, f.router, f.cors, ucPosts, sManager),
@@ -91,6 +94,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		POSTS_LIKES:            likes_handler.NewLikesHandler(f.logger, f.router, f.cors, ucLikes, ucPosts, sManager),
 		GET_CSRF_TOKEN:         csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
 		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
+		USER_SUBSCRIBES:        subscribe_handler.NewSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
 	}
 }
 
@@ -111,10 +115,12 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/avatar":   hs[UPDATE_AVATAR],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 		// /creators ---------------------------------------------------------////
-		"/creators":                     hs[CREATORS],
-		"/creators/{creator_id:[0-9]+}": hs[CREATOR_WITH_ID],
+		"/creators":                           hs[CREATORS],
+		"/creators/{creator_id:[0-9]+}":       hs[CREATOR_WITH_ID],
+		"/creators/{:creator_id}/subscribe":   hs[USER_SUBSCRIBES],
+		"/creators/{:creator_id}/unsubscribe": hs[USER_SUBSCRIBES],
 		// ../awards ---------------------------------------------------------////
-		"/creators/{creator_id:[0-9]+}/awards":                                 hs[AWARDS],
+		"/creators/{creator_id:[0-9]+}/awards":                                hs[AWARDS],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}":              hs[AWARDS_WITH_ID],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/update/other": hs[AWARDS_OTHER_UPD],
 		// ../posts  ---------------------------------------------------------////

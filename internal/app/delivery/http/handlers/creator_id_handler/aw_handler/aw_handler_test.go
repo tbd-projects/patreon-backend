@@ -1,4 +1,4 @@
-package awards_handler
+package aw_handler
 
 import (
 	"patreon/internal/app/delivery/http/handlers"

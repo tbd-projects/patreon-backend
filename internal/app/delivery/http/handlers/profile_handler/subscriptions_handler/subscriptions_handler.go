@@ -52,12 +52,13 @@ func (h SubscriptionsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
 		return
 	}
 	creators, err := h.subscribersUsecase.GetCreators(userID.(int64))
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByError)
+		return
 	}
 
 	res := responseModels.ToSubscriptionsUser(creators)

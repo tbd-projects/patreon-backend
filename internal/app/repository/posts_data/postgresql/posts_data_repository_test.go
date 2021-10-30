@@ -1,8 +1,9 @@
 package repository_postgresql
 
 import (
-	"github.com/stretchr/testify/require"
 	"patreon/internal/app/models"
+
+	"github.com/stretchr/testify/require"
 )
 
 type SuitePostsDataRepository struct {
@@ -18,6 +19,7 @@ func (s *SuitePostsDataRepository) SetupSuite() {
 func (s *SuitePostsDataRepository) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.Mock.ExpectationsWereMet())
 }
+
 /*
 func (s *SuitePostsDataRepository) TestPostsDataRepository_Create() {
 	cr := models.TestCreator()

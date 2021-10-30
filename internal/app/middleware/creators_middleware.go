@@ -19,7 +19,7 @@ func NewCreatorsMiddleware(log *logrus.Logger) *CreatorsMiddleware {
 }
 
 // CheckAllowUserFunc Errors
-//		Status 500 middleware.ContextError
+//		Status 500 middleware.InternalError
 //		Status 400 middleware.InvalidParameters
 //		Status 403 middleware.ForbiddenChangeCreator
 func (mw *CreatorsMiddleware) CheckAllowUserFunc(next hf.HandlerFunc) hf.HandlerFunc {
@@ -28,7 +28,7 @@ func (mw *CreatorsMiddleware) CheckAllowUserFunc(next hf.HandlerFunc) hf.Handler
 		userId := r.Context().Value("user_id")
 		if userId == nil {
 			mw.log.Log(r).Error("can not get user_id from context")
-			respond.Error(w, r, http.StatusInternalServerError, ContextError)
+			respond.Error(w, r, http.StatusInternalServerError, InternalError)
 			return
 		}
 
