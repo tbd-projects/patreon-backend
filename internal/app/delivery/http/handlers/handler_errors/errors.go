@@ -46,10 +46,11 @@ var (
 	InvalidBody          = errors.New("invalid body in request")
 	InvalidParameters    = errors.New("invalid parameters")
 	InvalidQueries       = errors.New("invalid parameters in query")
-	ContextError         = errors.New("can not get info from context")
 	FileSizeError        = errors.New("size of file very big")
 	InvalidFormFieldName = errors.New("invalid form field name for load file")
 	InvalidAvatarExt     = errors.New("please upload a JPEG, JPG or PNG image")
+	UserAlreadySubscribe = errors.New("this user already have subscribe on creator")
+	SubscribesNotFound   = errors.New("subscribes on the creator not found")
 )
 
 var InternalError = errors.New("server error")

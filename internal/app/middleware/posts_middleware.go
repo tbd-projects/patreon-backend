@@ -1,9 +1,6 @@
 package middleware
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
@@ -11,6 +8,10 @@ import (
 	usePosts "patreon/internal/app/usecase/posts"
 	"patreon/internal/app/utilits"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type PostsMiddleware struct {
@@ -23,7 +24,7 @@ func NewPostsMiddleware(log *logrus.Logger, usecasePosts usePosts.Usecase) *Post
 }
 
 // CheckCorrectPostFunc Errors
-//		Status 500 middleware.ContextError
+//		Status 500 middleware.InternalError
 //		Status 400 middleware.InvalidParameters
 //		Status 500 middleware.BDError
 //		Status 403 middleware.IncorrectCreatorForPost
@@ -69,7 +70,7 @@ func (mw *PostsMiddleware) CheckCorrectPostFunc(next hf.HandlerFunc) hf.HandlerF
 }
 
 // CheckCorrectPost Errors
-//		Status 500 middleware.ContextError
+//		Status 500 middleware.InternalError
 //		Status 400 middleware.InvalidParameters
 //		Status 500 middleware.BDError
 //		Status 403 middleware.IncorrectCreatorForPost

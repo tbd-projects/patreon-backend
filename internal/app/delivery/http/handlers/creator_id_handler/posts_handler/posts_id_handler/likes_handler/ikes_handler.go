@@ -1,8 +1,6 @@
 package likes_handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -13,6 +11,9 @@ import (
 	sessionMid "patreon/internal/app/sessions/middleware"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type LikesHandler struct {
@@ -23,7 +24,7 @@ type LikesHandler struct {
 func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
 	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *LikesHandler {
 	h := &LikesHandler{
-		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
 		likesUsecase: ucLikes,
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
@@ -65,7 +66,7 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	userId, ok = r.Context().Value("user_id").(int64)
 	if !ok {
 		h.Log(r).Error("can not get user_id from context")
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
 		return
 	}
 
@@ -108,7 +109,7 @@ func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	userId, ok = r.Context().Value("user_id").(int64)
 	if !ok {
 		h.Log(r).Error("can not get user_id from context")
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
 		return
 	}
 

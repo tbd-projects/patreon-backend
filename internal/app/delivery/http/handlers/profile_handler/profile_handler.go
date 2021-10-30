@@ -49,7 +49,7 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.ContextError)
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
 		return
 	}
 

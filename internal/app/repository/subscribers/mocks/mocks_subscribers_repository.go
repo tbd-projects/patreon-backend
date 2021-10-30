@@ -48,6 +48,20 @@ func (mr *MockRepositoryMockRecorder) Create(subscriber interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepository)(nil).Create), subscriber)
 }
 
+// Delete mocks base method.
+func (m *MockRepository) Delete(subscriber *models.Subscriber) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", subscriber)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockRepositoryMockRecorder) Delete(subscriber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), subscriber)
+}
+
 // Get mocks base method.
 func (m *MockRepository) Get(userID, creatorID int64) (bool, error) {
 	m.ctrl.T.Helper()

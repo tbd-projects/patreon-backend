@@ -24,7 +24,7 @@ func (s *SuiteSubscribersUsecase) SetupSuite() {
 	s.uc = NewSubscribersUsecase(s.MockSubscribersRepository)
 }
 
-func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseCreate_OK() {
+func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_OK() {
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber.UserID, subscriber.CreatorID).
@@ -33,29 +33,29 @@ func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseCreate_OK() {
 	s.MockSubscribersRepository.EXPECT().
 		Create(subscriber).Times(1).
 		Return(nil)
-	err := s.uc.Create(subscriber)
+	err := s.uc.Subscribe(subscriber)
 	assert.NoError(s.T(), err)
 }
-func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseCreate_AlreadyExists() {
+func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_AlreadyExists() {
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber.UserID, subscriber.CreatorID).
 		Return(true, nil).
 		Times(1)
 
-	err := s.uc.Create(subscriber)
+	err := s.uc.Subscribe(subscriber)
 	assert.Equal(s.T(), err, SubscriptionAlreadyExists)
 }
-func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseCreate_CheckExistsError() {
+func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_CheckExistsError() {
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber.UserID, subscriber.CreatorID).
 		Return(false, repository.NewDBError(repository.DefaultErrDB)).
 		Times(1)
-	err := s.uc.Create(subscriber)
+	err := s.uc.Subscribe(subscriber)
 	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
 }
-func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseCreate_RepositoryCreateError() {
+func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_RepositoryCreateError() {
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber.UserID, subscriber.CreatorID).
@@ -67,7 +67,7 @@ func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseCreate_RepositoryCreateE
 		Return(&app.GeneralError{
 			Err: repository.DefaultErrDB,
 		})
-	err := s.uc.Create(subscriber)
+	err := s.uc.Subscribe(subscriber)
 	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
 }
 func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetCreators_OK() {
