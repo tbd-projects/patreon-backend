@@ -1,7 +1,6 @@
 package subscribe_handler
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -15,6 +14,8 @@ import (
 	"patreon/internal/app/sessions"
 	middleSes "patreon/internal/app/sessions/middleware"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -107,12 +108,14 @@ func (h *SubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} models.ErrResponse "serverError"
 // @Router /creators/{:creator_id}/subscribe [POST]
 func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
+	req := &responseModels.SubscribeRequest{}
+
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil || req.Validate() != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")
@@ -130,21 +133,13 @@ func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
-	decoder := json.NewDecoder(r.Body)
-	req := responseModels.SubscribeRequest{}
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&req); err != nil || len(req.AwardName) == 0 {
-		h.Log(r).Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
-		return
-	}
 
 	subscriber := &models.Subscriber{
 		UserID:    userID.(int64),
 		CreatorID: creatorID,
 	}
 
-	err := h.subscriberUsecase.Subscribe(subscriber, req.AwardName)
+	err = h.subscriberUsecase.Subscribe(subscriber, req.AwardName)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPOST)
 		return
@@ -164,12 +159,6 @@ func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} models.ErrResponse "serverError"
 // @Router /creators/{:creator_id}/subscribe [GET]
 func (h *SubscribeHandler) GET(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
 	creatorID, ok := h.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
 		h.Log(r).Warnf("invalid creator_id %v", mux.Vars(r))

@@ -1,7 +1,6 @@
 package csrf_handler
 
 import (
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -41,12 +40,6 @@ func NewCsrfHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig
 // @Failure 500 {object} models.ErrResponse "server error"
 // @Router /token [GET]
 func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
 	sessionId, ok := r.Context().Value("session_id").(string)
 	if !ok {
 		h.Log(r).Error("invalid conversation session_id from context to string")

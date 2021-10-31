@@ -4,9 +4,9 @@ import "errors"
 
 /// NOT FOUND
 var (
-	UserNotFound     = errors.New("user with this id not found")
+	UserNotFound     = errors.New("user not found")
 	AwardNotFound    = errors.New("award with this id not found")
-	PostNotFound     = errors.New("post with this id not found")
+	PostNotFound     = errors.New("post with not found")
 	PostDataNotFound = errors.New("post data with this id not found")
 	LikeNotFound     = errors.New("like with this id not found")
 )
@@ -21,7 +21,7 @@ var (
 	IncorrectCreatorId       = errors.New("this creator id not know")
 	EmptyTitle               = errors.New("empty title")
 	EmptyName                = errors.New("empty name in request")
-	IncorrectEmailOrPassword = errors.New("incorrect email or password")
+	IncorrectLoginOrPassword = errors.New("incorrect login or password")
 	IncorrectPrice           = errors.New("incorrect value of price")
 	IncorrectNewPassword     = errors.New("invalid new password")
 	IncorrectDataType        = errors.New("invalid data type")

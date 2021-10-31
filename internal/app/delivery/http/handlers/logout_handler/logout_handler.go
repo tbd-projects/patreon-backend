@@ -1,7 +1,6 @@
 package logout_handler
 
 import (
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -42,12 +41,6 @@ func NewLogoutHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConf
 // @Failure 401 "User not are authorized"
 // @Router /logout [POST]
 func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Fatal(err)
-		}
-	}(r.Body)
 	uniqID := r.Context().Value("session_id")
 	if uniqID == nil {
 		h.Log(r).Error("can not get session_id from context")

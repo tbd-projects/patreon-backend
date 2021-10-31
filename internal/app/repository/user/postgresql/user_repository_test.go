@@ -34,7 +34,7 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 	u := models.TestUser()
 
 	u.ID = 1
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) "+
+	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4)"+
 		"RETURNING users_id")).
 		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(u.ID))))
@@ -45,7 +45,7 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) "+
 		"RETURNING users_id")).
 		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
-		WillReturnError(models.BDError)
+		WillReturnError(repository.NewDBError(models.BDError))
 
 	err = s.repo.Create(u)
 	assert.Error(s.T(), err)

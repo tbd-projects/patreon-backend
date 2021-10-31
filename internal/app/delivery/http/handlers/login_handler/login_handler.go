@@ -1,8 +1,6 @@
 package login_handler
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -13,6 +11,8 @@ import (
 	"patreon/internal/app/sessions/sessions_manager"
 	usecase_user "patreon/internal/app/usecase/user"
 	"time"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/gorilla/mux"
 
@@ -52,24 +52,13 @@ func NewLoginHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 // @Failure 418 "User are authorized"
 // @Router /login [POST]
 func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Fatal(err)
-		}
-	}(r.Body)
-
 	req := &models.RequestLogin{}
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-
-	if err := decoder.Decode(req); err != nil ||
-		len(req.Login) == 0 || len(req.Password) == 0 {
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil || len(req.Password) == 0 || len(req.Login) == 0 {
 		h.Log(r).Warnf("can not decode body %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
-
 	h.Log(r).Debugf("Login : %s, password : %s", req.Login, req.Password)
 
 	id, err := h.userUsecase.Check(req.Login, req.Password)
