@@ -5,15 +5,11 @@ import (
 	"io"
 	"net/http"
 	"patreon/internal/app"
-	csrf_middleware "patreon/internal/app/csrf/middleware"
-	repository_jwt "patreon/internal/app/csrf/repository/jwt"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
 
 	"github.com/gorilla/mux"
@@ -34,9 +30,6 @@ func NewRegisterHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 		userUsecase:    ucUser,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized,
-		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken)
 	h.AddMethod(http.MethodPost, h.POST)
 	return h
 }
