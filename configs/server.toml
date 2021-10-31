@@ -22,7 +22,7 @@ headers = [
 ]
 methods = ["GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"]
 urls = [
-    "http://localhost:3001", "https://patreon-dev.herokuapp.com",
+    "http://localhost:3001", "http://localhost:8080", "https://patreon-dev.herokuapp.com",
     "https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",
     "http://patreon-dev.herokuapp.com", "http://front2.tp.volodyalarin.site",
     "http://pyaterochka-team.site"
