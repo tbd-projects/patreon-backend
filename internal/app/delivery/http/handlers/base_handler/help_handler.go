@@ -1,7 +1,7 @@
 package base_handler
 
 import (
-	"github.com/gorilla/mux"
+	"encoding/json"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -10,6 +10,9 @@ import (
 	"patreon/internal/app/utilits"
 	"sort"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/pkg/errors"
 
@@ -21,6 +24,9 @@ const (
 	MAX_UPLOAD_SIZE = 1024 * 1024 * 4 // 4MB
 )
 
+type Sanitizer interface {
+	Sanitize(sanitizer bluemonday.Policy)
+}
 type RespondError struct {
 	Code  int
 	Error error
@@ -149,4 +155,22 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 	}
 
 	return f, repFiles.FileName(fHeader.Filename), 0, nil
+}
+func (h *HelpHandlers) GetRequestBody(w http.ResponseWriter, r *http.Request,
+	reqStruct Sanitizer, sanitizer bluemonday.Policy) error {
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			h.Log(r).Error(err)
+		}
+	}(r.Body)
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(reqStruct); err != nil {
+		return err
+	}
+	reqStruct.Sanitize(sanitizer)
+
+	return nil
 }

@@ -1,9 +1,6 @@
 package upl_text_data_handler
 
 import (
-	"encoding/json"
-	"github.com/gorilla/mux"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -15,6 +12,9 @@ import (
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
+
+	"github.com/gorilla/mux"
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/sirupsen/logrus"
 )
@@ -41,7 +41,7 @@ func NewPostsDataUploadTextHandler(log *logrus.Logger, router *mux.Router, cors 
 // POST add text to post
 // @Summary add text to post
 // @Accept  json
-// @Param user body models.RequestText true "Request body for text"
+// @Param text body models.RequestText true "Request body for text"
 // @Success 201 {object} models.IdResponse "id posts_data"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 500 {object} models.ErrResponse "server error"
@@ -50,12 +50,14 @@ func NewPostsDataUploadTextHandler(log *logrus.Logger, router *mux.Router, cors 
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Router /creators/{:creator_id}/posts/{:post_id}/text [POST]
 func (h *PostsDataUploadTextHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
+	req := &models.RequestText{}
+
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
 
 	var postId int64
 	var ok bool
@@ -67,14 +69,6 @@ func (h *PostsDataUploadTextHandler) POST(w http.ResponseWriter, r *http.Request
 	if len(mux.Vars(r)) > 2 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
-		return
-	}
-
-	req := &models.RequestText{}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(req); err != nil {
-		h.Log(r).Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 

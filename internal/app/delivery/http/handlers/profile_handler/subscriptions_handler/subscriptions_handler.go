@@ -1,7 +1,6 @@
 package subscriptions_handler
 
 import (
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -43,12 +42,6 @@ func NewSubscriptionsHandler(log *logrus.Logger, router *mux.Router,
 // @Failure 500 {object} models.ErrResponse "serverError"
 // @Router /user/subscriptions [GET]
 func (h SubscriptionsHandler) GET(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")

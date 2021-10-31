@@ -1,11 +1,7 @@
 package aw_handler
 
 import (
-	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"image/color"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -15,6 +11,10 @@ import (
 	db_models "patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
+
+	"github.com/gorilla/mux"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/sirupsen/logrus"
 
 	useAwards "patreon/internal/app/usecase/awards"
 )
@@ -74,7 +74,7 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // POST Create Awards
 // @Summary create awards
 // @Description create awards to creator with id from path
-// @Param user body models.RequestAwards true "Request body for awards"
+// @Param award body models.RequestAwards true "Request body for awards"
 // @Produce json
 // @Success 201 {object} models.IdResponse "id awards"
 // @Failure 422 {object} models.ErrResponse "invalid body in request"
@@ -88,12 +88,14 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards [POST]
 func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
+	req := &models.RequestAwards{}
+
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
 
 	idInt, ok := h.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
@@ -102,15 +104,6 @@ func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 	if len(mux.Vars(r)) > 1 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
-		return
-	}
-
-	req := &models.RequestAwards{}
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(req); err != nil {
-		h.Log(r).Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 

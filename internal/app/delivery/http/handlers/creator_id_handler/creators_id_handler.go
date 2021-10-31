@@ -1,7 +1,6 @@
 package creator_id_handler
 
 import (
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
@@ -38,20 +37,13 @@ func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Summary get creator
 // @Description get creator with id from path
 // @Produce json
-// @Param id path int true "Get creator with id"
+// @Param creator_id path int true "Get creator with id"
 // @Success 200 {object} models.Creator
 // @Failure 404 {object} models.ErrResponse "user with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Router /creators/{creator_id:} [GET]
 func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			s.Log(r).Error(err)
-		}
-	}(r.Body)
-
 	creatorId, ok := s.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
 		return

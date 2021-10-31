@@ -1,9 +1,7 @@
 package password_handler
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
@@ -15,6 +13,8 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -45,7 +45,7 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 // @Description change password from user
 // @Accept  json
 // @Produce json
-// @Param user body models.RequestChangePassword true "Request body for change password"
+// @Param password body models.RequestChangePassword true "Request body for change password"
 // @Success 200 "success update password"
 // @Failure 400 {object} models.ErrResponse "incorrect new password"
 // @Failure 403 "csrf token is invalid, get new token"
@@ -56,15 +56,9 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 // @Failure 500 {object} models.ErrResponse "database error"
 // @Router /user/update/password [PUT]
 func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
 	req := &models.RequestChangePassword{}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(req); err != nil {
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
 		return
 	}
@@ -76,7 +70,7 @@ func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	err := h.userUsecase.UpdatePassword(userId, req.NewPassword)
+	err = h.userUsecase.UpdatePassword(userId, req.NewPassword)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByError)
 		return

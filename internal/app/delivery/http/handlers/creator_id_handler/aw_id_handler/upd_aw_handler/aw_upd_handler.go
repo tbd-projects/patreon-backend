@@ -1,11 +1,7 @@
 package aw_upd_handler
 
 import (
-	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"image/color"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -16,6 +12,10 @@ import (
 	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
+
+	"github.com/gorilla/mux"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/sirupsen/logrus"
 )
 
 type AwardsUpdHandler struct {
@@ -38,7 +38,7 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // PUT Awards
 // @Summary update current awards
 // @Description update current awards from current creator
-// @Param user body models.RequestAwards true "Request body for update awards"
+// @Param award body models.RequestAwards true "Request body for update awards"
 // @Produce json
 // @Success 200
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
@@ -54,12 +54,14 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/update/other [PUT]
 func (h *AwardsUpdHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
+	req := &models.RequestAwards{}
+
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
 
 	awardsId, ok := h.GetInt64FromParam(w, r, "award_id")
 	if !ok {
@@ -71,15 +73,6 @@ func (h *AwardsUpdHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
-
-	req := &models.RequestAwards{}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(req); err != nil {
-		h.Log(r).Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
-		return
-	}
-
 	award := &bd_modle.Award{
 		ID:          awardsId,
 		Name:        req.Name,
@@ -88,7 +81,7 @@ func (h *AwardsUpdHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		Color:       color.RGBA{R: req.Color.R, B: req.Color.B, G: req.Color.G, A: req.Color.A},
 	}
 
-	err := h.awardsUsecase.Update(award)
+	err = h.awardsUsecase.Update(award)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)
 		return
