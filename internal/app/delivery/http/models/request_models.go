@@ -77,6 +77,3 @@ func (o *RequestPosts) UnmarshalJSON(text []byte) error {
 type SubscribeRequest struct {
 	AwardName string `json:"award_name"`
 }
-type RequestBalanceTop struct {
-	Deposit float64 `json:"deposit"`
-}
