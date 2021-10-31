@@ -5,7 +5,9 @@
 package mock_usecase
 
 import (
+	io "io"
 	models "patreon/internal/app/models"
+	repository_files "patreon/internal/app/repository/files"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -105,4 +107,18 @@ func (m *AwardsUsecase) Update(arg0 *models.Award) error {
 func (mr *AwardsUsecaseMockRecorder) Update(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*AwardsUsecase)(nil).Update), arg0)
+}
+
+// UpdateCover mocks base method.
+func (m *AwardsUsecase) UpdateCover(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCover", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateCover indicates an expected call of UpdateCover.
+func (mr *AwardsUsecaseMockRecorder) UpdateCover(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCover", reflect.TypeOf((*AwardsUsecase)(nil).UpdateCover), arg0, arg1, arg2)
 }

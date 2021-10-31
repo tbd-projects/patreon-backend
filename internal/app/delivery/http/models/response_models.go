@@ -38,6 +38,7 @@ type ResponseAward struct {
 	Description string `json:"description,omitempty"`
 	Price       int64  `json:"price,omitempty"`
 	Color       Color  `json:"color,omitempty"`
+	Cover       string `json:"cover"`
 }
 
 type ResponsePost struct {
@@ -90,6 +91,7 @@ func ToResponseAward(aw models.Award) ResponseAward {
 		Price:       aw.Price,
 		Description: aw.Description,
 		Color:       NewColor(aw.Color),
+		Cover:       aw.Cover,
 	}
 }
 

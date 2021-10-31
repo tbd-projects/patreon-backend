@@ -40,11 +40,11 @@ func NewUpdateCoverHandler(log *logrus.Logger, router *mux.Router, cors *app.Cor
 // PUT CoverChange
 // @Summary set new creator cover
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param cover formData file true "Avatar file with ext jpeg/png"
-// @Success 200 "successfully upload avatar"
+// @Param cover formData file true "Cover file with ext jpeg/png"
+// @Success 200 "successfully upload cover"
 // @Failure 400 {object} models.ErrResponse "size of file very big"
 // @Failure 400 {object} models.ErrResponse "invalid form field name"
-// @Failure 400 {object} models.ErrResponse "invalid avatar extension"
+// @Failure 400 {object} models.ErrResponse "please upload a JPEG, JPG or PNG files"
 // @Failure 403 "csrf token is invalid, get new token"
 // @Failure 422 {object} models.ErrResponse "this creator id not know"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"

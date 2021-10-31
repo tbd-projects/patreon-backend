@@ -1,4 +1,4 @@
-package upd_avatar_creator_handler
+package upd_cover_awards_handler
 
 import (
 	"github.com/gorilla/mux"
@@ -13,63 +13,64 @@ import (
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/sessions"
 	middlewareSes "patreon/internal/app/sessions/middleware"
-	usecase_creator "patreon/internal/app/usecase/creator"
+	useAwards "patreon/internal/app/usecase/awards"
 )
 
-type UpdateAvatarCreatorHandler struct {
+type UpdateCoverAwardsHandler struct {
 	sessionManager sessions.SessionsManager
-	creatorUsecase usecase_creator.Usecase
+	awardsUsecase  useAwards.Usecase
 	bh.BaseHandler
 }
 
-func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	sManager sessions.SessionsManager, creatorUsecase usecase_creator.Usecase) *UpdateAvatarCreatorHandler {
-	h := &UpdateAvatarCreatorHandler{
+func NewUpdateCoverAwardsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+	sManager sessions.SessionsManager, awardsUsecase useAwards.Usecase) *UpdateCoverAwardsHandler {
+	h := &UpdateCoverAwardsHandler{
 		sessionManager: sManager,
-		creatorUsecase: creatorUsecase,
+		awardsUsecase:  awardsUsecase,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
 	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionManager, log).Check,
 		csrf_middleware.NewCsrfMiddleware(log,
 			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
-		middleware.NewCreatorsMiddleware(log).CheckAllowUser)
+		middleware.NewCreatorsMiddleware(log).CheckAllowUser,
+		middleware.NewAwardsMiddleware(log, awardsUsecase).CheckCorrectAward)
 	h.AddMethod(http.MethodPut, h.PUT)
 	return h
 }
 
-// PUT AvatarChange
-// @Summary set new creator avatar
+// PUT CoverChange
+// @Summary set new awards cover
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param avatar formData file true "Avatar file with ext jpeg/png"
+// @Param cover formData file true "Cover file with ext jpeg/png"
 // @Success 200 "successfully upload avatar"
 // @Failure 400 {object} models.ErrResponse "size of file very big"
 // @Failure 400 {object} models.ErrResponse "invalid form field name"
-// @Failure 400 {object} models.ErrResponse "invalid avatar extension"
+// @Failure 400 {object} models.ErrResponse "please upload a JPEG, JPG or PNG files"
 // @Failure 403 "csrf token is invalid, get new token"
 // @Failure 422 {object} models.ErrResponse "this creator id not know"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 500 {object} models.ErrResponse "server error"
-// @Router /creators/{creator_id:}/update/avatar [PUT]
-func (h *UpdateAvatarCreatorHandler) PUT(w http.ResponseWriter, r *http.Request) {
+// @Router /creators/{:creator_id}/awards/{:award_id}/cover [PUT]
+func (h *UpdateCoverAwardsHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
-		"avatar", []string{"image/png", "image/jpeg", "image/jpg"})
+		"cover", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return
 	}
 
-	creatorId, ok := h.GetInt64FromParam(w, r, "creator_id")
+	awardId, ok := h.GetInt64FromParam(w, r, "award_id")
 	if !ok {
 		return
 	}
 
-	if len(mux.Vars(r)) > 1 {
+	if len(mux.Vars(r)) > 2 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 
-	err = h.creatorUsecase.UpdateAvatar(file, filename, creatorId)
+	err = h.awardsUsecase.UpdateCover(file, filename, awardId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByError)
 		return

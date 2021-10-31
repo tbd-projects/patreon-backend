@@ -96,6 +96,23 @@ func (repo *PostsDataRepository) Get(dataID int64) (*models.PostData, error) {
 	return data, nil
 }
 
+// ExistsData Errors:
+//		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *PostsDataRepository) ExistsData(dataID int64) (bool, error) {
+	query := `SELECT post_id FROM posts_data WHERE data_id = $1`
+
+	if err := repo.store.QueryRow(query, dataID).Scan(&dataID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, repository.NotFound
+		}
+		return false, repository.NewDBError(err)
+	}
+
+	return true, nil
+}
+
 // GetData Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
@@ -136,14 +153,14 @@ func (repo *PostsDataRepository) GetData(postsId int64) ([]models.PostData, erro
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsDataRepository) Update(postData *models.PostData) error {
-	query := `UPDATE posts_data SET type = $1, data = $2, post_id = $3 WHERE data_id = $4`
+	query := `UPDATE posts_data SET type = $1, data = $2 WHERE data_id = $3 RETURNING data_id`
 
 	type_id, err := repo.getAndCheckDataTypeId(postData.Type)
 	if err != nil {
 		return err
 	}
 
-	if err = repo.store.QueryRow(query, type_id, postData.Data, postData.PostId).
+	if err = repo.store.QueryRow(query, type_id, postData.Data, postData.ID).
 		Scan(&postData.ID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return repository.NotFound

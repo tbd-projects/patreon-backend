@@ -34,6 +34,21 @@ func (m *AwardsRepository) EXPECT() *AwardsRepositoryMockRecorder {
 	return m.recorder
 }
 
+// CheckAwards mocks base method.
+func (m *AwardsRepository) CheckAwards(arg0 int64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckAwards", arg0)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckAwards indicates an expected call of CheckAwards.
+func (mr *AwardsRepositoryMockRecorder) CheckAwards(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAwards", reflect.TypeOf((*AwardsRepository)(nil).CheckAwards), arg0)
+}
+
 // Create mocks base method.
 func (m *AwardsRepository) Create(arg0 *models.Award) (int64, error) {
 	m.ctrl.T.Helper()
@@ -120,4 +135,18 @@ func (m *AwardsRepository) Update(arg0 *models.Award) error {
 func (mr *AwardsRepositoryMockRecorder) Update(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*AwardsRepository)(nil).Update), arg0)
+}
+
+// UpdateCover mocks base method.
+func (m *AwardsRepository) UpdateCover(arg0 int64, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCover", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateCover indicates an expected call of UpdateCover.
+func (mr *AwardsRepositoryMockRecorder) UpdateCover(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCover", reflect.TypeOf((*AwardsRepository)(nil).UpdateCover), arg0, arg1)
 }

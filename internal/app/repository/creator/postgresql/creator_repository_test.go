@@ -180,6 +180,31 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_UpdateCover() {
 	err = s.repo.UpdateCover(creatorId, cover)
 	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
 }
+
+func (s *SuiteCreatorRepository) TestCreatorRepository_ExistCreator() {
+	query := `SELECT creator_id from creator_profile where creator_id=$1`
+
+	creatorId := int64(1)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(creatorId).
+		WillReturnRows(sqlmock.NewRows([]string{"creator_id"}).AddRow(creatorId))
+
+	check, err := s.repo.ExistsCreator(creatorId)
+	assert.NoError(s.T(), err)
+	assert.True(s.T(), check)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(creatorId).WillReturnError(sql.ErrNoRows)
+
+	check, err = s.repo.ExistsCreator(creatorId)
+	assert.Error(s.T(), app.UnknownError, err)
+	assert.False(s.T(), check)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(creatorId).WillReturnError(models.BDError)
+
+	check, err = s.repo.ExistsCreator(creatorId)
+	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
+	assert.False(s.T(), check)
+}
+
 func TestCreatorRepository(t *testing.T) {
 	suite.Run(t, new(SuiteCreatorRepository))
 }

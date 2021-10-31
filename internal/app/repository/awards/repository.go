@@ -31,5 +31,21 @@ type Repository interface {
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	Delete(awardsId int64) error
+
+	// CheckAwards Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	CheckAwards(awardsID int64) (bool, error)
+
+	// FindByName Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
 	FindByName(creatorID int64, awardName string) (bool, error)
+
+	// UpdateCover Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	UpdateCover(awardsId int64, cover string) error
 }

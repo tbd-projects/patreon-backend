@@ -1,7 +1,9 @@
 package usecase_awards
 
 import (
+	"io"
 	"patreon/internal/app/models"
+	repoFiles "patreon/internal/app/repository/files"
 )
 
 type Usecase interface {
@@ -39,4 +41,12 @@ type Usecase interface {
 	//			app.UnknownError
 	//			repository.DefaultErrDB
 	Create(awards *models.Award) (int64, error)
+
+	// UpdateCover Errors:
+	// 		repository.NotFound
+	// 		app.GeneralError with Errors:
+	//			repository_os.ErrorCreate
+	//   		repository_os.ErrorCopyFile
+	// 			repository.DefaultErrDB
+	UpdateCover(data io.Reader, name repoFiles.FileName, awardsId int64) error
 }

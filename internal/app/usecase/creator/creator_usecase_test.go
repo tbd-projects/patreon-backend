@@ -35,11 +35,11 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_DB_Error() {
 		ExpectedError:     repository.DefaultErrDB,
 	}
 	cr := models.TestCreator()
-	s.MockCreatorRepository.EXPECT().
-		GetCreator(cr.ID).
-		Times(s.Tb.ExpectedMockTimes).
-		Return(cr, repository.DefaultErrDB)
 
+	s.MockCreatorRepository.EXPECT().
+		ExistsCreator(cr.ID).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(false, repository.DefaultErrDB)
 	id, err := s.uc.Create(cr)
 
 	expectId := int64(-1)
@@ -55,9 +55,9 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Creator_Exist() {
 	}
 	cr := models.TestCreator()
 	s.MockCreatorRepository.EXPECT().
-		GetCreator(cr.ID).
+		ExistsCreator(cr.ID).
 		Times(s.Tb.ExpectedMockTimes).
-		Return(cr, nil)
+		Return(true, nil)
 	id, err := s.uc.Create(cr)
 	expectId := int64(-1)
 	assert.Equal(s.T(), expectId, id)
@@ -74,9 +74,9 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Validate_Error() {
 	cr := models.TestCreator()
 	cr.Nickname = ""
 	s.MockCreatorRepository.EXPECT().
-		GetCreator(cr.ID).
+		ExistsCreator(cr.ID).
 		Times(s.Tb.ExpectedMockTimes).
-		Return(nil, nil)
+		Return(false, repository.NotFound)
 	id, err := s.uc.Create(cr)
 	expectId := int64(-1)
 	assert.Equal(s.T(), expectId, id)
@@ -93,9 +93,9 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Success() {
 	expectId := cr.ID
 
 	s.MockCreatorRepository.EXPECT().
-		GetCreator(cr.ID).
+		ExistsCreator(cr.ID).
 		Times(s.Tb.ExpectedMockTimes).
-		Return(nil, nil)
+		Return(false, repository.NotFound)
 
 	s.MockCreatorRepository.EXPECT().
 		Create(cr).
@@ -109,6 +109,11 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Success() {
 
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateAvatar_Success() {
 	cr := models.TestCreator()
+
+	s.MockCreatorRepository.EXPECT().
+		ExistsCreator(cr.ID).
+		Times(1).
+		Return(true, nil)
 
 	name := "true"
 	out := io.Reader(bytes.NewBufferString(""))
@@ -128,9 +133,14 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateAvatar_Success() {
 
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateCover_Success() {
 	cr := models.TestCreator()
-
 	name := "true"
 	out := io.Reader(bytes.NewBufferString(""))
+
+	s.MockCreatorRepository.EXPECT().
+		ExistsCreator(cr.ID).
+		Times(1).
+		Return(true, nil)
+
 	s.MockFileRepository.EXPECT().
 		SaveFile(out, repository_files.FileName(name), repository_files.Image).
 		Times(1).

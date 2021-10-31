@@ -22,6 +22,11 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	GetCreator(int64) (*models.Creator, error)
 
+	// ExistsCreator Errors:
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	ExistsCreator(creatorId int64) (bool, error)
+
 	// UpdateAvatar Errors:
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:

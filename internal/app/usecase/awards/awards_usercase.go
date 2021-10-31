@@ -1,19 +1,24 @@
 package usecase_awards
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
+	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	repoAwrds "patreon/internal/app/repository/awards"
+	repoFiles "patreon/internal/app/repository/files"
 )
 
 type AwardsUsecase struct {
-	repository repoAwrds.Repository
+	repository      repoAwrds.Repository
+	repositoryFiles repoFiles.Repository
 }
 
-func NewAwardsUsecase(repository repoAwrds.Repository) *AwardsUsecase {
+func NewAwardsUsecase(repository repoAwrds.Repository, repositoryFiles repoFiles.Repository) *AwardsUsecase {
 	return &AwardsUsecase{
-		repository: repository,
+		repository:      repository,
+		repositoryFiles: repositoryFiles,
 	}
 }
 
@@ -85,4 +90,28 @@ func (usecase *AwardsUsecase) GetCreatorId(awardsId int64) (int64, error) {
 		return app.InvalidInt, err
 	}
 	return aw.CreatorId, nil
+}
+
+// UpdateCover Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors:
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
+// 			repository.DefaultErrDB
+func (usecase *AwardsUsecase) UpdateCover(data io.Reader, name repoFiles.FileName, awardsId int64) error {
+	_, err := usecase.repository.CheckAwards(awardsId)
+	if err != nil {
+		return err
+	}
+
+	path, err := usecase.repositoryFiles.SaveFile(data, name, repoFiles.Image)
+	if err != nil {
+		return err
+	}
+
+	err = usecase.repository.UpdateCover(awardsId, app.LoadFileUrl+path)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf(" err avatar cover awards with id %d", awardsId))
+	}
+	return nil
 }

@@ -97,7 +97,7 @@ func (usecase *PostsDataUsecase) LoadText(postData *models.PostData) (int64, err
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 func (usecase *PostsDataUsecase) UpdateImage(data io.Reader, name repoFiles.FileName, postDataId int64) error {
-	if _, err := usecase.repository.Get(postDataId); err != nil {
+	if _, err := usecase.repository.ExistsData(postDataId); err != nil {
 		return err
 	}
 
