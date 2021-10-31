@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users
     login              text      not null unique,
     nickname           text      not null unique,
     encrypted_password text      not null,
-    avatar             text      not null
+    avatar             text      not null,
+    balance              bigint    not null default 0
 );
 
 CREATE TABLE IF NOT EXISTS creator_category

@@ -64,6 +64,21 @@ func (mr *MockUsecaseMockRecorder) Create(user interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUsecase)(nil).Create), user)
 }
 
+// GetBalance mocks base method.
+func (m *MockUsecase) GetBalance(userID int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBalance", userID)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBalance indicates an expected call of GetBalance.
+func (mr *MockUsecaseMockRecorder) GetBalance(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalance", reflect.TypeOf((*MockUsecase)(nil).GetBalance), userID)
+}
+
 // GetProfile mocks base method.
 func (m *MockUsecase) GetProfile(userID int64) (*models.User, error) {
 	m.ctrl.T.Helper()

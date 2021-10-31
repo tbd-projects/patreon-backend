@@ -1,4 +1,4 @@
-package profile_handler
+package balance_handler
 
 import (
 	"net/http"
@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var codeByError = base_handler.CodeMap{
+var codeByErrorGET = base_handler.CodeMap{
 	repository.NotFound: {
 		http.StatusNotFound, handler_errors.UserNotFound, logrus.WarnLevel},
 	repository.DefaultErrDB: {

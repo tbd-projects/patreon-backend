@@ -69,3 +69,7 @@ func (o *RequestPosts) UnmarshalJSON(text []byte) error {
 	*o = RequestPosts(opts)
 	return nil
 }
+
+type RequestBalanceTop struct {
+	Deposit int64 `json:"deposit"`
+}

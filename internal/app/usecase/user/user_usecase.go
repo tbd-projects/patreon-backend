@@ -148,3 +148,15 @@ func (usecase *UserUsecase) UpdateAvatar(userId int64, newAvatar string) error {
 	}
 	return nil
 }
+
+//	GetBalance Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (usecase *UserUsecase) GetBalance(userID int64) (int64, error) {
+	u, err := usecase.repository.FindByID(userID)
+	if err != nil {
+		return -1, err
+	}
+	return u.Balance, nil
+}

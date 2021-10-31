@@ -16,6 +16,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler/balance_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/subscriptions_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
@@ -45,6 +46,7 @@ const (
 	GET_CSRF_TOKEN
 	GET_USER_SUBSCRIPTIONS
 	SUBSCRIBES
+	BALANCE
 )
 
 type HandlerFactory struct {
@@ -94,6 +96,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		GET_CSRF_TOKEN:         csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
 		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
 		SUBSCRIBES:             subscribe_handler.NewSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
+		BALANCE:                balance_handler.NewBalanceHandler(f.logger, f.router, f.cors, sManager, f.usecaseFactory.GetUserUsecase()),
 	}
 }
 
@@ -113,6 +116,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/password": hs[UPDATE_PASSWORD],
 		"/user/update/avatar":   hs[UPDATE_AVATAR],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
+		"/user/balance":         hs[BALANCE],
 		// /creators ---------------------------------------------------------////
 		"/creators":                           hs[CREATORS],
 		"/creators/{creator_id:[0-9]+}":       hs[CREATOR_WITH_ID],
