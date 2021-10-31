@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
+	models2 "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"testing"
@@ -23,7 +24,7 @@ type ProfileTestSuite struct {
 
 func (s *ProfileTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	//s.handler = NewProfileHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase)
+	s.handler = NewProfileHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase)
 }
 
 func (s *ProfileTestSuite) TestProfileHandler_GET_Correct() {
@@ -51,7 +52,7 @@ func (s *ProfileTestSuite) TestProfileHandler_GET_Correct() {
 	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 
-	req := &models.Profile{}
+	req := &models2.ProfileResponse{}
 	decoder := json.NewDecoder(recorder.Body)
 	err = decoder.Decode(req)
 	require.NoError(s.T(), err)

@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/mock/gomock"
-	"golang.org/x/net/context"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app"
@@ -14,6 +12,9 @@ import (
 	models_data "patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	"golang.org/x/net/context"
 
 	"github.com/stretchr/testify/suite"
 
@@ -28,8 +29,8 @@ type CreatorTestSuite struct {
 
 func (s *CreatorTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	//s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase,
-	//	s.MockUserUsecase)
+	s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase,
+		s.MockUserUsecase)
 }
 
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {

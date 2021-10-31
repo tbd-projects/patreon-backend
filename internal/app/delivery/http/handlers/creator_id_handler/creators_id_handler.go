@@ -1,7 +1,6 @@
 package creator_id_handler
 
 import (
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
@@ -45,13 +44,6 @@ func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Router /creators/{creator_id:} [GET]
 func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			s.Log(r).Error(err)
-		}
-	}(r.Body)
-
 	creatorId, ok := s.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
 		return

@@ -20,7 +20,7 @@ type SuiteCreatorUsecase struct {
 
 func (s *SuiteCreatorUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-//	s.uc = NewCreatorUsecase(s.MockCreatorRepository)
+	s.uc = NewCreatorUsecase(s.MockCreatorRepository, s.MockFilesRepository)
 }
 
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_DB_Error() {

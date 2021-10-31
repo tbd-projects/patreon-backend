@@ -3,6 +3,7 @@ package usecase
 import (
 	"io"
 	mock_repository_creator "patreon/internal/app/repository/creator/mocks"
+	mock_repository_files "patreon/internal/app/repository/files/mocks"
 	mock_repository_subscribers "patreon/internal/app/repository/subscribers/mocks"
 	mock_repository_user "patreon/internal/app/repository/user/mocks"
 
@@ -20,9 +21,10 @@ type TestTable struct {
 type SuiteUsecase struct {
 	suite.Suite
 	Mock                      *gomock.Controller
-	MockCreatorRepository     *mock_repository_creator.CreatorRepository
+	MockCreatorRepository     *mock_repository_creator.MockRepository
 	MockUserRepository        *mock_repository_user.MockRepository
 	MockSubscribersRepository *mock_repository_subscribers.MockRepository
+	MockFilesRepository       *mock_repository_files.MockRepository
 
 	Logger *logrus.Logger
 	Tb     TestTable
@@ -30,9 +32,10 @@ type SuiteUsecase struct {
 
 func (s *SuiteUsecase) SetupSuite() {
 	s.Mock = gomock.NewController(s.T())
-	s.MockCreatorRepository = mock_repository_creator.NewCreatorRepository(s.Mock)
+	s.MockCreatorRepository = mock_repository_creator.NewMockRepository(s.Mock)
 	s.MockUserRepository = mock_repository_user.NewMockRepository(s.Mock)
 	s.MockSubscribersRepository = mock_repository_subscribers.NewMockRepository(s.Mock)
+	s.MockFilesRepository = mock_repository_files.NewMockRepository(s.Mock)
 
 	s.Logger = logrus.New()
 	s.Logger.SetOutput(io.Discard)

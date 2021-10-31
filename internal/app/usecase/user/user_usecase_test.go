@@ -22,7 +22,7 @@ type SuiteUserUsecase struct {
 
 func (s *SuiteUserUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-	//s.uc = NewUserUsecase(s.MockUserRepository)
+	s.uc = NewUserUsecase(s.MockUserRepository, s.MockFilesRepository)
 }
 
 func (s *SuiteUserUsecase) TestCreatorUsecase_GetProfile_DB_Error() {
