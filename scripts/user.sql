@@ -41,15 +41,15 @@ CREATE TABLE IF NOT EXISTS posts_type
     type          text      not null
 );
 
-
 CREATE TABLE IF NOT EXISTS awards
 (
-    awards_id   bigserial        not null primary key,
-    name        text             not null,
-    description text             not null,
-    price       integer          not null,
-    color       bigint default 0 not null,
-    creator_id  bigint           not null references creator_profile (creator_id) on delete cascade,
+    awards_id   bigserial         not null primary key,
+    name        text              not null,
+    description text              not null,
+    price       integer           not null,
+    cover       text   default '' not null,
+    color       bigint default 0  not null,
+    creator_id  bigint            not null references creator_profile (creator_id) on delete cascade,
     UNIQUE (name, creator_id)
 );
 

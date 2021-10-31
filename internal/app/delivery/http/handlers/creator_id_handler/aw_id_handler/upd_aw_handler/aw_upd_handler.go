@@ -52,7 +52,7 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Failure 422 {object} models.ErrResponse "incorrect value of price"
 // @Failure 500 {object} models.ErrResponse "server error"
 // @Failure 401 "User are not authorized"
-// @Router /creators/{:creator_id}/awards/{:award_id}/update/other [PUT]
+// @Router /creators/{:creator_id}/awards/{:award_id}/update [PUT]
 func (h *AwardsUpdHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

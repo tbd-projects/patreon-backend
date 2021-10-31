@@ -95,7 +95,7 @@ func (h *PostsDataIDHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.postsDataUsecase.Delete(dataId); err != nil {
-		h.UsecaseError(w, r, err, codesByErrorsGET)
+		h.UsecaseError(w, r, err, codesByErrorsDELETE)
 		return
 	}
 

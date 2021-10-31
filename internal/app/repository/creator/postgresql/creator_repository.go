@@ -108,6 +108,23 @@ func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, err
 	return creator, nil
 }
 
+// ExistsCreator Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *CreatorRepository) ExistsCreator(creatorId int64) (bool, error) {
+	query := `SELECT creator_id from creator_profile where creator_id=$1`
+	creator := &models.Creator{}
+
+	if err := repo.store.QueryRow(query, creatorId).Scan(&creator.ID); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, repository.NewDBError(err)
+	}
+
+	return true, nil
+}
+
 // UpdateAvatar Errors:
 // 		repository.NotFound
 // 		app.GeneralError with Errors:

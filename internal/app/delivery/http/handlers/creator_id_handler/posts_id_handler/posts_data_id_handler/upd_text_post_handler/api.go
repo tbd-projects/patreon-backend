@@ -1,4 +1,4 @@
-package upl_text_data_handler
+package upd_text_data_handler
 
 import (
 	"net/http"
@@ -13,6 +13,8 @@ import (
 )
 
 var codeByErrorPUT = base_handler.CodeMap{
+	repository.NotFound: {
+		http.StatusNotFound, handler_errors.PostDataNotFound, logrus.ErrorLevel},
 	repository_postgresql.UnknownDataFormat: {
 		http.StatusUnprocessableEntity, handler_errors.IncorrectDataType, logrus.WarnLevel},
 	models.InvalidType: {

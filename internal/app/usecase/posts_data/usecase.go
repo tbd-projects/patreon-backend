@@ -47,6 +47,7 @@ type Usecase interface {
 	// UpdateText Errors:
 	//		models.InvalidPostId
 	//		models.InvalidType
+	//		repository.NotFound
 	//		repository_postgresql.UnknownDataFormat
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
@@ -56,6 +57,7 @@ type Usecase interface {
 	// UpdateImage Errors:
 	//		models.InvalidPostId
 	//		models.InvalidType
+	//		repository.NotFound
 	//		repository_postgresql.UnknownDataFormat
 	//		app.GeneralError with Errors:
 	//			app.UnknownError

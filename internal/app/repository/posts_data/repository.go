@@ -29,6 +29,12 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	Update(postData *models.PostData) error
 
+	// ExistsData Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	ExistsData(dataID int64) (bool, error)
+
 	// Delete Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB

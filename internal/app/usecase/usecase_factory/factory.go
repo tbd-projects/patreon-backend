@@ -79,7 +79,8 @@ func (f *UsecaseFactory) GetSubscribersUsecase() useSubscr.Usecase {
 
 func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
 	if f.awardsUsecase == nil {
-		f.awardsUsecase = useAwards.NewAwardsUsecase(f.repositoryFactory.GetAwardsRepository())
+		f.awardsUsecase = useAwards.NewAwardsUsecase(f.repositoryFactory.GetAwardsRepository(),
+			f.repositoryFactory.GetFilesRepository())
 	}
 	return f.awardsUsecase
 }

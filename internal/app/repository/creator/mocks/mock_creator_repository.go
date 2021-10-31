@@ -49,6 +49,21 @@ func (mr *CreatorRepositoryMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*CreatorRepository)(nil).Create), arg0)
 }
 
+// ExistsCreator mocks base method.
+func (m *CreatorRepository) ExistsCreator(arg0 int64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsCreator", arg0)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsCreator indicates an expected call of ExistsCreator.
+func (mr *CreatorRepositoryMockRecorder) ExistsCreator(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsCreator", reflect.TypeOf((*CreatorRepository)(nil).ExistsCreator), arg0)
+}
+
 // GetCreator mocks base method.
 func (m *CreatorRepository) GetCreator(arg0 int64) (*models.Creator, error) {
 	m.ctrl.T.Helper()

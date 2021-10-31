@@ -108,8 +108,8 @@ func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
 
 func (s *SuiteUserRepository) TestUserRepository_FindByID() {
 	ID := int64(1)
-	query := "SELECT users_id, login, nickname, avatar, encrypted_password " +
-		"from users where users_id=$1"
+	query := `SELECT users_id, login, nickname, users.avatar, encrypted_password, cp.creator_id IS NOT NULL
+	from users LEFT JOIN creator_profile AS cp ON (users.users_id = cp.creator_id) where users_id=$1`
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(ID).
 		WillReturnError(sql.ErrNoRows)
@@ -130,9 +130,9 @@ func (s *SuiteUserRepository) TestUserRepository_FindByID() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(ID).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login", "nickname",
-			"avatar", "encrypted_password"}).
+			"avatar", "encrypted_password", "creator_id"}).
 			AddRow(strconv.Itoa(int(u.ID)), u.Login, u.Nickname, u.Avatar,
-				u.EncryptedPassword))
+				u.EncryptedPassword, true))
 	var gotten *models.User
 	gotten, err = s.repo.FindByID(ID)
 
@@ -141,6 +141,7 @@ func (s *SuiteUserRepository) TestUserRepository_FindByID() {
 	assert.Equal(s.T(), gotten.ID, u.ID)
 	assert.Equal(s.T(), gotten.Nickname, u.Nickname)
 	assert.Equal(s.T(), gotten.Avatar, u.Avatar)
+	assert.True(s.T(), gotten.HaveCreator)
 }
 func (s *SuiteUserRepository) TestUserRepository_UpdateAvatar_Correct() {
 	user := models.TestUser()

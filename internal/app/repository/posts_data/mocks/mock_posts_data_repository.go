@@ -63,6 +63,21 @@ func (mr *Posts_dataRepositoryMockRecorder) Delete(arg0 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*Posts_dataRepository)(nil).Delete), arg0)
 }
 
+// ExistsData mocks base method.
+func (m *Posts_dataRepository) ExistsData(arg0 int64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsData", arg0)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistsData indicates an expected call of ExistsData.
+func (mr *Posts_dataRepositoryMockRecorder) ExistsData(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsData", reflect.TypeOf((*Posts_dataRepository)(nil).ExistsData), arg0)
+}
+
 // Get mocks base method.
 func (m *Posts_dataRepository) Get(arg0 int64) (*models.PostData, error) {
 	m.ctrl.T.Helper()

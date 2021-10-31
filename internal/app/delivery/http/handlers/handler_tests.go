@@ -27,7 +27,7 @@ type TestTable struct {
 type SuiteHandler struct {
 	suite.Suite
 	Mock                   *gomock.Controller
-	MockUserUsecase        *mock_usecase_user.MockUsecase
+	MockUserUsecase        *mock_usecase_user.UserUsecase
 	MockCreatorUsecase     *mock_usecase_creator.CreatorUsecase
 	MockAwardsUsecase      *mock_usecase_awards.AwardsUsecase
 	MockSessionsManager    *mock_sessions.MockSessionsManager
@@ -36,17 +36,17 @@ type SuiteHandler struct {
 	Router                 *mux.Router
 	Cors                   *app.CorsConfig
 	MockCsrfUsecase        *mock_usecase_csrf.MockUsecase
-	MockSubscribersUsecase *mock_subscribers.MockUsecase
+	MockSubscribersUsecase *mock_subscribers.SubscribersUsecase
 }
 
 func (s *SuiteHandler) SetupSuite() {
 	s.Mock = gomock.NewController(s.T())
-	s.MockUserUsecase = mock_usecase_user.NewMockUsecase(s.Mock)
+	s.MockUserUsecase = mock_usecase_user.NewUserUsecase(s.Mock)
 	s.MockCreatorUsecase = mock_usecase_creator.NewCreatorUsecase(s.Mock)
 	s.MockAwardsUsecase = mock_usecase_awards.NewAwardsUsecase(s.Mock)
 	s.MockSessionsManager = mock_sessions.NewMockSessionsManager(s.Mock)
 	s.MockCsrfUsecase = mock_usecase_csrf.NewMockUsecase(s.Mock)
-	s.MockSubscribersUsecase = mock_subscribers.NewMockUsecase(s.Mock)
+	s.MockSubscribersUsecase = mock_subscribers.NewSubscribersUsecase(s.Mock)
 
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()

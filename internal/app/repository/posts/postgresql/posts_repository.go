@@ -69,7 +69,7 @@ func (repo *PostsRepository) GetPostCreator(postID int64) (int64, error) {
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) GetPost(postID int64, userId int64) (*models.Post, error) {
 	query := `
-			SELECT title, description, likes, posts.date, cover, type_awards, lk.likes_id IS NULL, views FROM posts
+			SELECT title, description, likes, posts.date, cover, type_awards, lk.likes_id IS NOT NULL, views FROM posts
 				LEFT OUTER JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
 				WHERE posts.posts_id = $2;`
 	queryPost := `UPDATE posts SET views = views + 1 WHERE posts_id = $1`
@@ -104,11 +104,10 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64) (*models.Post, 
 func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64, pag *models.Pagination) ([]models.Post, error) {
 	limit, offset, err := putilits.AddPagination("posts", pag, repo.store)
 	query := `
-			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, lk.likes_id IS NULL, views
+			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, lk.likes_id IS NOT NULL, views
 			FROM posts
 			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
 			WHERE creator_id = $2 ORDER BY posts.posts_id ` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
-	queryPost := `UPDATE posts SET views = views + 1 WHERE creator_id = $1`
 
 	if err != nil {
 		return nil, err
@@ -116,11 +115,6 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64, pag *model
 	var res []models.Post
 
 	rows, err := repo.store.Query(query, userId, creatorsId)
-	if err != nil {
-		return nil, repository.NewDBError(err)
-	}
-
-	_, err = repo.store.Query(queryPost, creatorsId)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}

@@ -33,12 +33,12 @@ func NewCreatorUsecase(repository repoCreator.Repository, repositoryFile repoFil
 //			app.UnknownError
 //			repository.DefaultErrDB
 func (usecase *CreatorUsecase) Create(creator *models.Creator) (int64, error) {
-	check, err := usecase.repository.GetCreator(creator.ID)
+	check, err := usecase.repository.ExistsCreator(creator.ID)
 	if err != nil && err != repository.NotFound {
 		return app.InvalidInt, errors.Wrap(err, fmt.Sprintf("METHOD: usecase_creator.Create; "+
 			"ERR: error on get creator with ID = %v", creator.ID))
 	}
-	if check != nil {
+	if check {
 		return app.InvalidInt, CreatorExist
 	}
 
@@ -82,11 +82,16 @@ func (usecase *CreatorUsecase) GetCreator(id int64) (*models.Creator, error) {
 //   		repository_os.ErrorCopyFile
 // 			repository.DefaultErrDB
 func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileName, id int64) error {
+	_, err := usecase.repository.ExistsCreator(id)
+	if err != nil {
+		return err
+	}
+
 	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}
-	err = usecase.repository.UpdateCover(id, app.LoadFileUrl + path)
+	err = usecase.repository.UpdateCover(id, app.LoadFileUrl+path)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf(" err update cover cretor with id %d", id))
 	}
@@ -100,12 +105,17 @@ func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileNa
 //   		repository_os.ErrorCopyFile
 // 			repository.DefaultErrDB
 func (usecase *CreatorUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, id int64) error {
+	_, err := usecase.repository.ExistsCreator(id)
+	if err != nil {
+		return err
+	}
+
 	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}
 
-	err = usecase.repository.UpdateAvatar(id, app.LoadFileUrl + path)
+	err = usecase.repository.UpdateAvatar(id, app.LoadFileUrl+path)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf(" err avatar cover cretor with id %d", id))
 	}
