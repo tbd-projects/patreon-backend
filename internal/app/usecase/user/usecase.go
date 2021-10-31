@@ -43,9 +43,4 @@ type Usecase interface {
 	// 			repository.DefaultErrDB
 	//			app.UnknownError
 	UpdateAvatar(userId int64, newAvatar string) error
-	//	GetBalance Errors:
-	// 		repository.NotFound
-	// 		app.GeneralError with Errors
-	// 			repository.DefaultErrDB
-	GetBalance(userID int64) (int64, error)
 }

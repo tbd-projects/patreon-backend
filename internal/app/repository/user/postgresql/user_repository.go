@@ -41,9 +41,9 @@ func (repo *UserRepository) Create(u *models.User) error {
 func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
 	user := models.User{}
 
-	if err := repo.store.QueryRow("SELECT users_id, login, nickname, avatar, encrypted_password, balance "+
+	if err := repo.store.QueryRow("SELECT users_id, login, nickname, avatar, encrypted_password "+
 		"from users where login=$1", login).
-		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword, &user.Balance); err != nil {
+		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, repository.NotFound
 		}
@@ -61,9 +61,9 @@ func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
 func (repo *UserRepository) FindByID(id int64) (*models.User, error) {
 	user := models.User{}
 
-	if err := repo.store.QueryRow("SELECT users_id, login, nickname, avatar, encrypted_password, balance "+
+	if err := repo.store.QueryRow("SELECT users_id, login, nickname, avatar, encrypted_password "+
 		"from users where users_id=$1", id).
-		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword, &user.Balance); err != nil {
+		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, repository.NotFound
 		}

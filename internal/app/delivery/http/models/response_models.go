@@ -60,8 +60,8 @@ type ResponsePostWithData struct {
 	Data []ResponsePostData `json:"data"`
 }
 type ResponseBalance struct {
-	ID      int64 `json:"user_id"`
-	Balance int64 `json:"balance"`
+	ID      int64        `json:"user_id"`
+	Balance models.Money `json:"balance"`
 }
 
 func ToResponseCreator(cr models.Creator) ResponseCreator {

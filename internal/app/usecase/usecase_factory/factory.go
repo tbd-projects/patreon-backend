@@ -7,9 +7,9 @@ import (
 	useAccess "patreon/internal/app/usecase/access"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
-	useSubscr "patreon/internal/app/usecase/subscribers"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
 )
 
@@ -22,10 +22,10 @@ type UsecaseFactory struct {
 	accessUsecase      useAccess.Usecase
 	subscribersUsecase useSubscr.Usecase
 	awardsUsercase     useAwards.Usecase
-	awardsUsecase     useAwards.Usecase
-	sessinManager     sessions.SessionsManager
-	postsUsecase      usePosts.Usecase
-	likesUsecase      useLikes.Usecase
+	awardsUsecase      useAwards.Usecase
+	sessinManager      sessions.SessionsManager
+	postsUsecase       usePosts.Usecase
+	likesUsecase       useLikes.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
@@ -68,7 +68,8 @@ func (f *UsecaseFactory) GetAccessUsecase() useAccess.Usecase {
 }
 func (f *UsecaseFactory) GetSubscribersUsecase() useSubscr.Usecase {
 	if f.subscribersUsecase == nil {
-		f.subscribersUsecase = useSubscr.NewSubscribersUsecase(f.repositoryFactory.GetSubscribersRepository())
+		f.subscribersUsecase = useSubscr.NewSubscribersUsecase(f.repositoryFactory.GetSubscribersRepository(),
+			f.repositoryFactory.GetAwardsRepository())
 	}
 	return f.subscribersUsecase
 }

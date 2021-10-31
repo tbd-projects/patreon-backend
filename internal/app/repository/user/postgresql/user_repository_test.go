@@ -72,7 +72,7 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 
 func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
 	login := "mail1999"
-	query := "SELECT users_id, login, nickname, avatar, encrypted_password, balance " +
+	query := "SELECT users_id, login, nickname, avatar, encrypted_password " +
 		"from users where login=$1"
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(login).
@@ -93,9 +93,9 @@ func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(login).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login", "nickname",
-			"avatar", "encrypted_password", "balance"}).
+			"avatar", "encrypted_password"}).
 			AddRow(strconv.Itoa(int(u.ID)), u.Login, u.Nickname, u.Avatar,
-				u.EncryptedPassword, u.Balance))
+				u.EncryptedPassword))
 	var gotten *models.User
 	gotten, err = s.repo.FindByLogin(login)
 
@@ -104,12 +104,11 @@ func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {
 	assert.Equal(s.T(), gotten.ID, u.ID)
 	assert.Equal(s.T(), gotten.Login, u.Login)
 	assert.Equal(s.T(), gotten.EncryptedPassword, u.EncryptedPassword)
-	assert.Equal(s.T(), gotten.Balance, u.Balance)
 }
 
 func (s *SuiteUserRepository) TestUserRepository_FindByID() {
 	ID := int64(1)
-	query := "SELECT users_id, login, nickname, avatar, encrypted_password, balance " +
+	query := "SELECT users_id, login, nickname, avatar, encrypted_password " +
 		"from users where users_id=$1"
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(ID).
@@ -131,9 +130,9 @@ func (s *SuiteUserRepository) TestUserRepository_FindByID() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(ID).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login", "nickname",
-			"avatar", "encrypted_password", "balance"}).
+			"avatar", "encrypted_password"}).
 			AddRow(strconv.Itoa(int(u.ID)), u.Login, u.Nickname, u.Avatar,
-				u.EncryptedPassword, u.Balance))
+				u.EncryptedPassword))
 	var gotten *models.User
 	gotten, err = s.repo.FindByID(ID)
 
@@ -142,7 +141,6 @@ func (s *SuiteUserRepository) TestUserRepository_FindByID() {
 	assert.Equal(s.T(), gotten.ID, u.ID)
 	assert.Equal(s.T(), gotten.Nickname, u.Nickname)
 	assert.Equal(s.T(), gotten.Avatar, u.Avatar)
-	assert.Equal(s.T(), gotten.Balance, u.Balance)
 }
 func (s *SuiteUserRepository) TestUserRepository_UpdateAvatar_Correct() {
 	user := models.TestUser()

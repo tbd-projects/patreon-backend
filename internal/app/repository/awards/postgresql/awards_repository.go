@@ -2,10 +2,11 @@ package repository_postgresql
 
 import (
 	"database/sql"
-	"github.com/pkg/errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repository_awards "patreon/internal/app/repository/awards"
+
+	"github.com/pkg/errors"
 )
 
 const NotSkipAwards = -1
@@ -154,4 +155,18 @@ func (repo *AwardsRepository) Delete(awardsId int64) error {
 	}
 
 	return nil
+}
+
+func (repo *AwardsRepository) FindByName(creatorID int64, awardName string) (bool, error) {
+	query := "SELECT count(*) as cnt from awards where creator_id = $1 and name = $2"
+	cnt := 0
+	res := repo.store.QueryRow(query, creatorID, awardName).Scan(&cnt)
+	if res != nil {
+		return false, repository.NewDBError(res)
+	}
+	if cnt == 0 {
+		return false, nil
+	}
+	return true, nil
+
 }
