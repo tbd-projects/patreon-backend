@@ -97,13 +97,13 @@ func (h *SubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 // @Description subscribes on the creator with id = creator_id
 // @Accept json
 // @Produce json
-// @Param subscribe body models.RequestRegistration true "Request body for the subscribe"
+// @Param subscribe body models.SubscribeRequest true "Request body for the subscribe"
 // @Param creator_id path int true "creator_id"
 // @Success 201 "Successfully subscribe on the creator with id = creator_id"
-// @Failure 400 "invalid parameters - creator_id"
-// @Failure 401 "User are not authorized"
-// @Failure 409 "this user already subscribed on the creator"
-// @Failure 409 "creator have not award with this award_name"
+// @Failure 400 {object} models.ErrResponse "invalid parameters - creator_id"
+// @Failure 401 {object} models.ErrResponse "User are not authorized"
+// @Failure 409 {object} models.ErrResponse "this user already subscribed on the creator"
+// @Failure 409 {object} models.ErrResponse "creator have not award with this award_name"
 // @Failure 500 {object} models.ErrResponse "serverError"
 // @Router /creators/{:creator_id}/subscribe [POST]
 func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {

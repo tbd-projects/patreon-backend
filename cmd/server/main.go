@@ -72,7 +72,7 @@ func init() {
 // @version 1.0
 // @description Server for Patreon application.
 
-// @host localhost:8080
+// @host api.pyaterochka-team.site
 // @BasePath /api/v1
 
 // @x-extension-openapi {"example": "value on a json format"}
