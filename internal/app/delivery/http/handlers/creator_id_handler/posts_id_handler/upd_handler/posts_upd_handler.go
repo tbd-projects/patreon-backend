@@ -1,9 +1,6 @@
 package posts_upd_handler
 
 import (
-	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -14,6 +11,10 @@ import (
 	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+
+	"github.com/gorilla/mux"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/sirupsen/logrus"
 )
 
 type PostsUpdateHandler struct {
@@ -54,6 +55,15 @@ func NewPostsUpdateHandler(log *logrus.Logger, router *mux.Router, cors *app.Cor
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/update [PUT]
 func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
+	req := &models.RequestPosts{}
+
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
+
 	postId, ok := h.GetInt64FromParam(w, r, "post_id")
 	if !ok {
 		return
@@ -65,15 +75,7 @@ func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req := &models.RequestPosts{}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(req); err != nil {
-		h.Log(r).Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
-		return
-	}
-
-	if err := h.postsUsecase.Update(&models_db.UpdatePost{ID: postId, Title: req.Title,
+	if err = h.postsUsecase.Update(&models_db.UpdatePost{ID: postId, Title: req.Title,
 		Description: req.Title, Awards: req.AwardsId}); err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)
 		return

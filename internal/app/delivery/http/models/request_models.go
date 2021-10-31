@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"image/color"
 	repPosts "patreon/internal/app/repository/posts"
+
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type RequestCreator struct {
@@ -76,4 +78,14 @@ func (o *RequestPosts) UnmarshalJSON(text []byte) error {
 
 type SubscribeRequest struct {
 	AwardName string `json:"award_name"`
+}
+
+func (req *SubscribeRequest) Validate() error {
+	err := validation.Errors{
+		"award_name": validation.Validate(req.AwardName, validation.Required, validation.Length(1, 0)),
+	}.Filter()
+	if err != nil {
+		return AwardNameValidateError
+	}
+	return nil
 }

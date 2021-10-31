@@ -38,7 +38,7 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // PUT Awards
 // @Summary update current awards
 // @Description update current awards from current creator
-// @Param user body models.RequestAwards true "Request body for update awards"
+// @Param award body models.RequestAwards true "Request body for update awards"
 // @Produce json
 // @Success 200
 // @Failure 400 {object} models.ErrResponse "invalid parameters"

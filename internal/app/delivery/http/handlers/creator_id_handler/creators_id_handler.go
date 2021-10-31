@@ -38,7 +38,7 @@ func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Summary get creator
 // @Description get creator with id from path
 // @Produce json
-// @Param id path int true "Get creator with id"
+// @Param creator_id path int true "Get creator with id"
 // @Success 200 {object} models.Creator
 // @Failure 404 {object} models.ErrResponse "user with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
