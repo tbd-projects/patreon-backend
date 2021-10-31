@@ -21,9 +21,11 @@ type IdResponse struct {
 }
 
 type ProfileResponse struct {
-	Login    string `json:"login"`
-	Nickname string `json:"nickname"`
-	Avatar   string `json:"avatar"`
+	ID          int64  `json:"id"`
+	Login       string `json:"login"`
+	Nickname    string `json:"nickname"`
+	Avatar      string `json:"avatar"`
+	HaveCreator bool   `json:"have_creator"`
 }
 
 type ResponseCreator struct {
@@ -62,6 +64,16 @@ type ResponsePostWithData struct {
 type ResponseBalance struct {
 	ID      int64        `json:"user_id"`
 	Balance models.Money `json:"balance"`
+}
+
+func ToRProfileResponse(us models.User) ProfileResponse {
+	return ProfileResponse{
+		ID:          us.ID,
+		Login:       us.Login,
+		Nickname:    us.Nickname,
+		Avatar:      us.Avatar,
+		HaveCreator: us.HaveCreator,
+	}
 }
 
 func ToResponseCreator(cr models.Creator) ResponseCreator {

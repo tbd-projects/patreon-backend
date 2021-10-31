@@ -60,10 +60,11 @@ func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
 // 			repository.DefaultErrDB
 func (repo *UserRepository) FindByID(id int64) (*models.User, error) {
 	user := models.User{}
+	query := `SELECT users_id, login, nickname, users.avatar, encrypted_password, cp.creator_id IS NOT NULL
+	from users LEFT JOIN creator_profile AS cp ON (users.users_id = cp.creator_id) where users_id=$1`
 
-	if err := repo.store.QueryRow("SELECT users_id, login, nickname, avatar, encrypted_password "+
-		"from users where users_id=$1", id).
-		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword); err != nil {
+	if err := repo.store.QueryRow(query, id).
+		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword, &user.HaveCreator); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, repository.NotFound
 		}

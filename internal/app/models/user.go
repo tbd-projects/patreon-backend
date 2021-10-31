@@ -23,6 +23,7 @@ type User struct {
 	Password          string `json:"password,omitempty"`
 	EncryptedPassword string `json:",omitempty"`
 	Avatar            string `json:"avatar,omitempty"`
+	HaveCreator       bool   `json:"have_creator"`
 }
 
 func (u *User) String() string {
