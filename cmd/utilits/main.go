@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"patreon/internal/app"
 	"strings"
 	"time"
@@ -31,6 +33,7 @@ var (
 	logLevel   string
 	needFile   string
 	allFiles   bool
+	GenMock string
 )
 
 func init() {
@@ -38,6 +41,7 @@ func init() {
 	flag.StringVar(&logLevel, "level", "trace", "skip levels")
 	flag.StringVar(&needFile, "name-file", "", "concrate files to print")
 	flag.BoolVar(&allFiles, "all", false, "print all logs")
+	flag.StringVar(&GenMock, "gen-mock", "", "genmock")
 }
 
 func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time) error {
@@ -100,14 +104,65 @@ func parseTimeFromFileName(fileName string) (time.Time, error) {
 	return tmp, err
 }
 
+//mockgen  -destination=mocks/mock_awards_usecase.go -package=mock_usecase -mock_names=Usecase=AwardsUsecase . Usecase
+
+func generateMock(dir string) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			filesInFile, err := os.ReadDir(dir + "/" + file.Name())
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			haveMockDir := false
+			for _, checkedFiles := range filesInFile {
+				if checkedFiles.Name() == "mocks" {
+					haveMockDir = true
+					break
+				}
+			}
+
+			if !haveMockDir {
+				continue
+			}
+
+			baseDir := filepath.Base(dir)
+			interfaceName := strings.Title(strings.ToLower(baseDir))
+			cmd := exec.Command("mockgen", fmt.Sprintf("-destination=mocks/mock_%s_%s.go", file.Name(), baseDir),
+				fmt.Sprintf("-package=mock_%s", baseDir),
+				fmt.Sprintf("-mock_names=%s=%s%s", interfaceName,
+					strings.Title(strings.ToLower(file.Name())), interfaceName), ".", interfaceName)
+			cmd.Dir = dir + file.Name() + "/"
+			cmd.Stdout = log.Writer()
+			cmd.Stderr = log.Writer()
+			err = cmd.Run()
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+		}
+	}
+}
+
 func main() {
 	flag.Parse()
+
+	if GenMock != "" {
+		generateMock(GenMock)
+		return
+	}
 
 	config := app.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 
 	level, err := logrus.ParseLevel(logLevel)
 	if err != nil {

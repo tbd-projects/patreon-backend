@@ -35,7 +35,7 @@ func NewPostsIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Summary delete current awards
 // @Description delete current awards from current creator
 // @Produce json
-// @Success 200
+// @Success 200 {object} models.ResponsePostWithData "posts"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "post with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"

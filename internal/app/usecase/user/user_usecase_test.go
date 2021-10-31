@@ -22,7 +22,7 @@ type SuiteUserUsecase struct {
 
 func (s *SuiteUserUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-	//s.uc = NewUserUsecase(s.MockUserRepository)
+	s.uc = NewUserUsecase(s.MockUserRepository, s.MockFileRepository)
 }
 
 func (s *SuiteUserUsecase) TestCreatorUsecase_GetProfile_DB_Error() {
@@ -292,6 +292,7 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_Create_CreateFail() {
 	assert.Equal(s.T(), expectedId, resId)
 	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
 }
+
 func (s *SuiteUserUsecase) TestCreatorUsecase_Create_Success() {
 	s.Tb = usecase.TestTable{
 		Name:              "Success create user",
@@ -314,6 +315,8 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_Create_Success() {
 	assert.Equal(s.T(), expectedId, resId)
 	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
 }
+
+
 
 func TestUsecaseUser(t *testing.T) {
 	suite.Run(t, new(SuiteUserUsecase))

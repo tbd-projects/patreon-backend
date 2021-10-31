@@ -1,8 +1,12 @@
 package usecase_creator
 
 import (
+	"bytes"
+	"io"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	repository_files "patreon/internal/app/repository/files"
 	"patreon/internal/app/usecase"
 	"testing"
 
@@ -20,7 +24,7 @@ type SuiteCreatorUsecase struct {
 
 func (s *SuiteCreatorUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-//	s.uc = NewCreatorUsecase(s.MockCreatorRepository)
+	s.uc = NewCreatorUsecase(s.MockCreatorRepository, s.MockFileRepository)
 }
 
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_DB_Error() {
@@ -101,6 +105,44 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Success() {
 	id, err := s.uc.Create(cr)
 	assert.Equal(s.T(), expectId, id)
 	assert.Equal(s.T(), s.Tb.ExpectedError, err)
+}
+
+func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateAvatar_Success() {
+	cr := models.TestCreator()
+
+	name := "true"
+	out := io.Reader(bytes.NewBufferString(""))
+	s.MockFileRepository.EXPECT().
+		SaveFile(out, repository_files.FileName(name), repository_files.Image).
+		Times(1).
+		Return(name, nil)
+
+	s.MockCreatorRepository.EXPECT().
+		UpdateAvatar(cr.ID, app.LoadFileUrl + name).
+		Times(1).
+		Return(nil)
+
+	err := s.uc.UpdateAvatar(out, repository_files.FileName(name), cr.ID)
+	assert.NoError(s.T(), err)
+}
+
+func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateCover_Success() {
+	cr := models.TestCreator()
+
+	name := "true"
+	out := io.Reader(bytes.NewBufferString(""))
+	s.MockFileRepository.EXPECT().
+		SaveFile(out, repository_files.FileName(name), repository_files.Image).
+		Times(1).
+		Return(name, nil)
+
+	s.MockCreatorRepository.EXPECT().
+		UpdateCover(cr.ID, app.LoadFileUrl + name).
+		Times(1).
+		Return(nil)
+
+	err := s.uc.UpdateCover(out, repository_files.FileName(name), cr.ID)
+	assert.NoError(s.T(), err)
 }
 
 func TestUsecaseCreator(t *testing.T) {

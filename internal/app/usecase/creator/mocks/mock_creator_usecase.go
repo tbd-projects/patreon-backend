@@ -2,10 +2,12 @@
 // Source: patreon/internal/app/usecase/creator (interfaces: Usecase)
 
 // Package mock_usecase is a generated GoMock package.
-package mock_usecase_creator
+package mock_usecase
 
 import (
-	"patreon/internal/app/models"
+	io "io"
+	models "patreon/internal/app/models"
+	repository_files "patreon/internal/app/repository/files"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -77,4 +79,32 @@ func (m *CreatorUsecase) GetCreators() ([]models.Creator, error) {
 func (mr *CreatorUsecaseMockRecorder) GetCreators() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreators", reflect.TypeOf((*CreatorUsecase)(nil).GetCreators))
+}
+
+// UpdateAvatar mocks base method.
+func (m *CreatorUsecase) UpdateAvatar(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAvatar", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAvatar indicates an expected call of UpdateAvatar.
+func (mr *CreatorUsecaseMockRecorder) UpdateAvatar(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAvatar", reflect.TypeOf((*CreatorUsecase)(nil).UpdateAvatar), arg0, arg1, arg2)
+}
+
+// UpdateCover mocks base method.
+func (m *CreatorUsecase) UpdateCover(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCover", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateCover indicates an expected call of UpdateCover.
+func (mr *CreatorUsecaseMockRecorder) UpdateCover(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCover", reflect.TypeOf((*CreatorUsecase)(nil).UpdateCover), arg0, arg1, arg2)
 }

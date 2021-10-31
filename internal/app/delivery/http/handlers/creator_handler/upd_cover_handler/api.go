@@ -1,4 +1,4 @@
-package avatar_handler
+package upd_cover_creator_handler
 
 import (
 	"net/http"
@@ -14,7 +14,7 @@ var codeByError = base_handler.CodeMap{
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
 	repository.NotFound: {
-		http.StatusUnprocessableEntity, handler_errors.UserNotFound, log.WarnLevel},
+		http.StatusUnprocessableEntity, handler_errors.IncorrectCreatorId, log.WarnLevel},
 	repository_os.ErrorCreate: {
 		http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
 	repository_os.ErrorCreate: {

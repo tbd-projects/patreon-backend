@@ -63,6 +63,21 @@ func (mr *AwardsRepositoryMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*AwardsRepository)(nil).Delete), arg0)
 }
 
+// FindByName mocks base method.
+func (m *AwardsRepository) FindByName(arg0 int64, arg1 string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByName", arg0, arg1)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByName indicates an expected call of FindByName.
+func (mr *AwardsRepositoryMockRecorder) FindByName(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*AwardsRepository)(nil).FindByName), arg0, arg1)
+}
+
 // GetAwards mocks base method.
 func (m *AwardsRepository) GetAwards(arg0 int64) ([]models.Award, error) {
 	m.ctrl.T.Helper()

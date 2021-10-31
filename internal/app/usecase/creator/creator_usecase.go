@@ -78,13 +78,15 @@ func (usecase *CreatorUsecase) GetCreator(id int64) (*models.Creator, error) {
 // UpdateCover Errors:
 // 		repository.NotFound
 // 		app.GeneralError with Errors:
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
 // 			repository.DefaultErrDB
 func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileName, id int64) error {
 	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}
-	err = usecase.repository.UpdateCover(id, path)
+	err = usecase.repository.UpdateCover(id, app.LoadFileUrl + path)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf(" err update cover cretor with id %d", id))
 	}
@@ -94,6 +96,8 @@ func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileNa
 // UpdateAvatar Errors:
 // 		repository.NotFound
 // 		app.GeneralError with Errors:
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
 // 			repository.DefaultErrDB
 func (usecase *CreatorUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, id int64) error {
 	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
@@ -101,7 +105,7 @@ func (usecase *CreatorUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileN
 		return err
 	}
 
-	err = usecase.repository.UpdateCover(id, path)
+	err = usecase.repository.UpdateAvatar(id, app.LoadFileUrl + path)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf(" err avatar cover cretor with id %d", id))
 	}

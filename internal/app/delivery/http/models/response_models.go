@@ -53,13 +53,14 @@ type ResponsePost struct {
 }
 
 type ResponsePostData struct {
-	ID   int64  `json:"data_id"`
+	ID   int64  `json:"attach_id"`
 	Data string `json:"data"`
+	Type string `json:"type"`
 }
 
 type ResponsePostWithData struct {
 	Post ResponsePost       `json:"post"`
-	Data []ResponsePostData `json:"data"`
+	Data []ResponsePostData `json:"attach"`
 }
 type ResponseBalance struct {
 	ID      int64        `json:"user_id"`
@@ -118,6 +119,7 @@ func ToResponsePostData(ps models.PostData) ResponsePostData {
 	return ResponsePostData{
 		ID:   ps.ID,
 		Data: ps.Data,
+		Type: string(ps.Type),
 	}
 }
 

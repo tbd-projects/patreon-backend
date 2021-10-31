@@ -69,7 +69,7 @@ func (repo *PostsRepository) GetPostCreator(postID int64) (int64, error) {
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) GetPost(postID int64, userId int64) (*models.Post, error) {
 	query := `
-			SELECT title, description, likes, date, cover, type_awards, lk.likes_id IS NULL, views FROM posts
+			SELECT title, description, likes, posts.date, cover, type_awards, lk.likes_id IS NULL, views FROM posts
 				LEFT OUTER JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
 				WHERE posts.posts_id = $2;`
 	queryPost := `UPDATE posts SET views = views + 1 WHERE posts_id = $1`

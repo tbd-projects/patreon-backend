@@ -1,4 +1,4 @@
-package repository_like
+package repository_posts
 
 import (
 	"patreon/internal/app/models"

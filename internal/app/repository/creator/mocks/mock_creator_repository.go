@@ -2,10 +2,10 @@
 // Source: patreon/internal/app/repository/creator (interfaces: Repository)
 
 // Package mock_repository is a generated GoMock package.
-package mock_repository_creator
+package mock_repository
 
 import (
-	"patreon/internal/app/models"
+	models "patreon/internal/app/models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -77,4 +77,32 @@ func (m *CreatorRepository) GetCreators() ([]models.Creator, error) {
 func (mr *CreatorRepositoryMockRecorder) GetCreators() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreators", reflect.TypeOf((*CreatorRepository)(nil).GetCreators))
+}
+
+// UpdateAvatar mocks base method.
+func (m *CreatorRepository) UpdateAvatar(arg0 int64, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAvatar", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAvatar indicates an expected call of UpdateAvatar.
+func (mr *CreatorRepositoryMockRecorder) UpdateAvatar(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAvatar", reflect.TypeOf((*CreatorRepository)(nil).UpdateAvatar), arg0, arg1)
+}
+
+// UpdateCover mocks base method.
+func (m *CreatorRepository) UpdateCover(arg0 int64, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCover", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateCover indicates an expected call of UpdateCover.
+func (mr *CreatorRepositoryMockRecorder) UpdateCover(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCover", reflect.TypeOf((*CreatorRepository)(nil).UpdateCover), arg0, arg1)
 }

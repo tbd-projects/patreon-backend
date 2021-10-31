@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_handler/subscribe_handler"
+	upd_avatar_creator_handler "patreon/internal/app/delivery/http/handlers/creator_handler/upd_avatar_handler"
+	upd_cover_creator_handler "patreon/internal/app/delivery/http/handlers/creator_handler/upd_cover_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler"
@@ -37,6 +39,8 @@ const (
 	PROFILE
 	CREATORS
 	CREATOR_WITH_ID
+	CREATOR_AVATAR
+	CREATOR_COVER
 	UPDATE_PASSWORD
 	UPDATE_AVATAR
 	AWARDS
@@ -48,7 +52,6 @@ const (
 	POSTS_LIKES
 	GET_CSRF_TOKEN
 	GET_USER_SUBSCRIPTIONS
-	GET_CREATOR_SUBSCRIBERS //@todo
 	POST_UPL_COVER
 	POST_ADD_TEXT
 	POST_ADD_IMAGE
@@ -111,6 +114,8 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 			ucPosts, sManager),
 		POST_DATA_ID: posts_data_id_handler.NewPostsDataIDHandler(f.logger, f.router, f.cors, ucPostsData,
 			ucPosts, sManager),
+		CREATOR_AVATAR: upd_avatar_creator_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucCreator),
+		CREATOR_COVER:  upd_cover_creator_handler.NewUpdateCoverHandler(f.logger, f.router, f.cors, sManager, ucCreator),
 	}
 }
 
@@ -131,9 +136,11 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/avatar":   hs[UPDATE_AVATAR],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 		// /creators ---------------------------------------------------------////
-		"/creators":                               hs[CREATORS],
-		"/creators/{creator_id:[0-9]+}":           hs[CREATOR_WITH_ID],
-		"/creators/{creator_id:[0-9]+}/subscribe": hs[SUBSCRIBES],
+		"/creators":                                   hs[CREATORS],
+		"/creators/{creator_id:[0-9]+}":               hs[CREATOR_WITH_ID],
+		"/creators/{creator_id:[0-9]+}/subscribe":     hs[SUBSCRIBES],
+		"/creators/{creator_id:[0-9]+}/update/avatar": hs[CREATOR_AVATAR],
+		"/creators/{creator_id:[0-9]+}/update/cover":  hs[CREATOR_COVER],
 		// ../awards ---------------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/awards":                                hs[AWARDS],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}":              hs[AWARDS_WITH_ID],
