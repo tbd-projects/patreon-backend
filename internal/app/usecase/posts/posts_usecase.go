@@ -1,22 +1,27 @@
-package usecase_posts
+package posts
 
 import (
 	"github.com/pkg/errors"
+	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
+	repoFiles "patreon/internal/app/repository/files"
 	repoPosts "patreon/internal/app/repository/posts"
 	repoPostsData "patreon/internal/app/repository/posts_data"
 )
 
 type PostsUsecase struct {
-	repository     repoPosts.Repository
-	repositoryData repoPostsData.Repository
+	repository      repoPosts.Repository
+	repositoryData  repoPostsData.Repository
+	filesRepository repoFiles.Repository
 }
 
-func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoPostsData.Repository) *PostsUsecase {
+func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoPostsData.Repository,
+	filesRepository repoFiles.Repository) *PostsUsecase {
 	return &PostsUsecase{
-		repository:     repository,
-		repositoryData: repositoryData,
+		repository:      repository,
+		repositoryData:  repositoryData,
+		filesRepository: filesRepository,
 	}
 }
 
@@ -106,4 +111,23 @@ func (usecase *PostsUsecase) GetCreatorId(postId int64) (int64, error) {
 		return app.InvalidInt, err
 	}
 	return aw, nil
+}
+
+// LoadCover Errors:
+//		repository.NotFound
+//		app.GeneralError with Errors:
+//			repository.DefaultErrDB
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
+func (usecase *PostsUsecase) LoadCover(data io.Reader, name repoFiles.FileName, postId int64) error {
+	if _, err := usecase.repository.GetPostCreator(postId); err != nil {
+		return err
+	}
+
+	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Image)
+	if err != nil {
+		return err
+	}
+
+	return usecase.repository.UpdateCoverPost(postId, app.LoadFileUrl + path)
 }

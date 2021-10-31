@@ -56,6 +56,10 @@ type RequestPosts struct {
 	Description string `json:"description,omitempty"`
 }
 
+type RequestText struct {
+	Text string `json:"text"`
+}
+
 func (o *RequestPosts) UnmarshalJSON(text []byte) error {
 	type options RequestPosts
 	opts := options{

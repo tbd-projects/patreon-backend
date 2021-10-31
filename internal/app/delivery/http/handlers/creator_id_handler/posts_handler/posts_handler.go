@@ -64,7 +64,7 @@ func (h *PostsHandler) baseGet(w http.ResponseWriter, r *http.Request, pag *db_m
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 400 {object} models.ErrResponse "invalid parameters in query"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Router /creators/{:creator_id}/posts [GET]
 func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	var limit, offset, page int64
@@ -142,7 +142,7 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 422 {object} models.ErrResponse "this awards id not know"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts [POST]

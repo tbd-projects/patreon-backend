@@ -75,7 +75,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 201 {object} models.Creator
 // @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 409 {object} models.ErrResponse "creator already exist"
 // @Failure 404 {object} models.ErrResponse "user with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"

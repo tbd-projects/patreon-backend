@@ -107,3 +107,39 @@ func (repo *CreatorRepository) GetCreator(creatorId int64) (*models.Creator, err
 
 	return creator, nil
 }
+
+// UpdateAvatar Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *CreatorRepository) UpdateAvatar(creatorId int64, avatar string) error {
+	query := `UPDATE creator_profile SET avatar = $1 WHERE creator_id = $2 RETURNING creator_id`
+
+	if err := repo.store.QueryRow(query, avatar, creatorId).
+		Scan(&creatorId); err != nil {
+		if err == sql.ErrNoRows {
+			return repository.NotFound
+		}
+		return repository.NewDBError(err)
+	}
+
+	return nil
+}
+
+// UpdateCover Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *CreatorRepository) UpdateCover(creatorId int64, cover string) error {
+	query := `UPDATE creator_profile SET cover = $1 WHERE creator_id = $2 RETURNING creator_id`
+
+	if err := repo.store.QueryRow(query, cover, creatorId).
+		Scan(&creatorId); err != nil {
+		if err == sql.ErrNoRows {
+			return repository.NotFound
+		}
+		return repository.NewDBError(err)
+	}
+
+	return nil
+}

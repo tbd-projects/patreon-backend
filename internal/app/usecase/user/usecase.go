@@ -1,7 +1,9 @@
 package usercase_user
 
 import (
+	"io"
 	"patreon/internal/app/models"
+	repoFiles "patreon/internal/app/repository/files"
 )
 
 type Usecase interface {
@@ -37,10 +39,11 @@ type Usecase interface {
 	//			BadEncrypt
 	//			app.UnknownError
 	UpdatePassword(userId int64, newPassword string) error
+
 	// UpdateAvatar Errors:
-	// 		repository.NotFound
 	// 		app.GeneralError with Errors
-	// 			repository.DefaultErrDB
 	//			app.UnknownError
-	UpdateAvatar(userId int64, newAvatar string) error
+	//			repository_os.ErrorCreate
+	//   		repository_os.ErrorCopyFile
+	UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64)  error
 }

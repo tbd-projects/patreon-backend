@@ -56,7 +56,7 @@ type ResponsePostData struct {
 }
 
 type ResponsePostWithData struct {
-	ResponsePost
+	Post ResponsePost       `json:"post"`
 	Data []ResponsePostData `json:"data"`
 }
 
@@ -91,7 +91,7 @@ func ToResponsePost(ps models.Post) ResponsePost {
 }
 
 func ToResponsePostWithData(ps models.PostWithData) ResponsePostWithData {
-	res := ResponsePostWithData{ResponsePost: ToResponsePost(*ps.Post), Data: []ResponsePostData{}}
+	res := ResponsePostWithData{Post: ToResponsePost(*ps.Post), Data: []ResponsePostData{}}
 	for _, data := range ps.Data {
 		res.Data = append(res.Data, ToResponsePostData(data))
 	}

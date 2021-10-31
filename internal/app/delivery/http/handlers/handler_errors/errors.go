@@ -7,6 +7,7 @@ var (
 	UserNotFound  = errors.New("user with this id not found")
 	AwardNotFound = errors.New("award with this id not found")
 	PostNotFound  = errors.New("post with this id not found")
+	PostDataNotFound  = errors.New("post data with this id not found")
 	LikeNotFound  = errors.New("like with this id not found")
 )
 
@@ -16,12 +17,14 @@ var (
 	InvalidCategory          = errors.New("invalid creator category")
 	InvalidDescription       = errors.New("invalid creator description")
 	IncorrectAwardsId        = errors.New("this awards id not know")
+	IncorrectPostId       = errors.New("this post id not know")
 	IncorrectCreatorId       = errors.New("this creator id not know")
 	EmptyTitle               = errors.New("empty title")
 	EmptyName                = errors.New("empty name in request")
 	IncorrectEmailOrPassword = errors.New("incorrect email or password")
 	IncorrectPrice           = errors.New("incorrect value of price")
 	IncorrectNewPassword     = errors.New("invalid new password")
+	IncorrectDataType     = errors.New("invalid data type")
 )
 
 // BD Error
@@ -48,7 +51,7 @@ var (
 	InvalidQueries       = errors.New("invalid parameters in query")
 	FileSizeError        = errors.New("size of file very big")
 	InvalidFormFieldName = errors.New("invalid form field name for load file")
-	InvalidAvatarExt     = errors.New("please upload a JPEG, JPG or PNG image")
+	InvalidImageExt     = errors.New("please upload a JPEG, JPG or PNG files")
 	UserAlreadySubscribe = errors.New("this user already have subscribe on creator")
 	SubscribesNotFound   = errors.New("subscribes on the creator not found")
 )

@@ -1,7 +1,9 @@
-package usecase_posts
+package posts
 
 import (
+	"io"
 	"patreon/internal/app/models"
+	repoFiles "patreon/internal/app/repository/files"
 )
 
 const (
@@ -51,4 +53,12 @@ type Usecase interface {
 	//  	app.GeneralError with Errors:
 	//   		repository.DefaultErrDB
 	GetCreatorId(postId int64) (int64, error)
+
+	// LoadCover Errors:
+	//		repository.NotFound
+	//		app.GeneralError with Errors:
+	//			repository.DefaultErrDB
+	//			repository_os.ErrorCreate
+	//   		repository_os.ErrorCopyFile
+	LoadCover(data io.Reader, name repoFiles.FileName, postId int64) error
 }

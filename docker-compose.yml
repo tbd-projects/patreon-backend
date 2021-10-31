@@ -16,6 +16,7 @@ services:
       - default
     volumes:
       - ./logs:/app/logs
+      - ./media:/app/media
     depends_on:
       - session-redis
       - access-redis
@@ -41,7 +42,8 @@ services:
     expose:
       - "5432"
     volumes:
-      - ./scripts/user.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/user.sql:/docker-entrypoint-initdb.d/1_init.sql
+      - ./scripts/start_initialization.sql:/docker-entrypoint-initdb.d/2_init.sql
       - postgis-data:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=pyaterochka

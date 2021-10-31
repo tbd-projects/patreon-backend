@@ -1,5 +1,7 @@
 package app
 
+const LoadFileUrl = "media/"
+
 type RepositoryConnections struct {
 	DataBaseUrl     string `toml:"database_url"`
 	SessionRedisUrl string `toml:"session-redis_url"`
@@ -13,6 +15,7 @@ type CorsConfig struct {
 }
 
 type Config struct {
+	MediaDir         string                `toml:"media_dir"`
 	BindAddr         string                `toml:"bind_addr"`
 	LogLevel         string                `toml:"log_level"`
 	LogAddr          string                `toml:"log_path"`

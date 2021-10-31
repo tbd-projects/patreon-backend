@@ -6,12 +6,14 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_handler/subscribe_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler/aw_id_handler"
-	aw_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler/aw_id_handler/upd_aw_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/likes_handler"
-	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler/posts_id_handler/update_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/likes_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/posts_data_id_handler"
+	upl_cover_posts_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_cover_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_img_data_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_text_data_handler"
 	"patreon/internal/app/delivery/http/handlers/csrf_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
@@ -44,6 +46,11 @@ const (
 	POSTS_LIKES
 	GET_CSRF_TOKEN
 	GET_USER_SUBSCRIPTIONS
+	GET_CREATOR_SUBSCRIBERS //@todo
+	POST_UPL_COVER
+	POST_ADD_TEXT
+	POST_ADD_IMAGE
+	POST_DATA_ID
 	SUBSCRIBES
 )
 
@@ -74,6 +81,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucLikes := f.usecaseFactory.GetLikesUsecase()
 	sManager := f.usecaseFactory.GetSessionManager()
 	ucSubscr := f.usecaseFactory.GetSubscribersUsecase()
+	ucPostsData := f.usecaseFactory.GetPostsDataUsecase()
 
 	return map[int]app.Handler{
 		REGISTER:               handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
@@ -94,6 +102,13 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		GET_CSRF_TOKEN:         csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
 		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
 		SUBSCRIBES:             subscribe_handler.NewSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
+		POST_UPL_COVER:         upl_cover_posts_handler.NewPostsUploadCoverHandler(f.logger, f.router, f.cors, ucPosts, sManager),
+		POST_ADD_TEXT: upl_text_data_handler.NewPostsDataUploadTextHandler(f.logger, f.router, f.cors, ucPostsData,
+			ucPosts, sManager),
+		POST_ADD_IMAGE: upl_img_data_handler.NewPostsUploadImageHandler(f.logger, f.router, f.cors, ucPostsData,
+			ucPosts, sManager),
+		POST_DATA_ID: posts_data_id_handler.NewPostsDataIDHandler(f.logger, f.router, f.cors, ucPostsData,
+			ucPosts, sManager),
 	}
 }
 
@@ -124,10 +139,14 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}":              hs[AWARDS_WITH_ID],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/update/other": hs[AWARDS_OTHER_UPD],
 		// ../posts  ---------------------------------------------------------////
-		"/creators/{creator_id:[0-9]+}/posts":                         hs[POSTS],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":        hs[POSTS_WITH_ID],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update": hs[POSTS_UPD],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":   hs[POSTS_LIKES],
+		"/creators/{creator_id:[0-9]+}/posts":                                   hs[POSTS],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":                  hs[POSTS_WITH_ID],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update":           hs[POSTS_UPD],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/text":             hs[POST_ADD_TEXT],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/image":            hs[POST_ADD_IMAGE],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/cover":            hs[POST_UPL_COVER],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":             hs[POSTS_LIKES],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}": hs[POST_DATA_ID],
 		//   /token  ---------------------------------------------------------////
 		"/token": hs[GET_CSRF_TOKEN],
 	}

@@ -1,1 +1,1 @@
-package usecase_posts
+package posts

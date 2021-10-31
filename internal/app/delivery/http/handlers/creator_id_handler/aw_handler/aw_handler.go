@@ -83,7 +83,7 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 422 {object} models.ErrResponse "incorrect value of price"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "can not get info from context"
+// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards [POST]
