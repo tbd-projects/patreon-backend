@@ -1,8 +1,6 @@
 package creator_handler
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
@@ -16,6 +14,8 @@ import (
 	middleSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/gorilla/mux"
 
@@ -85,33 +85,25 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 422 {object} models.ErrResponse "invalid creator category-description"
 // @Failure 401 "User are not authorized"
 // @Router /creators [POST]
-func (s *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			s.Log(r).Error(err)
-		}
-	}(r.Body)
-
+func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestCreator{}
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(req); err != nil {
-		s.Log(r).Warnf("can not parse request %s", err)
-		s.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 
 	userID := r.Context().Value("user_id")
 	if userID == nil {
-		s.Log(r).Error("can not get user_id from context")
-		s.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
+		h.Log(r).Error("can not get user_id from context")
+		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
 		return
 	}
 
-	u, err := s.userUsecase.GetProfile(userID.(int64))
+	u, err := h.userUsecase.GetProfile(userID.(int64))
 	if err != nil {
-		s.UsecaseError(w, r, err, codesByErrorsPOST)
+		h.UsecaseError(w, r, err, codesByErrorsPOST)
 		return
 	}
 
@@ -122,11 +114,11 @@ func (s *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Description: req.Description,
 	}
 
-	creatorId, err := s.creatorUsecase.Create(cr)
+	creatorId, err := h.creatorUsecase.Create(cr)
 	if err != nil {
-		s.UsecaseError(w, r, err, codesByErrorsPOST)
+		h.UsecaseError(w, r, err, codesByErrorsPOST)
 		return
 	}
 
-	s.Respond(w, r, http.StatusCreated, creatorId)
+	h.Respond(w, r, http.StatusCreated, creatorId)
 }
