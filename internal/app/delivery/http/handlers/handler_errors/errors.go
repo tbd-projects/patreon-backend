@@ -4,7 +4,7 @@ import "errors"
 
 /// NOT FOUND
 var (
-	UserNotFound     = errors.New("user with not found")
+	UserNotFound     = errors.New("user not found")
 	AwardNotFound    = errors.New("award with this id not found")
 	PostNotFound     = errors.New("post with not found")
 	PostDataNotFound = errors.New("post data with this id not found")
