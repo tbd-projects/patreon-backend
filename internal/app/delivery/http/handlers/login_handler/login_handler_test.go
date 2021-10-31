@@ -24,7 +24,7 @@ type LoginTestSuite struct {
 
 func (s *LoginTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewLoginHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase)
+	//s.handler = NewLoginHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase)
 }
 
 func (s *LoginTestSuite) TestLoginHandler_POST_EmptyBody() {

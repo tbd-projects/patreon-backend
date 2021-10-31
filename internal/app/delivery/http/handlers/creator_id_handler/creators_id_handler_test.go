@@ -24,7 +24,7 @@ type CreatorCreateTestSuite struct {
 
 func (s *CreatorCreateTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorIdHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
+	//s.handler = NewCreatorIdHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
 }
 
 func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {

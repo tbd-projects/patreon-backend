@@ -28,8 +28,8 @@ type CreatorTestSuite struct {
 
 func (s *CreatorTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase,
-		s.MockUserUsecase)
+	//s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase,
+	//	s.MockUserUsecase)
 }
 
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {
