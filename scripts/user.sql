@@ -55,15 +55,15 @@ CREATE TABLE IF NOT EXISTS awards
 
 CREATE TABLE IF NOT EXISTS posts
 (
-    posts_id    bigserial               not null primary key,
-    title       text                    not null,
-    description text                    not null,
-    likes       bigint    default 0     not null,
-    date        timestamp default now() not null,
-    cover       text                    not null,
-    views       bigint    default 0     not null,
-    type_awards bigint                  null references awards (awards_id),
-    creator_id  bigint                  not null references creator_profile (creator_id) on delete cascade
+    posts_id    bigserial                              not null primary key,
+    title       text                                   not null,
+    description text                                   not null,
+    likes       bigint      default 0                  not null,
+    date        timestamptz default now()::timestamptz not null,
+    cover       text                                   not null,
+    views       bigint      default 0                  not null,
+    type_awards bigint                                 null references awards (awards_id),
+    creator_id  bigint                                 not null references creator_profile (creator_id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS posts_data

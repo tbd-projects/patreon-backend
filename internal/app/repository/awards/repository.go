@@ -31,4 +31,5 @@ type Repository interface {
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	Delete(awardsId int64) error
+	FindByName(creatorID int64, awardName string) (bool, error)
 }

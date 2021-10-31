@@ -5,9 +5,10 @@ import "patreon/internal/app/models"
 type Usecase interface {
 	// Subscribe Errors:
 	//		SubscriptionAlreadyExists
+	//		repository_postgresql.AwardNameNotFound
 	//		app.generalError with Errors
 	//			repository.DefaultErrDB
-	Subscribe(subscriber *models.Subscriber) error
+	Subscribe(subscriber *models.Subscriber, awardName string) error
 	// UnSubscribe Errors:
 	//		SubscriptionsNotFound
 	//		app.generalError with Errors

@@ -131,11 +131,9 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/avatar":   hs[UPDATE_AVATAR],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 		// /creators ---------------------------------------------------------////
-		"/creators":                           hs[CREATORS],
-		"/creators/{creator_id:[0-9]+}":       hs[CREATOR_WITH_ID],
-		"/creators/{:creator_id}/subscribe":   hs[SUBSCRIBES],
-		"/creators/{:creator_id}/unsubscribe": hs[SUBSCRIBES],
-		"/creators/{:creator_id}/subscribers": hs[SUBSCRIBES],
+		"/creators":                               hs[CREATORS],
+		"/creators/{creator_id:[0-9]+}":           hs[CREATOR_WITH_ID],
+		"/creators/{creator_id:[0-9]+}/subscribe": hs[SUBSCRIBES],
 		// ../awards ---------------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/awards":                                hs[AWARDS],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}":              hs[AWARDS_WITH_ID],

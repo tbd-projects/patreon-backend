@@ -19,11 +19,37 @@ func NewSubscribersRepository(store *sql.DB) *SubscribersRepository {
 // Create Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
-func (repo *SubscribersRepository) Create(subscriber *models.Subscriber) error {
-	query := "INSERT INTO subscribers(users_id, creator_id) VALUES ($1, $2)"
-	if err := repo.store.QueryRow(query, subscriber.UserID, &subscriber.CreatorID); err.Err() != nil {
+func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, awardName string) error {
+	queryAwardPrice := "SELECT price FROM awards WHERE creator_id = $1 AND name = $2"
+	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id) VALUES ($1, $2)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+
+	price := 0
+	if err := repo.store.QueryRow(queryAwardPrice, subscriber.CreatorID, awardName).Scan(&price); err != nil {
+		return repository.NewDBError(err)
+	}
+	begin, err := repo.store.Begin()
+	if err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+
+	if err := repo.store.QueryRow(queryAddPayment, price,
+		subscriber.CreatorID, subscriber.UserID); err.Err() != nil {
+		_ = begin.Rollback()
 		return repository.NewDBError(err.Err())
 	}
+	if err := repo.store.QueryRow(queryAddSubscribe,
+		subscriber.UserID, subscriber.CreatorID); err.Err() != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err.Err())
+	}
+
+	if err = begin.Commit(); err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+
 	return nil
 }
 
@@ -98,13 +124,13 @@ func (repo *SubscribersRepository) GetSubscribers(creatorID int64) ([]int64, err
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) Get(userID int64, creatorID int64) (bool, error) {
-	query := "SELECT * from subscribers where users_id = $1 and creator_id = $2"
-
-	if row := repo.store.QueryRow(query, userID, creatorID); row.Err() != nil {
-		if row.Err() == sql.ErrNoRows {
-			return false, nil
-		}
-		return false, repository.NewDBError(row.Err())
+	query := "SELECT count(*) from subscribers where users_id = $1 and creator_id = $2"
+	cnt := 0
+	if res := repo.store.QueryRow(query, userID, creatorID).Scan(&cnt); res != nil {
+		return false, repository.NewDBError(res)
+	}
+	if cnt == 0 {
+		return false, nil
 	}
 	return true, nil
 }

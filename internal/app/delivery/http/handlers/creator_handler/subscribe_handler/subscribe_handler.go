@@ -1,6 +1,7 @@
 package subscribe_handler
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -36,7 +37,7 @@ func NewSubscribeHandler(log *logrus.Logger, router *mux.Router,
 	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 	)
-	h.AddMethod(http.MethodPost, h.DELETE, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+	h.AddMethod(http.MethodDelete, h.DELETE, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 	)
 	h.AddMethod(http.MethodGet, h.GET, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
@@ -47,12 +48,13 @@ func NewSubscribeHandler(log *logrus.Logger, router *mux.Router,
 // @Summary unsubscribe from the creator
 // @Description unsubscribe from the creator with id = creator_id
 // @Produce json
+// @Param creator_id path int true "creator_id"
 // @Success 200 "Successfully unsubscribe on the creator with id = creator_id"
 // @Failure 400 "invalid parameters - creator_id"
 // @Failure 401 "User are not authorized"
 // @Failure 409 "this user is not subscribed on the creator"
 // @Failure 500 {object} models.ErrResponse "serverError"
-// @Router /creators/{:creator_id}/unsubscribe [DELETE]
+// @Router /creators/{:creator_id}/subscribe [DELETE]
 func (h *SubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -93,11 +95,15 @@ func (h *SubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 // POST Subscribe
 // @Summary subscribes on the creator
 // @Description subscribes on the creator with id = creator_id
+// @Accept json
 // @Produce json
+// @Param subscribe body models.RequestRegistration true "Request body for the subscribe"
+// @Param creator_id path int true "creator_id"
 // @Success 201 "Successfully subscribe on the creator with id = creator_id"
 // @Failure 400 "invalid parameters - creator_id"
 // @Failure 401 "User are not authorized"
 // @Failure 409 "this user already subscribed on the creator"
+// @Failure 409 "creator have not award with this award_name"
 // @Failure 500 {object} models.ErrResponse "serverError"
 // @Router /creators/{:creator_id}/subscribe [POST]
 func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
@@ -124,11 +130,21 @@ func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
+	decoder := json.NewDecoder(r.Body)
+	req := responseModels.SubscribeRequest{}
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&req); err != nil || len(req.AwardName) == 0 {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
+
 	subscriber := &models.Subscriber{
 		UserID:    userID.(int64),
 		CreatorID: creatorID,
 	}
-	err := h.subscriberUsecase.Subscribe(subscriber)
+
+	err := h.subscriberUsecase.Subscribe(subscriber, req.AwardName)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPOST)
 		return
@@ -141,11 +157,12 @@ func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 // @Summary subscribers of the creator
 // @Description get subscribers of the creators with id = creator_id
 // @Produce json
+// @Param creator_id path int true "creator_id"
 // @Success 200 "Successfully get creator subscribers with creator id = creator_id"
 // @Failure 400 "invalid parameters - creator_id"
 // @Failure 401 "User are not authorized"
 // @Failure 500 {object} models.ErrResponse "serverError"
-// @Router /creators/{:creator_id}/subscribers [GET]
+// @Router /creators/{:creator_id}/subscribe [GET]
 func (h *SubscribeHandler) GET(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

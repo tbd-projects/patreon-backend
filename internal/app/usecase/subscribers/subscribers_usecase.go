@@ -2,27 +2,33 @@ package usecase_subscribers
 
 import (
 	"patreon/internal/app/models"
+	repository_awards "patreon/internal/app/repository/awards"
+	repository_postgresql "patreon/internal/app/repository/awards/postgresql"
 	repository_subscribers "patreon/internal/app/repository/subscribers"
 
 	"github.com/pkg/errors"
 )
 
 type SubscribersUsecase struct {
-	repository repository_subscribers.Repository
+	repoSubscr repository_subscribers.Repository
+	repoAwards repository_awards.Repository
 }
 
-func NewSubscribersUsecase(repository repository_subscribers.Repository) *SubscribersUsecase {
+func NewSubscribersUsecase(repoSubscr repository_subscribers.Repository,
+	repoAwards repository_awards.Repository) *SubscribersUsecase {
 	return &SubscribersUsecase{
-		repository: repository,
+		repoSubscr: repoSubscr,
+		repoAwards: repoAwards,
 	}
 }
 
 // Subscribe Errors:
 //		SubscriptionAlreadyExists
+//		repository_postgresql.AwardNameNotFound
 //		app.generalError with Errors
 //			repository.DefaultErrDB
-func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber) error {
-	exist, err := uc.repository.Get(subscriber.UserID, subscriber.CreatorID)
+func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber, awardName string) error {
+	exist, err := uc.repoSubscr.Get(subscriber.UserID, subscriber.CreatorID)
 	if err != nil {
 		return errors.Wrapf(err, "METHOD: subscribers_usecase.Subscribe; "+
 			"ERR: error on checkExists userID = %v creatorID = %v", subscriber.UserID, subscriber.CreatorID)
@@ -30,21 +36,30 @@ func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber) error {
 	if exist {
 		return SubscriptionAlreadyExists
 	}
-	return uc.repository.Create(subscriber)
+
+	exist, err = uc.repoAwards.FindByName(subscriber.CreatorID, awardName)
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return repository_postgresql.AwardNameNotFound
+	}
+
+	return uc.repoSubscr.Create(subscriber, awardName)
 }
 
 // GetCreators Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (uc *SubscribersUsecase) GetCreators(userID int64) ([]int64, error) {
-	return uc.repository.GetCreators(userID)
+	return uc.repoSubscr.GetCreators(userID)
 }
 
 // GetSubscribers Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (uc *SubscribersUsecase) GetSubscribers(creatorID int64) ([]int64, error) {
-	return uc.repository.GetSubscribers(creatorID)
+	return uc.repoSubscr.GetSubscribers(creatorID)
 }
 
 // UnSubscribe Errors:
@@ -52,14 +67,14 @@ func (uc *SubscribersUsecase) GetSubscribers(creatorID int64) ([]int64, error) {
 //		app.generalError with Errors
 //			repository.DefaultErrDB
 func (uc *SubscribersUsecase) UnSubscribe(subscriber *models.Subscriber) error {
-	exists, err := uc.repository.Get(subscriber.UserID, subscriber.CreatorID)
+	exists, err := uc.repoSubscr.Get(subscriber.UserID, subscriber.CreatorID)
 	if err != nil {
 		return err
 	}
 	if !exists {
 		return SubscriptionsNotFound
 	}
-	if err = uc.repository.Delete(subscriber); err != nil {
+	if err = uc.repoSubscr.Delete(subscriber); err != nil {
 		return err
 	}
 	return nil
