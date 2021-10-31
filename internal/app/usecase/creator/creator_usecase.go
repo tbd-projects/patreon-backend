@@ -3,19 +3,23 @@ package usecase_creator
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repoCreator "patreon/internal/app/repository/creator"
+	repoFiles "patreon/internal/app/repository/files"
 )
 
 type CreatorUsecase struct {
-	repository repoCreator.Repository
+	repository     repoCreator.Repository
+	repositoryFile repoFiles.Repository
 }
 
-func NewCreatorUsecase(repository repoCreator.Repository) *CreatorUsecase {
+func NewCreatorUsecase(repository repoCreator.Repository, repositoryFile repoFiles.Repository) *CreatorUsecase {
 	return &CreatorUsecase{
-		repository: repository,
+		repository:     repository,
+		repositoryFile: repositoryFile,
 	}
 }
 
@@ -69,4 +73,37 @@ func (usecase *CreatorUsecase) GetCreator(id int64) (*models.Creator, error) {
 		return nil, errors.Wrap(err, fmt.Sprintf("creator with ID = %v not found", id))
 	}
 	return cr, nil
+}
+
+// UpdateCover Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileName, id int64) error {
+	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
+	if err != nil {
+		return err
+	}
+	err = usecase.repository.UpdateCover(id, path)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf(" err update cover cretor with id %d", id))
+	}
+	return nil
+}
+
+// UpdateAvatar Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *CreatorUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, id int64) error {
+	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
+	if err != nil {
+		return err
+	}
+
+	err = usecase.repository.UpdateCover(id, path)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf(" err avatar cover cretor with id %d", id))
+	}
+	return nil
 }

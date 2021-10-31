@@ -81,7 +81,7 @@ func (repo *PostsDataRepository) Get(dataID int64) (*models.PostData, error) {
 
 	data := &models.PostData{ID: dataID}
 	var typeId int64
-	if err := repo.store.QueryRow(query, dataID).Scan(&data.PostId, &data.Type,
+	if err := repo.store.QueryRow(query, dataID).Scan(&data.PostId, &data.Data,
 		&typeId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
@@ -110,15 +110,13 @@ func (repo *PostsDataRepository) GetData(postsId int64) ([]models.PostData, erro
 		return nil, repository.NewDBError(err)
 	}
 
-	i := 0
 	for rows.Next() {
 		var data models.PostData
 		if err = rows.Scan(&data.ID, &data.Type, &data.Data); err != nil {
 			return nil, repository.NewDBError(err)
 		}
-		res[i] = data
+		res = append(res, data)
 		data.PostId = postsId
-		i++
 
 		if err = rows.Err(); err != nil {
 			return nil, repository.NewDBError(err)
@@ -159,7 +157,7 @@ func (repo *PostsDataRepository) Update(postData *models.PostData) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsDataRepository) Delete(dataId int64) error {
-	query := `DELETE FROM posts_data WHERE data_id = $q`
+	query := `DELETE FROM posts_data WHERE data_id = $1`
 
 	if _, err := repo.store.Query(query, dataId); err != nil {
 		return repository.NewDBError(err)

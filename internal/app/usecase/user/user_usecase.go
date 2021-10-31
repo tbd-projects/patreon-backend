@@ -151,7 +151,7 @@ func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName
 		return err
 	}
 
-	if err := usecase.repository.UpdateAvatar(userId, path); err != nil {
+	if err := usecase.repository.UpdateAvatar(userId, app.LoadFileUrl + path); err != nil {
 		return app.GeneralError{
 			Err:         app.UnknownError,
 			ExternalErr: errors.Wrap(err, "failed process of update avatar"),

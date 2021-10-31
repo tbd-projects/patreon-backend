@@ -51,7 +51,7 @@ func (usecase *PostsDataUsecase) LoadImage(data io.Reader, name repoFiles.FileNa
 		return app.InvalidInt, err
 	}
 
-	post := &models.PostData{Type: models.Image, Data: app.LoadFileUrl + path, ID: postId}
+	post := &models.PostData{Type: models.Image, Data: app.LoadFileUrl + path, PostId: postId}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return app.InvalidInt, err
@@ -106,7 +106,7 @@ func (usecase *PostsDataUsecase) UpdateImage(data io.Reader, name repoFiles.File
 		return err
 	}
 
-	post := &models.PostData{ID: postDataId, Type: models.Image, Data: app.LoadFileUrl + path}
+	post := &models.PostData{ID: postDataId, Type: models.Image, Data:  app.LoadFileUrl + path}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return err

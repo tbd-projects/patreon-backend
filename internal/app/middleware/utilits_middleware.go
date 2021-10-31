@@ -20,11 +20,12 @@ func NewUtilitiesMiddleware(log *logrus.Logger) UtilitiesMiddleware {
 
 func (mw *UtilitiesMiddleware) CheckPanic(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func(log *logrus.Entry) {
+		defer func(log *logrus.Entry, w http.ResponseWriter) {
 			if err := recover(); err != nil {
 				log.Errorf("detacted critical error: %v", err)
+				w.WriteHeader(http.StatusInternalServerError)
 			}
-		}(mw.log.Log(r))
+		}(mw.log.Log(r), w)
 		handler.ServeHTTP(w, r)
 	})
 }

@@ -81,6 +81,7 @@ func (h *PostsDataUploadTextHandler) POST(w http.ResponseWriter, r *http.Request
 	dataId, err := h.postsDataUsecase.LoadText(&models_db.PostData{Data: req.Text, PostId: postId})
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
+		return
 	}
 
 	h.Respond(w, r, http.StatusCreated, &models.IdResponse{ID: dataId})

@@ -42,7 +42,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.Co
 // PUT AvatarChange
 // @Summary set new user avatar
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param file formData file true "Avatar file with ext jpeg/png"
+// @Param avatar formData file true "Avatar file with ext jpeg/png"
 // @Success 200 "successfully upload avatar"
 // @Failure 400 {object} models.ErrResponse "size of file very big"
 // @Failure 400 {object} models.ErrResponse "invalid form field name"
@@ -69,6 +69,7 @@ func (h *UpdateAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	err = h.userUsecase.UpdateAvatar(file, filename, userId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByError)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }

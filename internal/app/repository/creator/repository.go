@@ -21,4 +21,16 @@ type Repository interface {
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	GetCreator(int64) (*models.Creator, error)
+
+	// UpdateAvatar Errors:
+	// 		repository.NotFound
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	UpdateAvatar(creatorId int64, avatar string) error
+
+	// UpdateCover Errors:
+	// 		repository.NotFound
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	UpdateCover(creatorId int64, cover string) error
 }

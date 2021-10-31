@@ -37,7 +37,7 @@ func NewPostsUploadImageHandler(log *logrus.Logger, router *mux.Router, cors *ap
 // POST add image to post
 // @Summary add image to post
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param file formData file true "image file with ext jpeg/png"
+// @Param image formData file true "image file with ext jpeg/png"
 // @Success 201 {object} models.IdResponse "id posts_data"
 // @Failure 400 {object} models.ErrResponse "size of file very big"
 // @Failure 400 {object} models.ErrResponse "invalid form field name for load file"
@@ -65,11 +65,13 @@ func (h *PostsUploadImageHandler) POST(w http.ResponseWriter, r *http.Request) {
 		"image", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
+		return
 	}
 
 	dataId, err = h.postsDataUsecase.LoadImage(file, filename, postId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
+		return
 	}
 
 	h.Respond(w, r, http.StatusCreated, &models.IdResponse{ID: dataId})

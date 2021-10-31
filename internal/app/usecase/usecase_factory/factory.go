@@ -45,7 +45,8 @@ func (f *UsecaseFactory) GetUserUsecase() useUser.Usecase {
 
 func (f *UsecaseFactory) GetCreatorUsecase() useCreator.Usecase {
 	if f.creatorUsecase == nil {
-		f.creatorUsecase = useCreator.NewCreatorUsecase(f.repositoryFactory.GetCreatorRepository())
+		f.creatorUsecase = useCreator.NewCreatorUsecase(f.repositoryFactory.GetCreatorRepository(),
+			f.repositoryFactory.GetFilesRepository())
 	}
 	return f.creatorUsecase
 }

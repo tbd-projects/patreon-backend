@@ -35,7 +35,7 @@ func NewPostsUploadCoverHandler(log *logrus.Logger, router *mux.Router, cors *ap
 // PUT CoverUpdate
 // @Summary set new post cover
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param file formData file true "cover file with ext jpeg/png"
+// @Param cover formData file true "cover file with ext jpeg/png"
 // @Success 200 "successfully upload cover"
 // @Failure 400 {object} models.ErrResponse "size of file very big"
 // @Failure 400 {object} models.ErrResponse "invalid form field name for load file"
@@ -62,11 +62,13 @@ func (h *PostsUploadCoverHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		"cover", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
+		return
 	}
 
 	err = h.postsUsecase.LoadCover(file, filename, postId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

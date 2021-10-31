@@ -29,7 +29,7 @@ func NewPostsDataIDHandler(log *logrus.Logger, router *mux.Router, cors *app.Cor
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
 	h.AddMiddleware(middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodGet, h.DELETE, sessionMiddleware.CheckFunc, middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc)
+	h.AddMethod(http.MethodDelete, h.DELETE, sessionMiddleware.CheckFunc, middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc)
 	return h
 }
 
