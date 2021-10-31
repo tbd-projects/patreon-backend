@@ -2,7 +2,6 @@ package register_handler
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -11,6 +10,8 @@ import (
 	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/gorilla/mux"
 
@@ -49,18 +50,10 @@ func NewRegisterHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 // @Failure 418 "User are authorized"
 // @Router /register [POST]
 func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
 	req := &models_respond.RequestRegistration{}
 
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(req); err != nil || len(req.Password) == 0 ||
-		len(req.Nickname) == 0 || len(req.Login) == 0 {
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return

@@ -21,7 +21,7 @@ var (
 	IncorrectCreatorId       = errors.New("this creator id not know")
 	EmptyTitle               = errors.New("empty title")
 	EmptyName                = errors.New("empty name in request")
-	IncorrectEmailOrPassword = errors.New("incorrect email or password")
+	IncorrectLoginOrPassword = errors.New("incorrect login or password")
 	IncorrectPrice           = errors.New("incorrect value of price")
 	IncorrectNewPassword     = errors.New("invalid new password")
 	IncorrectDataType        = errors.New("invalid data type")
