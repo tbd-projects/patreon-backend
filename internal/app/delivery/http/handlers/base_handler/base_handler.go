@@ -96,6 +96,7 @@ func (h *BaseHandler) getListMethods() []string {
 	for key := range h.handlerMethods {
 		useMethods = append(useMethods, key)
 	}
+	useMethods = append(useMethods, http.MethodOptions)
 	return useMethods
 }
 
