@@ -76,11 +76,11 @@ CREATE TABLE IF NOT EXISTS posts_data
 
 CREATE TABLE IF NOT EXISTS likes
 (
-    likes_id bigserial               not null primary key,
-    value    bool                    not null,
-    date     timestamp default now() not null,
-    post_id  bigint                  not null references posts (posts_id) on delete cascade,
-    users_id bigint                  not null references users (users_id) on delete cascade
+    likes_id bigserial                              not null primary key,
+    value    bool                                   not null,
+    date     timestamptz default now()::timestamptz not null,
+    post_id  bigint                                 not null references posts (posts_id) on delete cascade,
+    users_id bigint                                 not null references users (users_id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS comments
@@ -93,11 +93,11 @@ CREATE TABLE IF NOT EXISTS comments
 
 CREATE TABLE IF NOT EXISTS payments
 (
-    payments_id bigserial          not null primary key,
-    amount      integer            not null,
-    date        date default now() not null,
-    creator_id  bigint             not null references creator_profile (creator_id) on delete cascade,
-    users_id    bigint             not null references users (users_id) on delete cascade
+    payments_id bigserial                              not null primary key,
+    amount      integer                                not null,
+    date        timestamptz default now()::timestamptz not null,
+    creator_id  bigint                                 not null references creator_profile (creator_id) on delete cascade,
+    users_id    bigint                                 not null references users (users_id) on delete cascade
 )
 
 \disconnect
