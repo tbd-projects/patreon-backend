@@ -8,12 +8,15 @@ import (
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repository_user "patreon/internal/app/repository/user/postgresql"
+	useUser "patreon/internal/app/usecase/user"
 )
 
 var codeByError = base_handler.CodeMap{
 	models.EmptyPassword: {
 		http.StatusUnprocessableEntity, handler_errors.InvalidBody, logrus.InfoLevel},
 	repository_user.LoginAlreadyExist: {
+		http.StatusConflict, handler_errors.UserAlreadyExist, logrus.InfoLevel},
+	useUser.UserExist: {
 		http.StatusConflict, handler_errors.UserAlreadyExist, logrus.InfoLevel},
 	repository_user.NicknameAlreadyExist: {
 		http.StatusUnprocessableEntity, handler_errors.NicknameAlreadyExist, logrus.InfoLevel},

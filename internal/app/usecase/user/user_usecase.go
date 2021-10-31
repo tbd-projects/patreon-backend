@@ -39,8 +39,9 @@ func (usecase *UserUsecase) GetProfile(userID int64) (*models.User, error) {
 // Create Errors:
 //		models.EmptyPassword
 // 		models.IncorrectEmailOrPassword
-//		repository_user.LoginAlreadyExist
-//		repository_user.NicknameAlreadyExist
+//		repository_postgresql.LoginAlreadyExist
+//		repository_postgresql.NicknameAlreadyExist
+//		UserExist
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
