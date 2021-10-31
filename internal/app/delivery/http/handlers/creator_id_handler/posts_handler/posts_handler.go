@@ -1,11 +1,7 @@
 package posts_handler
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
-	"io"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -16,6 +12,11 @@ import (
 	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+
+	"github.com/microcosm-cc/bluemonday"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type PostsHandler struct {
@@ -47,10 +48,6 @@ func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 	h.Log(r).Debugf("redirect to url: %s, with offest 0 and limit %d", redirectUrl, usePosts.BaseLimit)
 
 	http.Redirect(w, r, redirectUrl, http.StatusPermanentRedirect)
-}
-
-func (h *PostsHandler) baseGet(w http.ResponseWriter, r *http.Request, pag *db_models.Pagination) {
-
 }
 
 // GET Posts
@@ -132,7 +129,7 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // POST Create Posts
 // @Summary create posts
 // @Description create posts to creator with id from path
-// @Param user body models.RequestPosts true "Request body for posts"
+// @Param post body models.RequestPosts true "Request body for posts"
 // @Produce json
 // @Success 201 {object} models.IdResponse "id posts"
 // @Failure 422 {object} models.ErrResponse "invalid body in request"
@@ -147,12 +144,14 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts [POST]
 func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			h.Log(r).Error(err)
-		}
-	}(r.Body)
+	req := &models.RequestPosts{}
+
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
 
 	idInt, ok := h.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
@@ -162,14 +161,6 @@ func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
 	if len(mux.Vars(r)) > 1 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
-		return
-	}
-
-	req := &models.RequestPosts{}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(req); err != nil {
-		h.Log(r).Warnf("can not parse request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 
