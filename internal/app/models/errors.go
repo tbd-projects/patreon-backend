@@ -16,8 +16,8 @@ var (
 	EmptyTitle                  = errors.New("empty title")
 	InvalidCreatorId            = errors.New("not positive creator id")
 	InvalidAwardsId             = errors.New("not positive awards id")
-	InvalidPostId            = errors.New("not positive posts id")
-	InvalidType             = errors.New("not positive data type")
+	InvalidPostId               = errors.New("not positive posts id")
+	InvalidType                 = errors.New("not positive data type")
 )
 
 // userValidError Errors:
@@ -108,7 +108,7 @@ func postValidError() extractorErrorByName {
 func postDataValidError() extractorErrorByName {
 	validMap := mapOfValidateError{
 		"post": InvalidPostId,
-		"type":  InvalidType,
+		"type": InvalidType,
 	}
 	return func(key string) error {
 		if val, ok := validMap[key]; ok {

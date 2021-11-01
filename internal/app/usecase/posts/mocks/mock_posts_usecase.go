@@ -81,18 +81,18 @@ func (mr *PostsUsecaseMockRecorder) GetCreatorId(arg0 interface{}) *gomock.Call 
 }
 
 // GetPost mocks base method.
-func (m *PostsUsecase) GetPost(arg0, arg1 int64) (*models.PostWithData, error) {
+func (m *PostsUsecase) GetPost(arg0, arg1 int64, arg2 bool) (*models.PostWithData, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPost", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetPost", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.PostWithData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetPost indicates an expected call of GetPost.
-func (mr *PostsUsecaseMockRecorder) GetPost(arg0, arg1 interface{}) *gomock.Call {
+func (mr *PostsUsecaseMockRecorder) GetPost(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPost", reflect.TypeOf((*PostsUsecase)(nil).GetPost), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPost", reflect.TypeOf((*PostsUsecase)(nil).GetPost), arg0, arg1, arg2)
 }
 
 // GetPosts mocks base method.
