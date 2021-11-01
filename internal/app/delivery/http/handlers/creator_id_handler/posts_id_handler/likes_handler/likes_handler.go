@@ -3,6 +3,9 @@ package likes_handler
 import (
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	response_models "patreon/internal/app/delivery/http/models"
@@ -31,8 +34,14 @@ func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
 	h.AddMiddleware(sessionMiddleware.Check, postsMiddleware.CheckCorrectPost)
-	h.AddMethod(http.MethodDelete, h.DELETE)
-	h.AddMethod(http.MethodPut, h.PUT)
+
+	h.AddMethod(http.MethodDelete, h.DELETE,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+
+	h.AddMethod(http.MethodPut, h.PUT,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
 	return h
 }
 

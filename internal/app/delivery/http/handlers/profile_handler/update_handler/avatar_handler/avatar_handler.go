@@ -2,7 +2,6 @@ package avatar_handler
 
 import (
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
@@ -13,6 +12,8 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -30,10 +31,11 @@ func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.Co
 		userUsecase:    ucUser,
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check,
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+
+	h.AddMethod(http.MethodPut, h.PUT,
 		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken)
-	h.AddMethod(http.MethodPut, h.PUT)
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
 	return h
 }
 

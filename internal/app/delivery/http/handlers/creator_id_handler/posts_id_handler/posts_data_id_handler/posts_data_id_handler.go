@@ -1,10 +1,11 @@
 package posts_data_id_handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -13,6 +14,9 @@ import (
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type PostsDataIDHandler struct {
@@ -27,9 +31,15 @@ func NewPostsDataIDHandler(log *logrus.Logger, router *mux.Router, cors *app.Cor
 		postsDataUsecase: ucPostsData,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+
 	h.AddMiddleware(middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
+
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodDelete, h.DELETE, sessionMiddleware.CheckFunc, middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc)
+
+	h.AddMethod(http.MethodDelete, h.DELETE,
+		sessionMiddleware.CheckFunc, middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
 	return h
 }
 

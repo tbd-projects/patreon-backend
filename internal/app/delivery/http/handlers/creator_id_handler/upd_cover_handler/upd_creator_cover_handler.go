@@ -1,8 +1,6 @@
 package upd_cover_creator_handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
@@ -14,6 +12,9 @@ import (
 	"patreon/internal/app/sessions"
 	middlewareSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type UpdateCoverCreatorHandler struct {
@@ -30,10 +31,11 @@ func NewUpdateCoverHandler(log *logrus.Logger, router *mux.Router, cors *app.Cor
 		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
 	}
 	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionManager, log).Check,
-		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser)
-	h.AddMethod(http.MethodPut, h.PUT)
+
+	h.AddMethod(http.MethodPut, h.PUT,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
+	)
 	return h
 }
 

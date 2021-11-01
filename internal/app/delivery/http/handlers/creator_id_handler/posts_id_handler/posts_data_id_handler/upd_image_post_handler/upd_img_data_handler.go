@@ -1,9 +1,11 @@
 package upd_img_data_handler
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
@@ -11,6 +13,8 @@ import (
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -23,13 +27,17 @@ type PostsUploadImageHandler struct {
 func NewPostsUploadImageHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
 	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUploadImageHandler {
 	h := &PostsUploadImageHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:      *bh.NewBaseHandler(log, router, cors),
 		postsDataUsecase: ucPostsData,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
 	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
-	h.AddMethod(http.MethodPut, h.PUT)
+
+	h.AddMethod(http.MethodPut, h.PUT,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+
 	return h
 }
 

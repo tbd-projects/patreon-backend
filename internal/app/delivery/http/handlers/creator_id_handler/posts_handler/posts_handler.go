@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -31,9 +34,14 @@ func NewPostsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 		postsUsecase: ucPosts,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+
 	h.AddMethod(http.MethodGet, h.GET)
+
 	h.AddMethod(http.MethodPost, h.POST, sessionMiddleware.CheckFunc,
-		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc)
+		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+
 	return h
 }
 

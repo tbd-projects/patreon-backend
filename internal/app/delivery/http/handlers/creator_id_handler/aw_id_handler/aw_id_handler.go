@@ -1,16 +1,20 @@
 package aw_id_handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type AwardsIdHandler struct {
@@ -24,9 +28,13 @@ func NewAwardsIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCo
 		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
 		awardsUsecase: ucAwards,
 	}
+
 	h.AddMethod(http.MethodDelete, h.DELETE, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
-		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc)
+		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+
 	return h
 }
 

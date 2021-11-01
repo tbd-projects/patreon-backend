@@ -4,6 +4,9 @@ import (
 	"image/color"
 	"net/http"
 	"patreon/internal/app"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -29,9 +32,13 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
 		awardsUsecase: ucAwards,
 	}
+
 	h.AddMethod(http.MethodPut, h.PUT, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
-		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc)
+		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+
 	return h
 }
 
