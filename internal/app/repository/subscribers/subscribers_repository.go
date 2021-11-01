@@ -28,25 +28,37 @@ func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, awardNa
 	if err := repo.store.QueryRow(queryAwardPrice, subscriber.CreatorID, awardName).Scan(&price); err != nil {
 		return repository.NewDBError(err)
 	}
+
 	begin, err := repo.store.Begin()
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	row, err := repo.store.Query(queryAddPayment, price,
+		subscriber.CreatorID, subscriber.UserID)
+
 	if err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 
-	if err := repo.store.QueryRow(queryAddPayment, price,
-		subscriber.CreatorID, subscriber.UserID); err.Err() != nil {
+	if err = row.Close(); err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err.Err())
+		return repository.NewDBError(err)
 	}
-	if err := repo.store.QueryRow(queryAddSubscribe,
-		subscriber.UserID, subscriber.CreatorID); err.Err() != nil {
+
+	if row, err = repo.store.Query(queryAddSubscribe,
+		subscriber.UserID, subscriber.CreatorID); err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err.Err())
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
 	}
 
 	if err = begin.Commit(); err != nil {
-		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 
@@ -73,16 +85,16 @@ func (repo *SubscribersRepository) GetCreators(userID int64) ([]int64, error) {
 	var cur models.Subscriber
 	for rows.Next() {
 		if err = rows.Scan(&cur.CreatorID); err != nil {
-			return []int64{}, repository.NewDBError(err)
-		}
-		if err = rows.Err(); err != nil {
+			_ = rows.Close()
 			return []int64{}, repository.NewDBError(err)
 		}
 		res = append(res, cur.CreatorID)
 	}
-	if err = rows.Close(); err != nil {
+
+	if err = rows.Err(); err != nil {
 		return []int64{}, repository.NewDBError(err)
 	}
+
 	return res, nil
 
 }
@@ -107,16 +119,16 @@ func (repo *SubscribersRepository) GetSubscribers(creatorID int64) ([]int64, err
 	var cur models.Subscriber
 	for rows.Next() {
 		if err = rows.Scan(&cur.UserID); err != nil {
-			return nil, repository.NewDBError(err)
-		}
-		if err = rows.Err(); err != nil {
+			_ = rows.Close()
 			return nil, repository.NewDBError(err)
 		}
 		res = append(res, cur.UserID)
 	}
-	if err = rows.Close(); err != nil {
+
+	if err = rows.Err(); err != nil {
 		return nil, repository.NewDBError(err)
 	}
+
 	return res, nil
 }
 

@@ -59,6 +59,18 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
 	_, err = s.repo.Create(cr)
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategory)).
+		WithArgs(cr.Category).
+		WillReturnError(models.BDError)
+	_, err = s.repo.Create(cr)
+	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategory)).
+		WithArgs(cr.Category).
+		WillReturnError(sql.ErrNoRows)
+	_, err = s.repo.Create(cr)
+	assert.Error(s.T(), IncorrectCategory, err)
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreator() {
@@ -120,6 +132,24 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreat
 	get, err := s.repo.GetCreators()
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), creators, get)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreator)).
+		WillReturnRows(preapareRows.RowError(0, models.BDError))
+
+	_, err = s.repo.GetCreators()
+	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreator)).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(""))
+
+	_, err = s.repo.GetCreators()
+	assert.Error(s.T(), err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).WillReturnError(models.BDError)
 

@@ -69,16 +69,14 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 		var creator models.Creator
 		if err = rows.Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,
 			&creator.Cover, &creator.Nickname); err != nil {
+			_ = rows.Close()
 			return nil, repository.NewDBError(err)
 		}
 		res[i] = creator
 		i++
-
-		if err = rows.Err(); err != nil {
-			return nil, repository.NewDBError(err)
-		}
 	}
-	if err = rows.Close(); err != nil {
+
+	if err = rows.Err(); err != nil {
 		return nil, repository.NewDBError(err)
 	}
 

@@ -25,6 +25,7 @@ func NewUserRepository(st *sql.DB) *UserRepository {
 // 			repository.DefaultErrDB
 func (repo *UserRepository) Create(u *models.User) error {
 	query := `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
+
 	if err := repo.store.QueryRow(query, u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).Scan(&u.ID); err != nil {
 		if _, ok := err.(*pq.Error); ok {
 			return parsePQError(err.(*pq.Error))
@@ -39,10 +40,10 @@ func (repo *UserRepository) Create(u *models.User) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
+	query := `SELECT users_id, login, nickname, avatar, encrypted_password from users where login=$1`
 	user := models.User{}
 
-	if err := repo.store.QueryRow("SELECT users_id, login, nickname, avatar, encrypted_password "+
-		"from users where login=$1", login).
+	if err := repo.store.QueryRow(query, login).
 		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, repository.NotFound
@@ -78,7 +79,9 @@ func (repo *UserRepository) FindByID(id int64) (*models.User, error) {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *UserRepository) UpdatePassword(id int64, newEncryptedPassword string) error {
-	row, err := repo.store.Query("UPDATE users SET encrypted_password = $1 WHERE users_id = $2",
+	query := `UPDATE users SET encrypted_password = $1 WHERE users_id = $2`
+
+	row, err := repo.store.Query(query,
 		newEncryptedPassword, id)
 	if err != nil {
 		return repository.NewDBError(err)
@@ -94,7 +97,9 @@ func (repo *UserRepository) UpdatePassword(id int64, newEncryptedPassword string
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *UserRepository) UpdateAvatar(id int64, newAvatar string) error {
-	row, err := repo.store.Query("UPDATE users SET avatar = $1 WHERE users_id = $2", newAvatar, id)
+	query := `UPDATE users SET avatar = $1 WHERE users_id = $2`
+
+	row, err := repo.store.Query(query, newAvatar, id)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
