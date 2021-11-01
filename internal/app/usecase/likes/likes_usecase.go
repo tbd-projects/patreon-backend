@@ -23,16 +23,16 @@ func NewLikesUsecase(repository repoLikes.Repository) *LikesUsecase {
 //		usecase_likes.IncorrectAddLike
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *LikesUsecase) Add(like *models.Like) error {
+func (usecase *LikesUsecase) Add(like *models.Like) (int64, error) {
 	_, err := usecase.repository.GetLikeId(like.UserId, like.PostId)
 	if err != nil {
 		if errors.Is(err, repository.NotFound) {
 			like.Value = 1
 			return usecase.repository.Add(like)
 		}
-		return err
+		return app.InvalidInt, err
 	}
-	return IncorrectAddLike
+	return app.InvalidInt, IncorrectAddLike
 }
 
 // Delete Errors:

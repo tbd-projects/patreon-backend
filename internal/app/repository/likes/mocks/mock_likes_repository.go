@@ -35,11 +35,12 @@ func (m *LikesRepository) EXPECT() *LikesRepositoryMockRecorder {
 }
 
 // Add mocks base method.
-func (m *LikesRepository) Add(arg0 *models.Like) error {
+func (m *LikesRepository) Add(arg0 *models.Like) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Add", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Add indicates an expected call of Add.

@@ -46,7 +46,7 @@ func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 }
 
 // DELETE Likes
-// @Summary deletes like from set post
+// @Summary deletes like from the post and return new count of likes
 // @Description deletes like form post id in url
 // @Produce json
 // @Success 200 {object} response_models.ResponseLike "current count of likes on post"
@@ -89,9 +89,9 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 
 // PUT Likes
 // @Summary add like on the post
-// @Description add like on the post with id = post_id
+// @Description add like on the post with id = post_id and return new count of likes
 // @Produce json
-// @Success 200
+// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "like with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
@@ -121,11 +121,11 @@ func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.likesUsecase.Add(&models.Like{PostId: postsId, UserId: userId})
+	res, err := h.likesUsecase.Add(&models.Like{PostId: postsId, UserId: userId})
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	h.Respond(w, r, http.StatusOK, response_models.ResponseLike{Likes: res})
 }

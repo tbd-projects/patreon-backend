@@ -10,7 +10,7 @@ type Usecase interface {
 	//		usecase_likes.IncorrectAddLike
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Add(like *models.Like) error
+	Add(like *models.Like) (int64, error)
 
 	// Delete Errors:
 	//		usecase_likes.IncorrectDelLike

@@ -20,7 +20,7 @@ type Repository interface {
 	// Add Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Add(like *models.Like) error
+	Add(like *models.Like) (int64, error)
 
 	// Delete Errors:
 	//		repository.NotFound

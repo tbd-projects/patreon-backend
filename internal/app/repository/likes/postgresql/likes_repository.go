@@ -57,43 +57,38 @@ func (repo *LikesRepository) GetLikeId(userId int64, postId int64) (int64, error
 // Add Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *LikesRepository) Add(like *models.Like) error {
+func (repo *LikesRepository) Add(like *models.Like) (int64, error) {
 	queryInsert := `INSERT INTO likes (post_id, users_id, value) VALUES ($1, $2, $3 > 0)`
-	queryUpdate := `UPDATE posts SET likes = likes + $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes + $2 WHERE posts_id = $1 RETURNING likes;`
 
 	begin, err := repo.store.Begin()
 	if err != nil {
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 	var row *sql.Rows
 	row, err = begin.Query(queryInsert, like.PostId, like.UserId, like.Value)
 
 	if err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	if err = row.Close(); err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
-
-	row, err = begin.Query(queryUpdate, like.PostId, like.Value)
+	countLikes := int64(app.InvalidInt)
+	err = begin.QueryRow(queryUpdate, like.PostId, like.Value).Scan(&countLikes)
 
 	if err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err)
-	}
-
-	if err = row.Close(); err != nil {
-		_ = begin.Rollback()
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	if err = begin.Commit(); err != nil {
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
-	return nil
+	return countLikes, nil
 }
 
 // Delete Errors:
