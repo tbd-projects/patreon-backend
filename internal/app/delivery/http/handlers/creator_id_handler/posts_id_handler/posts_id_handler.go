@@ -35,6 +35,7 @@ func NewPostsIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Summary delete current awards
 // @Description delete current awards from current creator
 // @Produce json
+// @Param add-view query string false "IMPORTANT: value yes or no, - if need add view to this post"
 // @Success 200 {object} models.ResponsePostWithData "posts"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "post with this id not found"
@@ -45,6 +46,7 @@ func NewPostsIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Router /creators/{:creator_id}/posts/{:post_id} [GET]
 func (h *PostsIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 	var postId, userId int64
+	var addView bool
 	var ok bool
 
 	if postId, ok = h.GetInt64FromParam(w, r, "post_id"); !ok {
@@ -57,11 +59,18 @@ func (h *PostsIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	value := r.URL.Query().Get("add-view")
+	if value == "" {
+		addView = false
+	} else {
+		addView = value == "yes"
+	}
+
 	if userId, ok = r.Context().Value("user_id").(int64); !ok {
 		userId = usePosts.EmptyUser
 	}
 
-	post, err := h.postsUsecase.GetPost(postId, userId)
+	post, err := h.postsUsecase.GetPost(postId, userId, addView)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsGET)
 		return

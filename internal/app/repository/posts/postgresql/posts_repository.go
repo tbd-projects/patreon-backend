@@ -67,7 +67,7 @@ func (repo *PostsRepository) GetPostCreator(postID int64) (int64, error) {
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *PostsRepository) GetPost(postID int64, userId int64) (*models.Post, error) {
+func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (*models.Post, error) {
 	query := `
 			SELECT title, description, likes, posts.date, cover, type_awards, lk.likes_id IS NOT NULL, views FROM posts
 				LEFT OUTER JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
@@ -84,12 +84,14 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64) (*models.Post, 
 		return nil, repository.NewDBError(err)
 	}
 
-	row, err := repo.store.Query(queryPost, postID)
-	if err != nil {
-		return nil, repository.NewDBError(err)
-	}
-	if err = row.Close(); err != nil {
-		return nil, repository.NewDBError(err)
+	if addView {
+		row, err := repo.store.Query(queryPost, postID)
+		if err != nil {
+			return nil, repository.NewDBError(err)
+		}
+		if err = row.Close(); err != nil {
+			return nil, repository.NewDBError(err)
+		}
 	}
 
 	if awardsId.Valid == false {
@@ -110,7 +112,7 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64, pag *model
 			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, lk.likes_id IS NOT NULL, views
 			FROM posts
 			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
-			WHERE creator_id = $2 ORDER BY posts.posts_id ` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
+			WHERE creator_id = $2 ORDER BY posts.date` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -198,7 +200,7 @@ func (repo *PostsRepository) Delete(postId int64) error {
 	query := `DELETE FROM posts WHERE posts_id = $q`
 
 	row, err := repo.store.Query(query, postId)
-	if  err != nil {
+	if err != nil {
 		return repository.NewDBError(err)
 	}
 
