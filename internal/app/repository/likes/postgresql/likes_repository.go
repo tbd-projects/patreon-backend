@@ -2,10 +2,11 @@ package repository_postgresql
 
 import (
 	"database/sql"
-	"github.com/pkg/errors"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+
+	"github.com/pkg/errors"
 )
 
 type LikesRepository struct {
@@ -62,7 +63,6 @@ func (repo *LikesRepository) Add(like *models.Like) error {
 
 	begin, err := repo.store.Begin()
 	if err != nil {
-		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 	var row *sql.Rows
@@ -91,7 +91,6 @@ func (repo *LikesRepository) Add(like *models.Like) error {
 	}
 
 	if err = begin.Commit(); err != nil {
-		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 	return nil
