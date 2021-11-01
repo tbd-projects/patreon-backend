@@ -96,15 +96,15 @@ func (mr *UserUsecaseMockRecorder) UpdateAvatar(arg0, arg1, arg2 interface{}) *g
 }
 
 // UpdatePassword mocks base method.
-func (m *UserUsecase) UpdatePassword(arg0 int64, arg1 string) error {
+func (m *UserUsecase) UpdatePassword(arg0 int64, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdatePassword", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdatePassword", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdatePassword indicates an expected call of UpdatePassword.
-func (mr *UserUsecaseMockRecorder) UpdatePassword(arg0, arg1 interface{}) *gomock.Call {
+func (mr *UserUsecaseMockRecorder) UpdatePassword(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*UserUsecase)(nil).UpdatePassword), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*UserUsecase)(nil).UpdatePassword), arg0, arg1, arg2)
 }
