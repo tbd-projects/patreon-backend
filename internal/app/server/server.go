@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -129,7 +128,7 @@ func (s *Server) Start(config *app.Config) error {
 
 		serverHTTPS := &http.Server{
 			Addr:      config.BindHttpsAddr,
-			TLSConfig: &tls.Config{GetCertificate: m.GetCertificate},
+			TLSConfig: m.TLSConfig(),
 			Handler:   routerApi,
 		}
 
