@@ -24,8 +24,8 @@ func NewUserRepository(st *sql.DB) *UserRepository {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *UserRepository) Create(u *models.User) error {
-	if err := repo.store.QueryRow("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) "+
-		"RETURNING users_id", u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).Scan(&u.ID); err != nil {
+	query := `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
+	if err := repo.store.QueryRow(query, u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).Scan(&u.ID); err != nil {
 		if _, ok := err.(*pq.Error); ok {
 			return parsePQError(err.(*pq.Error))
 		}

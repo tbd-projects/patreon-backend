@@ -32,27 +32,25 @@ func (s *SuiteUserRepository) AfterTest(_, _ string) {
 
 func (s *SuiteUserRepository) TestUserRepository_Create() {
 	u := models.TestUser()
+	query := `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
 
 	u.ID = 1
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4)"+
-		"RETURNING users_id")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(u.ID))))
 
 	err := s.repo.Create(u)
 	assert.NoError(s.T(), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) "+
-		"RETURNING users_id")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
-		WillReturnError(repository.NewDBError(models.BDError))
+		WillReturnError(models.BDError)
 
 	err = s.repo.Create(u)
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) "+
-		"RETURNING users_id")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
 		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: loginConstraint})
 
@@ -60,8 +58,7 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), LoginAlreadyExist, err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) "+
-		"RETURNING users_id")).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
 		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: nicknameConstraint})
 

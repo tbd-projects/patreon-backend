@@ -38,9 +38,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_EmptyBody() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
-	assert.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/register", &b)
 	s.handler.POST(recorder, reader)
@@ -54,7 +52,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_InvalidBody() {
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
 	Data := struct {
-		Login    string `json:"login"`
+		Login    string `json:"logine"`
 		Password string `json:"password"`
 	}{
 		Login:    "nickname",
@@ -197,6 +195,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_CreateSuccess() {
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 }
+
 func TestRegisterHandler(t *testing.T) {
 	suite.Run(t, new(RegisterTestSuite))
 }
