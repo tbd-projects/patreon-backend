@@ -20,4 +20,5 @@ var codeByError = base_handler.CodeMap{
 	usercase_user.BadEncrypt:           {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
 	app.UnknownError:                   {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
 	usercase_user.OldPasswordEqualNew:  {http.StatusConflict, handler_errors.IncorrectNewPassword, log.WarnLevel},
+	usercase_user.IncorrectEmailOrPassword: {http.StatusForbidden, handler_errors.IncorrectLoginOrPassword, log.InfoLevel},
 }

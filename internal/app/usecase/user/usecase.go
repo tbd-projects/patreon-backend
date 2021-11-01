@@ -33,18 +33,19 @@ type Usecase interface {
 	// UpdatePassword Errors:
 	// 		repository.NotFound
 	//		OldPasswordEqualNew
+	//		IncorrectEmailOrPassword
 	//		IncorrectNewPassword
 	//		models.EmptyPassword
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	//			BadEncrypt
 	//			app.UnknownError
-	UpdatePassword(userId int64, newPassword string) error
+	UpdatePassword(userId int64, oldPassword, newPassword string) error
 
 	// UpdateAvatar Errors:
 	// 		app.GeneralError with Errors
 	//			app.UnknownError
 	//			repository_os.ErrorCreate
 	//   		repository_os.ErrorCopyFile
-	UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64)  error
+	UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error
 }

@@ -1,8 +1,6 @@
 package likes_handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -13,6 +11,9 @@ import (
 	sessionMid "patreon/internal/app/sessions/middleware"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type LikesHandler struct {
@@ -78,8 +79,8 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 }
 
 // PUT Likes
-// @Summary deletes like from set post
-// @Description deletes like form post id in url
+// @Summary add like on the post
+// @Description add like on the post with id = post_id
 // @Produce json
 // @Success 200
 // @Failure 400 {object} models.ErrResponse "invalid parameters"

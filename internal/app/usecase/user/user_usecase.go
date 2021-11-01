@@ -102,18 +102,22 @@ func (usecase *UserUsecase) Check(login string, password string) (int64, error) 
 // UpdatePassword Errors:
 // 		repository.NotFound
 //		OldPasswordEqualNew
+//		IncorrectEmailOrPassword
 //		IncorrectNewPassword
 //		models.EmptyPassword
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 //			BadEncrypt
 //			app.UnknownError
-func (usecase *UserUsecase) UpdatePassword(userId int64, newPassword string) error {
+func (usecase *UserUsecase) UpdatePassword(userId int64, oldPassword, newPassword string) error {
 	u, err := usecase.GetProfile(userId)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("profile with id %v not found", userId))
 	}
-	if u.ComparePassword(newPassword) {
+	if !u.ComparePassword(oldPassword) {
+		return IncorrectEmailOrPassword
+	}
+	if !u.ComparePassword(newPassword) {
 		return OldPasswordEqualNew
 	}
 	u.MakeEmptyPassword()
@@ -152,7 +156,7 @@ func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName
 		return err
 	}
 
-	if err := usecase.repository.UpdateAvatar(userId, app.LoadFileUrl + path); err != nil {
+	if err := usecase.repository.UpdateAvatar(userId, app.LoadFileUrl+path); err != nil {
 		return app.GeneralError{
 			Err:         app.UnknownError,
 			ExternalErr: errors.Wrap(err, "failed process of update avatar"),

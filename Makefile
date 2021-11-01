@@ -5,8 +5,14 @@ CHECK_DIR=go list ./... | grep -v /cmd/utilits
 
 stop-redis:
 	systemctl stop redis
-stop-postgress:
+stop-postgres:
 	systemctl stop postgresql
+
+run-posgres-redis:
+	systemctl start redis
+	systemctl start postgresql
+
+
 
 generate-api:
 	go get -u github.com/swaggo/swag/cmd/swag
