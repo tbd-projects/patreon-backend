@@ -141,7 +141,7 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 			Err:         handler_errors.InternalError,
 		}
 	}
-
+	sort.Strings(validTypes)
 	fType := http.DetectContentType(buff)
 	if pos := sort.SearchStrings(validTypes, fType); pos == len(validTypes) {
 		return nil, "", http.StatusBadRequest, handler_errors.InvalidImageExt
