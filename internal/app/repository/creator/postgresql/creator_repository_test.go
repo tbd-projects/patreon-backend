@@ -45,7 +45,7 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
 		WithArgs(cr.Category).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(categoryId))))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(cr.ID, categoryId, cr.Description, cr.Avatar, cr.Cover).
+		WithArgs(cr.ID, categoryId, cr.Description, app.DefaultImage, app.DefaultImage).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(cr.ID))))
 	id, err := s.repo.Create(cr)
 	assert.Equal(s.T(), id, cr.ID)
@@ -55,7 +55,7 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
 		WithArgs(cr.Category).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(categoryId))))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(cr.ID, categoryId, cr.Description, cr.Avatar, cr.Cover).WillReturnError(models.BDError)
+		WithArgs(cr.ID, categoryId, cr.Description, app.DefaultImage, app.DefaultImage).WillReturnError(models.BDError)
 	_, err = s.repo.Create(cr)
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)

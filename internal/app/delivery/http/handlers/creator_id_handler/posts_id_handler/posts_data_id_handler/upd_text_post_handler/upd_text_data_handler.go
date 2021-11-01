@@ -49,7 +49,7 @@ func NewPostsDataUpdateTextHandler(log *logrus.Logger, router *mux.Router, cors 
 // @Failure 422 {object} models.ErrResponse "this post id not know"
 // @Failure 404 {object} models.ErrResponse "post data with this id not found"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id}/text [PUT]
+// @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id}/update/text [PUT]
 func (h *PostsDataUpdateTextHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

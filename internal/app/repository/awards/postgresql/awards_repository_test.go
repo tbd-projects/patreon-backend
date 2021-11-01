@@ -5,6 +5,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"regexp"
@@ -55,7 +56,7 @@ func (s *SuiteAwardsRepository) TestAwardsRepository_checkUniqName() {
 
 func (s *SuiteAwardsRepository) TestAwardsRepository_Create() {
 	queryCheck := "SELECT count(*) from awards where awards.creator_id = $1 and awards.name = $2 and awards.awards_id != $3"
-	query := `INSERT INTO awards (name, description, price, color, creator_id) VALUES ($1, $2, $3, $4, $5) 
+	query := `INSERT INTO awards (name, description, price, color, creator_id, cover) VALUES ($1, $2, $3, $4, $5. $6) 
 				RETURNING awards_id`
 	name := "sda"
 	creatorId := int64(1)
@@ -66,7 +67,7 @@ func (s *SuiteAwardsRepository) TestAwardsRepository_Create() {
 		WithArgs(creatorId, name, NotSkipAwards).
 		WillReturnRows(sqlmock.NewRows([]string{"cnt"}).AddRow(0))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color), awards.CreatorId).
+		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color), awards.CreatorId, app.DefaultImage).
 		WillReturnRows(sqlmock.NewRows([]string{"awards_id"}).AddRow(Id))
 	res, err := s.repo.Create(&awards)
 	assert.NoError(s.T(), err)
@@ -82,7 +83,7 @@ func (s *SuiteAwardsRepository) TestAwardsRepository_Create() {
 		WithArgs(creatorId, name, NotSkipAwards).
 		WillReturnRows(sqlmock.NewRows([]string{"cnt"}).AddRow(0))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color), awards.CreatorId).
+		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color), awards.CreatorId, app.DefaultImage).
 		WillReturnError(models.BDError)
 	_, err = s.repo.Create(&awards)
 	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
@@ -137,7 +138,7 @@ func (s *SuiteAwardsRepository) TestAwardsRepository_Update() {
 		WithArgs(creatorId, name, Id).
 		WillReturnRows(sqlmock.NewRows([]string{"cnt"}).AddRow(0))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
-		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color),  awards.ID).
+		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color), awards.ID).
 		WillReturnError(models.BDError)
 	err = s.repo.Update(&awards)
 	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
@@ -149,7 +150,7 @@ func (s *SuiteAwardsRepository) TestAwardsRepository_Update() {
 		WithArgs(creatorId, name, Id).
 		WillReturnRows(sqlmock.NewRows([]string{"cnt"}).AddRow(0))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
-		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color),  awards.ID).
+		WithArgs(awards.Name, awards.Description, awards.Price, convertRGBAToUint64(awards.Color), awards.ID).
 		WillReturnRows(sqlmock.NewRows([]string{}).CloseError(models.BDError))
 	err = s.repo.Update(&awards)
 	assert.Error(s.T(), err, repository.NewDBError(models.BDError))

@@ -38,7 +38,7 @@ func (repo *CreatorRepository) Create(cr *models.Creator) (int64, error) {
 		return app.InvalidInt, repository.NewDBError(err)
 	}
 
-	if err := repo.store.QueryRow(query, cr.ID, category, cr.Description, cr.Avatar, cr.Cover).Scan(&cr.ID); err != nil {
+	if err := repo.store.QueryRow(query, cr.ID, category, cr.Description, app.DefaultImage, app.DefaultImage).Scan(&cr.ID); err != nil {
 		return app.InvalidInt, repository.NewDBError(err)
 	}
 	return cr.ID, nil

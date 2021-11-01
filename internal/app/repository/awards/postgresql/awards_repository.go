@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repository_awards "patreon/internal/app/repository/awards"
@@ -50,10 +51,11 @@ func (repo *AwardsRepository) Create(aw *models.Award) (int64, error) {
 		return -1, err
 	}
 
-	query := `INSERT INTO awards (name, description, price, color, creator_id) VALUES ($1, $2, $3, $4, $5) 
+	query := `INSERT INTO awards (name, description, price, color, creator_id, cover) VALUES ($1, $2, $3, $4, $5. $6) 
 				RETURNING awards_id`
 
-	if err := repo.store.QueryRow(query, aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.CreatorId).
+	if err := repo.store.QueryRow(query, aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color),
+		aw.CreatorId, app.DefaultImage).
 		Scan(&aw.ID); err != nil {
 		return -1, repository.NewDBError(err)
 	}
@@ -162,7 +164,7 @@ func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Award, error)
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) Delete(awardsId int64) error {
-	queryUpdate:= "UPDATE posts SET type_awards = NULL where type_awards = $1"
+	queryUpdate := "UPDATE posts SET type_awards = NULL where type_awards = $1"
 	queryDelete := "DELETE FROM awards WHERE awards_id = $1"
 
 	row, err := repo.store.Query(queryUpdate, awardsId)

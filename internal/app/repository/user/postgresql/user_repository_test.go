@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"regexp"
@@ -36,14 +37,14 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 
 	u.ID = 1
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(u.ID))))
 
 	err := s.repo.Create(u)
 	assert.NoError(s.T(), err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
 		WillReturnError(models.BDError)
 
 	err = s.repo.Create(u)
@@ -51,7 +52,7 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
 		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: loginConstraint})
 
 	err = s.repo.Create(u)
@@ -59,7 +60,7 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 	assert.Equal(s.T(), LoginAlreadyExist, err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
 		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: nicknameConstraint})
 
 	err = s.repo.Create(u)
@@ -68,7 +69,7 @@ func (s *SuiteUserRepository) TestUserRepository_Create() {
 
 	pqerr := &pq.Error{Code: "646543", Constraint: nicknameConstraint}
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).
+		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
 		WillReturnError(pqerr)
 
 	err = s.repo.Create(u)
