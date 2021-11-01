@@ -20,6 +20,7 @@ import (
 var (
 	configPath          string
 	useServerRepository bool
+	runHttps            bool
 )
 
 func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() error) {
@@ -66,6 +67,8 @@ func newRedisPool(redisUrl string) *redis.Pool {
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/server.toml", "path to config file")
 	flag.BoolVar(&useServerRepository, "server-run", false, "true if it server run, false if it local run")
+	flag.BoolVar(&runHttps, "run-https", false, "run https serve with certificates")
+
 }
 
 // @title Patreon
@@ -79,8 +82,11 @@ func init() {
 
 func main() {
 	flag.Parse()
+	logrus.Info(os.Args[:])
 
 	config := app.NewConfig()
+	config.IsHTTPSServer = runHttps
+
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		logrus.Fatal(err)
@@ -97,7 +103,6 @@ func main() {
 
 	repositoryConfig := &config.LocalRepository
 	if useServerRepository {
-		config.IsProduction = true
 		repositoryConfig = &config.ServerRepository
 	}
 

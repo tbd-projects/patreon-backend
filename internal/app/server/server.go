@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -102,31 +103,48 @@ func (s *Server) Start(config *app.Config) error {
 		h.Connect(routerApi.Path(apiUrl))
 	}
 
-	s.logger.Info("starting server")
-
-	server := &http.Server{
-		Addr: config.BindHttpAddr,
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
-			log.Infof("Redirect from %s, to %s", r.URL.String(), targetUrl.String())
-			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
-		}),
-	}
-	if config.IsProduction {
-		m := &autocert.Manager{
-			Cache:      autocert.DirCache("patreon-secrt"),
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(config.Domen, "www."+config.Domen),
+	if config.IsHTTPSServer {
+		serverHTTP := &http.Server{
+			Addr: config.BindHttpAddr,
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+				log.Infof("Redirect from %s, to %s", r.URL.String(), targetUrl.String())
+				http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
+			}),
 		}
-		server = &http.Server{
+
+		hostPolicy := func(ctx context.Context, host string) error {
+			allowedHost := config.Domen
+			if host == allowedHost {
+				return nil
+			}
+			return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
+		}
+		dataDir := "./patreon-secrt"
+		m := &autocert.Manager{
+			Cache:      autocert.DirCache(dataDir),
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: hostPolicy,
+		}
+
+		serverHTTPS := &http.Server{
 			Addr:      config.BindHttpsAddr,
 			TLSConfig: &tls.Config{GetCertificate: m.GetCertificate},
 			Handler:   routerApi,
 		}
-		return server.ListenAndServeTLS("", "")
+
+		go func(logger *log.Logger, server *http.Server) {
+			logger.Info("Start http server")
+			err := server.ListenAndServe()
+			if err != nil {
+				logger.Errorf("http server error on listenAndServe %s", err)
+			}
+		}(s.logger, serverHTTP)
+
+		s.logger.Info("Start https server")
+		return serverHTTPS.ListenAndServeTLS("", "")
 	} else {
-		server.Handler = routerApi
-		return server.ListenAndServe()
-		//return http.ListenAndServe(config.BindAddr, routerApi)
+		s.logger.Info("start no production http server")
+		return http.ListenAndServe(config.BindHttpAddr, routerApi)
 	}
 }

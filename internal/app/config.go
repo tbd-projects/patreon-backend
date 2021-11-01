@@ -22,7 +22,7 @@ type Config struct {
 	ServerRepository RepositoryConnections `toml:"server"`
 	LocalRepository  RepositoryConnections `toml:"local"`
 	Cors             CorsConfig            `toml:"cors"`
-	IsProduction     bool
+	IsHTTPSServer    bool
 	Domen            string `toml:"domen"`
 	BindHttpsAddr    string `toml:"bind_addr_https"`
 	BindHttpAddr     string `toml:"bind_addr_http"`
