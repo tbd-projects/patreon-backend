@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"patreon/internal/app/delivery/http/handler_factory"
+	"patreon/internal/app/middleware"
 	"patreon/internal/app/repository/repository_factory"
 	"patreon/internal/app/usecase/usecase_factory"
 
@@ -68,6 +69,40 @@ func (s *Server) checkConnection() error {
 	return nil
 }
 
+//return http[0] and https[1] servers
+func makingHTTPSServerWithRedirect(config *app.Config, router *mux.Router) (*http.Server, *http.Server) {
+	serverHTTP := &http.Server{
+		Addr: config.BindHttpAddr,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+			log.Infof("Redirect from %s, to %s", r.RequestURI, targetUrl.String())
+			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
+		}),
+	}
+
+	hostPolicy := func(ctx context.Context, host string) error {
+		allowedHost := config.Domen
+		if host == allowedHost {
+			return nil
+		}
+		return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
+	}
+
+	dataDir := "./patreon-secrt"
+	m := &autocert.Manager{
+		Cache:      autocert.DirCache(dataDir),
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: hostPolicy,
+	}
+
+	serverHTTPS := &http.Server{
+		Addr:      config.BindHttpsAddr,
+		TLSConfig: m.TLSConfig(),
+		Handler:   router,
+	}
+	return serverHTTP, serverHTTPS
+}
+
 // @title Patreon
 // @version 1.0
 // @description Server for Patreon application.
@@ -101,37 +136,11 @@ func (s *Server) Start(config *app.Config) error {
 	for apiUrl, h := range *hs {
 		h.Connect(routerApi.Path(apiUrl))
 	}
+	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
+	routerApi.Use(ddosMiddleware.CheckAccess)
 
 	if config.IsHTTPSServer {
-		serverHTTP := &http.Server{
-			Addr: config.BindHttpAddr,
-			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
-				log.Infof("Redirect from %s, to %s", r.RequestURI, targetUrl.String())
-				http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
-			}),
-		}
-
-		hostPolicy := func(ctx context.Context, host string) error {
-			allowedHost := config.Domen
-			if host == allowedHost {
-				return nil
-			}
-			return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
-		}
-
-		dataDir := "./patreon-secrt"
-		m := &autocert.Manager{
-			Cache:      autocert.DirCache(dataDir),
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: hostPolicy,
-		}
-
-		serverHTTPS := &http.Server{
-			Addr:      config.BindHttpsAddr,
-			TLSConfig: m.TLSConfig(),
-			Handler:   routerApi,
-		}
+		serverHTTP, serverHTTPS := makingHTTPSServerWithRedirect(config, routerApi)
 
 		go func(logger *log.Logger, server *http.Server) {
 			logger.Info("Start http server")

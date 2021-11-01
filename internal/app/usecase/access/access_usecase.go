@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	queryLimit      = 2
-	timeLimit   int = int(time.Minute.Milliseconds())
-	blackList       = "BLACK_LIST"
-	timeBlocked     = int(time.Minute.Milliseconds() * 2)
+	queryLimit  = 100
+	timeLimit   = int(time.Minute.Milliseconds())
+	blackList   = "BLACK_LIST"
+	timeBlocked = int(time.Minute.Milliseconds() * 2)
 )
 
 type AccessUsecase struct {

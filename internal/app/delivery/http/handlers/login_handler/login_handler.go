@@ -3,9 +3,6 @@ package login_handler
 import (
 	"net/http"
 	"patreon/internal/app"
-	csrf_middleware "patreon/internal/app/csrf/middleware"
-	repository_jwt "patreon/internal/app/csrf/repository/jwt"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -36,10 +33,7 @@ func NewLoginHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 		userUsecase:    ucUser,
 	}
 	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)
-	h.AddMethod(http.MethodPost, h.POST,
-		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
-
+	h.AddMethod(http.MethodPost, h.POST)
 	return h
 }
 
