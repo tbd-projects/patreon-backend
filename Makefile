@@ -50,9 +50,17 @@ run-coverage:
 	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs"  | fgrep -v "config" | fgrep -v "main.go" > cover2
 	go tool cover -func=cover2
 
-parse-last-log:
-	go build -o logger.out -v ./cmd/utilits
-	./logger.out
+build-utils:
+	go build -o utils.out -v ./cmd/utilits
+
+parse-last-log: build-utils
+	./utils.out
+gen-mock: build-utils
+	./utils.out -gen-mock=./internal/app/repository/
+	./utils.out -gen-mock=./internal/app/usecase/
+
+
+
 
 test:
 	go test -v -race ./internal/...
