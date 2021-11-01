@@ -102,8 +102,8 @@ func (repo *LikesRepository) Add(like *models.Like) error {
 // 			repository.DefaultErrDB
 func (repo *LikesRepository) Delete(likeId int64) error {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 
 	var boolValue bool
 	var value, postId int64
@@ -122,7 +122,6 @@ func (repo *LikesRepository) Delete(likeId int64) error {
 
 	begin, err := repo.store.Begin()
 	if err != nil {
-		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 
@@ -150,7 +149,6 @@ func (repo *LikesRepository) Delete(likeId int64) error {
 	}
 
 	if err = begin.Commit(); err != nil {
-		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 
