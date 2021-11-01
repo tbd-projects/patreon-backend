@@ -49,11 +49,12 @@ func (mr *LikesUsecaseMockRecorder) Add(arg0 interface{}) *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *LikesUsecase) Delete(arg0, arg1 int64) error {
+func (m *LikesUsecase) Delete(arg0, arg1 int64) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete.

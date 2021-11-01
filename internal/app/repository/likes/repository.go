@@ -26,5 +26,5 @@ type Repository interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Delete(likeId int64) error
+	Delete(likeId int64) (int64, error)
 }

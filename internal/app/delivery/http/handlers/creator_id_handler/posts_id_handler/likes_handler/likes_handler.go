@@ -5,6 +5,7 @@ import (
 	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	response_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
@@ -40,7 +41,7 @@ func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 // @Summary deletes like from set post
 // @Description deletes like form post id in url
 // @Produce json
-// @Success 200
+// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "like with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
@@ -70,13 +71,12 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.likesUsecase.Delete(postsId, userId)
+	res, err := h.likesUsecase.Delete(postsId, userId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsDELETE)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
+	h.Respond(w, r, http.StatusOK, response_models.ResponseLike{Likes: res})
 }
 
 // PUT Likes

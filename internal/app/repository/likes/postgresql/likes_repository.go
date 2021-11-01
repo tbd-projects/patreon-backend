@@ -59,7 +59,7 @@ func (repo *LikesRepository) GetLikeId(userId int64, postId int64) (int64, error
 // 			repository.DefaultErrDB
 func (repo *LikesRepository) Add(like *models.Like) error {
 	queryInsert := `INSERT INTO likes (post_id, users_id, value) VALUES ($1, $2, $3 > 0)`
-	queryUpdate := `UPDATE posts SET likes = Likes + $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes + $2 WHERE posts_id = $1;`
 
 	begin, err := repo.store.Begin()
 	if err != nil {
@@ -100,18 +100,18 @@ func (repo *LikesRepository) Add(like *models.Like) error {
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *LikesRepository) Delete(likeId int64) error {
+func (repo *LikesRepository) Delete(likeId int64) (int64, error) {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 
 	var boolValue bool
 	var value, postId int64
 	if err := repo.store.QueryRow(querySelect, likeId).Scan(&postId, &boolValue); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return repository.NotFound
+			return app.InvalidInt, repository.NotFound
 		}
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	if boolValue {
@@ -122,35 +122,31 @@ func (repo *LikesRepository) Delete(likeId int64) error {
 
 	begin, err := repo.store.Begin()
 	if err != nil {
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	var row *sql.Rows
-	row, err = begin.Query(queryUpdate, postId, value)
+	var newCountLikes int64 = -1
+	err = begin.QueryRow(queryUpdate, postId, value).Scan(&newCountLikes)
 
 	if err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err)
-	}
-
-	if err = row.Close(); err != nil {
-		_ = begin.Rollback()
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	if row, err = begin.Query(queryDelete, likeId); err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	if err = row.Close(); err != nil {
 		_ = begin.Rollback()
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	if err = begin.Commit(); err != nil {
-		return repository.NewDBError(err)
+		return app.InvalidInt, repository.NewDBError(err)
 	}
 
-	return nil
+	return newCountLikes, nil
 }

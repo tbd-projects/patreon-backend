@@ -148,3 +148,7 @@ func ToSubscribersCreatorResponse(users []int64) SubscribersCreatorResponse {
 		Users: users,
 	}
 }
+
+type ResponseLike struct {
+	Likes int64 `json:"likes"`
+}

@@ -188,7 +188,6 @@ func (s *SuiteLikesRepository) TestLikesRepositoryAdd_InsertQueryError() {
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryAdd_CloseRowError() {
 	queryInsert := `INSERT INTO likes (post_id, users_id, value) VALUES ($1, $2, $3 > 0)`
-	//queryUpdate := `UPDATE posts SET likes = Likes + $2 WHERE posts_id = $1;`
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(pq.ErrNotSupported)
@@ -208,7 +207,7 @@ func (s *SuiteLikesRepository) TestLikesRepositoryAdd_CloseRowError() {
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryAdd_UpdateError() {
 	queryInsert := `INSERT INTO likes (post_id, users_id, value) VALUES ($1, $2, $3 > 0)`
-	queryUpdate := `UPDATE posts SET likes = Likes + $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes + $2 WHERE posts_id = $1;`
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(pq.ErrNotSupported)
@@ -231,7 +230,7 @@ func (s *SuiteLikesRepository) TestLikesRepositoryAdd_UpdateError() {
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryAdd_UpdateCloseRowError() {
 	queryInsert := `INSERT INTO likes (post_id, users_id, value) VALUES ($1, $2, $3 > 0)`
-	queryUpdate := `UPDATE posts SET likes = Likes + $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes + $2 WHERE posts_id = $1;`
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(pq.ErrNotSupported)
@@ -254,7 +253,7 @@ func (s *SuiteLikesRepository) TestLikesRepositoryAdd_UpdateCloseRowError() {
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryAdd_CommitError() {
 	queryInsert := `INSERT INTO likes (post_id, users_id, value) VALUES ($1, $2, $3 > 0)`
-	queryUpdate := `UPDATE posts SET likes = Likes + $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes + $2 WHERE posts_id = $1;`
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(pq.ErrNotSupported)
@@ -279,7 +278,7 @@ func (s *SuiteLikesRepository) TestLikesRepositoryAdd_CommitError() {
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryAdd_OK() {
 	queryInsert := `INSERT INTO likes (post_id, users_id, value) VALUES ($1, $2, $3 > 0)`
-	queryUpdate := `UPDATE posts SET likes = Likes + $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes + $2 WHERE posts_id = $1;`
 
 	like := TestLike(s.T())
 
@@ -307,6 +306,7 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_NotFoundLike() {
 	expValue := false
 	sqlErr := sql.ErrNoRows
 	expErr := repository.NotFound
+	expRes := int64(app.InvalidInt)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -314,7 +314,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_NotFoundLike() {
 			AddRow(like.PostId, expValue)).
 		WillReturnError(sqlErr)
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.Equal(s.T(), expErr, err)
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_InternalError() {
@@ -324,6 +325,7 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_InternalError() {
 	expValue := false
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
+	expRes := int64(app.InvalidInt)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -331,9 +333,10 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_InternalError() {
 			AddRow(like.PostId, expValue)).
 		WillReturnError(sqlErr)
 
-	err := s.repo.Delete(like.ID)
-	assert.Equal(s.T(), expErr, err)
+	res, err := s.repo.Delete(like.ID)
 
+	assert.Equal(s.T(), expRes, res)
+	assert.Equal(s.T(), expErr, err)
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_BeginTransactionError() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
@@ -342,6 +345,7 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_BeginTransactionError()
 	expValue := false
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
+	expRes := int64(app.InvalidInt)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -350,13 +354,14 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_BeginTransactionError()
 
 	s.Mock.ExpectBegin().WillReturnError(sqlErr)
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.Equal(s.T(), expErr, err)
 
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_UpdatePostsError() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 
 	like := TestLike(s.T())
 	expBoolValue := false
@@ -364,6 +369,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_UpdatePostsError() {
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
+	expRes := int64(app.InvalidInt)
+	countLikes := 1
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -374,17 +381,19 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_UpdatePostsError() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
 		WithArgs(like.PostId, convertToLike).
-		WillReturnRows(sqlmock.NewRows([]string{})).
-		WillReturnError(sqlErr)
+		WillReturnRows(sqlmock.NewRows([]string{"likes"}).
+			AddRow(countLikes)).WillReturnError(sqlErr)
 	s.Mock.ExpectRollback()
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.Equal(s.T(), expErr, err)
 
 }
+
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_UpdatePostsRowCloseError() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 
 	like := TestLike(s.T())
 	expBoolValue := false
@@ -392,6 +401,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_UpdatePostsRowCloseErro
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
+	expCountLikes := 1
+	expRes := int64(app.InvalidInt)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -402,16 +413,19 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_UpdatePostsRowCloseErro
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
 		WithArgs(like.PostId, convertToLike).
-		WillReturnRows(sqlmock.NewRows([]string{}).CloseError(sqlErr))
+		WillReturnRows(sqlmock.NewRows([]string{"likes"}).
+			AddRow(expCountLikes).CloseError(sqlErr))
 	s.Mock.ExpectRollback()
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.Equal(s.T(), expErr, err)
 
 }
+
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeError() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 
 	like := TestLike(s.T())
@@ -420,6 +434,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeError() {
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
+	expCountLikes := 1
+	expRes := int64(app.InvalidInt)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -430,7 +446,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeError() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
 		WithArgs(like.PostId, convertToLike).
-		WillReturnRows(sqlmock.NewRows([]string{})).RowsWillBeClosed()
+		WillReturnRows(sqlmock.NewRows([]string{"likes"}).
+			AddRow(expCountLikes)).RowsWillBeClosed()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryDelete)).
 		WithArgs(like.ID).
@@ -439,13 +456,15 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeError() {
 
 	s.Mock.ExpectRollback()
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.Equal(s.T(), expErr, err)
 
 }
+
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeCloseRowError() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 
 	like := TestLike(s.T())
@@ -454,6 +473,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeCloseRowError
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
+	expCountLikes := 1
+	expRes := int64(app.InvalidInt)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -464,7 +485,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeCloseRowError
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
 		WithArgs(like.PostId, convertToLike).
-		WillReturnRows(sqlmock.NewRows([]string{})).RowsWillBeClosed()
+		WillReturnRows(sqlmock.NewRows([]string{"likes"}).
+			AddRow(expCountLikes)).RowsWillBeClosed()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryDelete)).
 		WithArgs(like.ID).
@@ -473,13 +495,15 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_DeleteLikeCloseRowError
 			CloseError(sqlErr))
 	s.Mock.ExpectRollback()
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.Equal(s.T(), expErr, err)
 
 }
+
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_CommitError() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 
 	like := TestLike(s.T())
@@ -488,6 +512,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_CommitError() {
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
+	expCountLikes := 1
+	expRes := int64(app.InvalidInt)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -498,7 +524,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_CommitError() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
 		WithArgs(like.PostId, convertToLike).
-		WillReturnRows(sqlmock.NewRows([]string{})).RowsWillBeClosed()
+		WillReturnRows(sqlmock.NewRows([]string{"likes"}).
+			AddRow(expCountLikes)).RowsWillBeClosed()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryDelete)).
 		WithArgs(like.ID).
@@ -506,18 +533,21 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_CommitError() {
 			AddRow()).RowsWillBeClosed()
 	s.Mock.ExpectCommit().WillReturnError(sqlErr)
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.Equal(s.T(), expErr, err)
 
 }
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_OK_DeleteLike() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 
 	like := TestLike(s.T())
 	expBoolValue := true
 	convertToLike := 1
+	expCountLikes := 1
+	expRes := int64(1)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -528,7 +558,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_OK_DeleteLike() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
 		WithArgs(like.PostId, convertToLike).
-		WillReturnRows(sqlmock.NewRows([]string{})).RowsWillBeClosed()
+		WillReturnRows(sqlmock.NewRows([]string{"likes"}).
+			AddRow(expCountLikes)).RowsWillBeClosed()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryDelete)).
 		WithArgs(like.ID).
@@ -536,18 +567,22 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_OK_DeleteLike() {
 			AddRow()).RowsWillBeClosed()
 	s.Mock.ExpectCommit()
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.NoError(s.T(), err)
 
 }
+
 func (s *SuiteLikesRepository) TestLikesRepositoryDelete_OK_DeleteDislike() {
 	querySelect := `SELECT post_id, value FROM likes WHERE likes_id = $1`
-	queryUpdate := `UPDATE posts SET likes = Likes - $2 WHERE posts_id = $1;`
+	queryUpdate := `UPDATE posts SET likes = likes - $2 WHERE posts_id = $1 RETURNING likes;`
 	queryDelete := `DELETE FROM likes WHERE likes_id = $1;`
 
 	like := TestLike(s.T())
 	expBoolValue := false
 	convertToLike := -1
+	expCountLikes := 1
+	expRes := int64(1)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(like.ID).
@@ -558,7 +593,8 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_OK_DeleteDislike() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdate)).
 		WithArgs(like.PostId, convertToLike).
-		WillReturnRows(sqlmock.NewRows([]string{})).RowsWillBeClosed()
+		WillReturnRows(sqlmock.NewRows([]string{"likes"}).
+			AddRow(expCountLikes)).RowsWillBeClosed()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryDelete)).
 		WithArgs(like.ID).
@@ -566,108 +602,11 @@ func (s *SuiteLikesRepository) TestLikesRepositoryDelete_OK_DeleteDislike() {
 			AddRow()).RowsWillBeClosed()
 	s.Mock.ExpectCommit()
 
-	err := s.repo.Delete(like.ID)
+	res, err := s.repo.Delete(like.ID)
+	assert.Equal(s.T(), expRes, res)
 	assert.NoError(s.T(), err)
 
 }
 func TestLikesRepository(t *testing.T) {
 	suite.Run(t, new(SuiteLikesRepository))
 }
-
-/*=
-func (s *SuiteLikesRepository) TestLikesRepository_Create() {
-	cr := models.TestCreator()
-
-	cr.ID = 1
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO creator_profile (creator_id, category, "+
-		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+"RETURNING creator_id")).
-		WithArgs(cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(cr.ID))))
-	id, err := s.repo.Create(cr)
-	assert.Equal(s.T(), id, cr.ID)
-	assert.NoError(s.T(), err)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO creator_profile (creator_id, category, "+
-		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+"RETURNING creator_id")).
-		WithArgs(cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).WillReturnError(models.BDError)
-	_, err = s.repo.Create(cr)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
-}
-
-func (s *SuiteLikesRepository) TestLikesRepository_GetCreator() {
-	cr := models.TestCreator()
-	cr.ID = 1
-	expected := *cr
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
-		WithArgs(cr.ID).
-		WillReturnRows(sqlmock.
-			NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"}).
-			AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname))
-
-	get, err := s.repo.GetCreator(expected.ID)
-	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), expected, *get)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
-		WithArgs(cr.ID).WillReturnError(sql.ErrNoRows)
-
-	_, err = s.repo.GetCreator(expected.ID)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NotFound, err)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
-		WithArgs(cr.ID).WillReturnError(models.BDError)
-
-	_, err = s.repo.GetCreator(expected.ID)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
-}
-
-func (s *SuiteLikesRepository) TestLikesRepository_GetCreators_AllUsersCreators() {
-	creators := models.TestCreators()
-
-	preapareRows := sqlmock.NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"})
-
-	for index, cr := range creators {
-		cr.ID = int64(index)
-		creators[index] = cr
-		preapareRows.AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname)
-	}
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
-		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")).
-		WillReturnRows(preapareRows)
-
-	get, err := s.repo.GetCreators()
-	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), creators, get)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).WillReturnError(models.BDError)
-
-	_, err = s.repo.GetCreators()
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
-		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")).WillReturnError(models.BDError)
-
-	_, err = s.repo.GetCreators()
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
-}
-
-func TestLikesRepository(t *testing.T) {
-	suite.Run(t, new(SuiteLikesRepository))
-}
-*/

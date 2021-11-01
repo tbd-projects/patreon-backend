@@ -17,5 +17,5 @@ type Usecase interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Delete(postId int64, userId int64) error
+	Delete(postId int64, userId int64) (int64, error)
 }

@@ -1,10 +1,12 @@
 package usecase_likes
 
 import (
-	"github.com/pkg/errors"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repoLikes "patreon/internal/app/repository/likes"
+
+	"github.com/pkg/errors"
 )
 
 type LikesUsecase struct {
@@ -38,13 +40,13 @@ func (usecase *LikesUsecase) Add(like *models.Like) error {
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *LikesUsecase) Delete(postId int64, userId int64) error {
+func (usecase *LikesUsecase) Delete(postId int64, userId int64) (int64, error) {
 	likeId, err := usecase.repository.GetLikeId(userId, postId)
 	if err != nil {
 		if errors.Is(err, repository.NotFound) {
-			return IncorrectDelLike
+			return app.InvalidInt, IncorrectDelLike
 		}
-		return err
+		return app.InvalidInt, err
 	}
 	return usecase.repository.Delete(likeId)
 }
