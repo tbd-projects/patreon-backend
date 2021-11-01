@@ -66,7 +66,7 @@ func (repo *LikesRepository) Add(like *models.Like) error {
 		return repository.NewDBError(err)
 	}
 	var row *sql.Rows
-	row, err = repo.store.Query(queryInsert, like.PostId, like.UserId, like.Value)
+	row, err = begin.Query(queryInsert, like.PostId, like.UserId, like.Value)
 
 	if err != nil {
 		_ = begin.Rollback()
@@ -78,7 +78,7 @@ func (repo *LikesRepository) Add(like *models.Like) error {
 		return repository.NewDBError(err)
 	}
 
-	row, err = repo.store.Query(queryUpdate, like.PostId, like.Value)
+	row, err = begin.Query(queryUpdate, like.PostId, like.Value)
 
 	if err != nil {
 		_ = begin.Rollback()
@@ -127,7 +127,7 @@ func (repo *LikesRepository) Delete(likeId int64) error {
 	}
 
 	var row *sql.Rows
-	row, err = repo.store.Query(queryUpdate, postId, value)
+	row, err = begin.Query(queryUpdate, postId, value)
 
 	if err != nil {
 		_ = begin.Rollback()
@@ -139,7 +139,7 @@ func (repo *LikesRepository) Delete(likeId int64) error {
 		return repository.NewDBError(err)
 	}
 
-	if row, err = repo.store.Query(queryDelete, likeId); err != nil {
+	if row, err = begin.Query(queryDelete, likeId); err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
