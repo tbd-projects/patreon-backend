@@ -19,5 +19,5 @@ var codeByError = base_handler.CodeMap{
 	repository.DefaultErrDB:            {http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
 	usercase_user.BadEncrypt:           {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
 	app.UnknownError:                   {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
-	usercase_user.OldPasswordEqualNew:  {http.StatusInternalServerError, handler_errors.BDError, log.InfoLevel},
+	usercase_user.OldPasswordEqualNew:  {http.StatusBadRequest, handler_errors.BDError, log.InfoLevel},
 }
