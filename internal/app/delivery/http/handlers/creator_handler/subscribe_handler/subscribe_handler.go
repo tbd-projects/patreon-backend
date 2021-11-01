@@ -51,9 +51,9 @@ func NewSubscribeHandler(log *logrus.Logger, router *mux.Router,
 // @Produce json
 // @Param creator_id path int true "creator_id"
 // @Success 200 "Successfully unsubscribe on the creator with id = creator_id"
-// @Failure 400 "invalid parameters - creator_id"
-// @Failure 401 "User are not authorized"
-// @Failure 409 "this user is not subscribed on the creator"
+// @Failure 400 {object} models.ErrResponse "invalid parameters - creator_id"
+// @Failure 401 {object} models.ErrResponse "User are not authorized"
+// @Failure 409 {object} models.ErrResponse "this user is not subscribed on the creator"
 // @Failure 500 {object} models.ErrResponse "serverError"
 // @Router /creators/{:creator_id}/subscribe [DELETE]
 func (h *SubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
@@ -153,9 +153,9 @@ func (h *SubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 // @Description get subscribers of the creators with id = creator_id
 // @Produce json
 // @Param creator_id path int true "creator_id"
-// @Success 200 "Successfully get creator subscribers with creator id = creator_id"
-// @Failure 400 "invalid parameters - creator_id"
-// @Failure 401 "User are not authorized"
+// @Success 200 {object} models.SubscribersCreatorResponse "Successfully get creator subscribers with creator id = creator_id"
+// @Failure 400 {object} models.ErrResponse "invalid parameters - creator_id"
+// @Failure 401 {object} models.ErrResponse "User are not authorized"
 // @Failure 500 {object} models.ErrResponse "serverError"
 // @Router /creators/{:creator_id}/subscribe [GET]
 func (h *SubscribeHandler) GET(w http.ResponseWriter, r *http.Request) {

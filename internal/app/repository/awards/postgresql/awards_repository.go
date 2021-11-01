@@ -28,11 +28,9 @@ func NewAwardsRepository(st *sql.DB) *AwardsRepository {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) checkUniqName(name string, creatorId int64, skipAwardsid int64) error {
+	query := "SELECT count(*) from awards where awards.creator_id = $1 and awards.name = $2 and awards.awards_id != $3"
 	count := 0
-	err := repo.store.QueryRow(
-		"SELECT count(*) from awards where awards.creator_id = $1 and awards.name = $2 and awards.awards_id != $3",
-		creatorId, name, skipAwardsid).Scan(&count)
-	if err != nil {
+	if err := repo.store.QueryRow(query, creatorId, name, skipAwardsid).Scan(&count); err != nil {
 		return repository.NewDBError(err)
 	}
 
@@ -52,9 +50,10 @@ func (repo *AwardsRepository) Create(aw *models.Award) (int64, error) {
 		return -1, err
 	}
 
-	if err := repo.store.QueryRow("INSERT INTO awards (name, "+
-		"description, price, color, creator_id) VALUES ($1, $2, $3, $4, $5)"+
-		"RETURNING awards_id", aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.CreatorId).
+	query := `INSERT INTO awards (name, description, price, color, creator_id) VALUES ($1, $2, $3, $4, $5) 
+				RETURNING awards_id`
+
+	if err := repo.store.QueryRow(query, aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.CreatorId).
 		Scan(&aw.ID); err != nil {
 		return -1, repository.NewDBError(err)
 	}
@@ -66,9 +65,10 @@ func (repo *AwardsRepository) Create(aw *models.Award) (int64, error) {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) GetByID(awardsID int64) (*models.Award, error) {
+	query := "SELECT name, description, price, color, creator_id, cover FROM awards where awards_id = $1"
 	aw := &models.Award{ID: awardsID}
 	var clr uint64
-	if err := repo.store.QueryRow("SELECT name, description, price, color, creator_id, cover FROM awards where awards_id = $1",
+	if err := repo.store.QueryRow(query,
 		awardsID).Scan(&aw.Name, &aw.Description, &aw.Price, &clr, &aw.CreatorId, &aw.Cover); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
@@ -102,11 +102,11 @@ func (repo *AwardsRepository) CheckAwards(awardsID int64) (bool, error) {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) Update(aw *models.Award) error {
+	queryGetCreatorId := "SELECT creator_id from awards where awards.awards_id = $1"
+	queryUpdate := "UPDATE awards SET name = $1, description = $2, price = $3, color = $4 WHERE awards_id = $5"
 	creatorId := int64(0)
 
-	if err := repo.store.QueryRow(
-		"SELECT creator_id from awards where awards.awards_id = $1", aw.ID).
-		Scan(&creatorId); err != nil {
+	if err := repo.store.QueryRow(queryGetCreatorId, aw.ID).Scan(&creatorId); err != nil {
 		if err == sql.ErrNoRows {
 			return repository.NotFound
 		}
@@ -117,9 +117,7 @@ func (repo *AwardsRepository) Update(aw *models.Award) error {
 		return err
 	}
 
-	row, err := repo.store.Query("UPDATE awards SET name = $1, description = $2, price = $3, color = $4 WHERE awards_id = $5",
-		aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.ID)
-
+	row, err := repo.store.Query(queryUpdate, aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.ID)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
@@ -134,30 +132,26 @@ func (repo *AwardsRepository) Update(aw *models.Award) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Award, error) {
+	query := `SELECT awards_id, name, description, price, color, cover from awards where awards.creator_id = $1`
 	var res []models.Award
 
-	rows, err := repo.store.Query(
-		"SELECT awards_id, name, description, price, color, cover from awards where awards.creator_id = $1", creatorId)
+	rows, err := repo.store.Query(query, creatorId)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}
 
-	i := 0
 	for rows.Next() {
 		var awards models.Award
 		var clr uint64
 		if err = rows.Scan(&awards.ID, &awards.Name, &awards.Description, &awards.Price, &clr, &awards.Cover); err != nil {
+			_ = rows.Close()
 			return nil, repository.NewDBError(err)
 		}
 		awards.Color = convertUint64ToRGBA(clr)
 		res = append(res, awards)
-		i++
-
-		if err = rows.Err(); err != nil {
-			return nil, repository.NewDBError(err)
-		}
 	}
-	if err = rows.Close(); err != nil {
+
+	if err = rows.Err(); err != nil {
 		return nil, repository.NewDBError(err)
 	}
 
@@ -168,7 +162,10 @@ func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Award, error)
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) Delete(awardsId int64) error {
-	row, err := repo.store.Query("UPDATE posts SET type_awards = NULL where type_awards = $1", awardsId)
+	queryUpdate:= "UPDATE posts SET type_awards = NULL where type_awards = $1"
+	queryDelete := "DELETE FROM awards WHERE awards_id = $1"
+
+	row, err := repo.store.Query(queryUpdate, awardsId)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
@@ -177,7 +174,7 @@ func (repo *AwardsRepository) Delete(awardsId int64) error {
 		return repository.NewDBError(err)
 	}
 
-	row, err = repo.store.Query("DELETE FROM awards WHERE awards_id = $1", awardsId)
+	row, err = repo.store.Query(queryDelete, awardsId)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
