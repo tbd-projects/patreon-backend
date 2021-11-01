@@ -3,13 +3,14 @@ package repository_postgresql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/pkg/errors"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repository_posts "patreon/internal/app/repository/posts"
 	rp "patreon/internal/app/repository/posts"
 	putilits "patreon/internal/app/utilits/postgresql"
+
+	"github.com/pkg/errors"
 )
 
 type PostsRepository struct {
@@ -112,7 +113,7 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64, pag *model
 			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, lk.likes_id IS NOT NULL, views
 			FROM posts
 			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
-			WHERE creator_id = $2 ORDER BY posts.date` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
+			WHERE creator_id = $2 ORDER BY posts.date ` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
 
 	if err != nil {
 		return nil, err
