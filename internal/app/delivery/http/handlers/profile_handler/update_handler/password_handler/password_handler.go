@@ -58,7 +58,7 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestChangePassword{}
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
-	if err != nil {
+	if err != nil || req.OldPassword == "" || req.NewPassword == "" {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
 		return
 	}
