@@ -34,7 +34,7 @@ func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, awardNa
 		return repository.NewDBError(err)
 	}
 
-	row, err := repo.store.Query(queryAddPayment, price,
+	row, err := begin.Query(queryAddPayment, price,
 		subscriber.CreatorID, subscriber.UserID)
 
 	if err != nil {
@@ -47,7 +47,7 @@ func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, awardNa
 		return repository.NewDBError(err)
 	}
 
-	if row, err = repo.store.Query(queryAddSubscribe,
+	if row, err = begin.Query(queryAddSubscribe,
 		subscriber.UserID, subscriber.CreatorID); err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)

@@ -22,7 +22,7 @@ type Usecase interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPost(postId int64, userId int64) (*models.PostWithData, error)
+	GetPost(postId int64, userId int64, addView bool) (*models.PostWithData, error)
 
 	// Delete Errors:
 	// 		app.GeneralError with Errors:

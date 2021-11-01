@@ -16,7 +16,7 @@ type Repository interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPost(postID int64, userId int64) (*models.Post, error)
+	GetPost(postID int64, userId int64, addView bool) (*models.Post, error)
 
 	// GetPostCreator Errors:
 	//		repository.NotFound

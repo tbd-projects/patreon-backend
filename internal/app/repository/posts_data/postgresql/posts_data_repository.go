@@ -130,17 +130,15 @@ func (repo *PostsDataRepository) GetData(postsId int64) ([]models.PostData, erro
 	for rows.Next() {
 		var data models.PostData
 		if err = rows.Scan(&data.ID, &data.Type, &data.Data); err != nil {
+			_ = rows.Close()
 			return nil, repository.NewDBError(err)
 		}
+
 		res = append(res, data)
 		data.PostId = postsId
-
-		if err = rows.Err(); err != nil {
-			return nil, repository.NewDBError(err)
-		}
 	}
 
-	if err = rows.Close(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, repository.NewDBError(err)
 	}
 

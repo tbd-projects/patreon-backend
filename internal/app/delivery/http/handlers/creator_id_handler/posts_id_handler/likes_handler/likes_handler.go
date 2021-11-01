@@ -30,8 +30,7 @@ func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
-	creatorMiddleware := middleware.NewCreatorsMiddleware(log)
-	h.AddMiddleware(sessionMiddleware.Check, creatorMiddleware.CheckAllowUser, postsMiddleware.CheckCorrectPost)
+	h.AddMiddleware(sessionMiddleware.Check, postsMiddleware.CheckCorrectPost)
 	h.AddMethod(http.MethodDelete, h.DELETE)
 	h.AddMethod(http.MethodPut, h.PUT)
 	return h

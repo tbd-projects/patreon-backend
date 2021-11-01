@@ -1,7 +1,18 @@
 package repository_postgresql
 
 import (
+	"database/sql"
+	"fmt"
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
+	"patreon/internal/app/repository"
+	repository_posts "patreon/internal/app/repository/posts"
+	putilits "patreon/internal/app/utilits/postgresql"
+	"regexp"
+	"testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -20,100 +31,325 @@ func (s *SuitePostsRepository) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.Mock.ExpectationsWereMet())
 }
 
-/*
 func (s *SuitePostsRepository) TestPostsRepository_Create() {
-	cr := models.TestCreator()
+	query := `INSERT INTO posts (title, description,
+		type_awards, creator_id, cover) VALUES ($1, $2, $3, $4, $5) 
+		RETURNING posts_id`
+	post := &models.CreatePost{ID: 2, Title: "sad", Description: "asdasd", Awards: 1, CreatorId: 2}
 
-	cr.ID = 1
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO creator_profile (creator_id, category, "+
-		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+"RETURNING creator_id")).
-		WithArgs(cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(cr.ID))))
-	id, err := s.repo.Create(cr)
-	assert.Equal(s.T(), id, cr.ID)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(post.Title, post.Description, post.Awards, post.CreatorId, app.DefaultImage).
+		WillReturnRows(sqlmock.NewRows([]string{"posts_id"}).AddRow(post.ID))
+	id, err := s.repo.Create(post)
+	assert.Equal(s.T(), post.ID, id)
 	assert.NoError(s.T(), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("INSERT INTO creator_profile (creator_id, category, "+
-		"description, avatar, cover) VALUES ($1, $2, $3, $4, $5)"+"RETURNING creator_id")).
-		WithArgs(cr.ID, cr.Category, cr.Description, cr.Avatar, cr.Cover).WillReturnError(models.BDError)
-	_, err = s.repo.Create(cr)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
+	post.Awards = repository_posts.NoAwards
+	var awardsId sql.NullInt64
+	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Valid = false
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(post.Title, post.Description, awardsId, post.CreatorId, app.DefaultImage).
+		WillReturnRows(sqlmock.NewRows([]string{"posts_id"}).AddRow(post.ID))
+	id, err = s.repo.Create(post)
+	assert.Equal(s.T(), post.ID, id)
+	assert.NoError(s.T(), err)
+
+	post.Awards = 1
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(post.Title, post.Description, post.Awards, post.CreatorId, app.DefaultImage).
+		WillReturnError(repository.DefaultErrDB)
+	_, err = s.repo.Create(post)
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 }
 
-func (s *SuitePostsRepository) TestPostsRepository_GetCreator() {
-	cr := models.TestCreator()
-	cr.ID = 1
-	expected := *cr
+func (s *SuitePostsRepository) TestPostsRepository_GetPostCreator() {
+	query := `SELECT creator_id FROM posts WHERE posts_id = $1`
+	creatorId := int64(3)
+	postId := int64(2)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
-		WithArgs(cr.ID).
-		WillReturnRows(sqlmock.
-			NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"}).
-			AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname))
-
-	get, err := s.repo.GetCreator(expected.ID)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(postId).
+		WillReturnRows(sqlmock.NewRows([]string{"creator_id"}).AddRow(creatorId))
+	id, err := s.repo.GetPostCreator(postId)
+	assert.Equal(s.T(), id, creatorId)
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), expected, *get)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
-		WithArgs(cr.ID).WillReturnError(sql.ErrNoRows)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(postId).
+		WillReturnError(repository.DefaultErrDB)
+	_, err = s.repo.GetPostCreator(postId)
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 
-	_, err = s.repo.GetCreator(expected.ID)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NotFound, err)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id where creator_id=$1")).
-		WithArgs(cr.ID).WillReturnError(models.BDError)
-
-	_, err = s.repo.GetCreator(expected.ID)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(postId).
+		WillReturnError(sql.ErrNoRows)
+	_, err = s.repo.GetPostCreator(postId)
+	assert.Error(s.T(), err, repository.NotFound)
 }
 
-func (s *SuitePostsRepository) TestPostsRepository_GetCreators_AllUsersCreators() {
-	creators := models.TestCreators()
+func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
+	query := `
+			SELECT title, description, likes, posts.date, cover, type_awards, creator_id, lk.likes_id IS NOT NULL, views FROM posts
+				LEFT OUTER JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
+				WHERE posts.posts_id = $2;`
+	queryPost := `UPDATE posts SET views = views + 1 WHERE posts_id = $1`
 
-	preapareRows := sqlmock.NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"})
-
-	for index, cr := range creators {
-		cr.ID = int64(index)
-		creators[index] = cr
-		preapareRows.AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname)
-	}
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
-		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")).
-		WillReturnRows(preapareRows)
-
-	get, err := s.repo.GetCreators()
+	post := &models.Post{ID: 2, Title: "sad", Description: "asdasd", Awards: 1, CreatorId: 2}
+	userId := int64(5)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views"}).
+			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
+				post.Awards, post.CreatorId, post.AddLike, post.Views))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryPost)).
+		WithArgs(post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{}).AddRow())
+	res, err := s.repo.GetPost(post.ID, userId, true)
+	assert.Equal(s.T(), res, post)
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), creators, get)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views"}).
+			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
+				post.Awards, post.CreatorId, post.AddLike, post.Views))
+	res, err = s.repo.GetPost(post.ID, userId, false)
+	assert.Equal(s.T(), res, post)
+	assert.NoError(s.T(), err)
 
-	_, err = s.repo.GetCreators()
+	var awardsId sql.NullInt64
+	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Valid = false
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views"}).
+			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
+				awardsId, post.CreatorId, post.AddLike, post.Views))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryPost)).
+		WithArgs(post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{}).AddRow())
+	res, err = s.repo.GetPost(post.ID, userId, true)
+	post.Awards = repository_posts.NoAwards
+	assert.Equal(s.T(), res, post)
+	post.Awards = 1
+	assert.NoError(s.T(), err)
+
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views"}).
+			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
+				post.Awards, post.CreatorId, post.AddLike, post.Views))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryPost)).
+		WithArgs(post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{}).AddRow().CloseError(models.BDError))
+	_, err = s.repo.GetPost(post.ID, userId, true)
+	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views"}).
+			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
+				post.Awards, post.CreatorId, post.AddLike, post.Views))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryPost)).
+		WithArgs(post.ID).
+		WillReturnError(models.BDError)
+	_, err = s.repo.GetPost(post.ID, userId, true)
+	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.ID).
+		WillReturnError(models.BDError)
+	_, err = s.repo.GetPost(post.ID, userId, true)
+	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.ID).
+		WillReturnError(sql.ErrNoRows)
+	_, err = s.repo.GetPost(post.ID, userId, true)
+	assert.Error(s.T(), err, repository.NotFound)
+}
+
+func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
+	queryStat := "SELECT n_live_tup FROM pg_stat_all_tables WHERE relname = $1"
+	tableName := "posts"
+
+	pag := &models.Pagination{Limit: 10, Offset: 20}
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5000)))
+	limit, offset, err := putilits.AddPagination(tableName, pag, s.DB)
+	assert.NoError(s.T(), err)
+	query := `
+			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, lk.likes_id IS NOT NULL, views
+			FROM posts
+			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
+			WHERE creator_id = $2 ORDER BY posts.date` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
+
+	post := models.Post{ID: 2, Title: "sad", Description: "asdasd", Awards: 1, CreatorId: 2}
+	userId := int64(5)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5000)))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.CreatorId).
+		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
+		"type_awards", "posts.date", "cover", "have_like", "views"}).
+			AddRow( post.ID,post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
+				 post.AddLike, post.Views))
+	res, err := s.repo.GetPosts(post.CreatorId, userId, pag)
+	assert.Equal(s.T(), res[0], post)
+	assert.NoError(s.T(), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnError(repository.DefaultErrDB)
+	_, err = s.repo.GetPosts(post.CreatorId, userId, pag)
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
+
+	var awardsId sql.NullInt64
+	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Valid = false
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5000)))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.CreatorId).
+		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
+			"type_awards", "posts.date", "cover", "have_like", "views"}).
+			AddRow( post.ID,post.Title, post.Description, post.Likes, awardsId, post.Date, post.Cover,
+				post.AddLike, post.Views))
+	res, err = s.repo.GetPosts(post.CreatorId, userId, pag)
+	post.Awards = repository_posts.NoAwards
+	assert.Equal(s.T(), res[0], post)
+	post.Awards = 1
+	assert.NoError(s.T(), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5000)))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.CreatorId).
+		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views"}).
+			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
+				post.Awards, post.CreatorId, post.Description, post.Views))
+	_, err = s.repo.GetPosts(post.CreatorId, userId, pag)
 	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) from creator_profile")).
-		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5000)))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.CreatorId).
+		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
+			"type_awards", "posts.date", "cover", "have_like", "views"}).
+			AddRow( post.ID,post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
+				post.AddLike, post.Views).RowError(0, models.BDError))
+	_, err = s.repo.GetPosts(post.CreatorId, userId, pag)
+	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta("SELECT creator_id, category, description, creator_profile.avatar, cover, usr.nickname " +
-		"from creator_profile join users as usr on usr.user_id = creator_profile.creator_id")).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5000)))
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(userId, post.CreatorId).
+		WillReturnError(models.BDError)
+	_, err = s.repo.GetPosts(post.CreatorId, userId, pag)
+	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
+}
 
-	_, err = s.repo.GetCreators()
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
+func (s *SuitePostsRepository) TestPostsRepository_Update() {
+	query := `UPDATE posts SET title = $1, description = $2, type_awards = $3 WHERE posts_id = $4 RETURNING posts_id`
+	post := &models.UpdatePost{ID: 2, Title: "sad", Description: "asdasd", Awards: 1}
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(post.Title, post.Description, post.Awards, post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"posts_id"}).AddRow(post.ID))
+	err := s.repo.UpdatePost(post)
+	assert.NoError(s.T(), err)
+
+	post.Awards = repository_posts.NoAwards
+	var awardsId sql.NullInt64
+	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Valid = false
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(post.Title, post.Description, awardsId, post.ID).
+		WillReturnRows(sqlmock.NewRows([]string{"posts_id"}).AddRow(post.ID))
+	err = s.repo.UpdatePost(post)
+	assert.NoError(s.T(), err)
+
+	post.Awards = 1
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(post.Title, post.Description, post.Awards, post.ID).
+		WillReturnError(repository.DefaultErrDB)
+	err = s.repo.UpdatePost(post)
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(post.Title, post.Description, post.Awards, post.ID).
+		WillReturnError(sql.ErrNoRows)
+	err = s.repo.UpdatePost(post)
+	assert.Error(s.T(), err, repository.NotFound)
+}
+
+func (s *SuitePostsRepository) TestPostsRepository_UpdateCover() {
+	query := `UPDATE posts SET cover = $1 WHERE posts_id = $2 RETURNING posts_id`
+
+	postId := int64(2)
+	cover := "sdadsasd"
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(cover, postId).
+		WillReturnRows(sqlmock.NewRows([]string{"posts_id"}).AddRow(postId))
+	err := s.repo.UpdateCoverPost(postId, cover)
+	assert.NoError(s.T(), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(cover, postId).
+		WillReturnError(repository.DefaultErrDB)
+	err = s.repo.UpdateCoverPost(postId, cover)
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(cover, postId).
+		WillReturnError(sql.ErrNoRows)
+	err = s.repo.UpdateCoverPost(postId, cover)
+	assert.Error(s.T(), err, repository.NotFound)
+}
+
+func (s *SuitePostsRepository) TestPostsRepository_Delete() {
+	query := `DELETE FROM posts WHERE posts_id = $q`
+
+	postId := int64(2)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(postId).
+		WillReturnRows(sqlmock.NewRows([]string{}))
+	err := s.repo.Delete(postId)
+	assert.NoError(s.T(), err)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(postId).
+		WillReturnError(repository.DefaultErrDB)
+	err = s.repo.Delete(postId)
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(postId).
+		WillReturnRows(sqlmock.NewRows([]string{}).CloseError(repository.DefaultErrDB))
+	err = s.repo.Delete(postId)
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 }
 
 func TestPostsRepository(t *testing.T) {
 	suite.Run(t, new(SuitePostsRepository))
 }
-*/

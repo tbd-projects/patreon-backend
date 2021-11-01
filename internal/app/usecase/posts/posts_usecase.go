@@ -36,8 +36,8 @@ func (usecase *PostsUsecase) GetPosts(creatorId int64, userId int64, pag *models
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PostsUsecase) GetPost(postId int64, userId int64) (*models.PostWithData, error) {
-	post, err := usecase.repository.GetPost(postId, userId)
+func (usecase *PostsUsecase) GetPost(postId int64, userId int64, addView bool) (*models.PostWithData, error) {
+	post, err := usecase.repository.GetPost(postId, userId, addView)
 	if err != nil {
 		return nil, err
 	}

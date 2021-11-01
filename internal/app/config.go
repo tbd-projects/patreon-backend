@@ -1,6 +1,9 @@
 package app
 
-const LoadFileUrl = "media/"
+const (
+	LoadFileUrl = "media/"
+	DefaultImage = ""
+)
 
 type RepositoryConnections struct {
 	DataBaseUrl     string `toml:"database_url"`

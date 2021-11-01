@@ -107,7 +107,7 @@ func (s *Server) Start(config *app.Config) error {
 			Addr: config.BindHttpAddr,
 			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
-				log.Infof("Redirect from %s, to %s", r.URL.String(), targetUrl.String())
+				log.Infof("Redirect from %s, to %s", r.RequestURI, targetUrl.String())
 				http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
 			}),
 		}
@@ -119,6 +119,7 @@ func (s *Server) Start(config *app.Config) error {
 			}
 			return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
 		}
+
 		dataDir := "./patreon-secrt"
 		m := &autocert.Manager{
 			Cache:      autocert.DirCache(dataDir),

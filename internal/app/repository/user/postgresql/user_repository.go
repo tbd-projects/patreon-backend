@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 
@@ -26,7 +27,7 @@ func NewUserRepository(st *sql.DB) *UserRepository {
 func (repo *UserRepository) Create(u *models.User) error {
 	query := `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
 
-	if err := repo.store.QueryRow(query, u.Login, u.Nickname, u.EncryptedPassword, u.Avatar).Scan(&u.ID); err != nil {
+	if err := repo.store.QueryRow(query, u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).Scan(&u.ID); err != nil {
 		if _, ok := err.(*pq.Error); ok {
 			return parsePQError(err.(*pq.Error))
 		}
