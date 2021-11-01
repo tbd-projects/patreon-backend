@@ -34,8 +34,8 @@ type SuiteUsecase struct {
 	MockLikesRepository       *mock_repository_likes.LikesRepository
 	MockPostsDataRepository   *mock_repository_posts_data.Posts_dataRepository
 
-	Logger                    *logrus.Logger
-	Tb                        TestTable
+	Logger *logrus.Logger
+	Tb     TestTable
 }
 
 func (s *SuiteUsecase) SetupSuite() {

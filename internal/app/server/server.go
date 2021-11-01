@@ -1,11 +1,15 @@
 package server
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
+	"net/url"
 	"patreon/internal/app/delivery/http/handler_factory"
 	"patreon/internal/app/repository/repository_factory"
 	"patreon/internal/app/usecase/usecase_factory"
+
+	"golang.org/x/crypto/acme/autocert"
 
 	_ "patreon/docs"
 	"patreon/internal/app"
@@ -87,18 +91,42 @@ func (s *Server) Start(config *app.Config) error {
 	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	fileServer := http.FileServer(http.Dir(config.MediaDir + "/"))
-	routerApi.PathPrefix("/" + app.LoadFileUrl).Handler(http.StripPrefix("/api/v1/" + app.LoadFileUrl, fileServer))
+	routerApi.PathPrefix("/" + app.LoadFileUrl).Handler(http.StripPrefix("/api/v1/"+app.LoadFileUrl, fileServer))
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
 	factory := handler_factory.NewFactory(s.logger, router, &config.Cors, usecaseFactory)
 	hs := factory.GetHandleUrls()
 
-	for url, h := range *hs {
-		h.Connect(routerApi.Path(url))
+	for apiUrl, h := range *hs {
+		h.Connect(routerApi.Path(apiUrl))
 	}
 
 	s.logger.Info("starting server")
 
-	return http.ListenAndServe(config.BindAddr, routerApi)
+	server := &http.Server{
+		Addr: config.BindHttpAddr,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+			log.Infof("Redirect from %s, to %s", r.URL.String(), targetUrl.String())
+			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
+		}),
+	}
+	if config.IsProduction {
+		m := &autocert.Manager{
+			Cache:      autocert.DirCache("patreon-secrt"),
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(config.Domen, "www."+config.Domen),
+		}
+		server = &http.Server{
+			Addr:      config.BindHttpsAddr,
+			TLSConfig: &tls.Config{GetCertificate: m.GetCertificate},
+			Handler:   routerApi,
+		}
+		return server.ListenAndServeTLS("", "")
+	} else {
+		server.Handler = routerApi
+		return server.ListenAndServe()
+		//return http.ListenAndServe(config.BindAddr, routerApi)
+	}
 }

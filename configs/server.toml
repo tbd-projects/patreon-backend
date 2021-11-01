@@ -3,6 +3,11 @@ log_path = "./logs/"
 bind_addr = ":8080"
 media_dir = "./media"
 
+bind_addr_https = ":443"
+bind_addr_http = ":8080"
+
+domen = "95.163.208.72"
+
 [local]
 database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
 session-redis_url = "redis://localhost:6379"

@@ -123,7 +123,7 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateAvatar_Success() {
 		Return(name, nil)
 
 	s.MockCreatorRepository.EXPECT().
-		UpdateAvatar(cr.ID, app.LoadFileUrl + name).
+		UpdateAvatar(cr.ID, app.LoadFileUrl+name).
 		Times(1).
 		Return(nil)
 
@@ -147,7 +147,7 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateCover_Success() {
 		Return(name, nil)
 
 	s.MockCreatorRepository.EXPECT().
-		UpdateCover(cr.ID, app.LoadFileUrl + name).
+		UpdateCover(cr.ID, app.LoadFileUrl+name).
 		Times(1).
 		Return(nil)
 

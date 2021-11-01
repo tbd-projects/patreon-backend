@@ -97,6 +97,7 @@ func main() {
 
 	repositoryConfig := &config.LocalRepository
 	if useServerRepository {
+		config.IsProduction = true
 		repositoryConfig = &config.ServerRepository
 	}
 

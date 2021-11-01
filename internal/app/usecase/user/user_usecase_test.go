@@ -316,8 +316,6 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_Create_Success() {
 	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
 }
 
-
-
 func TestUsecaseUser(t *testing.T) {
 	suite.Run(t, new(SuiteUserUsecase))
 }
