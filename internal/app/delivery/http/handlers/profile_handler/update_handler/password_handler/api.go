@@ -13,11 +13,12 @@ import (
 )
 
 var codeByError = base_handler.CodeMap{
-	repository.NotFound:                {http.StatusNotFound, handler_errors.UserNotFound, log.WarnLevel},
-	usercase_user.IncorrectNewPassword: {http.StatusBadRequest, handler_errors.IncorrectNewPassword, log.InfoLevel},
-	models.EmptyPassword:               {http.StatusBadRequest, handler_errors.IncorrectNewPassword, log.InfoLevel},
-	repository.DefaultErrDB:            {http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
-	usercase_user.BadEncrypt:           {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
-	app.UnknownError:                   {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
-	usercase_user.OldPasswordEqualNew:  {http.StatusBadRequest, handler_errors.BDError, log.InfoLevel},
+	usercase_user.IncorrectEmailOrPassword: {http.StatusForbidden, handler_errors.IncorrectLoginOrPassword, log.InfoLevel},
+	repository.NotFound:                    {http.StatusNotFound, handler_errors.UserNotFound, log.WarnLevel},
+	usercase_user.IncorrectNewPassword:     {http.StatusBadRequest, handler_errors.IncorrectNewPassword, log.InfoLevel},
+	models.EmptyPassword:                   {http.StatusBadRequest, handler_errors.IncorrectNewPassword, log.InfoLevel},
+	repository.DefaultErrDB:                {http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
+	usercase_user.BadEncrypt:               {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
+	app.UnknownError:                       {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
+	usercase_user.OldPasswordEqualNew:      {http.StatusBadRequest, handler_errors.BDError, log.InfoLevel},
 }

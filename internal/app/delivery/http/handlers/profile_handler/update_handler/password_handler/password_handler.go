@@ -49,6 +49,7 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 // @Success 200 "success update password"
 // @Failure 400 {object} models.ErrResponse "incorrect new password"
 // @Failure 403 "csrf token is invalid, get new token"
+// @Failure 403 "incorrect email or password"
 // @Failure 404 {object} models.ErrResponse "User not found"
 // @Failure 418 "User are authorized"
 // @Failure 422 {object} models.ErrResponse "Not valid body"
@@ -70,7 +71,7 @@ func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	err = h.userUsecase.UpdatePassword(userId, req.NewPassword)
+	err = h.userUsecase.UpdatePassword(userId, req.OldPassword, req.NewPassword)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByError)
 		return
