@@ -6,7 +6,8 @@ media_dir = "./media"
 bind_addr_https = ":443"
 bind_addr_http = ":80"
 
-domen = "95.163.208.72"
+#domen = "95.163.208.72"
+domen = "api.pyaterochka-team.site"
 
 [local]
 database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
