@@ -117,8 +117,14 @@ func (repo *AwardsRepository) Update(aw *models.Award) error {
 		return err
 	}
 
-	if _, err := repo.store.Query("UPDATE awards SET name = $1, description = $2, price = $3, color = $4 WHERE awards_id = $5",
-		aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.ID); err != nil {
+	row, err := repo.store.Query("UPDATE awards SET name = $1, description = $2, price = $3, color = $4 WHERE awards_id = $5",
+		aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color), aw.ID)
+
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
 	}
 	return nil
@@ -162,12 +168,21 @@ func (repo *AwardsRepository) GetAwards(creatorId int64) ([]models.Award, error)
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *AwardsRepository) Delete(awardsId int64) error {
-	if _, err := repo.store.Query("UPDATE posts SET type_awards = NULL where type_awards = $1",
-		awardsId); err != nil {
+	row, err := repo.store.Query("UPDATE posts SET type_awards = NULL where type_awards = $1", awardsId)
+	if err != nil {
 		return repository.NewDBError(err)
 	}
 
-	if _, err := repo.store.Query("DELETE FROM awards WHERE awards_id = $1", awardsId); err != nil {
+	if err = row.Close(); err != nil {
+		return repository.NewDBError(err)
+	}
+
+	row, err = repo.store.Query("DELETE FROM awards WHERE awards_id = $1", awardsId)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
 	}
 
@@ -206,7 +221,12 @@ func (repo *AwardsRepository) UpdateCover(awardsId int64, cover string) error {
 		return repository.NewDBError(err)
 	}
 
-	if _, err := repo.store.Query(query, cover, awardsId); err != nil {
+	row, err := repo.store.Query(query, cover, awardsId)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
 	}
 	return nil

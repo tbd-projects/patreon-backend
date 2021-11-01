@@ -78,8 +78,13 @@ func (repo *UserRepository) FindByID(id int64) (*models.User, error) {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *UserRepository) UpdatePassword(id int64, newEncryptedPassword string) error {
-	if _, err := repo.store.Query("UPDATE users SET encrypted_password = $1 WHERE users_id = $2",
-		newEncryptedPassword, id); err != nil {
+	row, err := repo.store.Query("UPDATE users SET encrypted_password = $1 WHERE users_id = $2",
+		newEncryptedPassword, id)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
 	}
 	return nil
@@ -89,7 +94,12 @@ func (repo *UserRepository) UpdatePassword(id int64, newEncryptedPassword string
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *UserRepository) UpdateAvatar(id int64, newAvatar string) error {
-	if _, err := repo.store.Query("UPDATE users SET avatar = $1 WHERE users_id = $2", newAvatar, id); err != nil {
+	row, err := repo.store.Query("UPDATE users SET avatar = $1 WHERE users_id = $2", newAvatar, id)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
 	}
 	return nil

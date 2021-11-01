@@ -84,8 +84,11 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64) (*models.Post, 
 		return nil, repository.NewDBError(err)
 	}
 
-	_, err := repo.store.Query(queryPost, postID)
+	row, err := repo.store.Query(queryPost, postID)
 	if err != nil {
+		return nil, repository.NewDBError(err)
+	}
+	if err = row.Close(); err != nil {
 		return nil, repository.NewDBError(err)
 	}
 
@@ -194,7 +197,12 @@ func (repo *PostsRepository) UpdateCoverPost(postId int64, cover string) error {
 func (repo *PostsRepository) Delete(postId int64) error {
 	query := `DELETE FROM posts WHERE posts_id = $q`
 
-	if _, err := repo.store.Query(query, postId); err != nil {
+	row, err := repo.store.Query(query, postId)
+	if  err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
 	}
 

@@ -140,9 +140,13 @@ func (repo *SubscribersRepository) Get(userID int64, creatorID int64) (bool, err
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) Delete(subscriber *models.Subscriber) error {
 	query := "DELETE from subscribers where users_id = $1 and creator_id = $2"
+	row, err := repo.store.Query(query, subscriber.UserID, subscriber.CreatorID)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
 
-	if row := repo.store.QueryRow(query, subscriber.UserID, subscriber.CreatorID); row.Err() != nil {
-		return repository.NewDBError(row.Err())
+	if err = row.Close(); err != nil {
+		return repository.NewDBError(err)
 	}
 	return nil
 }

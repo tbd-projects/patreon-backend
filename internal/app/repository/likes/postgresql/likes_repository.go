@@ -65,13 +65,27 @@ func (repo *LikesRepository) Add(like *models.Like) error {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
+	var row *sql.Rows
+	row, err = repo.store.Query(queryInsert, like.PostId, like.UserId, like.Value)
 
-	if _, err = repo.store.Query(queryInsert, like.PostId, like.UserId, like.Value); err != nil {
+	if err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 
-	if _, err = repo.store.Query(queryUpdate, like.PostId, like.Value); err != nil {
+	if err = row.Close(); err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+
+	row, err = repo.store.Query(queryUpdate, like.PostId, like.Value)
+
+	if err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
@@ -113,12 +127,25 @@ func (repo *LikesRepository) Delete(likeId int64) error {
 		return repository.NewDBError(err)
 	}
 
-	if _, err = repo.store.Query(queryUpdate, postId, value); err != nil {
+	var row *sql.Rows
+	row, err = repo.store.Query(queryUpdate, postId, value)
+
+	if err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
 
-	if _, err = repo.store.Query(queryDelete, likeId); err != nil {
+	if err = row.Close(); err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+
+	if row, err = repo.store.Query(queryDelete, likeId); err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+
+	if err = row.Close(); err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}

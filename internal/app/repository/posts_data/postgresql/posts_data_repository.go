@@ -175,8 +175,12 @@ func (repo *PostsDataRepository) Update(postData *models.PostData) error {
 // 			repository.DefaultErrDB
 func (repo *PostsDataRepository) Delete(dataId int64) error {
 	query := `DELETE FROM posts_data WHERE data_id = $1`
+	row, err := repo.store.Query(query, dataId)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
 
-	if _, err := repo.store.Query(query, dataId); err != nil {
+	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
 	}
 
