@@ -1,9 +1,13 @@
 package usercase_user
 
 import (
+	"bytes"
+	"github.com/golang/mock/gomock"
+	"patreon/internal/app"
 	models2 "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	repository_files "patreon/internal/app/repository/files"
 	"patreon/internal/app/usecase"
 	"testing"
 
@@ -314,6 +318,192 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_Create_Success() {
 	resId, err := s.uc.Create(u)
 	assert.Equal(s.T(), expectedId, resId)
 	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_Update_InvalidLoginLong() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid login - long",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Login = "llllllllllllllllllllllllllllllllllllll"
+	s.MockUserRepository.EXPECT().
+		FindByLogin(u.Login).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil, nil)
+	expectedId := int64(-1)
+	resId, err := s.uc.Create(u)
+	assert.Equal(s.T(), expectedId, resId)
+	assert.Equal(s.T(), s.Tb.ExpectedError, errors.Cause(err))
+}
+func (s *SuiteUserUsecase) TestCreatorUsecase_Update_InvalidPasswordShort() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Password = "l"
+	s.MockUserRepository.EXPECT().
+		FindByID(u.ID).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(u, nil)
+
+	err := s.uc.UpdatePassword(u.ID, u.Password, u.Password)
+	assert.Error(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_Update_Error() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u.Password = "l"
+	s.MockUserRepository.EXPECT().
+		FindByID(u.ID).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(u, repository.DefaultErrDB)
+
+	err := s.uc.UpdatePassword(u.ID, u.Password, u.Password)
+	assert.Error(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_Update_Ok() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u2 := *u
+	u.Password = "lasdasdasdasddsa"
+	err := u.Encrypt()
+	assert.NoError(s.T(), err)
+	s.MockUserRepository.EXPECT().
+		FindByID(u.ID).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(u, nil)
+	u2.Password = "dsadasdon"
+	err = u2.Encrypt()
+	assert.NoError(s.T(), err)
+
+	s.MockUserRepository.EXPECT().
+		UpdatePassword(u.ID, gomock.Any()).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(nil)
+
+	err = s.uc.UpdatePassword(u.ID, u.Password, u2.Password)
+	assert.NoError(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_Update_Err() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u2 := *u
+	u.Password = "lasdasdasdasddsa"
+	err := u.Encrypt()
+	assert.NoError(s.T(), err)
+	s.MockUserRepository.EXPECT().
+		FindByID(u.ID).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(u, nil)
+	u2.Password = "2"
+	err = u2.Encrypt()
+	assert.NoError(s.T(), err)
+
+	err = s.uc.UpdatePassword(u.ID, u.Password, u2.Password)
+	assert.Error(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_Update_Err2() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	u2 := *u
+	u.Password = "lasdasdasdasddsa"
+	err := u.Encrypt()
+	u2.Password = "2"
+	assert.NoError(s.T(), err)
+	s.MockUserRepository.EXPECT().
+		FindByID(u.ID).
+		Times(s.Tb.ExpectedMockTimes).
+		Return(&u2, nil)
+
+	err = s.uc.UpdatePassword(u.ID, u.Password, u2.Password)
+	assert.Error(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ErrorSave() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	out := bytes.NewBufferString("")
+	name := repository_files.FileName("asd")
+	s.MockFileRepository.EXPECT().
+		SaveFile(out, name, repository_files.Image).
+		Times(s.Tb.ExpectedMockTimes).
+		Return("ASd", repository.DefaultErrDB)
+
+	err := s.uc.UpdateAvatar(out, name, u.ID)
+	assert.Error(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ok() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	out := bytes.NewBufferString("")
+	name := repository_files.FileName("asd")
+	s.MockFileRepository.EXPECT().
+		SaveFile(out, name, repository_files.Image).
+		Times(s.Tb.ExpectedMockTimes).
+		Return("ASd", nil)
+	s.MockUserRepository.EXPECT().UpdateAvatar( u.ID, app.LoadFileUrl+"ASd").Times(1).Return(nil)
+	err := s.uc.UpdateAvatar(out, name, u.ID)
+	assert.NoError(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ErrorAdd() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	out := bytes.NewBufferString("")
+	name := repository_files.FileName("asd")
+	s.MockFileRepository.EXPECT().
+		SaveFile(out, name, repository_files.Image).
+		Times(s.Tb.ExpectedMockTimes).
+		Return("ASd", nil)
+	s.MockUserRepository.EXPECT().UpdateAvatar( u.ID, app.LoadFileUrl+"ASd").Times(1).Return(repository.DefaultErrDB)
+	err := s.uc.UpdateAvatar(out, name, u.ID)
+	assert.Error(s.T(), err)
 }
 
 func TestUsecaseUser(t *testing.T) {
