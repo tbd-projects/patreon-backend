@@ -1,7 +1,6 @@
 package handler_factory
 
 import (
-	"patreon/internal/app"
 	mock_usecase_factory "patreon/internal/app/delivery/http/handler_factory/mocks"
 	"patreon/internal/app/delivery/http/handlers"
 	"testing"
@@ -50,8 +49,16 @@ func (s *FactorySuite) TestGetHandlersUrlsFirstRun() {
 	s.factory.GetHandleUrls()
 }
 func (s *FactorySuite) TestGetHandlersUrlsAlreadyExists() {
-
-	s.factory.urlHandler = &map[string]app.Handler{}
+	s.mockUsecaseFactory.EXPECT().GetUserUsecase().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetCreatorUsecase().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetCsrfUsecase().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetPostsUsecase().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetLikesUsecase().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetSessionManager().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
+	s.mockUsecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
+	s.factory.urlHandler = nil
 	defer func() {
 		if r := recover(); r != nil {
 			assert.Fail(s.T(), "fail on initAllHandlers")
