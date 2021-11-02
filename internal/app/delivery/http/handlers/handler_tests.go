@@ -5,6 +5,7 @@ import (
 	"patreon/internal/app"
 	mock_usecase_csrf "patreon/internal/app/csrf/usecase/mocks"
 	mock_sessions "patreon/internal/app/sessions/mocks"
+	mock_usecase "patreon/internal/app/usecase/access/mocks"
 	mock_usecase_awards "patreon/internal/app/usecase/awards/mocks"
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
 	mock_subscribers "patreon/internal/app/usecase/subscribers/mocks"
@@ -30,6 +31,7 @@ type SuiteHandler struct {
 	MockUserUsecase        *mock_usecase_user.UserUsecase
 	MockCreatorUsecase     *mock_usecase_creator.CreatorUsecase
 	MockAwardsUsecase      *mock_usecase_awards.AwardsUsecase
+	MockAccessUsecase      *mock_usecase.AccessUsecase
 	MockSessionsManager    *mock_sessions.MockSessionsManager
 	Tb                     TestTable
 	Logger                 *logrus.Logger
@@ -47,6 +49,7 @@ func (s *SuiteHandler) SetupSuite() {
 	s.MockSessionsManager = mock_sessions.NewMockSessionsManager(s.Mock)
 	s.MockCsrfUsecase = mock_usecase_csrf.NewMockUsecase(s.Mock)
 	s.MockSubscribersUsecase = mock_subscribers.NewSubscribersUsecase(s.Mock)
+	s.MockAccessUsecase = mock_usecase.NewAccessUsecase(s.Mock)
 
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()
