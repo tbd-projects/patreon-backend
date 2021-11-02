@@ -11,6 +11,8 @@ const (
 	EmptyUser = -2
 )
 
+//go:generate mockgen -destination=mocks/mock_posts_data_usecase.go -package=mock_usecase -mock_names=Usecase=PostsDataUsecase . Usecase
+
 type Usecase interface {
 
 	// GetData Errors:

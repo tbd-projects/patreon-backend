@@ -2,6 +2,8 @@ package repository_awards
 
 import "patreon/internal/app/models"
 
+//go:generate mockgen -destination=mocks/mock_awards_repository.go -package=mock_repository -mock_names=Repository=AwardsRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	//		repository_postgresql.NameAlreadyExist

@@ -39,7 +39,6 @@ run-with-build-local: build-docker-local run
 
 run-with-build-server: build-docker-server run
 
-
 open-last-log:
 	cat $(LOG_DIR)/`ls -t $(LOG_DIR) | head -1 `
 
@@ -62,12 +61,9 @@ build-utils:
 
 parse-last-log: build-utils
 	./utils.out
-gen-mock: build-utils
-	./utils.out -gen-mock=./internal/app/repository/
-	./utils.out -gen-mock=./internal/app/usecase/
 
-
-
+gen-mock:
+	go generate ./...
 
 test:
 	go test -v -race ./internal/...

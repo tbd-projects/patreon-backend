@@ -1,5 +1,7 @@
 package usecase_access
 
+//go:generate mockgen -destination=mocks/mock_access_usecase.go -package=mock_usecase -mock_names=Usecase=AccessUsecase . Usecase
+
 type Usecase interface {
 	// CheckAccess Errors:
 	//		NoAccess

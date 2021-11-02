@@ -32,7 +32,7 @@ type SuiteUsecase struct {
 	MockAwardsRepository      *mock_repository_awards.AwardsRepository
 	MockPostsRepository       *mock_repository_posts.PostsRepository
 	MockLikesRepository       *mock_repository_likes.LikesRepository
-	MockPostsDataRepository   *mock_repository_posts_data.Posts_dataRepository
+	MockPostsDataRepository   *mock_repository_posts_data.PostsDataRepository
 
 	Logger *logrus.Logger
 	Tb     TestTable
@@ -44,7 +44,7 @@ func (s *SuiteUsecase) SetupSuite() {
 	s.MockUserRepository = mock_repository_user.NewUserRepository(s.Mock)
 	s.MockSubscribersRepository = mock_repository_subscribers.NewSubscribersRepository(s.Mock)
 	s.MockFileRepository = mock_repository_files.NewFilesRepository(s.Mock)
-	s.MockPostsDataRepository = mock_repository_posts_data.NewPosts_dataRepository(s.Mock)
+	s.MockPostsDataRepository = mock_repository_posts_data.NewPostsDataRepository(s.Mock)
 	s.MockPostsRepository = mock_repository_posts.NewPostsRepository(s.Mock)
 	s.MockAwardsRepository = mock_repository_awards.NewAwardsRepository(s.Mock)
 	s.MockLikesRepository = mock_repository_likes.NewLikesRepository(s.Mock)

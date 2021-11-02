@@ -6,6 +6,8 @@ import (
 	repoFiles "patreon/internal/app/repository/files"
 )
 
+//go:generate mockgen -destination=mocks/mock_user_usecase.go -package=mock_usecase -mock_names=Usecase=UserUsecase . Usecase
+
 type Usecase interface {
 	// GetProfile Errors:
 	// 		repository.NotFound

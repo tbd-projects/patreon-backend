@@ -2,6 +2,8 @@ package repository_subscribers
 
 import "patreon/internal/app/models"
 
+//go:generate mockgen -destination=mocks/mock_subscribers_repository.go -package=mock_repository -mock_names=Repository=SubscribersRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	//		app.GeneralError with Errors

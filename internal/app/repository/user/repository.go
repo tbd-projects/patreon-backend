@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app/models"
 )
 
+//go:generate mockgen -destination=mocks/mock_user_repository.go -package=mock_repository -mock_names=Repository=UserRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	// 		LoginAlreadyExist

@@ -11,31 +11,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// Posts_dataRepository is a mock of Repository interface.
-type Posts_dataRepository struct {
+// PostsDataRepository is a mock of Repository interface.
+type PostsDataRepository struct {
 	ctrl     *gomock.Controller
-	recorder *Posts_dataRepositoryMockRecorder
+	recorder *PostsDataRepositoryMockRecorder
 }
 
-// Posts_dataRepositoryMockRecorder is the mock recorder for Posts_dataRepository.
-type Posts_dataRepositoryMockRecorder struct {
-	mock *Posts_dataRepository
+// PostsDataRepositoryMockRecorder is the mock recorder for PostsDataRepository.
+type PostsDataRepositoryMockRecorder struct {
+	mock *PostsDataRepository
 }
 
-// NewPosts_dataRepository creates a new mock instance.
-func NewPosts_dataRepository(ctrl *gomock.Controller) *Posts_dataRepository {
-	mock := &Posts_dataRepository{ctrl: ctrl}
-	mock.recorder = &Posts_dataRepositoryMockRecorder{mock}
+// NewPostsDataRepository creates a new mock instance.
+func NewPostsDataRepository(ctrl *gomock.Controller) *PostsDataRepository {
+	mock := &PostsDataRepository{ctrl: ctrl}
+	mock.recorder = &PostsDataRepositoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *Posts_dataRepository) EXPECT() *Posts_dataRepositoryMockRecorder {
+func (m *PostsDataRepository) EXPECT() *PostsDataRepositoryMockRecorder {
 	return m.recorder
 }
 
 // Create mocks base method.
-func (m *Posts_dataRepository) Create(arg0 *models.PostData) (int64, error) {
+func (m *PostsDataRepository) Create(arg0 *models.PostData) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(int64)
@@ -44,13 +44,13 @@ func (m *Posts_dataRepository) Create(arg0 *models.PostData) (int64, error) {
 }
 
 // Create indicates an expected call of Create.
-func (mr *Posts_dataRepositoryMockRecorder) Create(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataRepositoryMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*Posts_dataRepository)(nil).Create), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*PostsDataRepository)(nil).Create), arg0)
 }
 
 // Delete mocks base method.
-func (m *Posts_dataRepository) Delete(arg0 int64) error {
+func (m *PostsDataRepository) Delete(arg0 int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0)
 	ret0, _ := ret[0].(error)
@@ -58,13 +58,13 @@ func (m *Posts_dataRepository) Delete(arg0 int64) error {
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *Posts_dataRepositoryMockRecorder) Delete(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataRepositoryMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*Posts_dataRepository)(nil).Delete), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*PostsDataRepository)(nil).Delete), arg0)
 }
 
 // ExistsData mocks base method.
-func (m *Posts_dataRepository) ExistsData(arg0 int64) (bool, error) {
+func (m *PostsDataRepository) ExistsData(arg0 int64) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExistsData", arg0)
 	ret0, _ := ret[0].(bool)
@@ -73,13 +73,13 @@ func (m *Posts_dataRepository) ExistsData(arg0 int64) (bool, error) {
 }
 
 // ExistsData indicates an expected call of ExistsData.
-func (mr *Posts_dataRepositoryMockRecorder) ExistsData(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataRepositoryMockRecorder) ExistsData(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsData", reflect.TypeOf((*Posts_dataRepository)(nil).ExistsData), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsData", reflect.TypeOf((*PostsDataRepository)(nil).ExistsData), arg0)
 }
 
 // Get mocks base method.
-func (m *Posts_dataRepository) Get(arg0 int64) (*models.PostData, error) {
+func (m *PostsDataRepository) Get(arg0 int64) (*models.PostData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
 	ret0, _ := ret[0].(*models.PostData)
@@ -88,13 +88,13 @@ func (m *Posts_dataRepository) Get(arg0 int64) (*models.PostData, error) {
 }
 
 // Get indicates an expected call of Get.
-func (mr *Posts_dataRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*Posts_dataRepository)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*PostsDataRepository)(nil).Get), arg0)
 }
 
 // GetData mocks base method.
-func (m *Posts_dataRepository) GetData(arg0 int64) ([]models.PostData, error) {
+func (m *PostsDataRepository) GetData(arg0 int64) ([]models.PostData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetData", arg0)
 	ret0, _ := ret[0].([]models.PostData)
@@ -103,13 +103,13 @@ func (m *Posts_dataRepository) GetData(arg0 int64) ([]models.PostData, error) {
 }
 
 // GetData indicates an expected call of GetData.
-func (mr *Posts_dataRepositoryMockRecorder) GetData(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataRepositoryMockRecorder) GetData(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetData", reflect.TypeOf((*Posts_dataRepository)(nil).GetData), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetData", reflect.TypeOf((*PostsDataRepository)(nil).GetData), arg0)
 }
 
 // Update mocks base method.
-func (m *Posts_dataRepository) Update(arg0 *models.PostData) error {
+func (m *PostsDataRepository) Update(arg0 *models.PostData) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0)
 	ret0, _ := ret[0].(error)
@@ -117,7 +117,7 @@ func (m *Posts_dataRepository) Update(arg0 *models.PostData) error {
 }
 
 // Update indicates an expected call of Update.
-func (mr *Posts_dataRepositoryMockRecorder) Update(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataRepositoryMockRecorder) Update(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*Posts_dataRepository)(nil).Update), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*PostsDataRepository)(nil).Update), arg0)
 }

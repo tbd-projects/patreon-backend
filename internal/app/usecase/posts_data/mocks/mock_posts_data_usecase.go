@@ -13,31 +13,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// Posts_dataUsecase is a mock of Usecase interface.
-type Posts_dataUsecase struct {
+// PostsDataUsecase is a mock of Usecase interface.
+type PostsDataUsecase struct {
 	ctrl     *gomock.Controller
-	recorder *Posts_dataUsecaseMockRecorder
+	recorder *PostsDataUsecaseMockRecorder
 }
 
-// Posts_dataUsecaseMockRecorder is the mock recorder for Posts_dataUsecase.
-type Posts_dataUsecaseMockRecorder struct {
-	mock *Posts_dataUsecase
+// PostsDataUsecaseMockRecorder is the mock recorder for PostsDataUsecase.
+type PostsDataUsecaseMockRecorder struct {
+	mock *PostsDataUsecase
 }
 
-// NewPosts_dataUsecase creates a new mock instance.
-func NewPosts_dataUsecase(ctrl *gomock.Controller) *Posts_dataUsecase {
-	mock := &Posts_dataUsecase{ctrl: ctrl}
-	mock.recorder = &Posts_dataUsecaseMockRecorder{mock}
+// NewPostsDataUsecase creates a new mock instance.
+func NewPostsDataUsecase(ctrl *gomock.Controller) *PostsDataUsecase {
+	mock := &PostsDataUsecase{ctrl: ctrl}
+	mock.recorder = &PostsDataUsecaseMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *Posts_dataUsecase) EXPECT() *Posts_dataUsecaseMockRecorder {
+func (m *PostsDataUsecase) EXPECT() *PostsDataUsecaseMockRecorder {
 	return m.recorder
 }
 
 // Delete mocks base method.
-func (m *Posts_dataUsecase) Delete(arg0 int64) error {
+func (m *PostsDataUsecase) Delete(arg0 int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0)
 	ret0, _ := ret[0].(error)
@@ -45,13 +45,13 @@ func (m *Posts_dataUsecase) Delete(arg0 int64) error {
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *Posts_dataUsecaseMockRecorder) Delete(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataUsecaseMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*Posts_dataUsecase)(nil).Delete), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*PostsDataUsecase)(nil).Delete), arg0)
 }
 
 // GetData mocks base method.
-func (m *Posts_dataUsecase) GetData(arg0 int64) (*models.PostData, error) {
+func (m *PostsDataUsecase) GetData(arg0 int64) (*models.PostData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetData", arg0)
 	ret0, _ := ret[0].(*models.PostData)
@@ -60,13 +60,13 @@ func (m *Posts_dataUsecase) GetData(arg0 int64) (*models.PostData, error) {
 }
 
 // GetData indicates an expected call of GetData.
-func (mr *Posts_dataUsecaseMockRecorder) GetData(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataUsecaseMockRecorder) GetData(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetData", reflect.TypeOf((*Posts_dataUsecase)(nil).GetData), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetData", reflect.TypeOf((*PostsDataUsecase)(nil).GetData), arg0)
 }
 
 // LoadImage mocks base method.
-func (m *Posts_dataUsecase) LoadImage(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) (int64, error) {
+func (m *PostsDataUsecase) LoadImage(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LoadImage", arg0, arg1, arg2)
 	ret0, _ := ret[0].(int64)
@@ -75,13 +75,13 @@ func (m *Posts_dataUsecase) LoadImage(arg0 io.Reader, arg1 repository_files.File
 }
 
 // LoadImage indicates an expected call of LoadImage.
-func (mr *Posts_dataUsecaseMockRecorder) LoadImage(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *PostsDataUsecaseMockRecorder) LoadImage(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadImage", reflect.TypeOf((*Posts_dataUsecase)(nil).LoadImage), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadImage", reflect.TypeOf((*PostsDataUsecase)(nil).LoadImage), arg0, arg1, arg2)
 }
 
 // LoadText mocks base method.
-func (m *Posts_dataUsecase) LoadText(arg0 *models.PostData) (int64, error) {
+func (m *PostsDataUsecase) LoadText(arg0 *models.PostData) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LoadText", arg0)
 	ret0, _ := ret[0].(int64)
@@ -90,13 +90,13 @@ func (m *Posts_dataUsecase) LoadText(arg0 *models.PostData) (int64, error) {
 }
 
 // LoadText indicates an expected call of LoadText.
-func (mr *Posts_dataUsecaseMockRecorder) LoadText(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataUsecaseMockRecorder) LoadText(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadText", reflect.TypeOf((*Posts_dataUsecase)(nil).LoadText), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadText", reflect.TypeOf((*PostsDataUsecase)(nil).LoadText), arg0)
 }
 
 // UpdateImage mocks base method.
-func (m *Posts_dataUsecase) UpdateImage(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) error {
+func (m *PostsDataUsecase) UpdateImage(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateImage", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
@@ -104,13 +104,13 @@ func (m *Posts_dataUsecase) UpdateImage(arg0 io.Reader, arg1 repository_files.Fi
 }
 
 // UpdateImage indicates an expected call of UpdateImage.
-func (mr *Posts_dataUsecaseMockRecorder) UpdateImage(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *PostsDataUsecaseMockRecorder) UpdateImage(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateImage", reflect.TypeOf((*Posts_dataUsecase)(nil).UpdateImage), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateImage", reflect.TypeOf((*PostsDataUsecase)(nil).UpdateImage), arg0, arg1, arg2)
 }
 
 // UpdateText mocks base method.
-func (m *Posts_dataUsecase) UpdateText(arg0 *models.PostData) error {
+func (m *PostsDataUsecase) UpdateText(arg0 *models.PostData) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateText", arg0)
 	ret0, _ := ret[0].(error)
@@ -118,7 +118,7 @@ func (m *Posts_dataUsecase) UpdateText(arg0 *models.PostData) error {
 }
 
 // UpdateText indicates an expected call of UpdateText.
-func (mr *Posts_dataUsecaseMockRecorder) UpdateText(arg0 interface{}) *gomock.Call {
+func (mr *PostsDataUsecaseMockRecorder) UpdateText(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateText", reflect.TypeOf((*Posts_dataUsecase)(nil).UpdateText), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateText", reflect.TypeOf((*PostsDataUsecase)(nil).UpdateText), arg0)
 }

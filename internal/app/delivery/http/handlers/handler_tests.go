@@ -36,14 +36,14 @@ type SuiteHandler struct {
 	MockCreatorUsecase     *mock_usecase_creator.CreatorUsecase
 	MockAwardsUsecase      *mock_usecase_awards.AwardsUsecase
 	MockPostsUsecase       *mock_usecase_posts.PostsUsecase
-	MockPostsDataUsecase   *mock_usecase_posts_data.Posts_dataUsecase
+	MockPostsDataUsecase   *mock_usecase_posts_data.PostsDataUsecase
 	MockAccessUsecase      *mock_usecase.AccessUsecase
 	MockSessionsManager    *mock_sessions.MockSessionsManager
 	Tb                     TestTable
 	Logger                 *logrus.Logger
 	Router                 *mux.Router
 	Cors                   *app.CorsConfig
-	MockCsrfUsecase        *mock_usecase_csrf.MockUsecase
+	MockCsrfUsecase        *mock_usecase_csrf.CsrfUsecase
 	MockSubscribersUsecase *mock_subscribers.SubscribersUsecase
 }
 
@@ -53,12 +53,12 @@ func (s *SuiteHandler) SetupSuite() {
 	s.MockCreatorUsecase = mock_usecase_creator.NewCreatorUsecase(s.Mock)
 	s.MockAwardsUsecase = mock_usecase_awards.NewAwardsUsecase(s.Mock)
 	s.MockSessionsManager = mock_sessions.NewMockSessionsManager(s.Mock)
-	s.MockCsrfUsecase = mock_usecase_csrf.NewMockUsecase(s.Mock)
+	s.MockCsrfUsecase = mock_usecase_csrf.NewCsrfUsecase(s.Mock)
 	s.MockSubscribersUsecase = mock_subscribers.NewSubscribersUsecase(s.Mock)
 	s.MockAccessUsecase = mock_usecase.NewAccessUsecase(s.Mock)
 	s.MockLikeUsecase = mock_usecase_like.NewLikesUsecase(s.Mock)
 	s.MockPostsUsecase = mock_usecase_posts.NewPostsUsecase(s.Mock)
-	s.MockPostsDataUsecase = mock_usecase_posts_data.NewPosts_dataUsecase(s.Mock)
+	s.MockPostsDataUsecase = mock_usecase_posts_data.NewPostsDataUsecase(s.Mock)
 
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()

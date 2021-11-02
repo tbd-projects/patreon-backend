@@ -15,6 +15,8 @@ import (
 	"patreon/internal/app/sessions"
 )
 
+//go:generate mockgen -destination=mocks/mock_repository_factory.go -package=mock_repository_factory . RepositoryFactory
+
 type RepositoryFactory interface {
 	GetUserRepository() repUser.Repository
 	GetCreatorRepository() repCreator.Repository

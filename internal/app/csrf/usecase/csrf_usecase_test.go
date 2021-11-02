@@ -20,13 +20,13 @@ import (
 type SuiteCsrfUsecase struct {
 	suite.Suite
 	Mock               *gomock.Controller
-	MockCsrfRepository *mock_repository_jwt.MockRepository
+	MockCsrfRepository *mock_repository_jwt.JwtRepository
 	uc                 Usecase
 }
 
 func (s *SuiteCsrfUsecase) SetupSuite() {
 	s.Mock = gomock.NewController(s.T())
-	s.MockCsrfRepository = mock_repository_jwt.NewMockRepository(s.Mock)
+	s.MockCsrfRepository = mock_repository_jwt.NewJwtRepository(s.Mock)
 	s.uc = NewCsrfUsecase(s.MockCsrfRepository)
 }
 

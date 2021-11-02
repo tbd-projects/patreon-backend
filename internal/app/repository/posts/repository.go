@@ -6,6 +6,8 @@ import (
 
 const NoAwards = -1
 
+//go:generate mockgen -destination=mocks/mock_posts_repository.go -package=mock_repository -mock_names=Repository=PostsRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	// 		app.GeneralError with Errors

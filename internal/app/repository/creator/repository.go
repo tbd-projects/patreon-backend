@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app/models"
 )
 
+//go:generate mockgen -destination=mocks/mock_creator_repository.go -package=mock_repository -mock_names=Repository=CreatorRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	//		repository_postgresql.IncorrectCategory

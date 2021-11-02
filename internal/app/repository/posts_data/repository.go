@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app/models"
 )
 
+//go:generate mockgen -destination=mocks/mock_posts_data_repository.go -package=mock_repository -mock_names=Repository=PostsDataRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	//		repository_postgresql.UnknownDataFormat

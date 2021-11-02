@@ -6,6 +6,8 @@ import (
 	repoFiles "patreon/internal/app/repository/files"
 )
 
+//go:generate mockgen -destination=mocks/mock_creator_usecase.go -package=mock_usecase -mock_names=Usecase=CreatorUsecase . Usecase
+
 type Usecase interface {
 	// GetCreators Errors:
 	// 		app.GeneralError with Errors:
