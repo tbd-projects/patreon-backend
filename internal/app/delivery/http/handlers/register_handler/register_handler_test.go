@@ -39,7 +39,6 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_EmptyBody() {
 
 	b := bytes.Buffer{}
 
-
 	reader, _ := http.NewRequest(http.MethodPost, "/register", &b)
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
