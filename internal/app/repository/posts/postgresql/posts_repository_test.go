@@ -3,9 +3,6 @@ package repository_postgresql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -13,6 +10,10 @@ import (
 	putilits "patreon/internal/app/utilits/postgresql"
 	"regexp"
 	"testing"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/stretchr/testify/require"
 )
@@ -140,7 +141,6 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 	post.Awards = 1
 	assert.NoError(s.T(), err)
 
-
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(userId, post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
@@ -192,7 +192,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, lk.likes_id IS NOT NULL, views
 			FROM posts
 			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
-			WHERE creator_id = $2 ORDER BY posts.date` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
+			WHERE creator_id = $2 ORDER BY posts.date ` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
 
 	post := models.Post{ID: 2, Title: "sad", Description: "asdasd", Awards: 1, CreatorId: 2}
 	userId := int64(5)
@@ -202,9 +202,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
-		"type_awards", "posts.date", "cover", "have_like", "views"}).
-			AddRow( post.ID,post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
-				 post.AddLike, post.Views))
+			"type_awards", "posts.date", "cover", "have_like", "views"}).
+			AddRow(post.ID, post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
+				post.AddLike, post.Views))
 	res, err := s.repo.GetPosts(post.CreatorId, userId, pag)
 	assert.Equal(s.T(), res[0], post)
 	assert.NoError(s.T(), err)
@@ -226,7 +226,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
 			"type_awards", "posts.date", "cover", "have_like", "views"}).
-			AddRow( post.ID,post.Title, post.Description, post.Likes, awardsId, post.Date, post.Cover,
+			AddRow(post.ID, post.Title, post.Description, post.Likes, awardsId, post.Date, post.Cover,
 				post.AddLike, post.Views))
 	res, err = s.repo.GetPosts(post.CreatorId, userId, pag)
 	post.Awards = repository_posts.NoAwards
@@ -253,7 +253,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
 			"type_awards", "posts.date", "cover", "have_like", "views"}).
-			AddRow( post.ID,post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
+			AddRow(post.ID, post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
 				post.AddLike, post.Views).RowError(0, models.BDError))
 	_, err = s.repo.GetPosts(post.CreatorId, userId, pag)
 	assert.Error(s.T(), err, repository.NewDBError(models.BDError))

@@ -3,7 +3,6 @@ package usecase_subscribers
 import (
 	"patreon/internal/app/models"
 	repository_awards "patreon/internal/app/repository/awards"
-	repository_postgresql "patreon/internal/app/repository/awards/postgresql"
 	repository_subscribers "patreon/internal/app/repository/subscribers"
 
 	"github.com/pkg/errors"
@@ -27,8 +26,8 @@ func NewSubscribersUsecase(repoSubscr repository_subscribers.Repository,
 //		repository_postgresql.AwardNameNotFound
 //		app.generalError with Errors
 //			repository.DefaultErrDB
-func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber, awardName string) error {
-	exist, err := uc.repoSubscr.Get(subscriber.UserID, subscriber.CreatorID)
+func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber) error {
+	exist, err := uc.repoSubscr.Get(subscriber)
 	if err != nil {
 		return errors.Wrapf(err, "METHOD: subscribers_usecase.Subscribe; "+
 			"ERR: error on checkExists userID = %v creatorID = %v", subscriber.UserID, subscriber.CreatorID)
@@ -37,15 +36,15 @@ func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber, awardName
 		return SubscriptionAlreadyExists
 	}
 
-	exist, err = uc.repoAwards.FindByName(subscriber.CreatorID, awardName)
-	if err != nil {
-		return err
-	}
-	if !exist {
-		return repository_postgresql.AwardNameNotFound
-	}
+	//exist, err = uc.repoAwards.FindByName(subscriber.CreatorID, awardName)
+	//if err != nil {
+	//	return err
+	//}
+	//if !exist {
+	//	return repository_postgresql.AwardNameNotFound
+	//}
 
-	return uc.repoSubscr.Create(subscriber, awardName)
+	return uc.repoSubscr.Create(subscriber)
 }
 
 // GetCreators Errors:
@@ -67,7 +66,7 @@ func (uc *SubscribersUsecase) GetSubscribers(creatorID int64) ([]int64, error) {
 //		app.generalError with Errors
 //			repository.DefaultErrDB
 func (uc *SubscribersUsecase) UnSubscribe(subscriber *models.Subscriber) error {
-	exists, err := uc.repoSubscr.Get(subscriber.UserID, subscriber.CreatorID)
+	exists, err := uc.repoSubscr.Get(subscriber)
 	if err != nil {
 		return err
 	}

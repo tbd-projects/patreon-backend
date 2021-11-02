@@ -35,17 +35,17 @@ func (m *SubscribersRepository) EXPECT() *SubscribersRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *SubscribersRepository) Create(arg0 *models.Subscriber, arg1 string) error {
+func (m *SubscribersRepository) Create(arg0 *models.Subscriber) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *SubscribersRepositoryMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+func (mr *SubscribersRepositoryMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*SubscribersRepository)(nil).Create), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*SubscribersRepository)(nil).Create), arg0)
 }
 
 // Delete mocks base method.
@@ -63,18 +63,18 @@ func (mr *SubscribersRepositoryMockRecorder) Delete(arg0 interface{}) *gomock.Ca
 }
 
 // Get mocks base method.
-func (m *SubscribersRepository) Get(arg0, arg1 int64) (bool, error) {
+func (m *SubscribersRepository) Get(arg0 *models.Subscriber) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1)
+	ret := m.ctrl.Call(m, "Get", arg0)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *SubscribersRepositoryMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
+func (mr *SubscribersRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*SubscribersRepository)(nil).Get), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*SubscribersRepository)(nil).Get), arg0)
 }
 
 // GetCreators mocks base method.

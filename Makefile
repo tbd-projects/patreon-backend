@@ -12,7 +12,8 @@ run-posgres-redis:
 	systemctl start redis
 	systemctl start postgresql
 
-
+watch-postgress-log:
+	docker attach 2021_2_pyaterochka_patreon-bd_1
 
 generate-api:
 	go get -u github.com/swaggo/swag/cmd/swag

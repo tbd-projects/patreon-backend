@@ -6,7 +6,7 @@ type Repository interface {
 	// Create Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB
-	Create(subscriber *models.Subscriber, awardName string) error
+	Create(subscriber *models.Subscriber) error
 	// Delete Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB
@@ -22,5 +22,5 @@ type Repository interface {
 	// Get Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB
-	Get(userID int64, creatorID int64) (bool, error)
+	Get(subscriber *models.Subscriber) (bool, error)
 }

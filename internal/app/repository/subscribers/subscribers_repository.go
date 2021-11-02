@@ -19,13 +19,13 @@ func NewSubscribersRepository(store *sql.DB) *SubscribersRepository {
 // Create Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
-func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, awardName string) error {
-	queryAwardPrice := "SELECT price FROM awards WHERE creator_id = $1 AND name = $2"
-	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id) VALUES ($1, $2)"
+func (repo *SubscribersRepository) Create(subscriber *models.Subscriber) error {
+	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
 	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id, awards_id) VALUES ($1, $2, $3)"
 
 	price := 0
-	if err := repo.store.QueryRow(queryAwardPrice, subscriber.CreatorID, awardName).Scan(&price); err != nil {
+	if err := repo.store.QueryRow(queryAwardPrice, subscriber.AwardID).Scan(&price); err != nil {
 		return repository.NewDBError(err)
 	}
 
@@ -48,7 +48,7 @@ func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, awardNa
 	}
 
 	if row, err = begin.Query(queryAddSubscribe,
-		subscriber.UserID, subscriber.CreatorID); err != nil {
+		subscriber.UserID, subscriber.CreatorID, subscriber.AwardID); err != nil {
 		_ = begin.Rollback()
 		return repository.NewDBError(err)
 	}
@@ -135,10 +135,10 @@ func (repo *SubscribersRepository) GetSubscribers(creatorID int64) ([]int64, err
 // Get Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
-func (repo *SubscribersRepository) Get(userID int64, creatorID int64) (bool, error) {
+func (repo *SubscribersRepository) Get(subscriber *models.Subscriber) (bool, error) {
 	query := "SELECT count(*) from subscribers where users_id = $1 and creator_id = $2"
 	cnt := 0
-	if res := repo.store.QueryRow(query, userID, creatorID).Scan(&cnt); res != nil {
+	if res := repo.store.QueryRow(query, subscriber.UserID, subscriber.CreatorID).Scan(&cnt); res != nil {
 		return false, repository.NewDBError(res)
 	}
 	if cnt == 0 {
@@ -151,8 +151,8 @@ func (repo *SubscribersRepository) Get(userID int64, creatorID int64) (bool, err
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) Delete(subscriber *models.Subscriber) error {
-	query := "DELETE from subscribers where users_id = $1 and creator_id = $2"
-	row, err := repo.store.Query(query, subscriber.UserID, subscriber.CreatorID)
+	query := "DELETE from subscribers where users_id = $1 and creator_id = $2 and awards_id = $3"
+	row, err := repo.store.Query(query, subscriber.UserID, subscriber.CreatorID, subscriber.AwardID)
 	if err != nil {
 		return repository.NewDBError(err)
 	}

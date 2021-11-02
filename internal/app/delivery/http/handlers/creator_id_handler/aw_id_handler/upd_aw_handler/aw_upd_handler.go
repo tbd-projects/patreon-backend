@@ -34,10 +34,11 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 	}
 
 	h.AddMethod(http.MethodPut, h.PUT, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
+		csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
 		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
-		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+	)
 
 	return h
 }

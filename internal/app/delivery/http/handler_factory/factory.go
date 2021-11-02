@@ -7,6 +7,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler"
+	aw_subscribe_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler/subscribe_handler"
 	aw_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler/upd_aw_handler"
 	upd_cover_awards_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler/upd_cover_awards"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
@@ -19,8 +20,8 @@ import (
 	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_img_data_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_text_data_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_avatar_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_cover_handler"
+	upd_avatar_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_avatar_handler"
+	upd_cover_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_cover_handler"
 	"patreon/internal/app/delivery/http/handlers/csrf_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
@@ -63,6 +64,7 @@ const (
 	POST_DATA_UPD_IMAGE
 	POST_DATA_ID
 	SUBSCRIBES
+	AWARDS_CREATOR_SUBSCRIBE
 )
 
 type HandlerFactory struct {
@@ -132,6 +134,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 			ucPosts, sManager),
 		POST_DATA_UPD_TEXT: upd_text_data_handler.NewPostsDataUpdateTextHandler(f.logger, f.router, f.cors, ucPostsData,
 			ucPosts, sManager),
+		AWARDS_CREATOR_SUBSCRIBE: aw_subscribe_handler.NewAwardsSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr, ucAwards),
 	}
 }
 
@@ -154,7 +157,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		// /creators ---------------------------------------------------------////
 		"/creators":                                   hs[CREATORS],
 		"/creators/{creator_id:[0-9]+}":               hs[CREATOR_WITH_ID],
-		"/creators/{creator_id:[0-9]+}/subscribe":     hs[SUBSCRIBES],
+		"/creators/{creator_id:[0-9]+}/subscribers":   hs[SUBSCRIBES],
 		"/creators/{creator_id:[0-9]+}/update/avatar": hs[CREATOR_AVATAR],
 		"/creators/{creator_id:[0-9]+}/update/cover":  hs[CREATOR_COVER],
 		// ../awards ---------------------------------------------------------////
@@ -162,6 +165,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}":              hs[AWARDS_WITH_ID],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/update":       hs[AWARDS_UPDATE],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/update/cover": hs[AWARDS_COVER],
+		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/subscribe":    hs[AWARDS_CREATOR_SUBSCRIBE],
 		// ../posts  ---------------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/posts":                         hs[POSTS],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":        hs[POSTS_WITH_ID],

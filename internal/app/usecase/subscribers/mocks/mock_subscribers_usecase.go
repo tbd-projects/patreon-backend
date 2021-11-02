@@ -65,17 +65,17 @@ func (mr *SubscribersUsecaseMockRecorder) GetSubscribers(arg0 interface{}) *gomo
 }
 
 // Subscribe mocks base method.
-func (m *SubscribersUsecase) Subscribe(arg0 *models.Subscriber, arg1 string) error {
+func (m *SubscribersUsecase) Subscribe(arg0 *models.Subscriber) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Subscribe", arg0, arg1)
+	ret := m.ctrl.Call(m, "Subscribe", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Subscribe indicates an expected call of Subscribe.
-func (mr *SubscribersUsecaseMockRecorder) Subscribe(arg0, arg1 interface{}) *gomock.Call {
+func (mr *SubscribersUsecaseMockRecorder) Subscribe(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*SubscribersUsecase)(nil).Subscribe), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*SubscribersUsecase)(nil).Subscribe), arg0)
 }
 
 // UnSubscribe mocks base method.
