@@ -145,19 +145,21 @@ func (s *FactorySuite) TestGetSubscribersUsecaseFirstCall() {
 	factory.GetSubscribersUsecase()
 }
 
-//func (s *FactorySuite) TestGetSubscribersUsecaseSecondCall() {
-//	factory := NewUsecaseFactory(s.mockRepositoryFactory)
-//	factory.subscribersUsecase = s.MockSubscribersUsecase
-//
-//	defer func() {
-//		if r := recover(); r != nil {
-//			assert.Fail(s.T(), "fail on getUserUsecase()")
-//		}
-//	}()
-//	factory.GetAccessUsecase()
-//}
+func (s *FactorySuite) TestGetSubscribersUsecaseSecondCall() {
+	factory := NewUsecaseFactory(s.mockRepositoryFactory)
+	factory.subscribersUsecase = s.MockSubscribersUsecase
+
+	defer func() {
+		if r := recover(); r != nil {
+			assert.Fail(s.T(), "fail on getUserUsecase()")
+		}
+	}()
+	factory.GetSubscribersUsecase()
+}
+
 func (s *FactorySuite) TestGetAwardsUsecaseFirstCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
+	factory.awardsUsecase = nil
 	s.mockRepositoryFactory.EXPECT().GetAwardsRepository()
 	s.mockRepositoryFactory.EXPECT().GetFilesRepository()
 
@@ -168,6 +170,7 @@ func (s *FactorySuite) TestGetAwardsUsecaseFirstCall() {
 	}()
 	factory.GetAwardsUsecase()
 }
+
 func (s *FactorySuite) TestGetAwardsUsecaseSecondCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
 	factory.awardsUsecase = s.MockAwardsUsecase
@@ -179,6 +182,7 @@ func (s *FactorySuite) TestGetAwardsUsecaseSecondCall() {
 	}()
 	factory.GetAwardsUsecase()
 }
+
 func (s *FactorySuite) TestGetPostsUsecaseFirstCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
 	s.mockRepositoryFactory.EXPECT().GetPostsRepository()
@@ -193,17 +197,17 @@ func (s *FactorySuite) TestGetPostsUsecaseFirstCall() {
 	factory.GetPostsUsecase()
 }
 
-//func (s *FactorySuite) TestGetPostsUsecaseSecondCall() {
-//	factory := NewUsecaseFactory(s.mockRepositoryFactory)
-//	factory.postsUsecase = s.Pos
-//
-//	defer func() {
-//		if r := recover(); r != nil {
-//			assert.Fail(s.T(), "fail on getUserUsecase()")
-//		}
-//	}()
-//	factory.GetAwardsUsecase()
-//}
+func (s *FactorySuite) TestGetPostsUsecaseSecondCall() {
+	factory := NewUsecaseFactory(s.mockRepositoryFactory)
+	factory.postsUsecase = s.MockPostsUsecase
+
+	defer func() {
+		if r := recover(); r != nil {
+			assert.Fail(s.T(), "fail on getUserUsecase()")
+		}
+	}()
+	factory.GetPostsUsecase()
+}
 func (s *FactorySuite) TestGetLikesUsecaseFirstCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
 	s.mockRepositoryFactory.EXPECT().GetLikesRepository()
@@ -216,17 +220,17 @@ func (s *FactorySuite) TestGetLikesUsecaseFirstCall() {
 	factory.GetLikesUsecase()
 }
 
-//func (s *FactorySuite) TestGetLikesUsecaseSecondCall() {
-//	factory := NewUsecaseFactory(s.mockRepositoryFactory)
-//	factory.likesUsecase = s.Moc
-//
-//	defer func() {
-//		if r := recover(); r != nil {
-//			assert.Fail(s.T(), "fail on getUserUsecase()")
-//		}
-//	}()
-//	factory.GetLikesUsecase()
-//}
+func (s *FactorySuite) TestGetLikesUsecaseSecondCall() {
+	factory := NewUsecaseFactory(s.mockRepositoryFactory)
+	factory.likesUsecase = s.MockLikeUsecase
+
+	defer func() {
+		if r := recover(); r != nil {
+			assert.Fail(s.T(), "fail on getUserUsecase()")
+		}
+	}()
+	factory.GetLikesUsecase()
+}
 func (s *FactorySuite) TestGetPostsDataUsecaseFirstCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
 	s.mockRepositoryFactory.EXPECT().GetPostsDataRepository()
@@ -239,6 +243,7 @@ func (s *FactorySuite) TestGetPostsDataUsecaseFirstCall() {
 	}()
 	factory.GetPostsDataUsecase()
 }
+
 func TestFactoryHandler(t *testing.T) {
 	suite.Run(t, new(FactorySuite))
 }

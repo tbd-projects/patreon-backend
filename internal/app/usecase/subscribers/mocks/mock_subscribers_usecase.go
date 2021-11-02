@@ -35,10 +35,10 @@ func (m *SubscribersUsecase) EXPECT() *SubscribersUsecaseMockRecorder {
 }
 
 // GetCreators mocks base method.
-func (m *SubscribersUsecase) GetCreators(arg0 int64) ([]models.Creator, error) {
+func (m *SubscribersUsecase) GetCreators(arg0 int64) ([]models.CreatorSubscribe, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCreators", arg0)
-	ret0, _ := ret[0].([]models.Creator)
+	ret0, _ := ret[0].([]models.CreatorSubscribe)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

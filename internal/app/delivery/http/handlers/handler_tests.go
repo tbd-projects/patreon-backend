@@ -8,6 +8,9 @@ import (
 	mock_usecase "patreon/internal/app/usecase/access/mocks"
 	mock_usecase_awards "patreon/internal/app/usecase/awards/mocks"
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
+	mock_usecase_like "patreon/internal/app/usecase/likes/mocks"
+	mock_usecase_posts "patreon/internal/app/usecase/posts/mocks"
+	mock_usecase_posts_data "patreon/internal/app/usecase/posts_data/mocks"
 	mock_subscribers "patreon/internal/app/usecase/subscribers/mocks"
 	mock_usecase_user "patreon/internal/app/usecase/user/mocks"
 
@@ -29,8 +32,11 @@ type SuiteHandler struct {
 	suite.Suite
 	Mock                   *gomock.Controller
 	MockUserUsecase        *mock_usecase_user.UserUsecase
+	MockLikeUsecase        *mock_usecase_like.LikesUsecase
 	MockCreatorUsecase     *mock_usecase_creator.CreatorUsecase
 	MockAwardsUsecase      *mock_usecase_awards.AwardsUsecase
+	MockPostsUsecase       *mock_usecase_posts.PostsUsecase
+	MockPostsDataUsecase   *mock_usecase_posts_data.Posts_dataUsecase
 	MockAccessUsecase      *mock_usecase.AccessUsecase
 	MockSessionsManager    *mock_sessions.MockSessionsManager
 	Tb                     TestTable
@@ -50,6 +56,9 @@ func (s *SuiteHandler) SetupSuite() {
 	s.MockCsrfUsecase = mock_usecase_csrf.NewMockUsecase(s.Mock)
 	s.MockSubscribersUsecase = mock_subscribers.NewSubscribersUsecase(s.Mock)
 	s.MockAccessUsecase = mock_usecase.NewAccessUsecase(s.Mock)
+	s.MockLikeUsecase = mock_usecase_like.NewLikesUsecase(s.Mock)
+	s.MockPostsUsecase = mock_usecase_posts.NewPostsUsecase(s.Mock)
+	s.MockPostsDataUsecase = mock_usecase_posts_data.NewPosts_dataUsecase(s.Mock)
 
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()

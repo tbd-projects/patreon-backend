@@ -43,9 +43,24 @@ func TestPostsMiddleware(t *testing.T) {
 
 	assert.Equal(t, recorder.Code, http.StatusOK)
 	mock.Finish()
-	recorder = httptest.NewRecorder()
-	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
-	vars = map[string]string{
+}
+
+func TestPostsMiddleware_Fobbiden(t *testing.T) {
+	defer func(t *testing.T) {
+		err := recover()
+		require.Equal(t, err, nil)
+	}(t)
+
+	log := &logrus.Logger{}
+	mock := gomock.NewController(t)
+	mockposts := mock_usecase.NewPostsUsecase(mock)
+	utilits := NewPostsMiddleware(log, mockposts)
+
+	b := bytes.Buffer{}
+	recorder := httptest.NewRecorder()
+	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
+
+	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
 		"post_id": strconv.Itoa(1),
 	}
@@ -59,10 +74,23 @@ func TestPostsMiddleware(t *testing.T) {
 
 	assert.Equal(t, recorder.Code, http.StatusForbidden)
 	mock.Finish()
+}
 
-	recorder = httptest.NewRecorder()
-	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
-	vars = map[string]string{
+func TestPostsMiddleware_StatusInternalServerError(t *testing.T) {
+	defer func(t *testing.T) {
+		err := recover()
+		require.Equal(t, err, nil)
+	}(t)
+
+	log := &logrus.Logger{}
+	mock := gomock.NewController(t)
+	mockposts := mock_usecase.NewPostsUsecase(mock)
+	utilits := NewPostsMiddleware(log, mockposts)
+
+	b := bytes.Buffer{}
+	recorder := httptest.NewRecorder()
+	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
+	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
 		"post_id": strconv.Itoa(1),
 	}
@@ -76,10 +104,23 @@ func TestPostsMiddleware(t *testing.T) {
 
 	assert.Equal(t, recorder.Code, http.StatusInternalServerError)
 	mock.Finish()
+}
 
-	recorder = httptest.NewRecorder()
-	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
-	vars = map[string]string{
+func TestPostsMiddleware_StatusForbidden2(t *testing.T) {
+	defer func(t *testing.T) {
+		err := recover()
+		require.Equal(t, err, nil)
+	}(t)
+
+	log := &logrus.Logger{}
+	mock := gomock.NewController(t)
+	mockposts := mock_usecase.NewPostsUsecase(mock)
+	utilits := NewPostsMiddleware(log, mockposts)
+
+	b := bytes.Buffer{}
+	recorder := httptest.NewRecorder()
+	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
+	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
 		"post_id": strconv.Itoa(1),
 	}
@@ -93,10 +134,23 @@ func TestPostsMiddleware(t *testing.T) {
 
 	assert.Equal(t, recorder.Code, http.StatusForbidden)
 	mock.Finish()
+}
 
-	recorder = httptest.NewRecorder()
-	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
-	vars = map[string]string{
+func TestPostsMiddleware_StatusBadRequest(t *testing.T) {
+	defer func(t *testing.T) {
+		err := recover()
+		require.Equal(t, err, nil)
+	}(t)
+
+	log := &logrus.Logger{}
+	mock := gomock.NewController(t)
+	mockposts := mock_usecase.NewPostsUsecase(mock)
+	utilits := NewPostsMiddleware(log, mockposts)
+
+	b := bytes.Buffer{}
+	recorder := httptest.NewRecorder()
+	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
+	vars := map[string]string{
 		"post_id": strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
@@ -108,10 +162,23 @@ func TestPostsMiddleware(t *testing.T) {
 
 	assert.Equal(t, recorder.Code, http.StatusBadRequest)
 	mock.Finish()
+}
 
-	recorder = httptest.NewRecorder()
-	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
-	vars = map[string]string{
+func TestPostsMiddleware_StatusBadRequest2(t *testing.T) {
+	defer func(t *testing.T) {
+		err := recover()
+		require.Equal(t, err, nil)
+	}(t)
+
+	log := &logrus.Logger{}
+	mock := gomock.NewController(t)
+	mockposts := mock_usecase.NewPostsUsecase(mock)
+	utilits := NewPostsMiddleware(log, mockposts)
+
+	b := bytes.Buffer{}
+	recorder := httptest.NewRecorder()
+	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
+	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
@@ -124,3 +191,4 @@ func TestPostsMiddleware(t *testing.T) {
 	assert.Equal(t, recorder.Code, http.StatusBadRequest)
 	mock.Finish()
 }
+
