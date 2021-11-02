@@ -21,6 +21,8 @@ func NewSessionMiddleware(sessionManager sessions.SessionsManager, log *logrus.L
 	}
 }
 
+// CheckFunc Errors:
+//		Status 401 "not authorized user"
 func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
@@ -44,10 +46,14 @@ func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	}
 }
 
+// Check Errors:
+//		Status 401 "not authorized user"
 func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 	return http.HandlerFunc(m.CheckFunc(next.ServeHTTP))
 }
 
+// CheckNotAuthorized Errors:
+//		Status 418 "user already authorized"
 func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
@@ -69,6 +75,8 @@ func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 	})
 }
 
+// AddUserIdFunc Errors:
+//		Nothing return only add user_id and session_id to context
 func (m *SessionMiddleware) AddUserIdFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
@@ -84,6 +92,8 @@ func (m *SessionMiddleware) AddUserIdFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	}
 }
 
+// AddUserId Errors:
+//		Nothing return only add user_id and session_id to context
 func (m *SessionMiddleware) AddUserId(next http.Handler) http.Handler {
-	return http.HandlerFunc(m.CheckFunc(next.ServeHTTP))
+	return http.HandlerFunc(m.AddUserIdFunc(next.ServeHTTP))
 }
