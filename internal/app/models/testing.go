@@ -87,6 +87,7 @@ func TestSubscriber() *Subscriber {
 		ID:        1,
 		UserID:    1,
 		CreatorID: 2,
+		AwardID:   3,
 	}
 
 }

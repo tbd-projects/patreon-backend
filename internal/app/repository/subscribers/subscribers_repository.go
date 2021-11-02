@@ -145,7 +145,7 @@ func (repo *SubscribersRepository) GetSubscribers(creatorID int64) ([]models.Use
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) Get(subscriber *models.Subscriber) (bool, error) {
-	query := "SELECT count(*) from subscribers where users_id = $1 and creator_id = $2"
+	query := "SELECT count(*) as cnt from subscribers where users_id = $1 and creator_id = $2"
 	cnt := 0
 	if res := repo.store.QueryRow(query, subscriber.UserID, subscriber.CreatorID).Scan(&cnt); res != nil {
 		return false, repository.NewDBError(res)
