@@ -130,22 +130,50 @@ func (u *ResponseCreator) String() string {
 }
 
 type SubscriptionsUserResponse struct {
-	Creators []models.Creator `json:"creators"`
+	Creators []ResponseCreator `json:"creators"`
 }
 
 func ToSubscriptionsUser(creators []models.Creator) SubscriptionsUserResponse {
+	res := make([]ResponseCreator, 0, len(creators))
+	for i, creator := range creators {
+		res[i] = ResponseCreator{
+			models.Creator{
+				ID:          creator.ID,
+				Nickname:    creator.Nickname,
+				Description: creator.Description,
+				Category:    creator.Category,
+				Cover:       creator.Cover,
+				Avatar:      creator.Avatar,
+			},
+		}
+	}
 	return SubscriptionsUserResponse{
-		Creators: creators,
+		Creators: res,
 	}
 }
 
+type ResponseUser struct {
+	ID       int64  `json:"id"`
+	Login    string `json:"login"`
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar,omitempty"`
+}
 type SubscribersCreatorResponse struct {
-	Users []models.User `json:"users"`
+	Users []ResponseUser `json:"users"`
 }
 
 func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorResponse {
+	res := make([]ResponseUser, 0, len(users))
+	for i, user := range users {
+		res[i] = ResponseUser{
+			ID:       user.ID,
+			Login:    user.Login,
+			Nickname: user.Nickname,
+			Avatar:   user.Avatar,
+		}
+	}
 	return SubscribersCreatorResponse{
-		Users: users,
+		Users: res,
 	}
 }
 
