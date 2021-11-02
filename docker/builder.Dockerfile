@@ -4,8 +4,12 @@ WORKDIR /app
 
 COPY . .
 
-EXPOSE 8080 8081
+EXPOSE 443 80
 
 RUN make build
 
-CMD ./server
+ARG RUN_HTTPS
+
+ENV HTTPS=$RUN_HTTPS
+
+CMD ./server.out -server-run $HTTPS

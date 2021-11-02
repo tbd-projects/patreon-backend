@@ -1,50 +1,106 @@
 package server
 
 import (
-	"database/sql"
+	"context"
+	"fmt"
 	"net/http"
-	"os"
+	"net/url"
+	"patreon/internal/app/delivery/http/handler_factory"
+	"patreon/internal/app/middleware"
+	"patreon/internal/app/repository/repository_factory"
+	"patreon/internal/app/usecase/usecase_factory"
+
+	"golang.org/x/crypto/acme/autocert"
+
 	_ "patreon/docs"
 	"patreon/internal/app"
-	"patreon/internal/app/handlers"
-	"patreon/internal/app/sessions/repository"
-	"patreon/internal/app/sessions/sessions_manager"
-	"patreon/internal/app/store/sqlstore"
 
 	httpSwagger "github.com/swaggo/http-swagger"
-
-	gorilla_handlers "github.com/gorilla/handlers"
-
-	redis "github.com/gomodule/redigo/redis"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
 
 type Server struct {
-	config  *Config
-	handler app.Handler
-	logger  *log.Logger
+	config      *app.Config
+	logger      *log.Logger
+	connections app.ExpectedConnections
 }
 
-func New(config *Config, handler app.Handler) *Server {
+func New(config *app.Config, connections app.ExpectedConnections, logger *log.Logger) *Server {
 	return &Server{
-		config:  config,
-		logger:  log.New(),
-		handler: handler,
+		config:      config,
+		logger:      logger,
+		connections: connections,
 	}
 }
 
-func newDB(url string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", url)
-	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
-		return nil, err
+func (s *Server) checkConnection() error {
+	if err := s.connections.SqlConnection.Ping(); err != nil {
+		return fmt.Errorf("Can't check connection to sql with error %v ", err)
 	}
 
-	return db, nil
+	s.logger.Info("Success check connection to sql db")
+
+	connSession, err := s.connections.SessionRedisPool.Dial()
+	if err != nil {
+		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
+	}
+
+	s.logger.Info("Success check connection to redis")
+
+	err = connSession.Close()
+	if err != nil {
+		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
+	}
+
+	connAccess, err := s.connections.SessionRedisPool.Dial()
+	if err != nil {
+		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
+	}
+
+	s.logger.Info("Success check connection to redis")
+
+	err = connAccess.Close()
+	if err != nil {
+		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
+	}
+
+	return nil
+}
+
+//return http[0] and https[1] servers
+func makingHTTPSServerWithRedirect(config *app.Config, router *mux.Router) (*http.Server, *http.Server) {
+	serverHTTP := &http.Server{
+		Addr: config.BindHttpAddr,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
+			log.Infof("Redirect from %s, to %s", r.RequestURI, targetUrl.String())
+			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
+		}),
+	}
+
+	hostPolicy := func(ctx context.Context, host string) error {
+		allowedHost := config.Domen
+		if host == allowedHost {
+			return nil
+		}
+		return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
+	}
+
+	dataDir := "./patreon-secrt"
+	m := &autocert.Manager{
+		Cache:      autocert.DirCache(dataDir),
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: hostPolicy,
+	}
+
+	serverHTTPS := &http.Server{
+		Addr:      config.BindHttpsAddr,
+		TLSConfig: m.TLSConfig(),
+		Handler:   router,
+	}
+	return serverHTTP, serverHTTPS
 }
 
 // @title Patreon
@@ -56,117 +112,48 @@ func newDB(url string) (*sql.DB, error) {
 // @contact.email support@swagger.io
 
 // @host localhost:8080
-// @BasePath /
-
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
+// @BasePath /api/v1/
 
 // @x-extension-openapi {"example": "value on a json format"}
-func Start(config *Config) error {
-	level, err := log.ParseLevel(config.LogLevel)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
-	logger := log.New()
-	logger.SetLevel(level)
 
-	handler := handlers.NewMainHandler()
-	handler.SetLogger(logger)
+func (s *Server) Start(config *app.Config) error {
+	if err := s.checkConnection(); err != nil {
+		return err
+	}
 
 	router := mux.NewRouter()
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	routerApi := router.PathPrefix("/api/v1/").Subrouter()
+	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	router.Use(gorilla_handlers.CORS(
-		gorilla_handlers.AllowedOrigins([]string{"http://localhost:3001", "https://patreon-dev.herokuapp.com",
-			"https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",
-			"http://patreon-dev.herokuapp.com", "http://front2.tp.volodyalarin.site", "http://pyaterochka-team.site"}),
-		gorilla_handlers.AllowedHeaders([]string{
-			"Accept", "Content-Type", "Content-Length",
-			"Accept-Encoding", "X-CSRF-Token", "csrf-token", "Authorization"}),
-		gorilla_handlers.AllowCredentials(),
-		gorilla_handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
-	))
+	fileServer := http.FileServer(http.Dir(config.MediaDir + "/"))
+	routerApi.PathPrefix("/" + app.LoadFileUrl).Handler(http.StripPrefix("/api/v1/"+app.LoadFileUrl, fileServer))
 
-	handler.SetRouter(router)
+	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
+	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
+	factory := handler_factory.NewFactory(s.logger, router, &config.Cors, usecaseFactory)
+	hs := factory.GetHandleUrls()
 
-	db, err := newDB(config.DataBaseUrl)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+	for apiUrl, h := range *hs {
+		h.Connect(routerApi.Path(apiUrl))
 	}
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(db)
+	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
+	routerApi.Use(ddosMiddleware.CheckAccess)
 
-	store := sqlstore.New(db)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+	if config.IsHTTPSServer {
+		serverHTTP, serverHTTPS := makingHTTPSServerWithRedirect(config, routerApi)
+
+		go func(logger *log.Logger, server *http.Server) {
+			logger.Info("Start http server")
+			err := server.ListenAndServe()
+			if err != nil {
+				logger.Errorf("http server error on listenAndServe %s", err)
+			}
+		}(s.logger, serverHTTP)
+
+		s.logger.Info("Start https server")
+		return serverHTTPS.ListenAndServeTLS("", "")
+	} else {
+		s.logger.Info("start no production http server")
+		return http.ListenAndServe(config.BindHttpAddr, routerApi)
 	}
-
-	registerHandler := handlers.NewRegisterHandler()
-	registerHandler.SetStore(store)
-
-	loginHandler := handlers.NewLoginHandler()
-	loginHandler.SetStore(store)
-
-	profileHandler := handlers.NewProfileHandler()
-	profileHandler.SetStore(store)
-
-	logoutHandler := handlers.NewLogoutHandler()
-
-	creatorHandler := handlers.NewCreatorHandler()
-	creatorHandler.SetStore(store)
-
-	creatorCreateHandler := handlers.NewCreatorCreateHandler()
-	creatorCreateHandler.SetStore(store)
-
-	sessionLog := log.New()
-	sessionLog.SetLevel(log.FatalLevel)
-	redisConn := &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.DialURL(config.RedisUrl)
-		},
-	}
-
-	conn, err := redisConn.Dial()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = conn.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	redisRepository := repository.NewRedisRepository(redisConn, sessionLog)
-	sessionManager := sessions_manager.NewSessionManager(redisRepository)
-	loginHandler.SetSessionManager(sessionManager)
-	registerHandler.SetSessionManager(sessionManager)
-	profileHandler.SetSessionManager(sessionManager)
-	logoutHandler.SetSessionManager(sessionManager)
-	creatorHandler.SetSessionManager(sessionManager)
-	creatorCreateHandler.SetSessionManager(sessionManager)
-
-	creatorHandler.JoinHandlers([]app.Joinable{
-		creatorCreateHandler,
-	})
-
-	handler.JoinHandlers([]app.Joinable{
-		registerHandler,
-		loginHandler,
-		profileHandler,
-		logoutHandler,
-		creatorHandler,
-	})
-
-	s := New(config, handler)
-	s.logger.Info("starting server")
-
-	return http.ListenAndServe(config.BindAddr, s.handler)
 }

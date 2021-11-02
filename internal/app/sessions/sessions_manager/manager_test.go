@@ -3,7 +3,7 @@ package sessions_manager
 import (
 	"fmt"
 	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/mocks"
+	mock_sessions "patreon/internal/app/sessions/mocks"
 	"patreon/internal/app/sessions/models"
 	"testing"
 
@@ -17,12 +17,12 @@ type SuiteTestSesManager struct {
 	suite.Suite
 	sessionsManager       SessionManager
 	mock                  *gomock.Controller
-	mockSessionRepository *mocks.MockSessionRepository
+	mockSessionRepository *mock_sessions.MockSessionRepository
 }
 
 func (s *SuiteTestSesManager) SetupSuite() {
 	s.mock = gomock.NewController(s.T())
-	s.mockSessionRepository = mocks.NewMockSessionRepository(s.mock)
+	s.mockSessionRepository = mock_sessions.NewMockSessionRepository(s.mock)
 	s.sessionsManager = *NewSessionManager(s.mockSessionRepository)
 }
 
@@ -60,7 +60,7 @@ func (s *SuiteTestSesManager) TestCreateSession() {
 	var uniqID string
 	s.mockSessionRepository.EXPECT().
 		Set(SkipUniqIDMatcher(models.Session{UserID: fmt.Sprintf("%d", userID), UniqID: "some uniqID",
-			Expiration: expiredCookiesTime})).
+			Expiration: int(ExpiredCookiesTime.Milliseconds())})).
 		Times(1).
 		Do(func(session *models.Session) error {
 			uniqID = session.UniqID

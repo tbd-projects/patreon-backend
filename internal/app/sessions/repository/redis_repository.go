@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/pkg/errors"
 	"patreon/internal/app/sessions/models"
 
 	"github.com/gomodule/redigo/redis"
@@ -32,10 +33,12 @@ func (repo *RedisRepository) Set(session *models.Session) error {
 	res, err := redis.String(con.Do("SET", session.UniqID, session.UserID,
 		"EX", session.Expiration))
 	if res != "OK" {
-		return err
+		return errors.Wrapf(err,
+			"error when try create session with uniqId: %s, and userId: %s", session.UniqID, session.UserID)
 	}
 	return nil
 }
+
 func (repo *RedisRepository) GetUserId(uniqID string) (string, error) {
 	con := repo.redisPool.Get()
 	defer func() {
@@ -46,7 +49,12 @@ func (repo *RedisRepository) GetUserId(uniqID string) (string, error) {
 		}
 	}()
 
-	return redis.String(con.Do("GET", uniqID))
+	res, err := redis.String(con.Do("GET", uniqID))
+	if err != nil {
+		return "", errors.Wrapf(err,
+			"error when try get session with uniqId: %s", uniqID)
+	}
+	return res, nil
 }
 
 func (repo *RedisRepository) Del(session *models.Session) error {
@@ -60,5 +68,6 @@ func (repo *RedisRepository) Del(session *models.Session) error {
 	}()
 
 	_, err := redis.Int(con.Do("DEL", session.UniqID))
-	return err
+	return errors.Wrapf(err,
+		"error when try delete session with uniqId: %s, and userId: %s", session.UniqID, session.UserID)
 }
