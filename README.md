@@ -13,3 +13,5 @@
 - [**Валерия Гусева**](https://github.com/lerakrya8) - *Фронтенд*
 
 ## Ссылка на [frontend](https://github.com/frontend-park-mail-ru/2021_2_Pyaterochka)
+
+## Ссылка на API документацию [swagger](https://api.pyaterochka-team.site/api/v1/swagger/)
