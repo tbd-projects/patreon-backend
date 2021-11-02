@@ -114,10 +114,10 @@ func (usecase *UserUsecase) UpdatePassword(userId int64, oldPassword, newPasswor
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("profile with id %v not found", userId))
 	}
-	if !u.ComparePassword(oldPassword) {
+	if u.ComparePassword(oldPassword) {
 		return IncorrectEmailOrPassword
 	}
-	if !u.ComparePassword(newPassword) {
+	if u.ComparePassword(newPassword) {
 		return OldPasswordEqualNew
 	}
 	u.MakeEmptyPassword()
