@@ -420,14 +420,14 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetSubscribers_Se
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_One() {
 	uId := int64(1)
-	mockRes := []models.Creator{*models.TestCreator()}
+	mockRes := []models.CreatorSubscribe{*models.TestCreatorSubscriber()}
 
 	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
 	querySelect := `
-	SELECT DISTINCT s.creator_id, category, description, nickname, cp.avatar, cover
+	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
-	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1`
-
+	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
+	`
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
 		WithArgs(uId).
 		WillReturnError(nil).
@@ -437,9 +437,9 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_On
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(uId).
 		WillReturnError(nil).
-		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "category",
+		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "awards_id", "category",
 			"description", "nickname", "cp.avatar", "cover"}).
-			AddRow(mockRes[0].ID, mockRes[0].Category, mockRes[0].Description,
+			AddRow(mockRes[0].ID, mockRes[0].AwardsId, mockRes[0].Category, mockRes[0].Description,
 				mockRes[0].Nickname, mockRes[0].Avatar, mockRes[0].Cover)).
 		RowsWillBeClosed()
 
@@ -450,11 +450,12 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_On
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_Few() {
 	uId := int64(1)
-	mockRes := []models.Creator{*models.TestCreator(), *models.TestCreator(), *models.TestCreator()}
+	mockRes := []models.CreatorSubscribe{*models.TestCreatorSubscriber(),
+		*models.TestCreatorSubscriber(), *models.TestCreatorSubscriber()}
 
 	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
 	querySelect := `
-	SELECT DISTINCT s.creator_id, category, description, nickname, cp.avatar, cover
+	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
 	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
 	`
@@ -467,13 +468,13 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_Fe
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(uId).
 		WillReturnError(nil).
-		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "category",
+		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "awards_id", "category",
 			"description", "nickname", "cp.avatar", "cover"}).
-			AddRow(mockRes[0].ID, mockRes[0].Category, mockRes[0].Description,
+			AddRow(mockRes[0].ID, mockRes[0].AwardsId, mockRes[0].Category, mockRes[0].Description,
 				mockRes[0].Nickname, mockRes[0].Avatar, mockRes[0].Cover).
-			AddRow(mockRes[1].ID, mockRes[1].Category, mockRes[1].Description,
+			AddRow(mockRes[1].ID, mockRes[1].AwardsId, mockRes[1].Category, mockRes[1].Description,
 				mockRes[1].Nickname, mockRes[1].Avatar, mockRes[1].Cover).
-			AddRow(mockRes[2].ID, mockRes[2].Category, mockRes[2].Description,
+			AddRow(mockRes[2].ID, mockRes[2].AwardsId, mockRes[2].Category, mockRes[2].Description,
 				mockRes[2].Nickname, mockRes[2].Avatar, mockRes[2].Cover)).
 		RowsWillBeClosed()
 	res, err := s.repo.GetCreators(uId)
@@ -483,12 +484,13 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_Fe
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_DBError_Few() {
 	uId := int64(1)
-	mockRes := []models.Creator{*models.TestCreator(), *models.TestCreator(), *models.TestCreator()}
+	mockRes := []models.CreatorSubscribe{*models.TestCreatorSubscriber(),
+		*models.TestCreatorSubscriber(), *models.TestCreatorSubscriber()}
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
 	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
 	querySelect := `
-	SELECT DISTINCT s.creator_id, category, description, nickname, cp.avatar, cover
+	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
 	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
 	`
@@ -501,13 +503,13 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_DBErr
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(uId).
 		WillReturnError(nil).
-		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "category",
+		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "awards_id", "category",
 			"description", "nickname", "cp.avatar", "cover"}).
-			AddRow(mockRes[0].ID, mockRes[0].Category, mockRes[0].Description,
+			AddRow(mockRes[0].ID, mockRes[0].AwardsId, mockRes[0].Category, mockRes[0].Description,
 				mockRes[0].Nickname, mockRes[0].Avatar, mockRes[0].Cover).
-			AddRow(mockRes[1].ID, mockRes[1].Category, mockRes[1].Description,
+			AddRow(mockRes[1].ID, mockRes[1].AwardsId, mockRes[1].Category, mockRes[1].Description,
 				mockRes[1].Nickname, mockRes[1].Avatar, mockRes[1].Cover).
-			AddRow(mockRes[2].ID, mockRes[2].Category, mockRes[2].Description,
+			AddRow(mockRes[2].ID, mockRes[2].AwardsId, mockRes[2].Category, mockRes[2].Description,
 				mockRes[2].Nickname, mockRes[2].Avatar, mockRes[2].Cover).RowError(2, sqlErr)).
 		RowsWillBeClosed()
 	res, err := s.repo.GetCreators(uId)
@@ -518,16 +520,18 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_DBErr
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_DBErrorScan_Few() {
 	uId := int64(1)
-	mockRes := []models.Creator{*models.TestCreator(), *models.TestCreator(), *models.TestCreator()}
+	mockRes := []models.CreatorSubscribe{*models.TestCreatorSubscriber(),
+		*models.TestCreatorSubscriber(), *models.TestCreatorSubscriber()}
 
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
 
 	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
 	querySelect := `
-	SELECT DISTINCT s.creator_id, category, description, nickname, cp.avatar, cover
+	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
-	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1`
+	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
+	`
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
 		WithArgs(uId).
@@ -538,13 +542,13 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_DBErr
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(uId).
 		WillReturnError(nil).
-		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "category",
+		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "awards_id", "category",
 			"description", "nickname", "cp.avatar", "cover"}).
-			AddRow(mockRes[0].ID, mockRes[0].Category, mockRes[0].Description,
+			AddRow(mockRes[0].ID, mockRes[0].AwardsId, mockRes[0].Category, mockRes[0].Description,
 				mockRes[0].Nickname, mockRes[0].Avatar, mockRes[0].Cover).
-			AddRow(mockRes[1].ID, mockRes[1].Category, mockRes[1].Description,
-				mockRes[1].Nickname, mockRes[1].ID, mockRes[1].Cover).RowError(1, sqlErr).
-			AddRow(mockRes[2].ID, mockRes[2].Category, mockRes[2].Description,
+			AddRow(mockRes[1].ID, mockRes[1].AwardsId, mockRes[1].Category, mockRes[1].Description,
+				mockRes[1].Nickname, mockRes[1].Avatar, mockRes[1].Cover).RowError(1, sqlErr).
+			AddRow(mockRes[2].ID, mockRes[2].AwardsId, mockRes[2].Category, mockRes[2].Description,
 				mockRes[2].Nickname, mockRes[2].Avatar, mockRes[2].Cover))
 
 	res, err := s.repo.GetCreators(uId)
@@ -571,13 +575,13 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Count
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_SelectQueryError() {
 	uId := int64(1)
 
-	mockRes := []models.Creator{*models.TestCreator()}
+	mockRes := []models.CreatorSubscribe{*models.TestCreatorSubscriber()}
 	sqlErr := pq.ErrNotSupported
 	expErr := repository.NewDBError(sqlErr)
 
 	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
 	querySelect := `
-	SELECT DISTINCT s.creator_id, category, description, nickname, cp.avatar, cover
+	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
 	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
 	`
@@ -598,13 +602,14 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Selec
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_NoOne() {
 	uId := int64(1)
-	mockRes := []models.Creator{}
+	var mockRes []models.CreatorSubscribe
 
 	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
 	querySelect := `
-	SELECT DISTINCT s.creator_id, category, description, nickname, cp.avatar, cover
+	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
-	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1`
+	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
+	`
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
 		WithArgs(uId).
@@ -615,7 +620,7 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_GetCreators_Ok_No
 	s.Mock.ExpectQuery(regexp.QuoteMeta(querySelect)).
 		WithArgs(uId).
 		WillReturnError(nil).
-		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "category",
+		WillReturnRows(sqlmock.NewRows([]string{"s.creator_id", "awards_id", "category",
 			"description", "nickname", "cp.avatar", "cover"})).
 		RowsWillBeClosed()
 

@@ -32,6 +32,10 @@ type ResponseCreator struct {
 	models.Creator
 }
 
+type ResponseCreatorSubscrube struct {
+	models.CreatorSubscribe
+}
+
 type ResponseAward struct {
 	ID          int64  `json:"awards_id"`
 	Name        string `json:"name"`
@@ -130,22 +134,23 @@ func (u *ResponseCreator) String() string {
 }
 
 type SubscriptionsUserResponse struct {
-	Creators []ResponseCreator `json:"creators"`
+	Creators []ResponseCreatorSubscrube `json:"creators"`
 }
 
-func ToSubscriptionsUser(creators []models.Creator) SubscriptionsUserResponse {
-	res := make([]ResponseCreator, 0, len(creators))
-	for i, creator := range creators {
-		res[i] = ResponseCreator{
-			models.Creator{
+func ToSubscriptionsUser(creators []models.CreatorSubscribe) SubscriptionsUserResponse {
+	var res []ResponseCreatorSubscrube
+	for _, creator := range creators {
+		res = append(res, ResponseCreatorSubscrube{
+			models.CreatorSubscribe{
 				ID:          creator.ID,
 				Nickname:    creator.Nickname,
 				Description: creator.Description,
 				Category:    creator.Category,
 				Cover:       creator.Cover,
 				Avatar:      creator.Avatar,
+				AwardsId:    creator.AwardsId,
 			},
-		}
+		})
 	}
 	return SubscriptionsUserResponse{
 		Creators: res,

@@ -50,7 +50,7 @@ func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber) error {
 // GetCreators Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
-func (uc *SubscribersUsecase) GetCreators(userID int64) ([]models.Creator, error) {
+func (uc *SubscribersUsecase) GetCreators(userID int64) ([]models.CreatorSubscribe, error) {
 	return uc.repoSubscr.GetCreators(userID)
 }
 

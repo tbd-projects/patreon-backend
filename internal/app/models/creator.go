@@ -17,6 +17,16 @@ type Creator struct {
 	Cover       string `json:"cover,omitempty"`
 }
 
+type CreatorSubscribe struct {
+	ID          int64  `json:"id"`
+	Category    string `json:"category"`
+	Nickname    string `json:"nickname"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar,omitempty"`
+	Cover       string `json:"cover,omitempty"`
+	AwardsId    int64  `json:"awards_id"`
+}
+
 func (cr *Creator) String() string {
 	return fmt.Sprintf("{ID: %s, Nickname: %s Category: %s}", strconv.Itoa(int(cr.ID)), cr.Nickname, cr.Category)
 }

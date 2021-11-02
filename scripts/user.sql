@@ -25,22 +25,13 @@ CREATE TABLE IF NOT EXISTS creator_profile
     foreign key (creator_id) references users (users_id) on delete cascade
 );
 
-CREATE TABLE IF NOT EXISTS subscribers
-(
-    id         bigserial not null primary key,
-    users_id   bigint    not null,
-    creator_id bigint    not null,
-    awards_id  bigint references awards (awards_id) on delete cascade,
-    foreign key (creator_id) references creator_profile (creator_id) on delete cascade,
-    foreign key (users_id) references users (users_id) on delete cascade
-);
-
 
 CREATE TABLE IF NOT EXISTS posts_type
 (
     posts_type_id bigserial not null primary key,
     type          text      not null
 );
+
 CREATE TABLE IF NOT EXISTS awards
 (
     awards_id   bigserial         not null primary key,
@@ -51,6 +42,16 @@ CREATE TABLE IF NOT EXISTS awards
     color       bigint default 0  not null,
     creator_id  bigint            not null references creator_profile (creator_id) on delete cascade,
     UNIQUE (name, creator_id)
+);
+
+CREATE TABLE IF NOT EXISTS subscribers
+(
+    id         bigserial not null primary key,
+    users_id   bigint    not null,
+    creator_id bigint    not null,
+    awards_id  bigint references awards (awards_id) on delete cascade,
+    foreign key (creator_id) references creator_profile (creator_id) on delete cascade,
+    foreign key (users_id) references users (users_id) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS posts

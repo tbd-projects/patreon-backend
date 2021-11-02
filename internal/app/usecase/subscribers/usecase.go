@@ -17,7 +17,7 @@ type Usecase interface {
 	// GetCreators Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB
-	GetCreators(userID int64) ([]models.Creator, error)
+	GetCreators(userID int64) ([]models.CreatorSubscribe, error)
 	// GetSubscribers Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB

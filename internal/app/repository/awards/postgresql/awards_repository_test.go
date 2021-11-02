@@ -56,8 +56,9 @@ func (s *SuiteAwardsRepository) TestAwardsRepository_checkUniqName() {
 
 func (s *SuiteAwardsRepository) TestAwardsRepository_Create() {
 	queryCheck := "SELECT count(*) from awards where awards.creator_id = $1 and awards.name = $2 and awards.awards_id != $3"
-	query := `INSERT INTO awards (name, description, price, color, creator_id, cover) VALUES ($1, $2, $3, $4, $5. $6, $7) 
+	query := `INSERT INTO awards (name, description, price, color, creator_id, cover) VALUES ($1, $2, $3, $4, $5, $6) 
 				RETURNING awards_id`
+
 	name := "sda"
 	creatorId := int64(1)
 	Id := int64(1)
