@@ -64,6 +64,16 @@ func TestCreator() *Creator {
 	}
 }
 
+func TestCreatorSubscriber() *CreatorSubscribe {
+	return &CreatorSubscribe{
+		ID:          1,
+		Nickname:    "doggy2005",
+		Category:    "podcasts",
+		Description: "i love podcasts",
+		AwardsId:    1,
+	}
+}
+
 func TestCreators() []Creator {
 	cr1 := Creator{
 		ID:          1,

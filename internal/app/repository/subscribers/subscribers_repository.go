@@ -68,10 +68,10 @@ func (repo *SubscribersRepository) Create(subscriber *models.Subscriber) error {
 // GetCreators Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
-func (repo *SubscribersRepository) GetCreators(userID int64) ([]models.Creator, error) {
+func (repo *SubscribersRepository) GetCreators(userID int64) ([]models.CreatorSubscribe, error) {
 	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
 	querySelect := `
-	SELECT DISTINCT s.creator_id, category, description, nickname, cp.avatar, cover
+	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
 	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
 	`
@@ -81,15 +81,15 @@ func (repo *SubscribersRepository) GetCreators(userID int64) ([]models.Creator, 
 		return nil, repository.NewDBError(err)
 	}
 
-	res := make([]models.Creator, 0, count)
+	var res []models.CreatorSubscribe
 
 	rows, err := repo.store.Query(querySelect, userID)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}
-	var cur models.Creator
+	var cur models.CreatorSubscribe
 	for rows.Next() {
-		if err = rows.Scan(&cur.ID, &cur.Category, &cur.Description, &cur.Nickname,
+		if err = rows.Scan(&cur.ID, &cur.AwardsId, &cur.Category, &cur.Description, &cur.Nickname,
 			&cur.Avatar, &cur.Cover); err != nil {
 			_ = rows.Close()
 			return nil, repository.NewDBError(err)
