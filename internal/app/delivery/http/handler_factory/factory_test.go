@@ -42,16 +42,6 @@ func (s *FactorySuite) TestInitHandlers() {
 	s.factory.initAllHandlers()
 }
 func (s *FactorySuite) TestGetHandlersUrlsFirstRun() {
-	s.mockUsecaseFactory.EXPECT().GetUserUsecase().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetCreatorUsecase().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetCsrfUsecase().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetPostsUsecase().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetLikesUsecase().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetSessionManager().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
-	s.mockUsecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
-
 	defer func() {
 		if r := recover(); r != nil {
 			assert.Fail(s.T(), "fail on initAllHandlers")
