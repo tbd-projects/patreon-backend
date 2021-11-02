@@ -130,20 +130,20 @@ func (u *ResponseCreator) String() string {
 }
 
 type SubscriptionsUserResponse struct {
-	Creators []int64 `json:"creator_id"`
+	Creators []models.Creator `json:"creators"`
 }
 
-func ToSubscriptionsUser(creators []int64) SubscriptionsUserResponse {
+func ToSubscriptionsUser(creators []models.Creator) SubscriptionsUserResponse {
 	return SubscriptionsUserResponse{
 		Creators: creators,
 	}
 }
 
 type SubscribersCreatorResponse struct {
-	Users []int64 `json:"user_id"`
+	Users []models.User `json:"users"`
 }
 
-func ToSubscribersCreatorResponse(users []int64) SubscribersCreatorResponse {
+func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorResponse {
 	return SubscribersCreatorResponse{
 		Users: users,
 	}

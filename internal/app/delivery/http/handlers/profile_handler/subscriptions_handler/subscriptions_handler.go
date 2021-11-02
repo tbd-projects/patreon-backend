@@ -35,7 +35,7 @@ func NewSubscriptionsHandler(log *logrus.Logger, router *mux.Router,
 
 // GET Subscriptions
 // @Summary get user subscriptions
-// @Description get id's of the creators that the user is subscribed to
+// @Description get user creators
 // @Produce json
 // @Success 200 {object} models.SubscriptionsUserResponse "Successfully get user subscriptions"
 // @Failure 401 "User are not authorized"

@@ -35,10 +35,10 @@ func (m *SubscribersUsecase) EXPECT() *SubscribersUsecaseMockRecorder {
 }
 
 // GetCreators mocks base method.
-func (m *SubscribersUsecase) GetCreators(arg0 int64) ([]int64, error) {
+func (m *SubscribersUsecase) GetCreators(arg0 int64) ([]models.Creator, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCreators", arg0)
-	ret0, _ := ret[0].([]int64)
+	ret0, _ := ret[0].([]models.Creator)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +50,10 @@ func (mr *SubscribersUsecaseMockRecorder) GetCreators(arg0 interface{}) *gomock.
 }
 
 // GetSubscribers mocks base method.
-func (m *SubscribersUsecase) GetSubscribers(arg0 int64) ([]int64, error) {
+func (m *SubscribersUsecase) GetSubscribers(arg0 int64) ([]models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSubscribers", arg0)
-	ret0, _ := ret[0].([]int64)
+	ret0, _ := ret[0].([]models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
