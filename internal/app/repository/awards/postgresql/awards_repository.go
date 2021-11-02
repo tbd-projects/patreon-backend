@@ -51,7 +51,7 @@ func (repo *AwardsRepository) Create(aw *models.Award) (int64, error) {
 		return -1, err
 	}
 
-	query := `INSERT INTO awards (name, description, price, color, creator_id, cover) VALUES ($1, $2, $3, $4, $5. $6, $7) 
+	query := `INSERT INTO awards (name, description, price, color, creator_id, cover) VALUES ($1, $2, $3, $4, $5, $6) 
 				RETURNING awards_id`
 
 	if err := repo.store.QueryRow(query, aw.Name, aw.Description, aw.Price, convertRGBAToUint64(aw.Color),
