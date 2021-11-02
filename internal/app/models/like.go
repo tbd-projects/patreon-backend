@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
 )
@@ -19,14 +20,13 @@ func (lk *Like) String() string {
 }
 
 // Validate Errors:
-//		EmptyName
-//		IncorrectlkardsPrice
+//		InvalidLikeValue
 // Important can return some other error
 func (lk *Like) Validate() error {
 	err := validation.Errors{
 		"value": validation.Validate(lk.Value, validation.By(func(val interface{}) error {
-			value, ok := val.(*int8)
-			if !ok || (*value != -1 && *value != 1) {
+			value, ok := val.(int8)
+			if !ok || (value != -1 && value != 1) {
 				return errors.New(fmt.Sprintf("Unvalid like value %v", value))
 			}
 			return nil

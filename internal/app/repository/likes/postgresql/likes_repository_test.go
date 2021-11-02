@@ -108,6 +108,22 @@ func (s *SuiteLikesRepository) TestLikesRepositoryGetLikeId_DBError() {
 	assert.Equal(s.T(), resExp, res)
 	assert.Equal(s.T(), expErr, err)
 }
+func (s *SuiteLikesRepository) TestLikesRepositoryGetLikeId_SqlNoRows() {
+	query := `SELECT likes_id FROM likes WHERE users_id = $1 AND post_id = $2`
+	like := TestLike(s.T())
+
+	sqlErr := sql.ErrNoRows
+	expErr := repository.NotFound
+	resExp := int64(app.InvalidInt)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs(like.UserId, like.PostId).
+		WillReturnError(sqlErr)
+	res, err := s.repo.GetLikeId(like.UserId, like.PostId)
+
+	assert.Equal(s.T(), resExp, res)
+	assert.Equal(s.T(), expErr, err)
+}
 func (s *SuiteLikesRepository) TestLikesRepositoryGetLikeId_NotFoundUserLikeOnPost() {
 	query := `SELECT likes_id FROM likes WHERE users_id = $1 AND post_id = $2`
 	like := TestLike(s.T())

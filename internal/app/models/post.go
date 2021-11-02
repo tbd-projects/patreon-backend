@@ -2,9 +2,10 @@ package models
 
 import (
 	"fmt"
+	"time"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type UpdatePost struct {
@@ -132,7 +133,7 @@ func (ps *PostData) Validate() error {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(postValidError(), mapOfErr); knowError != nil {
+	if knowError = extractValidateError(postDataValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 

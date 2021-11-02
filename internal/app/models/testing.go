@@ -101,3 +101,46 @@ func TestSubscriber() *Subscriber {
 	}
 
 }
+func TestAward() *Award {
+	return &Award{
+		ID:          1,
+		Name:        "award",
+		Description: "description",
+		Price:       100,
+		CreatorId:   1,
+		Cover:       "not found",
+	}
+}
+func TestLike() *Like {
+	return &Like{
+		ID:     1,
+		Value:  1,
+		PostId: 2,
+		UserId: 3,
+	}
+}
+func TestUpdatePost() *UpdatePost {
+	return &UpdatePost{
+		ID:          1,
+		Title:       "Title",
+		Awards:      1,
+		Description: "jfnagd",
+	}
+}
+func TestCreatePost() *CreatePost {
+	return &CreatePost{
+		ID:          1,
+		Title:       "Title",
+		Awards:      1,
+		Description: "jfnagd",
+		CreatorId:   1,
+	}
+}
+func TestPostData() *PostData {
+	return &PostData{
+		ID:     1,
+		PostId: 1,
+		Data:   "jfnagd",
+		Type:   Image,
+	}
+}
