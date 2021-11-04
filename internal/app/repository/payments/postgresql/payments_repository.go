@@ -22,7 +22,7 @@ func NewPaymentsRepository(store *sql.DB) *PaymentsRepository {
 //		repository.NotFound
 //		app.GeneralError with Errors:
 //			repository.DefaultErrDB
-func (repo *PaymentsRepository) GetUserPayments(userID int64) ([]models.Payment, error) {
+func (repo *PaymentsRepository) GetUserPayments(userID int64) ([]models.Payments, error) {
 	queryCount := "SELECT count(*) FROM payments where users_id = $1"
 	querySelect := "SELECT amount, date, creator_id FROM payments where users_id = $1"
 
@@ -40,10 +40,10 @@ func (repo *PaymentsRepository) GetUserPayments(userID int64) ([]models.Payment,
 		return nil, repository.NewDBError(err)
 	}
 
-	paymentsRes := make([]models.Payment, 0, count)
+	paymentsRes := make([]models.Payments, 0, count)
 
 	for rows.Next() {
-		cur := models.Payment{}
+		cur := models.Payments{}
 		if err = rows.Scan(&cur.Amount, &cur.Date, &cur.CreatorID); err != nil {
 			_ = rows.Close()
 			return nil, repository.NewDBError(errors.Wrapf(err, "method - GetUserPayments"+
@@ -59,11 +59,7 @@ func (repo *PaymentsRepository) GetUserPayments(userID int64) ([]models.Payment,
 	return paymentsRes, nil
 }
 
-// GetCreatorPayments Errors:
-//		repository.NotFound
-//		app.GeneralError with Errors:
-//			repository.DefaultErrDB
-func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64) ([]models.Payment, error) {
+func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64) ([]models.Payments, error) {
 	queryCount := "SELECT count(*) FROM payments where creator_id = $1"
 	querySelect := "SELECT amount, date, users_id FROM payments where creator_id = $1"
 
@@ -81,13 +77,13 @@ func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64) ([]models.Pa
 		return nil, repository.NewDBError(err)
 	}
 
-	paymentsRes := make([]models.Payment, 0, count)
+	paymentsRes := make([]models.Payments, 0, count)
 
 	for rows.Next() {
-		cur := models.Payment{}
+		cur := models.Payments{}
 		if err = rows.Scan(&cur.Amount, &cur.Date, &cur.UserID); err != nil {
 			_ = rows.Close()
-			return nil, repository.NewDBError(errors.Wrapf(err, "method - GetCreatorPayments"+
+			return nil, repository.NewDBError(errors.Wrapf(err, "method - GetUserPayments"+
 				"invalid data in db: table payments"))
 		}
 		paymentsRes = append(paymentsRes, cur)

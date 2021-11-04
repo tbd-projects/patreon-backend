@@ -1,6 +1,6 @@
 package payments
 
-//go:generate mockgen -destination=mocks/mock_payments_data_repository.go -package=mock_repository -mock_names=Repository=PaymentsDataRepository . Repository
+//go:generate mockgen -destination=mocks/mock_payments_repository.go -package=mock_repository -mock_names=Repository=PaymentsRepository . Repository
 
 type Repository interface {
 	// GetUserPayments Errors:

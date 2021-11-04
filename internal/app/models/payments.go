@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Payment struct {
+type Payments struct {
 	Amount    float64   `json:"amount"`
 	Date      time.Time `json:"date"`
 	CreatorID int64     `json:"creator_id"`
