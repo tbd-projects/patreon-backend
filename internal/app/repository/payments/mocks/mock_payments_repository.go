@@ -5,6 +5,7 @@
 package mock_repository
 
 import (
+	models "patreon/internal/app/models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -34,9 +35,12 @@ func (m *PaymentsRepository) EXPECT() *PaymentsRepositoryMockRecorder {
 }
 
 // GetCreatorPayments mocks base method.
-func (m *PaymentsRepository) GetCreatorPayments(arg0 int64) {
+func (m *PaymentsRepository) GetCreatorPayments(arg0 int64) ([]models.Payments, error) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "GetCreatorPayments", arg0)
+	ret := m.ctrl.Call(m, "GetCreatorPayments", arg0)
+	ret0, _ := ret[0].([]models.Payments)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetCreatorPayments indicates an expected call of GetCreatorPayments.
@@ -46,9 +50,12 @@ func (mr *PaymentsRepositoryMockRecorder) GetCreatorPayments(arg0 interface{}) *
 }
 
 // GetUserPayments mocks base method.
-func (m *PaymentsRepository) GetUserPayments(arg0 int64) {
+func (m *PaymentsRepository) GetUserPayments(arg0 int64) ([]models.Payments, error) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "GetUserPayments", arg0)
+	ret := m.ctrl.Call(m, "GetUserPayments", arg0)
+	ret0, _ := ret[0].([]models.Payments)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetUserPayments indicates an expected call of GetUserPayments.

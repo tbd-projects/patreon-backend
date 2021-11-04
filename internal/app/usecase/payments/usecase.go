@@ -2,9 +2,9 @@ package payments
 
 import "patreon/internal/app/models"
 
-//go:generate mockgen -destination=mocks/mock_payments_repository.go -package=mock_repository -mock_names=Repository=PaymentsRepository . Repository
+//go:generate mockgen -destination=mocks/mock_payments_usecase.go -package=mock_usecase -mock_names=Usecase=PaymentsUsecase . Usecase
 
-type Repository interface {
+type Usecase interface {
 	// GetUserPayments Errors:
 	//		repository.NotFound
 	//		app.GeneralError with Errors:
