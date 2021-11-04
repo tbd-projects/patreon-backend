@@ -93,9 +93,11 @@ func ToResponseCreator(cr models.Creator) ResponseCreator {
 }
 
 func ToResponseCreatorWithAwards(cr models.CreatorWithAwards) ResponseCreatorWithAwards {
-	return ResponseCreatorWithAwards{
+	res := ResponseCreatorWithAwards{
 		cr,
 	}
+	res.AwardsId = int64(math.Max(float64(res.AwardsId), 0))
+	return res
 }
 
 func ToResponseAward(aw models.Award) ResponseAward {
