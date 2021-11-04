@@ -24,9 +24,10 @@ const (
 	MAX_UPLOAD_SIZE = 1024 * 1024 * 4 // 4MB
 )
 
-type Sanitizer interface {
+type Sanitizable interface {
 	Sanitize(sanitizer bluemonday.Policy)
 }
+
 type RespondError struct {
 	Code  int
 	Error error
@@ -83,6 +84,7 @@ func (h *HelpHandlers) UsecaseError(w http.ResponseWriter, r *http.Request, usec
 
 	respond := RespondError{http.StatusServiceUnavailable,
 		errors.New("UnknownError"), logrus.ErrorLevel}
+
 	for err, respondErr := range codeByErr {
 		if errors.Is(usecaseErr, err) {
 			respond = respondErr
@@ -157,7 +159,7 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 	return f, repFiles.FileName(fHeader.Filename), 0, nil
 }
 func (h *HelpHandlers) GetRequestBody(w http.ResponseWriter, r *http.Request,
-	reqStruct Sanitizer, sanitizer bluemonday.Policy) error {
+	reqStruct Sanitizable, sanitizer bluemonday.Policy) error {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {

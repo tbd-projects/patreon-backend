@@ -73,7 +73,6 @@ func (tk *JwtRepository) Create(sources models.TokenSources) (models.Token, erro
 		SessionId: sources.SessionId,
 		UserId:    sources.UserId,
 		StandardClaims: jwt.StandardClaims{
-			//ExpiresAt: time.Now().Add(expiredCsrfTime).Unix(),
 			ExpiresAt: sources.ExpiredTime.Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},

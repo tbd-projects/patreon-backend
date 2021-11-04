@@ -31,12 +31,12 @@ func NewPostsMiddleware(log *logrus.Logger, usecasePosts usePosts.Usecase) *Post
 func (mw *PostsMiddleware) CheckCorrectPostFunc(next hf.HandlerFunc) hf.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		respond := utilits.Responder{LogObject: mw.log}
-		var postId, cretorId, bdCretorId int64
+		var postId, creatorId, bdCreatorId int64
 		var err error
 
 		vars := mux.Vars(r)
 		id, ok := vars["creator_id"]
-		cretorId, err = strconv.ParseInt(id, 10, 64)
+		creatorId, err = strconv.ParseInt(id, 10, 64)
 		if !ok || err != nil {
 			mw.log.Log(r).Info(vars)
 			respond.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
@@ -52,15 +52,15 @@ func (mw *PostsMiddleware) CheckCorrectPostFunc(next hf.HandlerFunc) hf.HandlerF
 			return
 		}
 
-		bdCretorId, err = mw.usecasePosts.GetCreatorId(postId)
+		bdCreatorId, err = mw.usecasePosts.GetCreatorId(postId)
 
-		if err != nil || bdCretorId != cretorId {
+		if err != nil || bdCreatorId != creatorId {
 			if err != nil && !errors.Is(err, repository.NotFound) {
 				mw.log.Log(r).Errorf("some error of bd awards %v", err)
 				respond.Error(w, r, http.StatusInternalServerError, BDError)
 				return
 			}
-			mw.log.Log(r).Warnf("this post %d not belongs to this creator %d", postId, cretorId)
+			mw.log.Log(r).Warnf("this post %d not belongs to this creator %d", postId, creatorId)
 			respond.Error(w, r, http.StatusForbidden, IncorrectCreatorForAward)
 			return
 		}
