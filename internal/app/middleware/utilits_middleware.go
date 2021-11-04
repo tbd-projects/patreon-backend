@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"patreon/internal/app/utilits"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
@@ -40,8 +41,10 @@ func (mw *UtilitiesMiddleware) UpgradeLogger(handler http.Handler) http.Handler 
 			"work_time":   time.Since(start).Milliseconds(),
 			"req_id":      uuid.NewV4(),
 		})
-		r = r.WithContext(context.WithValue(r.Context(), "logger", upgradeLogger)) //nolint
+
+		r = r.WithContext(context.WithValue(r.Context(), "logger", upgradeLogger))
 		upgradeLogger.Info("Log was upgraded")
 		handler.ServeHTTP(w, r)
+		upgradeLogger.Infof("work time: %v", time.Since(start).Milliseconds())
 	})
 }
