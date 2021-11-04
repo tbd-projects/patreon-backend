@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -19,10 +18,10 @@ type PostsIDHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewPostsIDHandler(log *logrus.Logger,
 	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsIDHandler {
 	h := &PostsIDHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)

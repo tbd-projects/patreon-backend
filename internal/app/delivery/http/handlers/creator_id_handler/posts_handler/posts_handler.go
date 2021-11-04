@@ -3,7 +3,6 @@ package posts_handler
 import (
 	"fmt"
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -27,10 +26,10 @@ type PostsHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewPostsHandler(log *logrus.Logger,
 	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsHandler {
 	h := &PostsHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)

@@ -22,7 +22,7 @@ type Repository interface {
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetCreator(int64) (*models.Creator, error)
+	GetCreator(creatorId int64, userId int64) (*models.CreatorWithAwards, error)
 
 	// ExistsCreator Errors:
 	// 		app.GeneralError with Errors:

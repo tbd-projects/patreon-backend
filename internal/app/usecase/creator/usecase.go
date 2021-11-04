@@ -18,7 +18,7 @@ type Usecase interface {
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetCreator(id int64) (*models.Creator, error)
+	GetCreator(id int64, userId int64) (*models.CreatorWithAwards, error)
 
 	// Create Errors:
 	//		CreatorExist

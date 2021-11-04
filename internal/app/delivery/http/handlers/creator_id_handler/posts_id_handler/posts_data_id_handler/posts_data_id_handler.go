@@ -2,7 +2,6 @@ package posts_data_id_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -24,10 +23,10 @@ type PostsDataIDHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsDataIDHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewPostsDataIDHandler(log *logrus.Logger,
 	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsDataIDHandler {
 	h := &PostsDataIDHandler{
-		BaseHandler:      *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)

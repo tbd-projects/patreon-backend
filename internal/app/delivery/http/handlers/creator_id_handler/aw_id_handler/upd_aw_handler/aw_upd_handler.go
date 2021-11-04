@@ -3,7 +3,6 @@ package aw_upd_handler
 import (
 	"image/color"
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -26,10 +25,10 @@ type AwardsUpdHandler struct {
 	bh.BaseHandler
 }
 
-func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewAwardsUpdHandler(log *logrus.Logger,
 	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsUpdHandler {
 	h := &AwardsUpdHandler{
-		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:   *bh.NewBaseHandler(log),
 		awardsUsecase: ucAwards,
 	}
 

@@ -29,7 +29,7 @@ type CreatorTestSuite struct {
 
 func (s *CreatorTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase,
+	s.handler = NewCreatorHandler(s.Logger, s.MockSessionsManager, s.MockCreatorUsecase,
 		s.MockUserUsecase)
 }
 

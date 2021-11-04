@@ -11,7 +11,7 @@ type LikesIdTestSuite struct {
 
 func (s *LikesIdTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	//	s.handler = NewLikesHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
+	//	s.handler = NewLikesHandler(s.Logger, s.MockAwardsUsecase, s.MockSessionsManager)
 }
 
 /*

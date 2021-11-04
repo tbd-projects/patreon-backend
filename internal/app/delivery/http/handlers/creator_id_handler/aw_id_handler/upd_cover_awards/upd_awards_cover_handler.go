@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -22,12 +21,12 @@ type UpdateCoverAwardsHandler struct {
 	bh.BaseHandler
 }
 
-func NewUpdateCoverAwardsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewUpdateCoverAwardsHandler(log *logrus.Logger,
 	sManager sessions.SessionsManager, awardsUsecase useAwards.Usecase) *UpdateCoverAwardsHandler {
 	h := &UpdateCoverAwardsHandler{
 		sessionManager: sManager,
 		awardsUsecase:  awardsUsecase,
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionManager, log).Check,
 		csrf_middleware.NewCsrfMiddleware(log,

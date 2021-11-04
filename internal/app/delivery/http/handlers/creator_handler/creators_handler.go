@@ -2,7 +2,6 @@ package creator_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -17,8 +16,6 @@ import (
 
 	"github.com/microcosm-cc/bluemonday"
 
-	"github.com/gorilla/mux"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,10 +26,10 @@ type CreatorHandler struct {
 	bh.BaseHandler
 }
 
-func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewCreatorHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 	ucCreator usecase_creator.Usecase, ucUser usecase_user.Usecase) *CreatorHandler {
 	h := &CreatorHandler{
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 		creatorUsecase: ucCreator,
 		sessionManager: sManager,
 		userUsecase:    ucUser,

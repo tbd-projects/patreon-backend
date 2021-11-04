@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -24,11 +23,11 @@ type PostsDataUpdateTextHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsDataUpdateTextHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewPostsDataUpdateTextHandler(log *logrus.Logger,
 	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase,
 	manager sessions.SessionsManager) *PostsDataUpdateTextHandler {
 	h := &PostsDataUpdateTextHandler{
-		BaseHandler:      *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)

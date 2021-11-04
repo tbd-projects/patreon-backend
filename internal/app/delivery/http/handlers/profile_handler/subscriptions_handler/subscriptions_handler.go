@@ -2,7 +2,6 @@ package subscriptions_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	responseModels "patreon/internal/app/delivery/http/models"
@@ -10,7 +9,6 @@ import (
 	"patreon/internal/app/sessions/middleware"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,13 +18,12 @@ type SubscriptionsHandler struct {
 	bh.BaseHandler
 }
 
-func NewSubscriptionsHandler(log *logrus.Logger, router *mux.Router,
-	cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewSubscriptionsHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 	ucSubscribers usecase_subscribers.Usecase) *SubscriptionsHandler {
 	h := &SubscriptionsHandler{
 		sessionManager:     sManager,
 		subscribersUsecase: ucSubscribers,
-		BaseHandler:        *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:        *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET,
 		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc)

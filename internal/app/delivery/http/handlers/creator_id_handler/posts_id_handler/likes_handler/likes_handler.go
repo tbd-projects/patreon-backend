@@ -2,7 +2,6 @@ package likes_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -25,10 +24,10 @@ type LikesHandler struct {
 	bh.BaseHandler
 }
 
-func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewLikesHandler(log *logrus.Logger,
 	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *LikesHandler {
 	h := &LikesHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		likesUsecase: ucLikes,
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)

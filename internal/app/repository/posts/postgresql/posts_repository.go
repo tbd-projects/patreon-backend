@@ -7,7 +7,7 @@ import (
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repository_posts "patreon/internal/app/repository/posts"
-	rp "patreon/internal/app/repository/posts"
+	rp "patreon/internal/app/repository"
 	putilits "patreon/internal/app/utilits/postgresql"
 
 	"github.com/pkg/errors"

@@ -70,7 +70,7 @@ func (s *Server) checkConnection() error {
 }
 
 //return http[0] and https[1] servers
-func makingHTTPSServerWithRedirect(config *app.Config, router *mux.Router) (*http.Server, *http.Server) {
+func makingHTTPSServerWithRedirect(config *app.Config, router http.Handler) (*http.Server, *http.Server) {
 	serverHTTP := &http.Server{
 		Addr: config.BindHttpAddr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +130,7 @@ func (s *Server) Start(config *app.Config) error {
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
-	factory := handler_factory.NewFactory(s.logger, router, &config.Cors, usecaseFactory)
+	factory := handler_factory.NewFactory(s.logger, usecaseFactory)
 	hs := factory.GetHandleUrls()
 
 	for apiUrl, h := range *hs {
@@ -139,8 +139,11 @@ func (s *Server) Start(config *app.Config) error {
 	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
 	routerApi.Use(ddosMiddleware.CheckAccess)
 
+	cors := middleware.NewCorsMiddleware(&config.Cors, router)
+	routerCors := cors.SetCors(router)
+
 	if config.IsHTTPSServer {
-		serverHTTP, serverHTTPS := makingHTTPSServerWithRedirect(config, routerApi)
+		serverHTTP, serverHTTPS := makingHTTPSServerWithRedirect(config, routerCors)
 
 		go func(logger *log.Logger, server *http.Server) {
 			logger.Info("Start http server")
@@ -154,6 +157,6 @@ func (s *Server) Start(config *app.Config) error {
 		return serverHTTPS.ListenAndServeTLS("", "")
 	} else {
 		s.logger.Info("start no production http server")
-		return http.ListenAndServe(config.BindHttpAddr, routerApi)
+		return http.ListenAndServe(config.BindHttpAddr, routerCors)
 	}
 }

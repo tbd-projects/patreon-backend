@@ -3,7 +3,6 @@ package aw_handler
 import (
 	"image/color"
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -27,10 +26,10 @@ type AwardsHandler struct {
 	bh.BaseHandler
 }
 
-func NewAwardsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewAwardsHandler(log *logrus.Logger,
 	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsHandler {
 	h := &AwardsHandler{
-		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:   *bh.NewBaseHandler(log),
 		awardsUsecase: ucAwards,
 	}
 	h.AddMethod(http.MethodGet, h.GET)

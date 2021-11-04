@@ -11,6 +11,8 @@ import (
 	repoFiles "patreon/internal/app/repository/files"
 )
 
+const NoUser int64 = -2
+
 type CreatorUsecase struct {
 	repository     repoCreator.Repository
 	repositoryFile repoFiles.Repository
@@ -67,8 +69,8 @@ func (usecase *CreatorUsecase) GetCreators() ([]models.Creator, error) {
 // 		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *CreatorUsecase) GetCreator(id int64) (*models.Creator, error) {
-	cr, err := usecase.repository.GetCreator(id)
+func (usecase *CreatorUsecase) GetCreator(id int64, userId int64) (*models.CreatorWithAwards, error) {
+	cr, err := usecase.repository.GetCreator(id, userId)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("creator with ID = %v not found", id))
 	}

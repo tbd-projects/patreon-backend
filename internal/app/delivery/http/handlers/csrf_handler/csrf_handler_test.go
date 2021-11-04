@@ -24,7 +24,7 @@ type CsrfTestSuite struct {
 
 func (s *CsrfTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCsrfHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCsrfUsecase)
+	s.handler = NewCsrfHandler(s.Logger, s.MockSessionsManager, s.MockCsrfUsecase)
 }
 func TestCsrfHandler(t *testing.T) {
 	suite.Run(t, new(CsrfTestSuite))

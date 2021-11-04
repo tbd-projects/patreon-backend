@@ -2,7 +2,6 @@ package upd_avatar_creator_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -23,12 +22,12 @@ type UpdateAvatarCreatorHandler struct {
 	bh.BaseHandler
 }
 
-func NewUpdateAvatarHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewUpdateAvatarHandler(log *logrus.Logger,
 	sManager sessions.SessionsManager, creatorUsecase usecase_creator.Usecase) *UpdateAvatarCreatorHandler {
 	h := &UpdateAvatarCreatorHandler{
 		sessionManager: sManager,
 		creatorUsecase: creatorUsecase,
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionManager, log).Check,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser)

@@ -3,7 +3,7 @@ package models
 import (
 	"encoding/json"
 	"image/color"
-	repPosts "patreon/internal/app/repository/posts"
+	rep "patreon/internal/app/repository"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 )
@@ -65,7 +65,7 @@ type RequestText struct {
 func (o *RequestPosts) UnmarshalJSON(text []byte) error {
 	type options RequestPosts
 	opts := options{
-		AwardsId: repPosts.NoAwards,
+		AwardsId: rep.NoAwards,
 	}
 
 	if err := json.Unmarshal(text, &opts); err != nil {

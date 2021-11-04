@@ -2,15 +2,12 @@ package csrf_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
-
-	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -21,10 +18,10 @@ type CsrfHandler struct {
 	bh.BaseHandler
 }
 
-func NewCsrfHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewCsrfHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 	uc usecase_csrf.Usecase) *CsrfHandler {
 	h := &CsrfHandler{
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 		sessionManager: sManager,
 		csrfUsecase:    uc,
 	}

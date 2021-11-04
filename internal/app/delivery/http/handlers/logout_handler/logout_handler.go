@@ -2,14 +2,11 @@ package logout_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	"time"
-
-	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -19,10 +16,10 @@ type LogoutHandler struct {
 	bh.BaseHandler
 }
 
-func NewLogoutHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewLogoutHandler(log *logrus.Logger,
 	sManager sessions.SessionsManager) *LogoutHandler {
 	h := &LogoutHandler{
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 		sessionManager: sManager,
 	}
 	h.AddMethod(http.MethodPost, h.POST,

@@ -2,7 +2,6 @@ package upl_cover_posts_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -23,10 +22,10 @@ type PostsUpdateCoverHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsUpdateCoverHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewPostsUpdateCoverHandler(log *logrus.Logger,
 	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUpdateCoverHandler {
 	h := &PostsUpdateCoverHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"io"
-	"patreon/internal/app"
 	mock_usecase_csrf "patreon/internal/app/csrf/usecase/mocks"
 	mock_sessions "patreon/internal/app/sessions/mocks"
 	mock_usecase "patreon/internal/app/usecase/access/mocks"
@@ -13,8 +12,6 @@ import (
 	mock_usecase_posts_data "patreon/internal/app/usecase/posts_data/mocks"
 	mock_subscribers "patreon/internal/app/usecase/subscribers/mocks"
 	mock_usecase_user "patreon/internal/app/usecase/user/mocks"
-
-	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
@@ -41,8 +38,6 @@ type SuiteHandler struct {
 	MockSessionsManager    *mock_sessions.MockSessionsManager
 	Tb                     TestTable
 	Logger                 *logrus.Logger
-	Router                 *mux.Router
-	Cors                   *app.CorsConfig
 	MockCsrfUsecase        *mock_usecase_csrf.CsrfUsecase
 	MockSubscribersUsecase *mock_subscribers.SubscribersUsecase
 }

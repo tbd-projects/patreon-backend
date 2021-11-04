@@ -28,6 +28,10 @@ type ProfileResponse struct {
 	HaveCreator bool   `json:"have_creator"`
 }
 
+type ResponseCreatorWithAwards struct {
+	models.CreatorWithAwards
+}
+
 type ResponseCreator struct {
 	models.Creator
 }
@@ -84,6 +88,12 @@ func ToRProfileResponse(us models.User) ProfileResponse {
 
 func ToResponseCreator(cr models.Creator) ResponseCreator {
 	return ResponseCreator{
+		cr,
+	}
+}
+
+func ToResponseCreatorWithAwards(cr models.CreatorWithAwards) ResponseCreatorWithAwards {
+	return ResponseCreatorWithAwards{
 		cr,
 	}
 }

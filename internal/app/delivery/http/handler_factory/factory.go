@@ -31,7 +31,6 @@ import (
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
 	handlers2 "patreon/internal/app/delivery/http/handlers/register_handler"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -70,18 +69,13 @@ const (
 type HandlerFactory struct {
 	usecaseFactory UsecaseFactory
 	logger         *logrus.Logger
-	router         *mux.Router
-	cors           *app.CorsConfig
 	urlHandler     *map[string]app.Handler
 }
 
-func NewFactory(logger *logrus.Logger, router *mux.Router,
-	cors *app.CorsConfig, usecaseFactory UsecaseFactory) *HandlerFactory {
+func NewFactory(logger *logrus.Logger, usecaseFactory UsecaseFactory) *HandlerFactory {
 	return &HandlerFactory{
 		usecaseFactory: usecaseFactory,
 		logger:         logger,
-		router:         router,
-		cors:           cors,
 	}
 }
 
@@ -97,44 +91,34 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucPostsData := f.usecaseFactory.GetPostsDataUsecase()
 
 	return map[int]app.Handler{
-		REGISTER:        handlers2.NewRegisterHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		LOGIN:           login_handler.NewLoginHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		LOGOUT:          logout_handler.NewLogoutHandler(f.logger, f.router, f.cors, sManager),
-		PROFILE:         profile_handler.NewProfileHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		CREATORS:        creator_handler.NewCreatorHandler(f.logger, f.router, f.cors, sManager, ucCreator, ucUser),
-		CREATOR_WITH_ID: creator_id_handler.NewCreatorIdHandler(f.logger, f.router, f.cors, sManager, ucUser, ucCreator),
-		UPDATE_PASSWORD: password_handler.NewUpdatePasswordHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		UPDATE_AVATAR:   avatar_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager, ucUser),
-		AWARDS:          aw_handler.NewAwardsHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		AWARDS_WITH_ID:  aw_id_handler.NewAwardsIdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		AWARDS_UPDATE:   aw_upd_handler.NewAwardsUpdHandler(f.logger, f.router, f.cors, ucAwards, sManager),
-		POSTS:           posts_handler.NewPostsHandler(f.logger, f.router, f.cors, ucPosts, sManager),
-		POSTS_WITH_ID:   posts_id_handler.NewPostsIDHandler(f.logger, f.router, f.cors, ucPosts, sManager),
-		POSTS_UPD:       posts_upd_handler.NewPostsUpdateHandler(f.logger, f.router, f.cors, ucPosts, sManager),
-		POSTS_LIKES:     likes_handler.NewLikesHandler(f.logger, f.router, f.cors, ucLikes, ucPosts, sManager),
-		GET_CSRF_TOKEN:  csrf_handler.NewCsrfHandler(f.logger, f.router, f.cors, sManager, ucCsrf),
-		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, f.router, f.cors, sManager,
-			ucSubscr),
-		SUBSCRIBES: subscribe_handler.NewSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr),
-		POST_UPD_COVER: upl_cover_posts_handler.NewPostsUpdateCoverHandler(f.logger, f.router, f.cors,
-			ucPosts, sManager),
-		POST_ADD_TEXT: upl_text_data_handler.NewPostsDataUploadTextHandler(f.logger, f.router, f.cors, ucPostsData,
-			ucPosts, sManager),
-		POST_ADD_IMAGE: upl_img_data_handler.NewPostsUploadImageHandler(f.logger, f.router, f.cors, ucPostsData,
-			ucPosts, sManager),
-		POST_DATA_ID: posts_data_id_handler.NewPostsDataIDHandler(f.logger, f.router, f.cors, ucPostsData,
-			ucPosts, sManager),
-		CREATOR_AVATAR: upd_avatar_creator_handler.NewUpdateAvatarHandler(f.logger, f.router, f.cors, sManager,
-			ucCreator),
-		CREATOR_COVER: upd_cover_creator_handler.NewUpdateCoverHandler(f.logger, f.router, f.cors, sManager,
-			ucCreator),
-		AWARDS_COVER: upd_cover_awards_handler.NewUpdateCoverAwardsHandler(f.logger, f.router, f.cors, sManager,
-			ucAwards),
-		POST_DATA_UPD_IMAGE: upd_img_data_handler.NewPostsUploadImageHandler(f.logger, f.router, f.cors, ucPostsData,
-			ucPosts, sManager),
-		POST_DATA_UPD_TEXT: upd_text_data_handler.NewPostsDataUpdateTextHandler(f.logger, f.router, f.cors, ucPostsData,
-			ucPosts, sManager),
-		AWARDS_CREATOR_SUBSCRIBE: aw_subscribe_handler.NewAwardsSubscribeHandler(f.logger, f.router, f.cors, sManager, ucSubscr, ucAwards),
+		REGISTER:        handlers2.NewRegisterHandler(f.logger, sManager, ucUser),
+		LOGIN:           login_handler.NewLoginHandler(f.logger, sManager, ucUser),
+		LOGOUT:          logout_handler.NewLogoutHandler(f.logger, sManager),
+		PROFILE:         profile_handler.NewProfileHandler(f.logger, sManager, ucUser),
+		CREATORS:        creator_handler.NewCreatorHandler(f.logger, sManager, ucCreator, ucUser),
+		CREATOR_WITH_ID: creator_id_handler.NewCreatorIdHandler(f.logger, sManager, ucUser, ucCreator),
+		UPDATE_PASSWORD: password_handler.NewUpdatePasswordHandler(f.logger, sManager, ucUser),
+		UPDATE_AVATAR:   avatar_handler.NewUpdateAvatarHandler(f.logger, sManager, ucUser),
+		AWARDS:          aw_handler.NewAwardsHandler(f.logger, ucAwards, sManager),
+		AWARDS_WITH_ID:  aw_id_handler.NewAwardsIdHandler(f.logger, ucAwards, sManager),
+		AWARDS_UPDATE:   aw_upd_handler.NewAwardsUpdHandler(f.logger, ucAwards, sManager),
+		POSTS:           posts_handler.NewPostsHandler(f.logger, ucPosts, sManager),
+		POSTS_WITH_ID:   posts_id_handler.NewPostsIDHandler(f.logger, ucPosts, sManager),
+		POSTS_UPD:       posts_upd_handler.NewPostsUpdateHandler(f.logger, ucPosts, sManager),
+		POSTS_LIKES:     likes_handler.NewLikesHandler(f.logger, ucLikes, ucPosts, sManager),
+		GET_CSRF_TOKEN:  csrf_handler.NewCsrfHandler(f.logger, sManager, ucCsrf),
+		GET_USER_SUBSCRIPTIONS: subscriptions_handler.NewSubscriptionsHandler(f.logger, sManager, ucSubscr),
+		SUBSCRIBES: subscribe_handler.NewSubscribeHandler(f.logger, sManager, ucSubscr),
+		POST_UPD_COVER: upl_cover_posts_handler.NewPostsUpdateCoverHandler(f.logger, ucPosts, sManager),
+		POST_ADD_TEXT: upl_text_data_handler.NewPostsDataUploadTextHandler(f.logger, ucPostsData, ucPosts, sManager),
+		POST_ADD_IMAGE: upl_img_data_handler.NewPostsUploadImageHandler(f.logger, ucPostsData, ucPosts, sManager),
+		POST_DATA_ID: posts_data_id_handler.NewPostsDataIDHandler(f.logger, ucPostsData, ucPosts, sManager),
+		CREATOR_AVATAR: upd_avatar_creator_handler.NewUpdateAvatarHandler(f.logger, sManager, ucCreator),
+		CREATOR_COVER: upd_cover_creator_handler.NewUpdateCoverHandler(f.logger, sManager, ucCreator),
+		AWARDS_COVER: upd_cover_awards_handler.NewUpdateCoverAwardsHandler(f.logger, sManager, ucAwards),
+		POST_DATA_UPD_IMAGE: upd_img_data_handler.NewPostsUploadImageHandler(f.logger, ucPostsData, ucPosts, sManager),
+		POST_DATA_UPD_TEXT: upd_text_data_handler.NewPostsDataUpdateTextHandler(f.logger, ucPostsData, ucPosts, sManager),
+		AWARDS_CREATOR_SUBSCRIBE: aw_subscribe_handler.NewAwardsSubscribeHandler(f.logger, sManager, ucSubscr, ucAwards),
 	}
 }
 

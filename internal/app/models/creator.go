@@ -17,6 +17,16 @@ type Creator struct {
 	Cover       string `json:"cover,omitempty"`
 }
 
+type CreatorWithAwards struct {
+	ID          int64  `json:"id"`
+	Category    string `json:"category"`
+	Nickname    string `json:"nickname"`
+	Description string `json:"description"`
+	Avatar      string `json:"avatar,omitempty"`
+	Cover       string `json:"cover,omitempty"`
+	AwardsId    int64  `json:"awards_id"`
+}
+
 type CreatorSubscribe struct {
 	ID          int64  `json:"id"`
 	Category    string `json:"category"`

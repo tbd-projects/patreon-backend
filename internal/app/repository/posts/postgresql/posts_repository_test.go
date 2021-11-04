@@ -6,7 +6,6 @@ import (
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_posts "patreon/internal/app/repository/posts"
 	putilits "patreon/internal/app/utilits/postgresql"
 	"regexp"
 	"testing"
@@ -45,9 +44,9 @@ func (s *SuitePostsRepository) TestPostsRepository_Create() {
 	assert.Equal(s.T(), post.ID, id)
 	assert.NoError(s.T(), err)
 
-	post.Awards = repository_posts.NoAwards
+	post.Awards = repository.NoAwards
 	var awardsId sql.NullInt64
-	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Int64 = repository.NoAwards
 	awardsId.Valid = false
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -123,7 +122,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 	assert.NoError(s.T(), err)
 
 	var awardsId sql.NullInt64
-	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Int64 = repository.NoAwards
 	awardsId.Valid = false
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -136,7 +135,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 		WithArgs(post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{}).AddRow())
 	res, err = s.repo.GetPost(post.ID, userId, true)
-	post.Awards = repository_posts.NoAwards
+	post.Awards = repository.NoAwards
 	assert.Equal(s.T(), res, post)
 	post.Awards = 1
 	assert.NoError(s.T(), err)
@@ -216,7 +215,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 
 	var awardsId sql.NullInt64
-	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Int64 = repository.NoAwards
 	awardsId.Valid = false
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
@@ -229,7 +228,7 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 			AddRow(post.ID, post.Title, post.Description, post.Likes, awardsId, post.Date, post.Cover,
 				post.AddLike, post.Views))
 	res, err = s.repo.GetPosts(post.CreatorId, userId, pag)
-	post.Awards = repository_posts.NoAwards
+	post.Awards = repository.NoAwards
 	assert.Equal(s.T(), res[0], post)
 	post.Awards = 1
 	assert.NoError(s.T(), err)
@@ -278,9 +277,9 @@ func (s *SuitePostsRepository) TestPostsRepository_Update() {
 	err := s.repo.UpdatePost(post)
 	assert.NoError(s.T(), err)
 
-	post.Awards = repository_posts.NoAwards
+	post.Awards = repository.NoAwards
 	var awardsId sql.NullInt64
-	awardsId.Int64 = repository_posts.NoAwards
+	awardsId.Int64 = repository.NoAwards
 	awardsId.Valid = false
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).

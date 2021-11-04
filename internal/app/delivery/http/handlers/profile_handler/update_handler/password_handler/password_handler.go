@@ -16,7 +16,6 @@ import (
 
 	"github.com/microcosm-cc/bluemonday"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,12 +25,12 @@ type UpdatePasswordHandler struct {
 	bh.BaseHandler
 }
 
-func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewUpdatePasswordHandler(log *logrus.Logger,
 	sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *UpdatePasswordHandler {
 	h := &UpdatePasswordHandler{
 		sessionManager: sManager,
 		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
 

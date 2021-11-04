@@ -2,7 +2,6 @@ package subscribe_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	responseModels "patreon/internal/app/delivery/http/models"
@@ -20,11 +19,10 @@ type SubscribeHandler struct {
 	bh.BaseHandler
 }
 
-func NewSubscribeHandler(log *logrus.Logger, router *mux.Router,
-	cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewSubscribeHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 	ucSubscribers usecase_subscribers.Usecase) *SubscribeHandler {
 	h := &SubscribeHandler{
-		BaseHandler:       *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:       *bh.NewBaseHandler(log),
 		subscriberUsecase: ucSubscribers,
 		sessionManager:    sManager,
 	}

@@ -64,6 +64,16 @@ func TestCreator() *Creator {
 	}
 }
 
+func TestCreatorWithAwards() *CreatorWithAwards {
+	return &CreatorWithAwards{
+		ID:          1,
+		Nickname:    "doggy2005",
+		Category:    "podcasts",
+		Description: "i love podcasts",
+		AwardsId: 1,
+	}
+}
+
 func TestCreatorSubscriber() *CreatorSubscribe {
 	return &CreatorSubscribe{
 		ID:          1,

@@ -2,7 +2,6 @@ package base_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/utilits"
 	"strings"
@@ -30,15 +29,13 @@ type BaseHandler struct {
 	HelpHandlers
 }
 
-func NewBaseHandler(log *logrus.Logger, router *mux.Router, config *app.CorsConfig) *BaseHandler {
+func NewBaseHandler(log *logrus.Logger) *BaseHandler {
 	h := &BaseHandler{handlerMethods: map[string]hf.HandlerFunc{}, middlewares: []hf.HMiddlewareFunc{},
 		utilitiesMiddleware: middleware.NewUtilitiesMiddleware(log),
-		corsMiddleware:      middleware.NewCorsMiddleware(config, router),
 		HelpHandlers: HelpHandlers{
 			Responder: utilits.Responder{LogObject: utilits.NewLogObject(log)},
 		},
 	}
-	h.AddMiddleware(h.corsMiddleware.SetCors)
 	h.AddMiddleware(h.utilitiesMiddleware.UpgradeLogger, h.utilitiesMiddleware.CheckPanic)
 	return h
 }

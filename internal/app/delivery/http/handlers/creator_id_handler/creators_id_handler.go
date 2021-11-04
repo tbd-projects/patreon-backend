@@ -2,10 +2,11 @@ package creator_id_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
+	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
 
@@ -21,15 +22,17 @@ type CreatorIdHandler struct {
 	base_handler.BaseHandler
 }
 
-func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewCreatorIdHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 	ucUser usecase_user.Usecase, ucCreator usecase_creator.Usecase) *CreatorIdHandler {
 	h := &CreatorIdHandler{
-		BaseHandler:    *base_handler.NewBaseHandler(log, router, cors),
+		BaseHandler:    *base_handler.NewBaseHandler(log),
 		sessionManager: sManager,
 		userUsecase:    ucUser,
 		creatorUsecase: ucCreator,
 	}
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).AddUserId)
 	h.AddMethod(http.MethodGet, h.GET)
+
 	return h
 }
 
@@ -44,6 +47,11 @@ func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Router /creators/{creator_id:} [GET]
 func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("user_id").(int64)
+	if !ok {
+		userId = usecase_creator.NoUser
+	}
+
 	creatorId, ok := s.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
 		return
@@ -55,13 +63,13 @@ func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	creator, err := s.creatorUsecase.GetCreator(creatorId)
+	creator, err := s.creatorUsecase.GetCreator(creatorId, userId)
 	if err != nil {
 		s.UsecaseError(w, r, err, codesByErrors)
 		return
 	}
 
 	s.Log(r).Debugf("get creator %v with id %v", creator, creatorId)
-	s.Respond(w, r, http.StatusOK, creator)
+	s.Respond(w, r, http.StatusOK, models.ToResponseCreatorWithAwards(*creator))
 
 }

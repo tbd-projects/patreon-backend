@@ -2,7 +2,6 @@ package aw_subscribe_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -25,11 +24,10 @@ type AwardsSubscribeHandler struct {
 	bh.BaseHandler
 }
 
-func NewAwardsSubscribeHandler(log *logrus.Logger, router *mux.Router,
-	cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewAwardsSubscribeHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 	ucSubscribers usecase_subscribers.Usecase, ucAwards useAwards.Usecase) *AwardsSubscribeHandler {
 	h := &AwardsSubscribeHandler{
-		BaseHandler:       *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:       *bh.NewBaseHandler(log),
 		subscriberUsecase: ucSubscribers,
 	}
 	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(sManager, log).CheckFunc,

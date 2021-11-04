@@ -19,7 +19,7 @@ type FactorySuite struct {
 func (s *FactorySuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
 	s.CsrfUsecaseFactory = mock_usecase_factory.NewMockUsecaseFactory(s.Mock)
-	s.factory = NewFactory(s.Logger, s.Router, s.Cors, s.CsrfUsecaseFactory)
+	s.factory = NewFactory(s.Logger, s.CsrfUsecaseFactory)
 }
 
 func (s *FactorySuite) TestInitHandlers() {

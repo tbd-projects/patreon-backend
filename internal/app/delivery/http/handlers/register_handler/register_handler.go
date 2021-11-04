@@ -3,7 +3,6 @@ package register_handler
 import (
 	"encoding/json"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
@@ -12,8 +11,6 @@ import (
 	usecase_user "patreon/internal/app/usecase/user"
 
 	"github.com/microcosm-cc/bluemonday"
-
-	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -24,12 +21,12 @@ type RegisterHandler struct {
 	bh.BaseHandler
 }
 
-func NewRegisterHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 	ucUser usecase_user.Usecase) *RegisterHandler {
 	h := &RegisterHandler{
 		sessionManager: sManager,
 		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodPost, h.POST)
 	return h

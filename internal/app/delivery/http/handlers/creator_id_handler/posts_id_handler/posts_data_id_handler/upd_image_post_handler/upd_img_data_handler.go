@@ -2,7 +2,6 @@ package upd_img_data_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -24,10 +23,10 @@ type PostsUploadImageHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsUploadImageHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewPostsUploadImageHandler(log *logrus.Logger,
 	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUploadImageHandler {
 	h := &PostsUploadImageHandler{
-		BaseHandler:      *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)

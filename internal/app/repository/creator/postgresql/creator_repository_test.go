@@ -5,6 +5,7 @@ import (
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	rp "patreon/internal/app/repository"
 	"regexp"
 	"strconv"
 	"testing"
@@ -74,45 +75,52 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreator() {
-	query := `SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
-			FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id 
-			JOIN creator_category As cc ON creator_profile.category = cc.category_id 
-			where creator_id=$1`
-	cr := models.TestCreator()
+	cr := models.TestCreatorWithAwards()
 	cr.ID = 1
+	userId := int64(1)
 	expected := *cr
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(cr.ID).
+	var awardsId sql.NullInt64
+	awardsId.Valid = true
+	awardsId.Int64 = cr.AwardsId
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryGetCreator)).
+		WithArgs(userId, cr.ID).
 		WillReturnRows(sqlmock.
-			NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"}).
-			AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname))
+			NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname", "awards_id"}).
+			AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname, awardsId))
 
-	get, err := s.repo.GetCreator(expected.ID)
+	get, err := s.repo.GetCreator(userId, expected.ID)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), expected, *get)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(cr.ID).WillReturnError(sql.ErrNoRows)
 
-	_, err = s.repo.GetCreator(expected.ID)
+	awardsId.Valid = false
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryGetCreator)).
+		WithArgs(userId, cr.ID).
+		WillReturnRows(sqlmock.
+			NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname", "awards_id"}).
+			AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname, awardsId))
+	expected.AwardsId = rp.NoAwards
+	get, err = s.repo.GetCreator(userId, expected.ID)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), expected, *get)
+
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryGetCreator)).
+		WithArgs(userId, cr.ID).WillReturnError(sql.ErrNoRows)
+
+	_, err = s.repo.GetCreator(userId, expected.ID)
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NotFound, err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(cr.ID).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryGetCreator)).
+		WithArgs(userId, cr.ID).WillReturnError(models.BDError)
 
-	_, err = s.repo.GetCreator(expected.ID)
+	_, err = s.repo.GetCreator(userId, expected.ID)
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreators() {
-	queryCount := `SELECT count(*) from creator_profile`
-	queryCreator := `SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
-					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
-					JOIN creator_category As cc ON creator_profile.category = cc.category_id`
-
 	creators := models.TestCreators()
 
 	preapareRows := sqlmock.NewRows([]string{"id", "category", "description", "avatar", "cover", "nickname"})
@@ -123,44 +131,44 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreat
 		preapareRows.AddRow(strconv.Itoa(int(cr.ID)), cr.Category, cr.Description, cr.Avatar, cr.Cover, cr.Nickname)
 	}
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCountGetCreators)).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreator)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreatorGetCreators)).
 		WillReturnRows(preapareRows)
 
 	get, err := s.repo.GetCreators()
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), creators, get)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCountGetCreators)).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreator)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreatorGetCreators)).
 		WillReturnRows(preapareRows.RowError(0, models.BDError))
 
 	_, err = s.repo.GetCreators()
 	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCountGetCreators)).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreator)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreatorGetCreators)).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(""))
 
 	_, err = s.repo.GetCreators()
 	assert.Error(s.T(), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCountGetCreators)).WillReturnError(models.BDError)
 
 	_, err = s.repo.GetCreators()
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCountGetCreators)).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(strconv.Itoa(len(creators))))
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreator)).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCreatorGetCreators)).WillReturnError(models.BDError)
 
 	_, err = s.repo.GetCreators()
 	assert.Error(s.T(), err)
@@ -168,67 +176,61 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_GetCreators_AllUsersCreat
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_UpdateAvatar() {
-	query := `UPDATE creator_profile SET avatar = $1 WHERE creator_id = $2 RETURNING creator_id`
-
 	avatar := "d"
 	creatorId := int64(1)
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(avatar, creatorId).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdateAvatar)).WithArgs(avatar, creatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"creator_id"}).AddRow(creatorId))
 
 	err := s.repo.UpdateAvatar(creatorId, avatar)
 	assert.NoError(s.T(), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(avatar, creatorId).WillReturnError(sql.ErrNoRows)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdateAvatar)).WithArgs(avatar, creatorId).WillReturnError(sql.ErrNoRows)
 
 	err = s.repo.UpdateAvatar(creatorId, avatar)
 	assert.Error(s.T(), app.UnknownError, err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(avatar, creatorId).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdateAvatar)).WithArgs(avatar, creatorId).WillReturnError(models.BDError)
 
 	err = s.repo.UpdateAvatar(creatorId, avatar)
 	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_UpdateCover() {
-	query := `UPDATE creator_profile SET cover = $1 WHERE creator_id = $2 RETURNING creator_id`
-
 	cover := "d"
 	creatorId := int64(1)
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(cover, creatorId).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdateCover)).WithArgs(cover, creatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"creator_id"}).AddRow(creatorId))
 
 	err := s.repo.UpdateCover(creatorId, cover)
 	assert.NoError(s.T(), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(cover, creatorId).WillReturnError(sql.ErrNoRows)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdateCover)).WithArgs(cover, creatorId).WillReturnError(sql.ErrNoRows)
 
 	err = s.repo.UpdateCover(creatorId, cover)
 	assert.Error(s.T(), app.UnknownError, err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(cover, creatorId).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryUpdateCover)).WithArgs(cover, creatorId).WillReturnError(models.BDError)
 
 	err = s.repo.UpdateCover(creatorId, cover)
 	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_ExistCreator() {
-	query := `SELECT creator_id from creator_profile where creator_id=$1`
-
 	creatorId := int64(1)
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(creatorId).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryExistsCreator)).WithArgs(creatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"creator_id"}).AddRow(creatorId))
 
 	check, err := s.repo.ExistsCreator(creatorId)
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), check)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(creatorId).WillReturnError(sql.ErrNoRows)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryExistsCreator)).WithArgs(creatorId).WillReturnError(sql.ErrNoRows)
 
 	check, err = s.repo.ExistsCreator(creatorId)
 	assert.Error(s.T(), app.UnknownError, err)
 	assert.False(s.T(), check)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(creatorId).WillReturnError(models.BDError)
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryExistsCreator)).WithArgs(creatorId).WillReturnError(models.BDError)
 
 	check, err = s.repo.ExistsCreator(creatorId)
 	assert.Error(s.T(), repository.NewDBError(models.BDError), err)

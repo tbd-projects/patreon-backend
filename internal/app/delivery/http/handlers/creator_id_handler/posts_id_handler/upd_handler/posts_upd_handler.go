@@ -2,7 +2,6 @@ package posts_upd_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -25,10 +24,10 @@ type PostsUpdateHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsUpdateHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
+func NewPostsUpdateHandler(log *logrus.Logger,
 	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUpdateHandler {
 	h := &PostsUpdateHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
 	h.AddMiddleware(sessionMid.NewSessionMiddleware(manager, log).Check,
