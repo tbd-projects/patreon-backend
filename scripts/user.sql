@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users
     nickname           text      not null unique,
     encrypted_password text      not null,
     avatar             text      not null
+
 );
 
 CREATE TABLE IF NOT EXISTS creator_category
@@ -95,7 +96,7 @@ CREATE TABLE IF NOT EXISTS comments
 CREATE TABLE IF NOT EXISTS payments
 (
     payments_id bigserial                              not null primary key,
-    amount      integer                                not null,
+    amount      numeric                                not null,
     date        timestamptz default now()::timestamptz not null,
     creator_id  bigint                                 not null references creator_profile (creator_id) on delete cascade,
     users_id    bigint                                 not null references users (users_id) on delete cascade
