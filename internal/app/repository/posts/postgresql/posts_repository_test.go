@@ -327,7 +327,7 @@ func (s *SuitePostsRepository) TestPostsRepository_UpdateCover() {
 }
 
 func (s *SuitePostsRepository) TestPostsRepository_Delete() {
-	query := `DELETE FROM posts WHERE posts_id = $q`
+	query := `DELETE FROM posts WHERE posts_id = $1`
 
 	postId := int64(2)
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).

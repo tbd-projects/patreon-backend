@@ -198,7 +198,7 @@ func (repo *PostsRepository) UpdateCoverPost(postId int64, cover string) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) Delete(postId int64) error {
-	query := `DELETE FROM posts WHERE posts_id = $q`
+	query := `DELETE FROM posts WHERE posts_id = $1`
 
 	row, err := repo.store.Query(query, postId)
 	if err != nil {
