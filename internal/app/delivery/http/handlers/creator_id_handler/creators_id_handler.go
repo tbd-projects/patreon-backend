@@ -42,7 +42,7 @@ func NewCreatorIdHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Produce json
 // @Param creator_id path int true "Get creator with id"
 // @Success 200 {object} models.ResponseCreatorWithAwards
-// @Failure 404 {object} models.ErrResponse "user with this id not found"
+// @Failure 404 {object} models.ErrResponse "user not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Router /creators/{creator_id:} [GET]

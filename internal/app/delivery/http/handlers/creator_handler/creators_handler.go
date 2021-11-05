@@ -46,7 +46,7 @@ func NewCreatorHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Description get list of creators which register on service
 // @Produce json
 // @Success 201 {array} models.ResponseCreator
-// @Failure 403 "csrf token is invalid, get new token"
+// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Router /creators [GET]
 func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
@@ -71,15 +71,11 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Param creator body models.RequestCreator true "Request body for creators"
 // @Produce json
 // @Success 201 {object} models.Creator
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "server error
 // @Failure 409 {object} models.ErrResponse "creator already exist"
 // @Failure 404 {object} models.ErrResponse "user with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 422 {object} models.ErrResponse "invalid creator category"
-// @Failure 422 {object} models.ErrResponse "invalid creator nickname"
-// @Failure 422 {object} models.ErrResponse "invalid creator category-description"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 422 {object} models.ErrResponse "invalid creator nickname", "invalid creator category-description", "invalid creator category", "invalid body in request"
+// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 401 "User are not authorized"
 // @Router /creators [POST]
 func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {

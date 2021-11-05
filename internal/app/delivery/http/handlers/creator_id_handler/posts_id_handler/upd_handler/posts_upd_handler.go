@@ -47,17 +47,11 @@ func NewPostsUpdateHandler(log *logrus.Logger,
 // @Param user body models.RequestPosts true "Request body for posts"
 // @Produce json
 // @Success 200
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "post with this id not found"
-// @Failure 422 {object} models.ErrResponse "empty title"
-// @Failure 422 {object} models.ErrResponse "this creator id not know"
-// @Failure 422 {object} models.ErrResponse "this awards id not know"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
+// @Failure 422 {object} models.ErrResponse "empty title", "this awards id not know", "this creator id not know", "invalid body in request"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/update [PUT]
 func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {

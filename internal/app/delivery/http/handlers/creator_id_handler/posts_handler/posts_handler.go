@@ -44,12 +44,6 @@ func NewPostsHandler(log *logrus.Logger,
 	return h
 }
 
-// GETRedirect Posts
-// @Summary redirect to get post with default query
-// @Description redirect to get post with default query
-// @Produce json
-// @Success 308
-// @Router /creators/{:creator_id}/posts [GET]
 func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 	redirectUrl := fmt.Sprintf("%s?page=1&limit=%d", r.RequestURI, usePosts.BaseLimit)
 	h.Log(r).Debugf("redirect to url: %s, with offest 0 and limit %d", redirectUrl, usePosts.BaseLimit)
@@ -65,10 +59,8 @@ func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 // @Param page query uint64 true "start page number of posts mutually exclusive with offset"
 // @Param offset query uint64 true "start number of posts mutually exclusive with page"
 // @Param limit query uint64 true "posts to return"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 400 {object} models.ErrResponse "invalid parameters in query"
-// @Failure 500 {object} models.ErrResponse "server error
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 400 {object} models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Router /creators/{:creator_id}/posts [GET]
 func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	var limit, offset, page int64
@@ -139,15 +131,10 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Param post body models.RequestPosts true "Request body for posts"
 // @Produce json
 // @Success 201 {object} models.IdResponse "id posts"
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 422 {object} models.ErrResponse "empty title"
-// @Failure 422 {object} models.ErrResponse "this creator id not know"
-// @Failure 422 {object} models.ErrResponse "this awards id not know"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
+// @Failure 400 {object} models.ErrResponse "invalid body in request"
+// @Failure 422 {object} models.ErrResponse "this creator id not know", "this awards id not know", "empty title", "invalid parameters"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "csrf token is invalid, get new token"
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts [POST]
 func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {

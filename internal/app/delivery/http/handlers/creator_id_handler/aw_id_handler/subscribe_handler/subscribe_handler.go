@@ -50,12 +50,11 @@ func NewAwardsSubscribeHandler(log *logrus.Logger, sManager sessions.SessionsMan
 // @Param creator_id path int true "creator_id"
 // @Success 200 "Successfully unsubscribe on the creator with id = creator_id"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 403 {object} models.ErrResponse "invalid csrf token"
-// @Failure 403 {object} models.ErrResponse "incorrect award for creator"
 // @Failure 404 {object} models.ErrResponse "award with this id not found"
-// @Failure 401 {object} models.ErrResponse "User are not authorized"
-// @Failure 409 {object} models.ErrResponse "this user is not subscribed on the creator"
-// @Failure 500 {object} models.ErrResponse "serverError"
+// @Failure 409 {object} models.ErrResponse "subscribes on the creator not found"
+// @Failure 500 {object} models.ErrResponse "server error", "can not do bd operation"
+// @Failure 403 {object} models.ErrResponse "this awards not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/subscribe [DELETE]
 func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")
@@ -93,12 +92,12 @@ func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) 
 // @Param award_id path int true "award_id"
 // @Param creator_id path int true "creator_id"
 // @Success 201 "Successfully subscribe on the creator with id = creator_id"
-// @Failure 400 {object} models.ErrResponse "invalid parameters - creator_id"
-// @Failure 401 {object} models.ErrResponse "User are not authorized"
-// @Failure 403 {object} models.ErrResponse "invalid csrf token"
-// @Failure 403 {object} models.ErrResponse "incorrect award for creator"
-// @Failure 409 {object} models.ErrResponse "this user already subscribed on the creator"
-// @Failure 500 {object} models.ErrResponse "serverError"
+// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Failure 409 {object} models.ErrResponse "this user already have subscribe on creator"
+// @Failure 404 {object} models.ErrResponse "award with this id not found"
+// @Failure 500 {object} models.ErrResponse "server error", "can not do bd operation"
+// @Failure 403 {object} models.ErrResponse "this awards not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/subscribe [POST]
 func (h *AwardsSubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 	//req := &responseModels.SubscribeRequest{}

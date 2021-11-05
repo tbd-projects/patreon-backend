@@ -35,8 +35,8 @@ func NewSubscriptionsHandler(log *logrus.Logger, sManager sessions.SessionsManag
 // @Description get user creators
 // @Produce json
 // @Success 200 {object} models.SubscriptionsUserResponse "Successfully get user subscriptions"
-// @Failure 401 "User are not authorized"
 // @Failure 500 {object} models.ErrResponse "serverError"
+// @Failure 401 "User are not authorized"
 // @Router /user/subscriptions [GET]
 func (h SubscriptionsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")

@@ -35,7 +35,7 @@ func NewLogoutHandler(log *logrus.Logger,
 // @Accept  json
 // @Produce json
 // @Success 201 "Successfully logout"
-// @Failure 500 {object} models.ErrResponse "server error
+// @Failure 500 {object} models.ErrResponse "server error"
 // @Failure 401 "User not are authorized"
 // @Router /logout [POST]
 func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {

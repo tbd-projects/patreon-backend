@@ -45,15 +45,13 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param image formData file true "image file with ext jpeg/png"
 // @Success 201 {object} models.IdResponse "id posts_data"
-// @Failure 400 {object} models.ErrResponse "size of file very big"
-// @Failure 400 {object} models.ErrResponse "invalid form field name for load file"
-// @Failure 400 {object} models.ErrResponse "please upload a JPEG, JPG or PNG files"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 422 {object} models.ErrResponse "invalid data type"
-// @Failure 422 {object} models.ErrResponse "this post id not kno"
+// @Failure 400 {object} models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a JPEG, JPG or PNG files"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 422 {object} models.ErrResponse "invalid data type", "this post id not know"
 // @Failure 404 {object} models.ErrResponse "post data with this id not found"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id}/update/image [PUT]
 func (h *PostsUploadImageHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var dataId int64

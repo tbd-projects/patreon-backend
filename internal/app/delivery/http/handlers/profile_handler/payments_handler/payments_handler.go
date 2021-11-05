@@ -38,8 +38,8 @@ func NewPaymentsHandler(log *logrus.Logger,
 // @Produce json
 // @Success 200 {object} models.ResponseUserPayments "Success"
 // @Failure 204 {object} models.OkResponse "payments not Found"
+// @Failure 500 {object} models.ErrResponse "server error"
 // @Failure 401 "User are not authorized"
-// @Failure 500 {object} models.ErrResponse "server error
 // @Router /user/payments [GET]
 func (h *PaymentsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")

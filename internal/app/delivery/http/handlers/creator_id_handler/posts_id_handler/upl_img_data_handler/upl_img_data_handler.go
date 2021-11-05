@@ -46,14 +46,12 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param image formData file true "image file with ext jpeg/png"
 // @Success 201 {object} models.IdResponse "id posts_data"
-// @Failure 400 {object} models.ErrResponse "size of file very big"
-// @Failure 400 {object} models.ErrResponse "invalid form field name for load file"
-// @Failure 400 {object} models.ErrResponse "please upload a JPEG, JPG or PNG files"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 422 {object} models.ErrResponse "invalid data type"
-// @Failure 422 {object} models.ErrResponse "this post id not know"
+// @Failure 400 {object} models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name for load file"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 422 {object} models.ErrResponse "invalid data type", "this post id not know"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
+// @Failure 401 "User not are authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/image [POST]
 func (h *PostsUploadImageHandler) POST(w http.ResponseWriter, r *http.Request) {
 	var dataId, postId int64

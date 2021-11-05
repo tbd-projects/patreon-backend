@@ -50,12 +50,10 @@ func NewLikesHandler(log *logrus.Logger,
 // @Produce json
 // @Success 200 {object} response_models.ResponseLike "current count of likes on post"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 404 {object} models.ErrResponse "like with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 409 {object} models.ErrResponse "this user not have like for this post"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
+// @Failure 403 {object} models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [DELETE]
 func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	var postsId, userId int64
@@ -92,12 +90,10 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} response_models.ResponseLike "current count of likes on post"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 404 {object} models.ErrResponse "like with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 409 {object} models.ErrResponse "this user already add like for this post"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
+// @Failure 403 {object} models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [PUT]
 func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var postsId, userId int64

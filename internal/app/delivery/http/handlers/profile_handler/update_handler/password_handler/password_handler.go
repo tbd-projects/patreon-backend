@@ -48,14 +48,12 @@ func NewUpdatePasswordHandler(log *logrus.Logger,
 // @Produce json
 // @Param password body models.RequestChangePassword true "Request body for change password"
 // @Success 200 "success update password"
-// @Failure 400 {object} models.ErrResponse "incorrect new password"
-// @Failure 403 "csrf token is invalid, get new token"
-// @Failure 403 "incorrect email or password"
-// @Failure 404 {object} models.ErrResponse "User not found"
+// @Failure 409 {object} models.ErrResponse "incorrect new password"(mean old password equal new)
+// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token", "incorrect email or password"
+// @Failure 404 {object} models.ErrResponse "user not found"
 // @Failure 418 "User are authorized"
-// @Failure 422 {object} models.ErrResponse "Not valid body"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "database error"
+// @Failure 400 {object} models.ErrResponse "invalid body in request", "incorrect new password"
+// @Failure 500 {object} models.ErrResponse "server error", "can not do bd operation"
 // @Router /user/update/password [PUT]
 func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestChangePassword{}

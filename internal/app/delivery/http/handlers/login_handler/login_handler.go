@@ -41,10 +41,9 @@ func NewLoginHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Produce json
 // @Param user body models.RequestLogin true "Request body for login"
 // @Success 200 "Successfully login"
-// @Failure 404 {object} models.ErrResponse "user with this id not found"
+// @Failure 404 {object} models.ErrResponse "user not found"
 // @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not create session"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
+// @Failure 500 {object} models.ErrResponse "can not create session", "can not do bd operation"
 // @Failure 401 {object} models.ErrResponse "incorrect email or password"
 // @Failure 418 "User are authorized"
 // @Router /login [POST]

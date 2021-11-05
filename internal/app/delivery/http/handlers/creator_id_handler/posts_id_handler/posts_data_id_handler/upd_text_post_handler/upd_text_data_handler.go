@@ -42,12 +42,12 @@ func NewPostsDataUpdateTextHandler(log *logrus.Logger,
 // @Accept  json
 // @Param user body models.RequestText true "Request body for text"
 // @Success 201 {object} models.IdResponse "id posts_data"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 422 {object} models.ErrResponse "invalid data type"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 422 {object} models.ErrResponse "this post id not know"
 // @Failure 404 {object} models.ErrResponse "post data with this id not found"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Failure 400 {object} models.ErrResponse "invalid parameters", "invalid data type", "invalid body in request"
+// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id}/update/text [PUT]
 func (h *PostsDataUpdateTextHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {

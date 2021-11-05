@@ -50,14 +50,10 @@ func NewAwardsUpdHandler(log *logrus.Logger,
 // @Success 200
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "award with this id not found"
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 422 {object} models.ErrResponse "empty name in request"
-// @Failure 422 {object} models.ErrResponse "incorrect value of price"
-// @Failure 500 {object} models.ErrResponse "server error"
+// @Failure 422 {object} models.ErrResponse "invalid body in request", "incorrect value of price", "empty name in request"
+// @Failure 409 {object} models.ErrResponse "awards with this name already exists"
+// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this awards not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/update [PUT]
 func (h *AwardsUpdHandler) PUT(w http.ResponseWriter, r *http.Request) {

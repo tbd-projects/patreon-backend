@@ -14,7 +14,7 @@ var codeByError = base_handler.CodeMap{
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
 	repository.NotFound: {
-		http.StatusUnprocessableEntity, handler_errors.UserNotFound, log.WarnLevel},
+		http.StatusNotFound, handler_errors.UserNotFound, log.WarnLevel},
 	repository_os.ErrorCreate: {
 		http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
 	repository_os.ErrorCreate: {
