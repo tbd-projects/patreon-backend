@@ -45,8 +45,8 @@ func NewPostsDataUploadTextHandler(log *logrus.Logger,
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 422 {object} models.ErrResponse "invalid data type", "this post id not know"
 // @Failure 400 {object} models.ErrResponse "invalid parameters", "invalid body in request"
-// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
-// @Failure 401 "User not are authorized"
+// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "User are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/text [POST]
 func (h *PostsDataUploadTextHandler) POST(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestText{}

@@ -14,3 +14,8 @@ var codesByErrorsGET = base_handler.CodeMap{
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 }
+
+var codesByErrorsDELETE = base_handler.CodeMap{
+	repository.DefaultErrDB: {
+		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
+}
