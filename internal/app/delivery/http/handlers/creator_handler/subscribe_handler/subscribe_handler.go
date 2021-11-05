@@ -36,9 +36,9 @@ func NewSubscribeHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Produce json
 // @Param creator_id path int true "creator_id"
 // @Success 200 {object} models.SubscribersCreatorResponse "Successfully get creator subscribers with creator id = creator_id"
-// @Failure 400 {object} models.ErrResponse "invalid parameters - creator_id"
-// @Failure 401 {object} models.ErrResponse "User are not authorized"
-// @Failure 500 {object} models.ErrResponse "serverError"
+// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Failure 500 {object} models.ErrResponse "server error", "can not do bd operation"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/subscribers [GET]
 func (h *SubscribeHandler) GET(w http.ResponseWriter, r *http.Request) {
 	creatorID, ok := h.GetInt64FromParam(w, r, "creator_id")

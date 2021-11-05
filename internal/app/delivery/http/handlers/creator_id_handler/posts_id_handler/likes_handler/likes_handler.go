@@ -53,7 +53,7 @@ func NewLikesHandler(log *logrus.Logger,
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 409 {object} models.ErrResponse "this user not have like for this post"
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [DELETE]
 func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	var postsId, userId int64
@@ -93,7 +93,7 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 409 {object} models.ErrResponse "this user already add like for this post"
 // @Failure 403 {object} models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [PUT]
 func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var postsId, userId int64

@@ -35,7 +35,7 @@ func NewCsrfHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Produce json
 // @Success 200 {object} models_respond.TokenResponse
 // @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /token [GET]
 func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
 	sessionId, ok := r.Context().Value("session_id").(string)

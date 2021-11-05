@@ -86,7 +86,7 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 422 {object} models.ErrResponse "empty name in request", "incorrect value of price", "invalid body in request"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator",  "csrf token is invalid, get new token"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards [POST]
 func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestAwards{}

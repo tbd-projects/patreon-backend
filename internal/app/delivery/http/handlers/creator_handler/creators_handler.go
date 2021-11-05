@@ -76,7 +76,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 422 {object} models.ErrResponse "invalid creator nickname", "invalid creator category-description", "invalid creator category", "invalid body in request"
 // @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators [POST]
 func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 	req := &models.RequestCreator{}

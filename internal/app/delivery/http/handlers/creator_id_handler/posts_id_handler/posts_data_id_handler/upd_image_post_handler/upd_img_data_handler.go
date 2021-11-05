@@ -51,7 +51,7 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 // @Failure 404 {object} models.ErrResponse "post data with this id not found"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id}/update/image [PUT]
 func (h *PostsUploadImageHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var dataId int64

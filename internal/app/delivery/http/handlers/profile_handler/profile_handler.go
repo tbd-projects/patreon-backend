@@ -39,7 +39,7 @@ func NewProfileHandler(log *logrus.Logger,
 // @Success 201 {object} models.ProfileResponse "Successfully get user"
 // @Failure 404 {object} models.ErrResponse "user with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /user [GET]
 func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")

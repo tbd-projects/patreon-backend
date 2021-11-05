@@ -48,7 +48,7 @@ func NewPostsUpdateCoverHandler(log *logrus.Logger,
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/update/cover [PUT]
 func (h *PostsUpdateCoverHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var postId int64

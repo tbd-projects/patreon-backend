@@ -54,7 +54,7 @@ func NewAwardsSubscribeHandler(log *logrus.Logger, sManager sessions.SessionsMan
 // @Failure 409 {object} models.ErrResponse "subscribes on the creator not found"
 // @Failure 500 {object} models.ErrResponse "server error", "can not do bd operation"
 // @Failure 403 {object} models.ErrResponse "this awards not belongs this creators", "csrf token is invalid, get new token"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/subscribe [DELETE]
 func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")
@@ -97,7 +97,7 @@ func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) 
 // @Failure 404 {object} models.ErrResponse "award with this id not found"
 // @Failure 500 {object} models.ErrResponse "server error", "can not do bd operation"
 // @Failure 403 {object} models.ErrResponse "this awards not belongs this creators", "csrf token is invalid, get new token"
-// @Failure 401 "User are not authorized"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/subscribe [POST]
 func (h *AwardsSubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 	//req := &responseModels.SubscribeRequest{}
