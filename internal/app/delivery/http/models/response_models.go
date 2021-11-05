@@ -15,6 +15,9 @@ type TokenResponse struct {
 type ErrResponse struct {
 	Err string `json:"error"`
 }
+type OkResponse struct {
+	Ok string `json:"OK"`
+}
 
 type IdResponse struct {
 	ID int64 `json:"id"`
@@ -196,4 +199,22 @@ func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorRespons
 
 type ResponseLike struct {
 	Likes int64 `json:"likes"`
+}
+
+type ResponseUserPayments struct {
+	Payments []models.Payments `json:"payments"`
+}
+
+func ToResponseUserPayments(payments []models.Payments) ResponseUserPayments {
+	res := make([]models.Payments, 0, len(payments))
+	for i, payment := range payments {
+		res[i] = models.Payments{
+			Amount:    payment.Amount,
+			Date:      payment.Date,
+			CreatorID: payment.CreatorID,
+		}
+	}
+	return ResponseUserPayments{
+		Payments: res,
+	}
 }

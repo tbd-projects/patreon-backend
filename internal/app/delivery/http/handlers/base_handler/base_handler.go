@@ -44,18 +44,17 @@ func (h *BaseHandler) AddMiddleware(middleware ...hf.HMiddlewareFunc) {
 	h.middlewares = append(h.middlewares, middleware...)
 }
 
-
 func (h *BaseHandler) AddMethod(method string, handlerMethod hf.HandlerFunc, middlewares ...hf.HFMiddlewareFunc) {
 	h.handlerMethods[method] = h.applyHFMiddleware(handlerMethod, middlewares...)
 }
 
-func (h *BaseHandler) applyHFMiddleware(handler hf.HandlerFunc,
+func (h *BaseHandler) applyHFMiddleware(handlerMethod hf.HandlerFunc,
 	middlewares ...hf.HFMiddlewareFunc) hf.HandlerFunc {
-	resultHandler := handler
+	resultHandlerMethod := handlerMethod
 	for index := len(middlewares) - 1; index >= 0; index-- {
-		resultHandler = middlewares[index](resultHandler)
+		resultHandlerMethod = middlewares[index](resultHandlerMethod)
 	}
-	return resultHandler
+	return resultHandlerMethod
 }
 
 func (h *BaseHandler) applyMiddleware(handler http.Handler) http.Handler {

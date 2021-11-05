@@ -9,6 +9,7 @@ var (
 	PostNotFound     = errors.New("post with not found")
 	PostDataNotFound = errors.New("post data with this id not found")
 	LikeNotFound     = errors.New("like with this id not found")
+	PaymentsNotFound = errors.New("this user have not payment")
 )
 
 /// Fields Incorrect
