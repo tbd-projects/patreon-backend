@@ -43,7 +43,7 @@ func init() {
 	flag.StringVar(&needFile, "name-file", "", "concrate files to print")
 	flag.BoolVar(&allFiles, "all", false, "print all logs")
 	flag.StringVar(&GenMock, "gen-mock", "", "genmock")
-	flag.StringVar(&SearchURL, "search-url", "*", "search url")
+	flag.StringVar(&SearchURL, "search-url", "", "search url")
 }
 
 func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time) error {
@@ -69,7 +69,7 @@ func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time
 			return err
 		}
 
-		if SearchURL != "*" && SearchURL != lg.Url.String() {
+		if SearchURL != "" && SearchURL != lg.Url.String() {
 			continue
 		}
 

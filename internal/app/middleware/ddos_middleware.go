@@ -3,18 +3,19 @@ package middleware
 import (
 	"net/http"
 	usecase_access "patreon/internal/app/usecase/access"
+	"patreon/internal/app/utilits"
 
 	"github.com/sirupsen/logrus"
 )
 
 type DDosMiddleware struct {
-	log           *logrus.Logger
+	utilits.LogObject
 	accessUsecase usecase_access.Usecase
 }
 
 func NewDdosMiddleware(log *logrus.Logger, accessUc usecase_access.Usecase) DDosMiddleware {
 	return DDosMiddleware{
-		log:           log,
+		LogObject:     utilits.NewLogObject(log),
 		accessUsecase: accessUc,
 	}
 }
@@ -23,7 +24,7 @@ func (mw *DDosMiddleware) CheckAccess(next http.Handler) http.Handler {
 		userIp := r.RemoteAddr
 		ok, err := mw.accessUsecase.CheckBlackList(userIp)
 		if ok {
-			mw.log.Warnf("DDOS_Middleware user with ip: %v in blackList", userIp)
+			mw.Log(r).Warnf("DDOS_Middleware user with ip: %v in blackList", userIp)
 			w.WriteHeader(http.StatusTooManyRequests)
 			return
 		}
@@ -31,11 +32,11 @@ func (mw *DDosMiddleware) CheckAccess(next http.Handler) http.Handler {
 		if !ok {
 			if err == usecase_access.NoAccess {
 				_ = mw.accessUsecase.AddToBlackList(userIp)
-				mw.log.Infof("DDOS_Middleware user with ip: %v add in blackList", userIp)
+				mw.Log(r).Infof("DDOS_Middleware user with ip: %v add in blackList", userIp)
 				w.WriteHeader(http.StatusTooManyRequests)
 				return
 			} else {
-				mw.log.Errorf("DDOS_Middleware error user with ip: %v err: %v",
+				mw.Log(r).Errorf("DDOS_Middleware error user with ip: %v err: %v",
 					userIp, err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -44,7 +45,7 @@ func (mw *DDosMiddleware) CheckAccess(next http.Handler) http.Handler {
 		if err == usecase_access.FirstQuery {
 			ok, err = mw.accessUsecase.Create(userIp)
 			if err != nil {
-				mw.log.Errorf("DDOS_Middleware - error on create AccessUserCounter from user with ip: %v err: %v",
+				mw.Log(r).Errorf("DDOS_Middleware - error on create AccessUserCounter from user with ip: %v err: %v",
 					userIp, err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -53,17 +54,17 @@ func (mw *DDosMiddleware) CheckAccess(next http.Handler) http.Handler {
 			res, err := mw.accessUsecase.Update(userIp)
 			if err == usecase_access.NoAccess {
 				_ = mw.accessUsecase.AddToBlackList(userIp)
-				mw.log.Infof("DDOS_Middleware user with ip: %v add in blackList", userIp)
+				mw.Log(r).Infof("DDOS_Middleware user with ip: %v add in blackList", userIp)
 				w.WriteHeader(http.StatusTooManyRequests)
 				return
 			}
 			if err != nil {
-				mw.log.Errorf("DDOS_Middleware - error on add user with ip: %v to BlackList err: %v",
+				mw.Log(r).Errorf("DDOS_Middleware - error on add user with ip: %v to BlackList err: %v",
 					userIp, err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			mw.log.Infof("DDOS_Middleware - Count of querys: %v from userIp: %v", res, userIp)
+			mw.Log(r).Infof("DDOS_Middleware - Count of querys: %v from userIp: %v", res, userIp)
 		}
 		next.ServeHTTP(w, r)
 	})

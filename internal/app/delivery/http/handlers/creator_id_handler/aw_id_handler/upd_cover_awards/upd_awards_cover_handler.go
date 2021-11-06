@@ -47,7 +47,7 @@ func NewUpdateCoverAwardsHandler(log *logrus.Logger,
 // @Failure 500 {object} models.ErrResponse "can not do bd operation". "server error"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this awards not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/awards/{:award_id}/cover [PUT]
+// @Router /creators/{:creator_id}/awards/{:award_id}/update/cover [PUT]
 func (h *UpdateCoverAwardsHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
 		"cover", []string{"image/png", "image/jpeg", "image/jpg"})

@@ -136,8 +136,9 @@ func (s *Server) Start(config *app.Config) error {
 	for apiUrl, h := range *hs {
 		h.Connect(routerApi.Path(apiUrl))
 	}
+	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger)
 	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
-	routerApi.Use(ddosMiddleware.CheckAccess)
+	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger, ddosMiddleware.CheckAccess)
 
 	cors := middleware.NewCorsMiddleware(&config.Cors, router)
 	routerCors := cors.SetCors(router)
