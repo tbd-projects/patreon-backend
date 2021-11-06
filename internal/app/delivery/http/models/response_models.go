@@ -207,12 +207,12 @@ type ResponseUserPayments struct {
 
 func ToResponseUserPayments(payments []models.Payments) ResponseUserPayments {
 	res := make([]models.Payments, 0, len(payments))
-	for i, payment := range payments {
-		res[i] = models.Payments{
+	for _, payment := range payments {
+		res = append(res, models.Payments{
 			Amount:    payment.Amount,
 			Date:      payment.Date,
 			CreatorID: payment.CreatorID,
-		}
+		})
 	}
 	return ResponseUserPayments{
 		Payments: res,

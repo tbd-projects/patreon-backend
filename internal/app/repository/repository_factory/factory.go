@@ -12,6 +12,8 @@ import (
 	repoFilesOs "patreon/internal/app/repository/files/os"
 	repoLikes "patreon/internal/app/repository/likes"
 	repLikesPsql "patreon/internal/app/repository/likes/postgresql"
+	repoPayments "patreon/internal/app/repository/payments"
+	repoPaymentsPsql "patreon/internal/app/repository/payments/postgresql"
 	repoPosts "patreon/internal/app/repository/posts"
 	repPostsPsql "patreon/internal/app/repository/posts/postgresql"
 	repoPostsData "patreon/internal/app/repository/posts_data"
@@ -19,6 +21,7 @@ import (
 	repoSubscribers "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 	repUserPsql "patreon/internal/app/repository/user/postgresql"
+
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/repository"
 
@@ -39,6 +42,7 @@ type RepositoryFactory struct {
 	accessRepository      repositoryAccess.Repository
 	subscribersRepository repoSubscribers.Repository
 	FilesRepository       repoFiles.Repository
+	paymentsRepository    repoPayments.Repository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -121,4 +125,10 @@ func (f *RepositoryFactory) GetFilesRepository() repoFiles.Repository {
 		f.FilesRepository = repoFilesOs.NewFileRepository(f.expectedConnections.PathFiles)
 	}
 	return f.FilesRepository
+}
+func (f *RepositoryFactory) GetPaymentsRepository() repoPayments.Repository {
+	if f.paymentsRepository == nil {
+		f.paymentsRepository = repoPaymentsPsql.NewPaymentsRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.paymentsRepository
 }

@@ -12,26 +12,27 @@ import (
 
 type FactorySuite struct {
 	handlers.SuiteHandler
-	CsrfUsecaseFactory *mock_usecase_factory.MockUsecaseFactory
-	factory            *HandlerFactory
+	usecaseFactory *mock_usecase_factory.MockUsecaseFactory
+	factory        *HandlerFactory
 }
 
 func (s *FactorySuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.CsrfUsecaseFactory = mock_usecase_factory.NewMockUsecaseFactory(s.Mock)
-	s.factory = NewFactory(s.Logger, s.CsrfUsecaseFactory)
+	s.usecaseFactory = mock_usecase_factory.NewMockUsecaseFactory(s.Mock)
+	s.factory = NewFactory(s.Logger, s.usecaseFactory)
 }
 
 func (s *FactorySuite) TestInitHandlers() {
-	s.CsrfUsecaseFactory.EXPECT().GetUserUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetCreatorUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetCsrfUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetPostsUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetLikesUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetSessionManager().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetUserUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetCreatorUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetCsrfUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetPostsUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetLikesUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetSessionManager().Times(1)
+	s.usecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -49,15 +50,17 @@ func (s *FactorySuite) TestGetHandlersUrlsFirstRun() {
 	s.factory.GetHandleUrls()
 }
 func (s *FactorySuite) TestGetHandlersUrlsAlreadyExists() {
-	s.CsrfUsecaseFactory.EXPECT().GetUserUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetCreatorUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetCsrfUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetPostsUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetLikesUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetSessionManager().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
-	s.CsrfUsecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetUserUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetCreatorUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetCsrfUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetPostsUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetLikesUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetSessionManager().Times(1)
+	s.usecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)
+
 	s.factory.urlHandler = nil
 	defer func() {
 		if r := recover(); r != nil {

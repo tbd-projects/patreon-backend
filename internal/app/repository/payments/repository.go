@@ -1,4 +1,4 @@
-package payments
+package repository_payments
 
 import "patreon/internal/app/models"
 

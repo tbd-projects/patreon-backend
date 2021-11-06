@@ -2,14 +2,14 @@ package payments
 
 import (
 	"patreon/internal/app/models"
-	"patreon/internal/app/repository/payments"
+	repository_payments "patreon/internal/app/repository/payments"
 )
 
 type PaymentsUsecase struct {
-	repository payments.Repository
+	repository repository_payments.Repository
 }
 
-func NewPaymentsUsecase(repo payments.Repository) *PaymentsUsecase {
+func NewPaymentsUsecase(repo repository_payments.Repository) *PaymentsUsecase {
 	return &PaymentsUsecase{
 		repository: repo,
 	}

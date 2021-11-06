@@ -1,4 +1,4 @@
-package postgresql
+package repository_postgresql
 
 import (
 	"database/sql"
@@ -35,7 +35,7 @@ func (repo *PaymentsRepository) GetUserPayments(userID int64) ([]models.Payments
 		return nil, repository.NotFound
 	}
 
-	rows, err := repo.store.Query(querySelect)
+	rows, err := repo.store.Query(querySelect, userID)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}
@@ -72,7 +72,7 @@ func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64) ([]models.Pa
 		return nil, repository.NotFound
 	}
 
-	rows, err := repo.store.Query(querySelect)
+	rows, err := repo.store.Query(querySelect, creatorID)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}

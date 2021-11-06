@@ -11,6 +11,7 @@ import (
 	repository_creator "patreon/internal/app/repository/creator"
 	repository_files "patreon/internal/app/repository/files"
 	repository_likes "patreon/internal/app/repository/likes"
+	repository_payments "patreon/internal/app/repository/payments"
 	repository_posts "patreon/internal/app/repository/posts"
 	repository_posts_data "patreon/internal/app/repository/posts_data"
 	repository_subscribers "patreon/internal/app/repository/subscribers"
@@ -126,6 +127,20 @@ func (m *MockRepositoryFactory) GetLikesRepository() repository_likes.Repository
 func (mr *MockRepositoryFactoryMockRecorder) GetLikesRepository() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLikesRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetLikesRepository))
+}
+
+// GetPaymentsRepository mocks base method.
+func (m *MockRepositoryFactory) GetPaymentsRepository() repository_payments.Repository {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPaymentsRepository")
+	ret0, _ := ret[0].(repository_payments.Repository)
+	return ret0
+}
+
+// GetPaymentsRepository indicates an expected call of GetPaymentsRepository.
+func (mr *MockRepositoryFactoryMockRecorder) GetPaymentsRepository() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentsRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetPaymentsRepository))
 }
 
 // GetPostsDataRepository mocks base method.

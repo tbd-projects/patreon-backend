@@ -6,6 +6,7 @@ import (
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
 	useLikes "patreon/internal/app/usecase/likes"
+	usePayments "patreon/internal/app/usecase/payments"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
 	useSubscr "patreon/internal/app/usecase/subscribers"
@@ -24,4 +25,5 @@ type UsecaseFactory interface {
 	GetSubscribersUsecase() useSubscr.Usecase
 	GetLikesUsecase() useLikes.Usecase
 	GetPostsDataUsecase() usePostsData.Usecase
+	GetPaymentsUsecase() usePayments.Usecase
 }
