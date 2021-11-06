@@ -21,7 +21,8 @@ func NewDdosMiddleware(log *logrus.Logger, accessUc usecase_access.Usecase) DDos
 }
 func (mw *DDosMiddleware) CheckAccess(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userIp := r.RemoteAddr
+		userUrl := r.URL.Path
+		userIp := r.RemoteAddr + userUrl
 		ok, err := mw.accessUsecase.CheckBlackList(userIp)
 		if ok {
 			mw.Log(r).Warnf("DDOS_Middleware user with ip: %v in blackList", userIp)
