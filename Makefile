@@ -60,7 +60,8 @@ build-utils:
 	go build -o utils.out -v ./cmd/utilits
 
 parse-last-log: build-utils
-	./utils.out
+	search_url=*
+	./utils.out -search-url=${search_url}
 
 gen-mock:
 	go generate ./...
