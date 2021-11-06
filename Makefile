@@ -2,6 +2,7 @@
 
 LOG_DIR=./logs
 CHECK_DIR=go list ./... | grep -v /cmd/utilits
+SQL_DIR=./scripts
 
 stop-redis:
 	systemctl stop redis
@@ -67,3 +68,52 @@ gen-mock:
 
 test:
 	go test -v -race ./internal/...
+
+$(serv):
+	cat ./configs/migrate.config | jq '.database_server'
+
+DATABASE_URL=$$(cat ./configs/migrate.config | jq '.database_server')
+DATABASE_URL_LOCAL="$$(cat ./configs/migrate.config | jq '.database_local')"
+
+
+
+some:
+	echo ${DATABASE_URL}
+
+migrate-up:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} up
+
+local-migrate-up:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL_LOCAL} up
+
+migrate-down:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} down
+
+local-migrate-down:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL_LOCAL} down
+
+migrate-up-one:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} up 1
+
+local-migrate-up-one:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL_LOCAL} up 1
+
+migrate-down-one:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} down 1
+
+local-migrate-down-one:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL_LOCAL} down 1
+
+migrate:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} goto $(version)
+
+local-migrate:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL_LOCAL} goto $(version)
+
+force-migrate:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} force $(version)
+
+local-force-migrate:
+	migrate -source file://${SQL_DIR} -database ${DATABASE_URL_LOCAL} force $(version)
+
+

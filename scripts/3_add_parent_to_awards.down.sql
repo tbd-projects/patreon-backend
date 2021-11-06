@@ -1,1 +1,1 @@
-DROP parents_awards;
+DROP TABLE parents_awards;
