@@ -1,5 +1,3 @@
-\connect restapi_dev
-
 INSERT INTO creator_category (name)
     VALUES('Подкасты'),
     ('Музыканты'),
@@ -17,5 +15,4 @@ VALUES('music'),
       ('text'),
       ('image');
 
-\disconnect
 

@@ -1,0 +1,1 @@
+DROP parents_awards;

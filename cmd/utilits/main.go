@@ -10,8 +10,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"patreon/internal/app"
 	"strings"
 	"time"
@@ -29,21 +27,31 @@ type Log struct {
 }
 
 var (
-	configPath string
-	logLevel   string
-	needFile   string
-	allFiles   bool
-	GenMock    string
-	SearchURL  string
+	configPath    string
+	logLevel      string
+	needFile      string
+	allFiles      bool
+	InitMigration int64
+	MigrationUp   bool
+	MigrationDown bool
+	MigrationAdd   bool
+	MigrationDel bool
+	SearchURL     string
+	useServerRepository bool
 )
 
 func init() {
-	flag.StringVar(&configPath, "config-path", "configs/server.toml", "path to config file")
+	flag.StringVar(&configPath, "config-path", "configs/utilits.toml", "path to config file")
 	flag.StringVar(&logLevel, "level", "trace", "skip levels")
 	flag.StringVar(&needFile, "name-file", "", "concrate files to print")
 	flag.BoolVar(&allFiles, "all", false, "print all logs")
-	flag.StringVar(&GenMock, "gen-mock", "", "genmock")
+	flag.Int64Var(&InitMigration, "init-migration", -1, "init-migration")
+	flag.BoolVar(&MigrationUp, "mig-up", false, "migration-up")
+	flag.BoolVar(&MigrationDown, "mig-down", false, "migration-down")
+	flag.BoolVar(&MigrationAdd, "mig-add", false, "migration-add-one-change")
+	flag.BoolVar(&MigrationDel, "mig-del", false, "migration-delete-one-change")
 	flag.StringVar(&SearchURL, "search-url", "", "search url")
+	flag.BoolVar(&useServerRepository, "server-run", false, "true if it server run, false if it local run")
 }
 
 func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time) error {
@@ -110,58 +118,8 @@ func parseTimeFromFileName(fileName string) (time.Time, error) {
 	return tmp, err
 }
 
-//mockgen  -destination=mocks/mock_awards_usecase.go -package=mock_usecase -mock_names=Usecase=AwardsUsecase . Usecase
-
-func generateMock(dir string) {
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			filesInFile, err := os.ReadDir(dir + "/" + file.Name())
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			haveMockDir := false
-			for _, checkedFiles := range filesInFile {
-				if checkedFiles.Name() == "mocks" {
-					haveMockDir = true
-					break
-				}
-			}
-
-			if !haveMockDir {
-				continue
-			}
-
-			baseDir := filepath.Base(dir)
-			interfaceName := strings.Title(strings.ToLower(baseDir))
-			cmd := exec.Command("mockgen", fmt.Sprintf("-destination=mocks/mock_%s_%s.go", file.Name(), baseDir),
-				fmt.Sprintf("-package=mock_%s", baseDir),
-				fmt.Sprintf("-mock_names=%s=%s%s", interfaceName,
-					strings.Title(strings.ToLower(file.Name())), interfaceName), ".", interfaceName)
-			cmd.Dir = dir + file.Name() + "/"
-			cmd.Stdout = log.Writer()
-			cmd.Stderr = log.Writer()
-			err = cmd.Run()
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
-		}
-	}
-}
-
 func main() {
 	flag.Parse()
-
-	if GenMock != "" {
-		generateMock(GenMock)
-		return
-	}
 
 	config := app.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
@@ -176,6 +134,29 @@ func main() {
 
 	logger := logrus.New()
 	logger.SetLevel(level)
+
+	mig := Migrations{log: logger, dbConect: config.LocalRepository.DataBaseUrl}
+	if useServerRepository {
+		mig = Migrations{log: logger, dbConect: config.ServerRepository.DataBaseUrl}
+	}
+
+	switch {
+	case InitMigration >= 0:
+		mig.MigrationInit(InitMigration)
+		return
+	case MigrationUp:
+		mig.MigrationUp()
+		return
+	case MigrationDown:
+		mig.MigrationDown()
+		return
+	case MigrationAdd:
+		mig.MigrationAddOne()
+		return
+	case MigrationDel:
+		mig.MigrationDelOne()
+		return
+	}
 
 	if needFile != "" {
 		tmp, err := parseTimeFromFileName(needFile)
