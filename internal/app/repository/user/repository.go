@@ -26,6 +26,12 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	FindByID(int64) (*models.User, error)
 
+	// FindByNickname Errors:
+	// 		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	FindByNickname(string) (*models.User, error)
+
 	// UpdatePassword Errors:
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB

@@ -78,6 +78,26 @@ func (repo *UserRepository) FindByID(id int64) (*models.User, error) {
 	return &user, nil
 }
 
+// FindByNickname Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (repo *UserRepository) FindByNickname(nickname string) (*models.User, error) {
+	user := models.User{}
+	query := `SELECT users_id, login, nickname, users.avatar, encrypted_password, cp.creator_id IS NOT NULL
+	from users LEFT JOIN creator_profile AS cp ON (users.users_id = cp.creator_id) where nickname=$1`
+
+	if err := repo.store.QueryRow(query, nickname).
+		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword, &user.HaveCreator); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, repository.NotFound
+		}
+		return nil, repository.NewDBError(err)
+	}
+
+	return &user, nil
+}
+
 // UpdatePassword Errors:
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
