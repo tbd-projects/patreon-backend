@@ -1,5 +1,3 @@
-\connect restapi_dev
--- create type posts_type as enum ('podcasts','article', 'music', 'designer', 'illustrator', 'journalist','mass media');
 CREATE TABLE IF NOT EXISTS users
 (
     users_id           bigserial not null primary key,
@@ -101,5 +99,3 @@ CREATE TABLE IF NOT EXISTS payments
     creator_id  bigint                                 not null references creator_profile (creator_id) on delete cascade,
     users_id    bigint                                 not null references users (users_id) on delete cascade
 )
-
-\disconnect
