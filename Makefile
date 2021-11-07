@@ -66,16 +66,15 @@ parse-last-log: build-utils
 gen-mock:
 	go generate ./...
 
+
 test:
 	go test -v -race ./internal/...
 
 $(serv):
 	cat ./configs/migrate.config | jq '.database_server'
 
-DATABASE_URL=$$(cat ./configs/migrate.config | jq '.database_server')
-DATABASE_URL_LOCAL="$$(cat ./configs/migrate.config | jq '.database_local')"
-
-
+DATABASE_URL=$(shell cat ./configs/migrate.config | jq '.database_server')
+DATABASE_URL_LOCAL=$(shell cat ./configs/migrate.config | jq '.database_local')
 
 some:
 	echo ${DATABASE_URL}
