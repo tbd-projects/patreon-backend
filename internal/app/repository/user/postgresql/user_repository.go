@@ -136,10 +136,10 @@ func (repo *UserRepository) UpdateAvatar(id int64, newAvatar string) error {
 // UpdateNickname Errors:
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *UserRepository) UpdateNickname(id int64, newNickname string) error {
-	query := `UPDATE users SET nickname = $1 WHERE users_id = $2`
+func (repo *UserRepository) UpdateNickname(oldNickname string, newNickname string) error {
+	query := `UPDATE users SET nickname = $1 WHERE nickname = $2`
 
-	row, err := repo.store.Exec(query, newNickname, id)
+	row, err := repo.store.Exec(query, newNickname, oldNickname)
 	if err != nil {
 		return repository.NewDBError(err)
 	}

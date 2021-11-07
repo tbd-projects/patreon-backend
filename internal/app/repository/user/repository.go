@@ -45,5 +45,5 @@ type Repository interface {
 	// UpdateNickname Errors:
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	UpdateNickname(id int64, newNickname string) error
+	UpdateNickname(oldNickname string, newNickname string) error
 }
