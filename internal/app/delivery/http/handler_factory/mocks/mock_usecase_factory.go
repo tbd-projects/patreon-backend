@@ -9,6 +9,7 @@ import (
 	sessions "patreon/internal/app/sessions"
 	usecase_awards "patreon/internal/app/usecase/awards"
 	usecase_creator "patreon/internal/app/usecase/creator"
+	usecase_info "patreon/internal/app/usecase/info"
 	usecase_likes "patreon/internal/app/usecase/likes"
 	payments "patreon/internal/app/usecase/payments"
 	posts "patreon/internal/app/usecase/posts"
@@ -83,6 +84,20 @@ func (m *MockUsecaseFactory) GetCsrfUsecase() usecase_csrf.Usecase {
 func (mr *MockUsecaseFactoryMockRecorder) GetCsrfUsecase() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCsrfUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetCsrfUsecase))
+}
+
+// GetInfoUsecase mocks base method.
+func (m *MockUsecaseFactory) GetInfoUsecase() usecase_info.Usecase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetInfoUsecase")
+	ret0, _ := ret[0].(usecase_info.Usecase)
+	return ret0
+}
+
+// GetInfoUsecase indicates an expected call of GetInfoUsecase.
+func (mr *MockUsecaseFactoryMockRecorder) GetInfoUsecase() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInfoUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetInfoUsecase))
 }
 
 // GetLikesUsecase mocks base method.

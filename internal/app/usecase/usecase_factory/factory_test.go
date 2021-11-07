@@ -244,6 +244,30 @@ func (s *FactorySuite) TestGetPostsDataUsecaseFirstCall() {
 	factory.GetPostsDataUsecase()
 }
 
+func (s *FactorySuite) TestGetInfoUsecaseFirstCall() {
+	factory := NewUsecaseFactory(s.mockRepositoryFactory)
+	s.mockRepositoryFactory.EXPECT().GetInfoRepository()
+
+	defer func() {
+		if r := recover(); r != nil {
+			assert.Fail(s.T(), "fail on getUserUsecase()")
+		}
+	}()
+	factory.GetInfoUsecase()
+}
+
+func (s *FactorySuite) TestGetInfoUsecaseSecondCall() {
+	factory := NewUsecaseFactory(s.mockRepositoryFactory)
+	factory.infoUsecase = s.MockInfoUsecase
+
+	defer func() {
+		if r := recover(); r != nil {
+			assert.Fail(s.T(), "fail on getUserUsecase()")
+		}
+	}()
+	factory.GetInfoUsecase()
+}
+
 func TestFactoryHandler(t *testing.T) {
 	suite.Run(t, new(FactorySuite))
 }

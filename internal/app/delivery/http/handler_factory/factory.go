@@ -23,6 +23,7 @@ import (
 	upd_avatar_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_avatar_handler"
 	upd_cover_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_cover_handler"
 	"patreon/internal/app/delivery/http/handlers/csrf_handler"
+	"patreon/internal/app/delivery/http/handlers/info_handler"
 	"patreon/internal/app/delivery/http/handlers/login_handler"
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
@@ -30,13 +31,14 @@ import (
 	"patreon/internal/app/delivery/http/handlers/profile_handler/subscriptions_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
-	handlers2 "patreon/internal/app/delivery/http/handlers/register_handler"
+	"patreon/internal/app/delivery/http/handlers/register_handler"
 
 	"github.com/sirupsen/logrus"
 )
 
 const (
 	ROOT = iota
+	INFO
 	REGISTER
 	LOGIN
 	LOGOUT
@@ -92,14 +94,16 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucSubscr := f.usecaseFactory.GetSubscribersUsecase()
 	ucPostsData := f.usecaseFactory.GetPostsDataUsecase()
 	ucPayments := f.usecaseFactory.GetPaymentsUsecase()
+	ucInfo := f.usecaseFactory.GetInfoUsecase()
 
 	return map[int]app.Handler{
-		REGISTER:                 handlers2.NewRegisterHandler(f.logger, sManager, ucUser),
+		INFO:                     info_handler.NewInfoHandler(f.logger, ucInfo),
+		REGISTER:                 register_handler.NewRegisterHandler(f.logger, sManager, ucUser),
 		LOGIN:                    login_handler.NewLoginHandler(f.logger, sManager, ucUser),
 		LOGOUT:                   logout_handler.NewLogoutHandler(f.logger, sManager),
 		PROFILE:                  profile_handler.NewProfileHandler(f.logger, sManager, ucUser),
 		CREATORS:                 creator_handler.NewCreatorHandler(f.logger, sManager, ucCreator, ucUser),
-		CREATOR_WITH_ID:          creator_id_handler.NewCreatorIdHandler(f.logger, sManager, ucUser, ucCreator),
+		CREATOR_WITH_ID:          creator_id_handler.NewCreatorIdHandler(f.logger, sManager, ucCreator),
 		UPDATE_PASSWORD:          password_handler.NewUpdatePasswordHandler(f.logger, sManager, ucUser),
 		UPDATE_AVATAR:            avatar_handler.NewUpdateAvatarHandler(f.logger, sManager, ucUser),
 		AWARDS:                   aw_handler.NewAwardsHandler(f.logger, ucAwards, sManager),
@@ -135,6 +139,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 	f.urlHandler = &map[string]app.Handler{
 		//"/":                     "I am a joke?",
 		"/login":    hs[LOGIN],
+		"/info":     hs[INFO],
 		"/logout":   hs[LOGOUT],
 		"/register": hs[REGISTER],
 		// /user     ---------------------------------------------------------////

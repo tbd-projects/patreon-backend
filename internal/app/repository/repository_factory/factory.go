@@ -10,6 +10,8 @@ import (
 	repCreatorPsql "patreon/internal/app/repository/creator/postgresql"
 	repoFiles "patreon/internal/app/repository/files"
 	repoFilesOs "patreon/internal/app/repository/files/os"
+	repoInfo "patreon/internal/app/repository/info"
+	repInfoPsql "patreon/internal/app/repository/info/postgresql"
 	repoLikes "patreon/internal/app/repository/likes"
 	repLikesPsql "patreon/internal/app/repository/likes/postgresql"
 	repoPayments "patreon/internal/app/repository/payments"
@@ -43,6 +45,7 @@ type RepositoryFactory struct {
 	subscribersRepository repoSubscribers.Repository
 	FilesRepository       repoFiles.Repository
 	paymentsRepository    repoPayments.Repository
+	infoRepository        repoInfo.Repository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -126,9 +129,17 @@ func (f *RepositoryFactory) GetFilesRepository() repoFiles.Repository {
 	}
 	return f.FilesRepository
 }
+
 func (f *RepositoryFactory) GetPaymentsRepository() repoPayments.Repository {
 	if f.paymentsRepository == nil {
 		f.paymentsRepository = repoPaymentsPsql.NewPaymentsRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.paymentsRepository
+}
+
+func (f *RepositoryFactory) GetInfoRepository() repoInfo.Repository {
+	if f.infoRepository == nil {
+		f.infoRepository = repInfoPsql.NewInfoRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.infoRepository
 }

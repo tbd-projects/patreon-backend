@@ -1,6 +1,7 @@
 package creator_id_handler
 
 import (
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
@@ -8,26 +9,20 @@ import (
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
-	usecase_user "patreon/internal/app/usecase/user"
-
-	"github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
 )
 
 type CreatorIdHandler struct {
 	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
 	creatorUsecase usecase_creator.Usecase
 	base_handler.BaseHandler
 }
 
-func NewCreatorIdHandler(log *logrus.Logger, sManager sessions.SessionsManager,
-	ucUser usecase_user.Usecase, ucCreator usecase_creator.Usecase) *CreatorIdHandler {
+func NewCreatorIdHandler(log *logrus.Logger, sManager sessions.SessionsManager, ucCreator usecase_creator.Usecase) *CreatorIdHandler {
 	h := &CreatorIdHandler{
 		BaseHandler:    *base_handler.NewBaseHandler(log),
 		sessionManager: sManager,
-		userUsecase:    ucUser,
 		creatorUsecase: ucCreator,
 	}
 	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).AddUserId)
@@ -71,5 +66,4 @@ func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 	s.Log(r).Debugf("get creator %v with id %v", creator, creatorId)
 	s.Respond(w, r, http.StatusOK, models.ToResponseCreatorWithAwards(*creator))
-
 }

@@ -5,6 +5,7 @@ import (
 	mock_repository_awards "patreon/internal/app/repository/awards/mocks"
 	mock_repository_creator "patreon/internal/app/repository/creator/mocks"
 	mock_repository_files "patreon/internal/app/repository/files/mocks"
+	mock_repository_info "patreon/internal/app/repository/info/mocks"
 	mock_repository_likes "patreon/internal/app/repository/likes/mocks"
 	mock_repository_posts "patreon/internal/app/repository/posts/mocks"
 	mock_repository_posts_data "patreon/internal/app/repository/posts_data/mocks"
@@ -32,6 +33,7 @@ type SuiteUsecase struct {
 	MockAwardsRepository      *mock_repository_awards.AwardsRepository
 	MockPostsRepository       *mock_repository_posts.PostsRepository
 	MockLikesRepository       *mock_repository_likes.LikesRepository
+	MockInfoRepository        *mock_repository_info.InfoRepository
 	MockPostsDataRepository   *mock_repository_posts_data.PostsDataRepository
 
 	Logger *logrus.Logger
@@ -48,6 +50,7 @@ func (s *SuiteUsecase) SetupSuite() {
 	s.MockPostsRepository = mock_repository_posts.NewPostsRepository(s.Mock)
 	s.MockAwardsRepository = mock_repository_awards.NewAwardsRepository(s.Mock)
 	s.MockLikesRepository = mock_repository_likes.NewLikesRepository(s.Mock)
+	s.MockInfoRepository = mock_repository_info.NewInfoRepository(s.Mock)
 
 	s.Logger = logrus.New()
 	s.Logger.SetOutput(io.Discard)

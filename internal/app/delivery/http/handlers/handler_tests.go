@@ -7,6 +7,7 @@ import (
 	mock_usecase "patreon/internal/app/usecase/access/mocks"
 	mock_usecase_awards "patreon/internal/app/usecase/awards/mocks"
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
+	mock_usecase_info "patreon/internal/app/usecase/info/mocks"
 	mock_usecase_like "patreon/internal/app/usecase/likes/mocks"
 	mock_usecase_posts "patreon/internal/app/usecase/posts/mocks"
 	mock_usecase_posts_data "patreon/internal/app/usecase/posts_data/mocks"
@@ -36,6 +37,7 @@ type SuiteHandler struct {
 	MockPostsDataUsecase   *mock_usecase_posts_data.PostsDataUsecase
 	MockAccessUsecase      *mock_usecase.AccessUsecase
 	MockSessionsManager    *mock_sessions.MockSessionsManager
+	MockInfoUsecase        *mock_usecase_info.InfoUsecase
 	Tb                     TestTable
 	Logger                 *logrus.Logger
 	MockCsrfUsecase        *mock_usecase_csrf.CsrfUsecase
@@ -54,7 +56,8 @@ func (s *SuiteHandler) SetupSuite() {
 	s.MockLikeUsecase = mock_usecase_like.NewLikesUsecase(s.Mock)
 	s.MockPostsUsecase = mock_usecase_posts.NewPostsUsecase(s.Mock)
 	s.MockPostsDataUsecase = mock_usecase_posts_data.NewPostsDataUsecase(s.Mock)
-
+	s.MockInfoUsecase = mock_usecase_info.NewInfoUsecase(s.Mock)
+	
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()
 	s.Logger.SetOutput(io.Discard)

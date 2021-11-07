@@ -11,10 +11,10 @@ import (
 )
 
 func TestFactory(t *testing.T) {
-	defer func (t *testing.T) {
+	defer func(t *testing.T) {
 		err := recover()
 		require.Equal(t, err, nil)
-	} (t)
+	}(t)
 
 	log := &logrus.Logger{}
 	t.Helper()
@@ -45,7 +45,8 @@ func TestFactory(t *testing.T) {
 	factory.GetPostsRepository()
 	factory.GetSessionRepository()
 	factory.GetSubscribersRepository()
+	factory.GetInfoRepository()
+	factory.GetPaymentsRepository()
 
 	redisServer.Close()
 }
-

@@ -7,6 +7,7 @@ import (
 	useAccess "patreon/internal/app/usecase/access"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
+	useInfo "patreon/internal/app/usecase/info"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePayments "patreon/internal/app/usecase/payments"
 	usePosts "patreon/internal/app/usecase/posts"
@@ -28,6 +29,7 @@ type UsecaseFactory struct {
 	sessinManager      sessions.SessionsManager
 	postsUsecase       usePosts.Usecase
 	postsDataUsecase   usePostsData.Usecase
+	infoUsecase        useInfo.Usecase
 	likesUsecase       useLikes.Usecase
 	paymentsUsecase    usePayments.Usecase
 }
@@ -109,9 +111,17 @@ func (f *UsecaseFactory) GetPostsDataUsecase() usePostsData.Usecase {
 	}
 	return f.postsDataUsecase
 }
+
 func (f *UsecaseFactory) GetPaymentsUsecase() usePayments.Usecase {
 	if f.paymentsUsecase == nil {
 		f.paymentsUsecase = usePayments.NewPaymentsUsecase(f.repositoryFactory.GetPaymentsRepository())
 	}
 	return f.paymentsUsecase
+}
+
+func (f *UsecaseFactory) GetInfoUsecase() useInfo.Usecase {
+	if f.infoUsecase == nil {
+		f.infoUsecase = useInfo.NewInfoUsecase(f.repositoryFactory.GetInfoRepository())
+	}
+	return f.infoUsecase
 }
