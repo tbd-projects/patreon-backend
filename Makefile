@@ -70,14 +70,9 @@ gen-mock:
 test:
 	go test -v -race ./internal/...
 
-$(serv):
-	cat ./configs/migrate.config | jq '.database_server'
 
 DATABASE_URL=$(shell cat ./configs/migrate.config | jq '.database_server')
 DATABASE_URL_LOCAL=$(shell cat ./configs/migrate.config | jq '.database_local')
-
-some:
-	echo ${DATABASE_URL}
 
 migrate-up:
 	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} up

@@ -31,11 +31,6 @@ var (
 	logLevel      string
 	needFile      string
 	allFiles      bool
-	InitMigration int64
-	MigrationUp   bool
-	MigrationDown bool
-	MigrationAdd   bool
-	MigrationDel bool
 	SearchURL     string
 	useServerRepository bool
 )
@@ -45,11 +40,6 @@ func init() {
 	flag.StringVar(&logLevel, "level", "trace", "skip levels")
 	flag.StringVar(&needFile, "name-file", "", "concrate files to print")
 	flag.BoolVar(&allFiles, "all", false, "print all logs")
-	flag.Int64Var(&InitMigration, "init-migration", -1, "init-migration")
-	flag.BoolVar(&MigrationUp, "mig-up", false, "migration-up")
-	flag.BoolVar(&MigrationDown, "mig-down", false, "migration-down")
-	flag.BoolVar(&MigrationAdd, "mig-add", false, "migration-add-one-change")
-	flag.BoolVar(&MigrationDel, "mig-del", false, "migration-delete-one-change")
 	flag.StringVar(&SearchURL, "search-url", "", "search url")
 	flag.BoolVar(&useServerRepository, "server-run", false, "true if it server run, false if it local run")
 }
@@ -134,29 +124,6 @@ func main() {
 
 	logger := logrus.New()
 	logger.SetLevel(level)
-
-	mig := Migrations{log: logger, dbConect: config.LocalRepository.DataBaseUrl}
-	if useServerRepository {
-		mig = Migrations{log: logger, dbConect: config.ServerRepository.DataBaseUrl}
-	}
-
-	switch {
-	case InitMigration >= 0:
-		mig.MigrationInit(InitMigration)
-		return
-	case MigrationUp:
-		mig.MigrationUp()
-		return
-	case MigrationDown:
-		mig.MigrationDown()
-		return
-	case MigrationAdd:
-		mig.MigrationAddOne()
-		return
-	case MigrationDel:
-		mig.MigrationDelOne()
-		return
-	}
 
 	if needFile != "" {
 		tmp, err := parseTimeFromFileName(needFile)
