@@ -35,4 +35,9 @@ type Repository interface {
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	UpdateAvatar(id int64, newAvatar string) error
+
+	// UpdateNickname Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	UpdateNickname(id int64, newNickname string) error
 }

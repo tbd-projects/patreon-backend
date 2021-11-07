@@ -6,6 +6,8 @@ import (
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 
+	"github.com/pkg/errors"
+
 	"github.com/lib/pq"
 )
 
@@ -107,6 +109,27 @@ func (repo *UserRepository) UpdateAvatar(id int64, newAvatar string) error {
 
 	if err = row.Close(); err != nil {
 		return repository.NewDBError(err)
+	}
+	return nil
+}
+
+// UpdateNickname Errors:
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (repo *UserRepository) UpdateNickname(id int64, newNickname string) error {
+	query := `UPDATE users SET nickname = $1 WHERE users_id = $2`
+
+	row, err := repo.store.Exec(query, newNickname, id)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+	if cntChangesRows, err := row.RowsAffected(); err != nil || cntChangesRows != 1 {
+		if err != nil {
+			return repository.NewDBError(err)
+		}
+		return repository.NewDBError(
+			errors.Wrapf(err,
+				"UPDATE_NICKNAME_REPO: expected changes only one row in db, change %v", cntChangesRows))
 	}
 	return nil
 }
