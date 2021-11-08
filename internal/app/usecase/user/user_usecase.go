@@ -8,6 +8,7 @@ import (
 	"patreon/internal/app/repository"
 	repoFiles "patreon/internal/app/repository/files"
 	repoUser "patreon/internal/app/repository/user"
+	usePosts "patreon/internal/app/usecase/posts"
 
 	"github.com/pkg/errors"
 )
@@ -149,6 +150,7 @@ func (usecase *UserUsecase) UpdatePassword(userId int64, oldPassword, newPasswor
 // UpdateAvatar Errors:
 // 		app.GeneralError with Errors
 //			app.UnknownError
+//			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error {
@@ -171,7 +173,7 @@ func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName
 //		repository.NotFound
 //		NicknameExists
 // 		app.GeneralError with Errors
-//			app.UnknownError
+//			repository.DefaultErrDB
 func (usecase *UserUsecase) UpdateNickname(userID int64, oldNickname string, newNickname string) error {
 	u, err := usecase.repository.FindByNickname(oldNickname)
 	if err != nil {
@@ -193,4 +195,19 @@ func (usecase *UserUsecase) UpdateNickname(userID int64, oldNickname string, new
 		return err
 	}
 	return nil
+}
+
+// CheckAccessForAward Errors:
+// 		app.GeneralError with Errors
+//			repository.DefaultErrDBr
+func (usecase *UserUsecase) CheckAccessForAward(userID int64, awardsId int64, creatorId int64) (bool, error) {
+	if awardsId == repository.NoAwards || userID == creatorId {
+		return true, nil
+	}
+
+	if userID == usePosts.EmptyUser {
+		return false, nil
+	}
+
+	return usecase.repository.IsAllowedAward(userID, awardsId)
 }

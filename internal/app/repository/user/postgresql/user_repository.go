@@ -133,6 +133,33 @@ func (repo *UserRepository) UpdateAvatar(id int64, newAvatar string) error {
 	return nil
 }
 
+// IsAllowedAward Errors:
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (repo *UserRepository) IsAllowedAward(userId int64, awardId int64) (bool, error) {
+	query := `WITH used_award AS (
+			 		SELECT count(*) as cnt FROM users 
+						JOIN subscribers AS sb ON sb.users_id = $2
+						JOIN parents_awards AS pa ON pa.parent_id = sb.awards_id AND pa.awards_id = $1
+				UNION
+					SELECT count(*) as cnt FROM subscribers WHERE users_id = $2 AND awards_id = $1
+		 	)
+			SELECT sum(cnt) FROM used_award`
+	count := int64(0)
+	if err := repo.store.QueryRow(query, awardId, userId).Scan(&count); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, repository.NewDBError(err)
+	}
+
+	if count == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 // UpdateNickname Errors:
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB

@@ -36,13 +36,14 @@ var (
 
 // BD Error
 var (
-	LikesAlreadyDel      = errors.New("this user not have like for this post")
-	LikesAlreadyExists   = errors.New("this user already add like for this post")
-	AwardsAlreadyExists  = errors.New("awards with this name already exists")
-	UserAlreadyExist     = errors.New("user already exist")
-	NicknameAlreadyExist = errors.New("nickname already exist")
-	CreatorAlreadyExist  = errors.New("creator already exist")
-	BDError              = errors.New("can not do bd operation")
+	LikesAlreadyDel          = errors.New("this user not have like for this post")
+	LikesAlreadyExists       = errors.New("this user already add like for this post")
+	AwardsAlreadyExists      = errors.New("awards with this name already exists")
+	AwardsPriceAlreadyExists = errors.New("awards with this price already exists")
+	UserAlreadyExist         = errors.New("user already exist")
+	NicknameAlreadyExist     = errors.New("nickname already exist")
+	CreatorAlreadyExist      = errors.New("creator already exist")
+	BDError                  = errors.New("can not do bd operation")
 )
 
 // Session Error
@@ -55,6 +56,7 @@ var (
 var (
 	InvalidBody          = errors.New("invalid body in request")
 	InvalidParameters    = errors.New("invalid parameters")
+	UserNotHaveAward     = errors.New("this user not have award for this post")
 	InvalidQueries       = errors.New("invalid parameters in query")
 	FileSizeError        = errors.New("size of file very big")
 	InvalidFormFieldName = errors.New("invalid form field name for load file")

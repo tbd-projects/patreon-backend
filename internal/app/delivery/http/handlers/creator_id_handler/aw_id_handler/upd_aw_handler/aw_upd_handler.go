@@ -51,7 +51,7 @@ func NewAwardsUpdHandler(log *logrus.Logger,
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "award with this id not found"
 // @Failure 422 {object} models.ErrResponse "invalid body in request", "incorrect value of price", "empty name in request"
-// @Failure 409 {object} models.ErrResponse "awards with this name already exists"
+// @Failure 409 {object} models.ErrResponse "awards with this name already exists", "awards with this price already exists"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this awards not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"

@@ -59,4 +59,9 @@ type Usecase interface {
 	// 		app.GeneralError with Errors
 	//			app.UnknownError
 	UpdateNickname(userID int64, oldNickname string, newNickname string) error
+
+	// CheckAccessForAward Errors:
+	// 		app.GeneralError with Errors
+	//			repository.DefaultErrDBr
+	CheckAccessForAward(userID int64, awardsId int64, creatorId int64) (bool, error)
 }

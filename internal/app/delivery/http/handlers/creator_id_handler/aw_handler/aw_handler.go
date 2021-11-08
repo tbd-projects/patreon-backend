@@ -85,6 +85,7 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 422 {object} models.ErrResponse "empty name in request", "incorrect value of price", "invalid body in request"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 409 {object} models.ErrResponse "awards with this price already exists", "awards with this name already exists"
 // @Failure 403 {object} models.ErrResponse "for this user forbidden change creator",  "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards [POST]

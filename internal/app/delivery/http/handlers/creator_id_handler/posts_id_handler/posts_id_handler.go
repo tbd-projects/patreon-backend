@@ -14,18 +14,21 @@ import (
 	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+	useUser "patreon/internal/app/usecase/user"
 )
 
 type PostsIDHandler struct {
 	postsUsecase usePosts.Usecase
+	userUsecase  useUser.Usecase
 	bh.BaseHandler
 }
 
 func NewPostsIDHandler(log *logrus.Logger,
-	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsIDHandler {
+	ucPosts usePosts.Usecase, ucUser useUser.Usecase, manager sessions.SessionsManager) *PostsIDHandler {
 	h := &PostsIDHandler{
 		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
+		userUsecase:  ucUser,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
 	postMid := middleware.NewPostsMiddleware(log, ucPosts)
@@ -45,10 +48,10 @@ func NewPostsIDHandler(log *logrus.Logger,
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 404 {object} models.ErrResponse "post with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators"
+// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "this user not have award for this post"
 // @Router /creators/{:creator_id}/posts/{:post_id} [GET]
 func (h *PostsIDHandler) GET(w http.ResponseWriter, r *http.Request) {
-	var postId, userId int64
+	var postId, userId, creatorId int64
 	var addView bool
 	var ok bool
 
@@ -59,6 +62,10 @@ func (h *PostsIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 	if len(mux.Vars(r)) > 2 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		return
+	}
+
+	if creatorId, ok = h.GetInt64FromParam(w, r, "creator_id"); !ok {
 		return
 	}
 
@@ -76,6 +83,19 @@ func (h *PostsIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 	post, err := h.postsUsecase.GetPost(postId, userId, addView)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsGET)
+		return
+	}
+
+	access, err := h.userUsecase.CheckAccessForAward(userId, post.Awards, creatorId)
+
+	if err != nil {
+		h.UsecaseError(w, r, err, codesByErrorsGET)
+		return
+	}
+
+	if !access {
+		h.Log(r).Warnf("Fobidden for user %d to post %v", userId, post)
+		h.Error(w, r, http.StatusForbidden, handler_errors.UserNotHaveAward)
 		return
 	}
 

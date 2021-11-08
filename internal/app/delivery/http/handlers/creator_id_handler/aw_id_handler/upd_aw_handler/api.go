@@ -18,6 +18,8 @@ var codesByErrorsPUT = base_handler.CodeMap{
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 	repository_postgresql.NameAlreadyExist: {
 		http.StatusConflict, handler_errors.AwardsAlreadyExists, logrus.InfoLevel},
+	repository_postgresql.PriceAlreadyExist: {
+		http.StatusConflict, handler_errors.AwardsPriceAlreadyExists, logrus.InfoLevel},
 	models.EmptyName: {
 		http.StatusUnprocessableEntity, handler_errors.EmptyName, logrus.WarnLevel},
 	models.IncorrectAwardsPrice: {

@@ -46,4 +46,9 @@ type Repository interface {
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	UpdateNickname(oldNickname string, newNickname string) error
+
+	// IsAllowedAward Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	IsAllowedAward(userId int64, awardId int64) (bool, error)
 }

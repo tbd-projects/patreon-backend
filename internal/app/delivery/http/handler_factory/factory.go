@@ -113,7 +113,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		AWARDS_WITH_ID:           aw_id_handler.NewAwardsIdHandler(f.logger, ucAwards, sManager),
 		AWARDS_UPDATE:            aw_upd_handler.NewAwardsUpdHandler(f.logger, ucAwards, sManager),
 		POSTS:                    posts_handler.NewPostsHandler(f.logger, ucPosts, sManager),
-		POSTS_WITH_ID:            posts_id_handler.NewPostsIDHandler(f.logger, ucPosts, sManager),
+		POSTS_WITH_ID:            posts_id_handler.NewPostsIDHandler(f.logger, ucPosts, ucUser, sManager),
 		POSTS_UPD:                posts_upd_handler.NewPostsUpdateHandler(f.logger, ucPosts, sManager),
 		POSTS_LIKES:              likes_handler.NewLikesHandler(f.logger, ucLikes, ucPosts, sManager),
 		GET_CSRF_TOKEN:           csrf_handler.NewCsrfHandler(f.logger, sManager, ucCsrf),

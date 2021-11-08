@@ -40,6 +40,7 @@ func (usecase *AwardsUsecase) Delete(id int64) error {
 // Update Errors:
 // 		repository.NotFound
 //		repository_postgresql.NameAlreadyExist
+//		repository_postgresql.PriceAlreadyExist
 //		models.IncorrectAwardsPrice
 //		models.EmptyName
 //		app.GeneralError with Errors:
@@ -61,6 +62,7 @@ func (usecase *AwardsUsecase) Update(awards *models.Award) error {
 
 // Create Errors:
 //		repository_postgresql.NameAlreadyExist
+//		repository_postgresql.PriceAlreadyExist
 //		models.IncorrectAwardsPrice
 //		models.EmptyName
 //		app.GeneralError with Errors:
