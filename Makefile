@@ -71,8 +71,8 @@ test:
 	go test -v -race ./internal/...
 
 
-DATABASE_URL=$(shell cat ./configs/migrate.config | jq '.database_server')
-DATABASE_URL_LOCAL=$(shell cat ./configs/migrate.config | jq '.database_local')
+DATABASE_URL:=$(shell cat ./configs/migrate.config | jq '.database_server')
+DATABASE_URL_LOCAL:=$(shell cat ./configs/migrate.config | jq '.database_local')
 
 migrate-up:
 	migrate -source file://${SQL_DIR} -database ${DATABASE_URL} up

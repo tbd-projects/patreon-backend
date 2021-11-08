@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"image/color"
+	"patreon/internal/app/models"
 	rep "patreon/internal/app/repository"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -22,7 +23,10 @@ type RequestChangePassword struct {
 	OldPassword string `json:"old"`
 	NewPassword string `json:"new"`
 }
-
+type RequestChangeNickname struct {
+	OldNickname string `json:"old"`
+	NewNickname string `json:"new"`
+}
 type RequestRegistration struct {
 	Login    string `json:"login"`
 	Nickname string `json:"nickname"`
@@ -86,6 +90,19 @@ func (req *SubscribeRequest) Validate() error {
 	}.Filter()
 	if err != nil {
 		return AwardNameValidateError
+	}
+	return nil
+}
+
+func (req *RequestChangeNickname) Validate() error {
+	err := validation.Errors{
+		"old_nickname": validation.Validate(req.OldNickname, validation.Required,
+			validation.Length(models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH)),
+		"new_nickname": validation.Validate(req.NewNickname, validation.Required,
+			validation.Length(models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH)),
+	}.Filter()
+	if err != nil {
+		return NicknameValidateError
 	}
 	return nil
 }

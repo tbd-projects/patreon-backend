@@ -17,6 +17,7 @@ type Usecase interface {
 
 	// Create Errors:
 	//		models.EmptyPassword
+	//		models.IncorrectNickname
 	// 		models.IncorrectEmailOrPassword
 	//		repository_postgresql.LoginAlreadyExist
 	//		repository_postgresql.NicknameAlreadyExist
@@ -50,4 +51,10 @@ type Usecase interface {
 	//			repository_os.ErrorCreate
 	//   		repository_os.ErrorCopyFile
 	UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error
+
+	// UpdateNickname Errors:
+	//		NicknameExists
+	// 		app.GeneralError with Errors
+	//			app.UnknownError
+	UpdateNickname(oldNickname string, newNickname string) error
 }

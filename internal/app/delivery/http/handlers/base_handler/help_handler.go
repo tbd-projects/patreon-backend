@@ -158,6 +158,7 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 
 	return f, repFiles.FileName(fHeader.Filename), 0, nil
 }
+
 func (h *HelpHandlers) GetRequestBody(w http.ResponseWriter, r *http.Request,
 	reqStruct Sanitizable, sanitizer bluemonday.Policy) error {
 	defer func(Body io.ReadCloser) {

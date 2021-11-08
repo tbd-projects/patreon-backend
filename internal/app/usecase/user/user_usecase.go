@@ -38,6 +38,7 @@ func (usecase *UserUsecase) GetProfile(userID int64) (*models.User, error) {
 
 // Create Errors:
 //		models.EmptyPassword
+//		models.IncorrectNickname
 // 		models.IncorrectEmailOrPassword
 //		repository_postgresql.LoginAlreadyExist
 //		repository_postgresql.NicknameAlreadyExist
@@ -55,7 +56,7 @@ func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
 	}
 
 	if err = user.Validate(); err != nil {
-		if errors.Is(err, models.IncorrectEmailOrPassword) {
+		if errors.Is(err, models.IncorrectEmailOrPassword) || errors.Is(err, models.IncorrectNickname) {
 			return -1, err
 		}
 		return -1, &app.GeneralError{
@@ -174,9 +175,18 @@ func (usecase *UserUsecase) UpdateNickname(oldNickname string, newNickname strin
 	if err == nil {
 		return NicknameExists
 	}
+	if err != nil {
+		return err
+	}
+
+	_, err = usecase.repository.FindByNickname(newNickname)
+	if err == nil {
+		return NicknameExists
+	}
 	if err != repository.NotFound {
 		return err
 	}
+
 	if err = usecase.repository.UpdateNickname(oldNickname, newNickname); err != nil {
 		return err
 	}

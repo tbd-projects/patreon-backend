@@ -13,6 +13,8 @@ import (
 )
 
 var codeByError = base_handler.CodeMap{
+	models.IncorrectNickname: {
+		http.StatusUnprocessableEntity, handler_errors.InvalidUserNickname, logrus.InfoLevel},
 	models.EmptyPassword: {
 		http.StatusUnprocessableEntity, handler_errors.InvalidBody, logrus.InfoLevel},
 	repository_user.LoginAlreadyExist: {

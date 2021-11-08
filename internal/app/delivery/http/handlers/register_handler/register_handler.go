@@ -40,7 +40,7 @@ func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Param user body models.RequestRegistration true "Request body for user registration"
 // @Success 201 {object} models.IdResponse "Create user successfully"
 // @Failure 409 {object} models.ErrResponse "user already exist"
-// @Failure 422 {object} models.ErrResponse "invalid body in request", "nickname already exist", "incorrect email or password"
+// @Failure 422 {object} models.ErrResponse "invalid body in request", "nickname already exist", "incorrect email or password", "incorrect nickname"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation"
 // @Failure 418 "User are authorized"
 // @Router /register [POST]

@@ -1,6 +1,10 @@
 package handler_errors
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"patreon/internal/app/models"
+)
 
 /// NOT FOUND
 var (
@@ -55,6 +59,8 @@ var (
 	InvalidImageExt      = errors.New("please upload a JPEG, JPG or PNG files")
 	UserAlreadySubscribe = errors.New("this user already have subscribe on creator")
 	SubscribesNotFound   = errors.New("subscribes on the creator not found")
+	InvalidUserNickname  = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
+		models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH))
 )
 
 var InternalError = errors.New("server error")

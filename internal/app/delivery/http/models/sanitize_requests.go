@@ -40,3 +40,7 @@ func (req *RequestText) Sanitize(sanitizer bluemonday.Policy) {
 func (req *SubscribeRequest) Sanitize(sanitizer bluemonday.Policy) {
 	req.AwardName = sanitizer.Sanitize(req.AwardName)
 }
+func (req *RequestChangeNickname) Sanitize(sanitizer bluemonday.Policy) {
+	req.OldNickname = sanitizer.Sanitize(req.OldNickname)
+	req.NewNickname = sanitizer.Sanitize(req.NewNickname)
+}
