@@ -51,6 +51,21 @@ func (mr *UserUsecaseMockRecorder) Check(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check", reflect.TypeOf((*UserUsecase)(nil).Check), arg0, arg1)
 }
 
+// CheckAccessForAward mocks base method.
+func (m *UserUsecase) CheckAccessForAward(arg0, arg1, arg2 int64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckAccessForAward", arg0, arg1, arg2)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckAccessForAward indicates an expected call of CheckAccessForAward.
+func (mr *UserUsecaseMockRecorder) CheckAccessForAward(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAccessForAward", reflect.TypeOf((*UserUsecase)(nil).CheckAccessForAward), arg0, arg1, arg2)
+}
+
 // Create mocks base method.
 func (m *UserUsecase) Create(arg0 *models.User) (int64, error) {
 	m.ctrl.T.Helper()
