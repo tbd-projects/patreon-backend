@@ -30,6 +30,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/profile_handler/payments_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/subscriptions_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/nickname_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
 	"patreon/internal/app/delivery/http/handlers/register_handler"
 
@@ -49,6 +50,7 @@ const (
 	CREATOR_COVER
 	UPDATE_PASSWORD
 	UPDATE_AVATAR
+	UPDATE_NICKNAME
 	AWARDS
 	AWARDS_WITH_ID
 	AWARDS_UPDATE
@@ -106,6 +108,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		CREATOR_WITH_ID:          creator_id_handler.NewCreatorIdHandler(f.logger, sManager, ucCreator),
 		UPDATE_PASSWORD:          password_handler.NewUpdatePasswordHandler(f.logger, sManager, ucUser),
 		UPDATE_AVATAR:            avatar_handler.NewUpdateAvatarHandler(f.logger, sManager, ucUser),
+		UPDATE_NICKNAME:          nickname_handler.NewUpdateNicknameHandler(f.logger, sManager, ucUser),
 		AWARDS:                   aw_handler.NewAwardsHandler(f.logger, ucAwards, sManager),
 		AWARDS_WITH_ID:           aw_id_handler.NewAwardsIdHandler(f.logger, ucAwards, sManager),
 		AWARDS_UPDATE:            aw_upd_handler.NewAwardsUpdHandler(f.logger, ucAwards, sManager),
@@ -146,6 +149,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user":                 hs[PROFILE],
 		"/user/update/password": hs[UPDATE_PASSWORD],
 		"/user/update/avatar":   hs[UPDATE_AVATAR],
+		"/user/update/nickname": hs[UPDATE_NICKNAME],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 		"/user/payments":        hs[USER_PAYMENTS],
 		// /creators ---------------------------------------------------------////

@@ -8,12 +8,13 @@ import (
 
 /// NOT FOUND
 var (
-	UserNotFound     = errors.New("user not found")
-	AwardNotFound    = errors.New("award with this id not found")
-	PostNotFound     = errors.New("post with not found")
-	PostDataNotFound = errors.New("post data with this id not found")
-	LikeNotFound     = errors.New("like with this id not found")
-	PaymentsNotFound = errors.New("this user have not payment")
+	UserNotFound             = errors.New("user not found")
+	UserWithNicknameNotFound = errors.New("user with this nickname not found")
+	AwardNotFound            = errors.New("award with this id not found")
+	PostNotFound             = errors.New("post with not found")
+	PostDataNotFound         = errors.New("post data with this id not found")
+	LikeNotFound             = errors.New("like with this id not found")
+	PaymentsNotFound         = errors.New("this user have not payment")
 )
 
 /// Fields Incorrect
@@ -30,6 +31,7 @@ var (
 	IncorrectPrice           = errors.New("incorrect value of price")
 	IncorrectNewPassword     = errors.New("invalid new password")
 	IncorrectDataType        = errors.New("invalid data type")
+	InvalidOldNickname       = errors.New("old nickname not equal current user nickname")
 )
 
 // BD Error

@@ -96,17 +96,17 @@ func (mr *UserUsecaseMockRecorder) UpdateAvatar(arg0, arg1, arg2 interface{}) *g
 }
 
 // UpdateNickname mocks base method.
-func (m *UserUsecase) UpdateNickname(arg0, arg1 string) error {
+func (m *UserUsecase) UpdateNickname(arg0 int64, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateNickname", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateNickname", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateNickname indicates an expected call of UpdateNickname.
-func (mr *UserUsecaseMockRecorder) UpdateNickname(arg0, arg1 interface{}) *gomock.Call {
+func (mr *UserUsecaseMockRecorder) UpdateNickname(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNickname", reflect.TypeOf((*UserUsecase)(nil).UpdateNickname), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNickname", reflect.TypeOf((*UserUsecase)(nil).UpdateNickname), arg0, arg1, arg2)
 }
 
 // UpdatePassword mocks base method.

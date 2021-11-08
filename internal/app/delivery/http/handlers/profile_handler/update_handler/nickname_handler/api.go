@@ -12,7 +12,9 @@ import (
 )
 
 var codeByErrorPUT = base_handler.CodeMap{
-	usercase_user.NicknameExists: {http.StatusConflict, handler_errors.NicknameAlreadyExist, log.WarnLevel},
-	repository.DefaultErrDB:      {http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
-	app.UnknownError:             {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
+	usercase_user.InvalidOldNickname: {http.StatusUnprocessableEntity, handler_errors.InvalidOldNickname, log.WarnLevel},
+	repository.NotFound:              {http.StatusNotFound, handler_errors.UserWithNicknameNotFound, log.WarnLevel},
+	usercase_user.NicknameExists:     {http.StatusConflict, handler_errors.NicknameAlreadyExist, log.WarnLevel},
+	repository.DefaultErrDB:          {http.StatusInternalServerError, handler_errors.BDError, log.ErrorLevel},
+	app.UnknownError:                 {http.StatusInternalServerError, handler_errors.InternalError, log.ErrorLevel},
 }

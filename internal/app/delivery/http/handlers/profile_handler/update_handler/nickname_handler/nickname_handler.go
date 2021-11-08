@@ -46,13 +46,14 @@ func NewUpdateNicknameHandler(log *logrus.Logger,
 // @Param nickname body models.RequestChangeNickname true "Request body for change nickname"
 // @Success 200 "successfully change nickname"
 // @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
+// @Failure 404 {object} models.ErrResponse "user not found"
 // @Failure 409 {object} models.ErrResponse "nickname already exists"
-// @Failure 422 {object} models.ErrResponse "invalid body in request", "user with this oldNickname not found", "invalid nickname in body"
+// @Failure 422 {object} models.ErrResponse "invalid body in request | user with this oldNickname not found | invalid nickname in body | old nickname not equal current user nickname"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 418 "User are authorized"
-// @Router /user/update/avatar [PUT]
+// @Router /user/update/nickname [PUT]
 func (h *UpdateNicknameHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	_, ok := r.Context().Value("user_id").(int64)
+	id, ok := r.Context().Value("user_id").(int64)
 	if !ok {
 		h.HandlerError(w, r, http.StatusInternalServerError, app.GeneralError{
 			Err:         handler_errors.InternalError,
@@ -71,7 +72,7 @@ func (h *UpdateNicknameHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusUnprocessableEntity, models.NicknameValidateError)
 		return
 	}
-	err := h.userUsecase.UpdateNickname(req.OldNickname, req.NewNickname)
+	err := h.userUsecase.UpdateNickname(id, req.OldNickname, req.NewNickname)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
 		return

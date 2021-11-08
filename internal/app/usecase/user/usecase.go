@@ -53,8 +53,10 @@ type Usecase interface {
 	UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error
 
 	// UpdateNickname Errors:
+	//		InvalidOldNickname
+	//		repository.NotFound
 	//		NicknameExists
 	// 		app.GeneralError with Errors
 	//			app.UnknownError
-	UpdateNickname(oldNickname string, newNickname string) error
+	UpdateNickname(userID int64, oldNickname string, newNickname string) error
 }

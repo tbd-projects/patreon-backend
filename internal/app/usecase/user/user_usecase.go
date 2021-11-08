@@ -167,16 +167,18 @@ func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName
 }
 
 // UpdateNickname Errors:
+//		InvalidOldNickname
+//		repository.NotFound
 //		NicknameExists
 // 		app.GeneralError with Errors
 //			app.UnknownError
-func (usecase *UserUsecase) UpdateNickname(oldNickname string, newNickname string) error {
-	_, err := usecase.repository.FindByNickname(oldNickname)
-	if err == nil {
-		return NicknameExists
-	}
+func (usecase *UserUsecase) UpdateNickname(userID int64, oldNickname string, newNickname string) error {
+	u, err := usecase.repository.FindByNickname(oldNickname)
 	if err != nil {
 		return err
+	}
+	if u.ID != userID {
+		return InvalidOldNickname
 	}
 
 	_, err = usecase.repository.FindByNickname(newNickname)
