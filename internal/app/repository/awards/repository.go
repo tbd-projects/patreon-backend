@@ -6,6 +6,7 @@ import "patreon/internal/app/models"
 
 type Repository interface {
 	// Create Errors:
+	//		repository_postgresql.PriceAlreadyExist
 	//		repository_postgresql.NameAlreadyExist
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
@@ -13,6 +14,7 @@ type Repository interface {
 
 	// Update Errors:
 	//		repository.NotFound
+	//		repository_postgresql.PriceAlreadyExist
 	//		repository_postgresql.NameAlreadyExist
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB

@@ -181,11 +181,11 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Correct() {
 		Return(creator.ID, nil)
 	s.handler.POST(recorder, reader)
 	decoder := json.NewDecoder(recorder.Body)
-	var res interface{}
+	var res models.IdResponse
 	err = decoder.Decode(&res)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
-	assert.Equal(s.T(), int(userId), int(res.(float64)))
+	assert.Equal(s.T(), models.IdResponse{ID: userId}, res)
 
 }
 

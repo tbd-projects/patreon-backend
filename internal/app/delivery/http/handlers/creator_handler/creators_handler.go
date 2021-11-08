@@ -70,7 +70,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Description create creator with id from path, and respond created creator
 // @Param creator body models.RequestCreator true "Request body for creators"
 // @Produce json
-// @Success 201 {object} models.Creator
+// @Success 201 {object} models.IdResponse
 // @Failure 409 {object} models.ErrResponse "creator already exist"
 // @Failure 404 {object} models.ErrResponse "user with this id not found"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
@@ -113,5 +113,5 @@ func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, creatorId)
+	h.Respond(w, r, http.StatusCreated, models.IdResponse{ID: creatorId})
 }

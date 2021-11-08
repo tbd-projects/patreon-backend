@@ -15,6 +15,7 @@ type Award struct {
 	Price       int64      `json:"price,omitempty"`
 	CreatorId   int64      `json:"creator_id"`
 	Color       color.RGBA `json:"color.omitempty"`
+	ChildAward  int64      `json:"child_award"`
 	Cover       string     `json:"cover"`
 }
 
