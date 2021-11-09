@@ -8,6 +8,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.15.1
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/containerd/containerd v1.5.7 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/docker/docker v20.10.10+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
@@ -28,8 +29,8 @@ require (
 	github.com/swaggo/http-swagger v1.1.1
 	github.com/swaggo/swag v1.7.4
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272
-	golang.org/x/net v0.0.0-20211104170005-ce137452f963
-	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
+	golang.org/x/net v0.0.0-20211108170745-6635138e15ea
+	golang.org/x/sys v0.0.0-20211109065445-02f5c0300f6e // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	google.golang.org/grpc v1.42.0 // indirect
 )
