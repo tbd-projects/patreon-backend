@@ -6,6 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	models_utilits "patreon/internal/app/utilits/models"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -46,7 +48,7 @@ func (u *User) String() string {
 func (u *User) Validate() error {
 	err := validation.Errors{
 		"login": validation.Validate(u.Login, validation.Required, validation.Length(MIN_LOGIN_LENGTH, MAX_LOGIN_LENGTH)),
-		"password": validation.Validate(u.Password, validation.By(requiredIf(u.EncryptedPassword == "")),
+		"password": validation.Validate(u.Password, validation.By(models_utilits.RequiredIf(u.EncryptedPassword == "")),
 			validation.Length(MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)),
 		"nickname": validation.Validate(u.Nickname, validation.Required, validation.Length(MIN_NICKNAME_LENGTH, MAX_NICKNAME_LENGTH)),
 	}.Filter()
@@ -54,12 +56,12 @@ func (u *User) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(err, "failed error getting in validate user")
 	}
 
-	if knowError = extractValidateError(userValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(userValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 

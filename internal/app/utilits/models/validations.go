@@ -1,4 +1,4 @@
-package models
+package models_utilits
 
 import (
 	"encoding/json"
@@ -6,11 +6,11 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
-type extractorErrorByName func(string) error
-type mapOfValidateError map[string]error
-type mapOfUnmarshalError map[string]string
+type ExtractorErrorByName func(string) error
+type MapOfValidateError map[string]error
+type MapOfUnmarshalError map[string]string
 
-func requiredIf(cond bool) validation.RuleFunc {
+func RequiredIf(cond bool) validation.RuleFunc {
 	return func(value interface{}) error {
 		if cond {
 			return validation.Validate(value, validation.Required)
@@ -19,8 +19,8 @@ func requiredIf(cond bool) validation.RuleFunc {
 	}
 }
 
-func parseErrorToMap(err error) (mapOfUnmarshalError, error) {
-	var mapOfErr mapOfUnmarshalError
+func ParseErrorToMap(err error) (MapOfUnmarshalError, error) {
+	var mapOfErr MapOfUnmarshalError
 	encoded, bad := json.Marshal(err)
 	if bad != nil {
 		return nil, bad
@@ -33,7 +33,7 @@ func parseErrorToMap(err error) (mapOfUnmarshalError, error) {
 	return mapOfErr, nil
 }
 
-func extractValidateError(extractor extractorErrorByName, mapOfErr mapOfUnmarshalError) error {
+func ExtractValidateError(extractor ExtractorErrorByName, mapOfErr MapOfUnmarshalError) error {
 	var knowError error = nil
 	for key, _ := range mapOfErr {
 		if knowError = extractor(key); knowError != nil {

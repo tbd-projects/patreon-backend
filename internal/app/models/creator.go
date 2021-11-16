@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	models_utilits "patreon/internal/app/utilits/models"
 	"strconv"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -56,12 +57,12 @@ func (cr *Creator) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(creatorValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(creatorValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 

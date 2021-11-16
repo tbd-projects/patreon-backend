@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	models_utilits "patreon/internal/app/utilits/models"
 )
 
 var (
@@ -26,8 +27,8 @@ var (
 // userValidError Errors:
 //		IncorrectEmailOrPassword
 //		IncorrectNickname
-func userValidError() extractorErrorByName {
-	validMap := mapOfValidateError{
+func userValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
 		"login":    IncorrectEmailOrPassword,
 		"password": IncorrectEmailOrPassword,
 		"nickname": IncorrectNickname,
@@ -44,8 +45,8 @@ func userValidError() extractorErrorByName {
 //		IncorrectCreatorNickname
 //		IncorrectCreatorCategory
 //		IncorrectCreatorDescription
-func creatorValidError() extractorErrorByName {
-	validMap := mapOfValidateError{
+func creatorValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
 		"nickname":    IncorrectCreatorNickname,
 		"category":    IncorrectCreatorCategory,
 		"description": IncorrectCreatorDescription,
@@ -61,8 +62,8 @@ func creatorValidError() extractorErrorByName {
 // awardsValidError Errors:
 //		EmptyName
 //		IncorrectAwardsPrice
-func awardsValidError() extractorErrorByName {
-	validMap := mapOfValidateError{
+func awardsValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
 		"name":  EmptyName,
 		"price": IncorrectAwardsPrice,
 	}
@@ -77,8 +78,8 @@ func awardsValidError() extractorErrorByName {
 // likeValidError Errors:
 //		EmptyName
 //		IncorrectAwardsPrice
-func likeValidError() extractorErrorByName {
-	validMap := mapOfValidateError{
+func likeValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
 		"value": InvalidLikeValue,
 	}
 	return func(key string) error {
@@ -93,8 +94,8 @@ func likeValidError() extractorErrorByName {
 //		EmptyTitle
 //		InvalidCreatorId
 //		InvalidAwardsId
-func postValidError() extractorErrorByName {
-	validMap := mapOfValidateError{
+func postValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
 		"title":   EmptyTitle,
 		"creator": InvalidCreatorId,
 		"awards":  InvalidAwardsId,
@@ -110,8 +111,8 @@ func postValidError() extractorErrorByName {
 // postValidError Errors:
 //		InvalidType
 //		InvalidPostId
-func postDataValidError() extractorErrorByName {
-	validMap := mapOfValidateError{
+func postDataValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
 		"post": InvalidPostId,
 		"type": InvalidType,
 	}

@@ -2,11 +2,19 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/pkg/errors"
 	"image/color"
 	"patreon/internal/app/models"
 	rep "patreon/internal/app/repository"
+	models_utilits "patreon/internal/app/utilits/models"
 
 	validation "github.com/go-ozzo/ozzo-validation"
+)
+
+const (
+	AddStatus    = "add"
+	UpdateStatus = "update"
 )
 
 type RequestCreator struct {
@@ -63,6 +71,17 @@ type RequestPosts struct {
 	IsDraft     bool   `json:"is_draft,omitempty"`
 }
 
+type RequestAttach struct {
+	Type   string `json:"type"`
+	Value  string `json:"value,omitempty"`
+	Id     int64  `json:"id,omitempty"`
+	Status string `json:"status,omitempty"`
+}
+
+type RequestAttaches struct {
+	Attaches []RequestAttach `json:"attaches"`
+}
+
 type RequestText struct {
 	Text string `json:"text"`
 }
@@ -104,6 +123,78 @@ func (req *RequestChangeNickname) Validate() error {
 	}.Filter()
 	if err != nil {
 		return NicknameValidateError
+	}
+	return nil
+}
+
+var (
+	IncorrectType = errors.New(
+		fmt.Sprintf("Not allow type, allowed type is: %s, %s, %s, %s, %s",
+			models.Music, models.Video, models.Files, models.Text, models.Image))
+	IncorrectIdAttach = errors.New("Not valid attach id")
+	IncorrectStatus   = errors.New(fmt.Sprintf("Not allow status, allowed status is: %s, %s",
+		AddStatus, UpdateStatus))
+)
+
+// requestAttachValidError Errors:
+//		InvalidType
+//		InvalidPostId
+func requestAttachValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
+		"type":   IncorrectType,
+		"id":     IncorrectIdAttach,
+		"status": IncorrectStatus,
+	}
+	return func(key string) error {
+		if val, ok := validMap[key]; ok {
+			return val
+		}
+		return nil
+	}
+}
+
+
+func (req *RequestAttach) Validate() error {
+	err := validation.Errors{
+		"type": validation.Validate(req.Type, validation.In(models.Music, models.Video,
+			models.Files, models.Text, models.Image)),
+		"id":     validation.Validate(req.Id, validation.Min(1)),
+		"status": validation.Validate(req.Status, validation.In(AddStatus, UpdateStatus)),
+	}
+
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
+	if knowError != nil {
+		return errors.Wrap(knowError, "failed error getting in validate request attach")
+	}
+	_, haveTypeError := mapOfErr["type"]
+	_, haveIdError := mapOfErr["id"]
+	_, haveStatusError := mapOfErr["status"]
+	if !haveTypeError && haveIdError {
+		if haveStatusError && models.DataType(req.Type) != models.Text {
+			return IncorrectStatus
+		}
+		return nil
+	}
+
+	if haveStatusError && models.DataType(req.Type) != models.Text {
+		if haveIdError {
+			return IncorrectIdAttach
+		}
+		return nil
+	}
+
+	if knowError = models_utilits.ExtractValidateError(requestAttachValidError(), mapOfErr); knowError != nil {
+		return knowError
+	}
+
+	return nil
+}
+
+func (req *RequestAttaches) Validate() error {
+	for _, attach := range req.Attaches {
+		if err := attach.Validate(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

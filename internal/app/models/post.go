@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	models_utilits "patreon/internal/app/utilits/models"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -57,12 +58,12 @@ func (ps *UpdatePost) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(postValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(postValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 
@@ -89,12 +90,12 @@ func (ps *CreatePost) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(postValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(postValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 
@@ -131,12 +132,12 @@ func (ps *PostData) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(postDataValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(postDataValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 
