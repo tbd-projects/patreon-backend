@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -10,10 +11,10 @@ import (
 )
 
 type LikesRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
-func NewLikesRepository(st *sql.DB) *LikesRepository {
+func NewLikesRepository(st *sqlx.DB) *LikesRepository {
 	return &LikesRepository{
 		store: st,
 	}

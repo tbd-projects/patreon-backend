@@ -1,7 +1,7 @@
 package repository_postgresql
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 
@@ -9,10 +9,10 @@ import (
 )
 
 type PaymentsRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
-func NewPaymentsRepository(store *sql.DB) *PaymentsRepository {
+func NewPaymentsRepository(store *sqlx.DB) *PaymentsRepository {
 	return &PaymentsRepository{
 		store: store,
 	}

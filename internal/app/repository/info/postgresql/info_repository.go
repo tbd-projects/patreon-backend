@@ -1,7 +1,7 @@
 package repository_postgresql
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 )
@@ -12,10 +12,10 @@ const (
 )
 
 type InfoRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
-func NewInfoRepository(st *sql.DB) *InfoRepository {
+func NewInfoRepository(st *sqlx.DB) *InfoRepository {
 	return &InfoRepository{
 		store: st,
 	}

@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -12,10 +13,10 @@ import (
 )
 
 type UserRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
-func NewUserRepository(st *sql.DB) *UserRepository {
+func NewUserRepository(st *sqlx.DB) *UserRepository {
 	return &UserRepository{
 		store: st,
 	}

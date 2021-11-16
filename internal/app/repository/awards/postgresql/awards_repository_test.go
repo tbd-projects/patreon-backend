@@ -3,7 +3,7 @@ package repository_postgresql
 import (
 	"database/sql"
 	"database/sql/driver"
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/zhashkevych/go-sqlxmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"patreon/internal/app"

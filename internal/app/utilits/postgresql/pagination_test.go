@@ -1,8 +1,8 @@
 package postgresql_utilits
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/zhashkevych/go-sqlxmock"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"regexp"
@@ -11,7 +11,7 @@ import (
 
 func Test_AddPagintation(t *testing.T) {
 	queryStat := "SELECT n_live_tup FROM pg_stat_all_tables WHERE relname = $1"
-	db, mock, err := sqlmock.New()
+	db, mock, err := sqlmock.Newx()
 	if err != nil {
 		t.Fatal(err)
 	}

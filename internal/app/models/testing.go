@@ -1,19 +1,19 @@
 package models
 
 import (
-	"database/sql"
 	"errors"
+	"github.com/jmoiron/sqlx"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
+	"github.com/zhashkevych/go-sqlxmock"
 )
 
 var BDError = errors.New("BD error")
 
 type Suite struct {
 	suite.Suite
-	DB   *sql.DB
+	DB   *sqlx.DB
 	Mock sqlmock.Sqlmock
 }
 
@@ -21,7 +21,7 @@ func (s *Suite) InitBD() {
 	s.T().Helper()
 
 	var err error
-	s.DB, s.Mock, err = sqlmock.New()
+	s.DB, s.Mock, err = sqlmock.Newx()
 	if err != nil {
 		s.T().Fatal(err)
 	}
@@ -70,7 +70,7 @@ func TestCreatorWithAwards() *CreatorWithAwards {
 		Nickname:    "doggy2005",
 		Category:    "podcasts",
 		Description: "i love podcasts",
-		AwardsId: 1,
+		AwardsId:    1,
 	}
 }
 

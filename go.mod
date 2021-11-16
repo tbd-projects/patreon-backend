@@ -19,6 +19,7 @@ require (
 	github.com/gomodule/redigo v1.8.5
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
+	github.com/jmoiron/sqlx v1.3.4 // indirect
 	github.com/lib/pq v1.10.3
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.16
@@ -28,6 +29,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/http-swagger v1.1.1
 	github.com/swaggo/swag v1.7.4
+	github.com/zhashkevych/go-sqlxmock v1.5.2-0.20201023121933-f973d0041cfc // indirect
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272
 	golang.org/x/net v0.0.0-20211108170745-6635138e15ea
 	golang.org/x/sys v0.0.0-20211109065445-02f5c0300f6e // indirect

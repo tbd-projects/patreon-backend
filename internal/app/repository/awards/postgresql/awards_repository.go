@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -65,12 +66,12 @@ const (
 )
 
 type AwardsRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
 var _ = repository_awards.Repository(&AwardsRepository{})
 
-func NewAwardsRepository(st *sql.DB) *AwardsRepository {
+func NewAwardsRepository(st *sqlx.DB) *AwardsRepository {
 	return &AwardsRepository{
 		store: st,
 	}

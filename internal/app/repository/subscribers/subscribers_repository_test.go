@@ -8,7 +8,7 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/zhashkevych/go-sqlxmock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"

@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
@@ -42,10 +43,10 @@ const (
 )
 
 type CreatorRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
-func NewCreatorRepository(st *sql.DB) *CreatorRepository {
+func NewCreatorRepository(st *sqlx.DB) *CreatorRepository {
 	return &CreatorRepository{
 		store: st,
 	}

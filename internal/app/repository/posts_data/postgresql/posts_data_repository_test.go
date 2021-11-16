@@ -2,9 +2,9 @@ package repository_postgresql
 
 import (
 	"database/sql"
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/zhashkevych/go-sqlxmock"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -32,7 +32,6 @@ func (s *SuitePostsDataRepository) SetupSuite() {
 func (s *SuitePostsDataRepository) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.Mock.ExpectationsWereMet())
 }
-
 
 func (s *SuitePostsDataRepository) TestPostsDataRepository_getAndCheckDataTypeId() {
 	query := `SELECT posts_type_id FROM posts_type WHERE type = $1`
@@ -78,8 +77,6 @@ func (s *SuitePostsDataRepository) TestPostsDataRepository_getDataType() {
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 }
 
-
-
 func (s *SuitePostsDataRepository) TestPostsDataRepository_Create() {
 	queryCheck := `SELECT posts_type_id FROM posts_type WHERE type = $1`
 	query := `INSERT INTO posts_data (type, data, post_id) VALUES ($1, $2, $3) 
@@ -111,7 +108,6 @@ func (s *SuitePostsDataRepository) TestPostsDataRepository_Create() {
 	id, err = s.repo.Create(&data)
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 }
-
 
 func (s *SuitePostsDataRepository) TestPostsDataRepository_Update() {
 	queryCheck := `SELECT posts_type_id FROM posts_type WHERE type = $1`
@@ -276,4 +272,3 @@ func (s *SuitePostsDataRepository) TestPostsDataRepository_GetData() {
 func TestPostsDataRepository(t *testing.T) {
 	suite.Run(t, new(SuitePostsDataRepository))
 }
-

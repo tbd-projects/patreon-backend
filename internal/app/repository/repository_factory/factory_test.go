@@ -1,11 +1,11 @@
 package repository_factory
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+	"github.com/zhashkevych/go-sqlxmock"
 	"patreon/internal/app"
 	"testing"
 )
@@ -18,7 +18,7 @@ func TestFactory(t *testing.T) {
 
 	log := &logrus.Logger{}
 	t.Helper()
-	db, _, err := sqlmock.New()
+	db, _, err := sqlmock.Newx()
 	if err != nil {
 		t.Fatal(err)
 	}

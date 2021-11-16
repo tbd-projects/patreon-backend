@@ -3,6 +3,7 @@ package repository_postgresql
 import (
 	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -14,12 +15,12 @@ import (
 )
 
 type PostsRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
 var _ = repository_posts.Repository(&PostsRepository{})
 
-func NewPostsRepository(st *sql.DB) *PostsRepository {
+func NewPostsRepository(st *sqlx.DB) *PostsRepository {
 	return &PostsRepository{
 		store: st,
 	}

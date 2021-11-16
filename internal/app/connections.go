@@ -1,7 +1,7 @@
 package app
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/gomodule/redigo/redis"
 )
@@ -9,6 +9,6 @@ import (
 type ExpectedConnections struct {
 	SessionRedisPool *redis.Pool
 	AccessRedisPool  *redis.Pool
-	SqlConnection    *sql.DB
+	SqlConnection    *sqlx.DB
 	PathFiles        string
 }

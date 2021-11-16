@@ -1,9 +1,9 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"os"
 	"patreon/internal/app"
 	main_server "patreon/internal/app/server"
@@ -47,8 +47,8 @@ func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() err
 	return logger, f.Close
 }
 
-func newPostgresConnection(config *app.RepositoryConnections) (db *sql.DB, closeResource func() error) {
-	db, err := sql.Open("postgres", config.DataBaseUrl)
+func newPostgresConnection(config *app.RepositoryConnections) (db *sqlx.DB, closeResource func() error) {
+	db, err := sqlx.Open("postgres", config.DataBaseUrl)
 	if err != nil {
 		logrus.Fatal(err)
 	}
