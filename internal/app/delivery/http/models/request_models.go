@@ -57,9 +57,10 @@ type RequestAwards struct {
 }
 
 type RequestPosts struct {
-	Title       string `json:"title"`
+	Title       string `json:"title,omitempty"`
 	AwardsId    int64  `json:"awards_id,omitempty"`
 	Description string `json:"description,omitempty"`
+	IsDraft     bool   `json:"is_draft,omitempty"`
 }
 
 type RequestText struct {

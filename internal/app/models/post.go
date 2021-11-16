@@ -13,6 +13,7 @@ type UpdatePost struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Awards      int64  `json:"type_awards"`
+	IsDraft     bool   `json:"is_draft"`
 }
 
 type CreatePost struct {
@@ -21,6 +22,7 @@ type CreatePost struct {
 	Description string `json:"description"`
 	Awards      int64  `json:"type_awards"`
 	CreatorId   int64  `json:"creator_id"`
+	IsDraft     bool   `json:"is_draft"`
 }
 
 type Post struct {
@@ -34,6 +36,7 @@ type Post struct {
 	Views       int64     `json:"views"`
 	AddLike     bool      `json:"add_like"`
 	Date        time.Time `json:"date"`
+	IsDraft     bool      `json:"is_draft"`
 }
 
 func (ps *UpdatePost) String() string {

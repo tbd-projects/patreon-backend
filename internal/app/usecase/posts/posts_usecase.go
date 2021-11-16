@@ -28,8 +28,9 @@ func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoPostsDa
 // GetPosts Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PostsUsecase) GetPosts(creatorId int64, userId int64, pag *models.Pagination) ([]models.Post, error) {
-	return usecase.repository.GetPosts(creatorId, userId, pag)
+func (usecase *PostsUsecase) GetPosts(creatorId int64, userId int64,
+	pag *models.Pagination, withDraft bool) ([]models.Post, error) {
+	return usecase.repository.GetPosts(creatorId, userId, pag, withDraft)
 }
 
 // GetPost Errors:
@@ -59,15 +60,16 @@ func (usecase *PostsUsecase) Delete(postId int64) error {
 // Update Errors:
 // 		repository.NotFound
 //		models.InvalidAwardsId
-//		models.InvalidCreatorId
 //		models.EmptyTitle
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
 func (usecase *PostsUsecase) Update(post *models.UpdatePost) error {
 	if err := post.Validate(); err != nil {
-		if errors.Is(err, models.EmptyTitle) || errors.Is(err, models.InvalidCreatorId) ||
-			errors.Is(err, models.InvalidAwardsId) {
+		if errors.Is(err, models.EmptyTitle) || errors.Is(err, models.InvalidAwardsId) {
+			if post.IsDraft && errors.Is(err, models.EmptyTitle) {
+				return usecase.repository.UpdatePost(post)
+			}
 			return err
 		}
 		return &app.GeneralError{
@@ -90,6 +92,9 @@ func (usecase *PostsUsecase) Create(post *models.CreatePost) (int64, error) {
 	if err := post.Validate(); err != nil {
 		if errors.Is(err, models.EmptyTitle) || errors.Is(err, models.InvalidCreatorId) ||
 			errors.Is(err, models.InvalidAwardsId) {
+			if errors.Is(err, models.EmptyTitle) && post.IsDraft {
+				return usecase.repository.Create(post)
+			}
 			return app.InvalidInt, err
 		}
 		return app.InvalidInt, &app.GeneralError{
@@ -129,5 +134,5 @@ func (usecase *PostsUsecase) LoadCover(data io.Reader, name repoFiles.FileName, 
 		return err
 	}
 
-	return usecase.repository.UpdateCoverPost(postId, app.LoadFileUrl + path)
+	return usecase.repository.UpdateCoverPost(postId, app.LoadFileUrl+path)
 }

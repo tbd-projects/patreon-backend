@@ -27,7 +27,7 @@ type Repository interface {
 	// GetPosts Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPosts(creatorsId int64, userId int64, pag *models.Pagination) ([]models.Post, error)
+	GetPosts(creatorsId int64, userId int64, pag *models.Pagination, withDraft bool) ([]models.Post, error)
 
 	// UpdatePost Errors:
 	//		repository.NotFound

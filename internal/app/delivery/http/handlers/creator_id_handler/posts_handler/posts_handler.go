@@ -14,6 +14,7 @@ import (
 	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+	"strconv"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -45,7 +46,11 @@ func NewPostsHandler(log *logrus.Logger,
 }
 
 func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
-	redirectUrl := fmt.Sprintf("%s?page=1&limit=%d", r.RequestURI, usePosts.BaseLimit)
+	query := r.URL.Query()
+	query.Set("page", "1")
+	query.Set("limit", fmt.Sprintf("%d", usePosts.BaseLimit))
+	r.URL.RawQuery = query.Encode()
+	redirectUrl := r.URL.String()
 	h.Log(r).Debugf("redirect to url: %s, with offest 0 and limit %d", redirectUrl, usePosts.BaseLimit)
 
 	http.Redirect(w, r, redirectUrl, http.StatusPermanentRedirect)
@@ -59,12 +64,13 @@ func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 // @Param page query uint64 true "start page number of posts mutually exclusive with offset"
 // @Param offset query uint64 true "start number of posts mutually exclusive with page"
 // @Param limit query uint64 true "posts to return"
+// @Param with-draft query bool false "if need add draft posts"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 400 {object} models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Router /creators/{:creator_id}/posts [GET]
 func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	var limit, offset, page int64
-	var ok bool
+	var ok, withDraft bool
 
 	limit, ok = h.GetInt64FromQueries(w, r, "limit")
 	if !ok {
@@ -92,6 +98,13 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		offset = (page - 1) * limit
 	}
 
+	var err error
+	if res := r.URL.Query().Get("with-draft"); res == "" {
+		withDraft = false
+	} else if withDraft, err = strconv.ParseBool(res); err != nil {
+		withDraft = true
+	}
+
 	if len(mux.Vars(r)) > 1 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
@@ -110,7 +123,8 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		userId = usePosts.EmptyUser
 	}
 
-	posts, err := h.postsUsecase.GetPosts(creatorId, userId, &db_models.Pagination{Limit: limit, Offset: offset})
+	posts, err := h.postsUsecase.GetPosts(creatorId, userId,
+		&db_models.Pagination{Limit: limit, Offset: offset}, withDraft)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsGET)
 		return
@@ -163,6 +177,7 @@ func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Description: req.Description,
 		Awards:      req.AwardsId,
 		CreatorId:   idInt,
+		IsDraft:     req.IsDraft,
 	}
 
 	postsId, err := h.postsUsecase.Create(aw)

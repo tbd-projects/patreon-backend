@@ -67,6 +67,7 @@ type ResponsePost struct {
 	AddLike     bool      `json:"add_like,omitempty"`
 	Views       int64     `json:"views"`
 	Date        time.Time `json:"date"`
+	IsDraft     bool      `json:"is_draft,omitempty"`
 }
 
 type ResponsePostData struct {
@@ -137,6 +138,7 @@ func ToResponsePost(ps models.Post) ResponsePost {
 		Cover:       ps.Cover,
 		AddLike:     ps.AddLike,
 		Views:       ps.Views,
+		IsDraft:     ps.IsDraft,
 	}
 }
 

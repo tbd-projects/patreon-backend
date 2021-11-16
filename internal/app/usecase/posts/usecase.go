@@ -18,7 +18,7 @@ type Usecase interface {
 	// GetPosts Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetPosts(creatorId int64, userId int64, pag *models.Pagination) ([]models.Post, error)
+	GetPosts(creatorId int64, userId int64, pag *models.Pagination, withDraft bool) ([]models.Post, error)
 
 	// GetPost Errors:
 	//		repository.NotFound

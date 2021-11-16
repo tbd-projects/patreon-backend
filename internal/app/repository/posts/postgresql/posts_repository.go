@@ -7,11 +7,48 @@ import (
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_posts "patreon/internal/app/repository/posts"
 	rp "patreon/internal/app/repository"
+	repository_posts "patreon/internal/app/repository/posts"
 	putilits "patreon/internal/app/utilits/postgresql"
 
 	"github.com/pkg/errors"
+)
+
+const (
+	createQuery = `INSERT INTO posts (title, description,
+		type_awards, creator_id, cover, is_draft) VALUES ($1, $2, $3, $4, $5, $6) 
+		RETURNING posts_id`
+
+	getPostCreatorQuery = `SELECT creator_id FROM posts WHERE posts_id = $1`
+
+	getPostQuery = `
+			SELECT title, description, likes, posts.date, cover, type_awards, 
+			       creator_id, lk.likes_id IS NOT NULL, views, is_draft FROM posts
+				LEFT OUTER JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
+				WHERE posts.posts_id = $2;`
+	getPostQueryUpdate = `UPDATE posts SET views = views + 1 WHERE posts_id = $1`
+
+	updateQuery = `UPDATE posts SET title = $1, description = $2, type_awards = $3, is_draft = $4
+					WHERE posts_id = $5 RETURNING posts_id`
+
+	updateCoverQuery = `UPDATE posts SET cover = $1 WHERE posts_id = $2 RETURNING posts_id`
+
+	deleteQuery = `DELETE FROM posts WHERE posts_id = $1`
+
+	getPostsQueryWithDraft = `
+			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, 
+					lk.likes_id IS NOT NULL, views, is_draft
+			FROM posts
+			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
+			WHERE creator_id = $2 ORDER BY posts.date DESC
+	`
+	getPostsQueryWithoutDraft = `
+			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, 
+					lk.likes_id IS NOT NULL, views
+			FROM posts
+			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
+			WHERE creator_id = $2 AND NOT is_draft ORDER BY posts.date DESC
+	`
 )
 
 type PostsRepository struct {
@@ -30,9 +67,6 @@ func NewPostsRepository(st *sqlx.DB) *PostsRepository {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) Create(post *models.CreatePost) (int64, error) {
-	query := `INSERT INTO posts (title, description,
-		type_awards, creator_id, cover) VALUES ($1, $2, $3, $4, $5) 
-		RETURNING posts_id`
 	var awardsId sql.NullInt64
 	awardsId.Int64 = post.Awards
 	if post.Awards == rp.NoAwards {
@@ -41,7 +75,8 @@ func (repo *PostsRepository) Create(post *models.CreatePost) (int64, error) {
 		awardsId.Valid = true
 	}
 
-	if err := repo.store.QueryRow(query, post.Title, post.Description, awardsId, post.CreatorId, "").
+	if err := repo.store.QueryRowx(createQuery, post.Title, post.Description, awardsId, post.CreatorId,
+		app.DefaultImage, post.IsDraft).
 		Scan(&post.ID); err != nil {
 		return app.InvalidInt, repository.NewDBError(err)
 	}
@@ -53,9 +88,8 @@ func (repo *PostsRepository) Create(post *models.CreatePost) (int64, error) {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) GetPostCreator(postID int64) (int64, error) {
-	query := `SELECT creator_id FROM posts WHERE posts_id = $1`
 	creatorId := int64(0)
-	if err := repo.store.QueryRow(query, postID).Scan(&creatorId); err != nil {
+	if err := repo.store.QueryRowx(getPostCreatorQuery, postID).Scan(&creatorId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return app.InvalidInt, repository.NotFound
 		}
@@ -70,16 +104,11 @@ func (repo *PostsRepository) GetPostCreator(postID int64) (int64, error) {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (*models.Post, error) {
-	query := `
-			SELECT title, description, likes, posts.date, cover, type_awards, creator_id, lk.likes_id IS NOT NULL, views FROM posts
-				LEFT OUTER JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
-				WHERE posts.posts_id = $2;`
-	queryPost := `UPDATE posts SET views = views + 1 WHERE posts_id = $1`
-
 	post := &models.Post{ID: postID}
 	var awardsId sql.NullInt64
-	if err := repo.store.QueryRow(query, userId, postID).Scan(&post.Title, &post.Description,
-		&post.Likes, &post.Date, &post.Cover, &awardsId, &post.CreatorId, &post.AddLike, &post.Views); err != nil {
+	if err := repo.store.QueryRow(getPostQuery, userId, postID).Scan(&post.Title, &post.Description,
+		&post.Likes, &post.Date, &post.Cover, &awardsId,
+		&post.CreatorId, &post.AddLike, &post.Views, &post.IsDraft); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
 		}
@@ -87,7 +116,7 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (
 	}
 
 	if addView {
-		row, err := repo.store.Query(queryPost, postID)
+		row, err := repo.store.Query(getPostQueryUpdate, postID)
 		if err != nil {
 			return nil, repository.NewDBError(err)
 		}
@@ -108,13 +137,15 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (
 // GetPosts Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64, pag *models.Pagination) ([]models.Post, error) {
+func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64,
+	pag *models.Pagination, withDraft bool) ([]models.Post, error) {
+
+	query := getPostsQueryWithoutDraft
+	if withDraft {
+		query = getPostsQueryWithDraft
+	}
 	limit, offset, err := putilits.AddPagination("posts", pag, repo.store)
-	query := `
-			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, lk.likes_id IS NOT NULL, views
-			FROM posts
-			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
-			WHERE creator_id = $2 ORDER BY posts.date DESC ` + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
+	query = query + fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -129,8 +160,16 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64, pag *model
 	for rows.Next() {
 		var post models.Post
 		var awardsId sql.NullInt64
-		if err = rows.Scan(&post.ID, &post.Title, &post.Description, &post.Likes,
-			&awardsId, &post.Date, &post.Cover, &post.AddLike, &post.Views); err != nil {
+
+		if withDraft {
+			err = rows.Scan(&post.ID, &post.Title, &post.Description, &post.Likes,
+				&awardsId, &post.Date, &post.Cover, &post.AddLike, &post.Views, &post.IsDraft)
+		} else {
+			err = rows.Scan(&post.ID, &post.Title, &post.Description, &post.Likes,
+				&awardsId, &post.Date, &post.Cover, &post.AddLike, &post.Views)
+		}
+
+		if err != nil {
 			_ = rows.Close()
 			return nil, repository.NewDBError(err)
 		}
@@ -157,8 +196,6 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64, pag *model
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) UpdatePost(post *models.UpdatePost) error {
-	query := `UPDATE posts SET title = $1, description = $2, type_awards = $3 WHERE posts_id = $4 RETURNING posts_id`
-
 	var awardsId sql.NullInt64
 	awardsId.Int64 = post.Awards
 	if post.Awards == rp.NoAwards {
@@ -168,7 +205,8 @@ func (repo *PostsRepository) UpdatePost(post *models.UpdatePost) error {
 	}
 
 	var postsId int64
-	if err := repo.store.QueryRow(query, post.Title, post.Description, awardsId, post.ID).Scan(&postsId); err != nil {
+	if err := repo.store.QueryRow(updateQuery, post.Title, post.Description,
+		awardsId, post.IsDraft, post.ID).Scan(&postsId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return repository.NotFound
 		}
@@ -182,10 +220,8 @@ func (repo *PostsRepository) UpdatePost(post *models.UpdatePost) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) UpdateCoverPost(postId int64, cover string) error {
-	query := `UPDATE posts SET cover = $1 WHERE posts_id = $2 RETURNING posts_id`
-
 	var postsId int64
-	if err := repo.store.QueryRow(query, cover, postId).Scan(&postsId); err != nil {
+	if err := repo.store.QueryRow(updateCoverQuery, cover, postId).Scan(&postsId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return repository.NotFound
 		}
@@ -199,9 +235,7 @@ func (repo *PostsRepository) UpdateCoverPost(postId int64, cover string) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) Delete(postId int64) error {
-	query := `DELETE FROM posts WHERE posts_id = $1`
-
-	row, err := repo.store.Query(query, postId)
+	row, err := repo.store.Query(deleteQuery, postId)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
