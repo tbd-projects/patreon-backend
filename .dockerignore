@@ -1,0 +1,9 @@
+./media
+./logs
+./patreon-secrt
+./docs
+./docker
+*.out
+*.txt
+*.html
+.idea

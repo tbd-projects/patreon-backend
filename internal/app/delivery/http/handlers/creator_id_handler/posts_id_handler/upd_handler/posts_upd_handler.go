@@ -10,9 +10,9 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -25,12 +25,12 @@ type PostsUpdateHandler struct {
 }
 
 func NewPostsUpdateHandler(log *logrus.Logger,
-	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUpdateHandler {
+	ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *PostsUpdateHandler {
 	h := &PostsUpdateHandler{
 		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
-	h.AddMiddleware(sessionMid.NewSessionMiddleware(manager, log).Check,
+	h.AddMiddleware(sessionMid.NewSessionMiddleware(sClient, log).Check,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost)
 

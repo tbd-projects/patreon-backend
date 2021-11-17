@@ -10,10 +10,10 @@ import (
 	response_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -25,13 +25,13 @@ type LikesHandler struct {
 }
 
 func NewLikesHandler(log *logrus.Logger,
-	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *LikesHandler {
+	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *LikesHandler {
 	h := &LikesHandler{
 		BaseHandler:  *bh.NewBaseHandler(log),
 		likesUsecase: ucLikes,
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, postsMiddleware.CheckCorrectPost)
 
 	h.AddMethod(http.MethodDelete, h.DELETE,
@@ -48,7 +48,7 @@ func NewLikesHandler(log *logrus.Logger,
 // @Summary deletes like from the post and return new count of likes
 // @Description deletes like form post id in url
 // @Produce json
-// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
+// @Success 200 {object} models.ResponseLike "current count of likes on post"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 409 {object} models.ErrResponse "this user not have like for this post"
@@ -88,7 +88,7 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 // @Summary add like on the post
 // @Description add like on the post with id = post_id and return new count of likes
 // @Produce json
-// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
+// @Success 200 {object} models.ResponseLike "current count of likes on post"
 // @Failure 400 {object} models.ErrResponse "invalid parameters"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 409 {object} models.ErrResponse "this user already add like for this post"

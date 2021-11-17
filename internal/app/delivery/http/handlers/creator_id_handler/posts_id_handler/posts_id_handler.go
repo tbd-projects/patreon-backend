@@ -1,8 +1,6 @@
 package posts_id_handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
@@ -11,9 +9,12 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type PostsIDHandler struct {
@@ -22,12 +23,12 @@ type PostsIDHandler struct {
 }
 
 func NewPostsIDHandler(log *logrus.Logger,
-	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsIDHandler {
+	ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *PostsIDHandler {
 	h := &PostsIDHandler{
 		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
 	postMid := middleware.NewPostsMiddleware(log, ucPosts)
 	h.AddMethod(http.MethodGet, h.GET, postMid.CheckCorrectPostFunc, sessionMiddleware.AddUserIdFunc)
 	h.AddMethod(http.MethodDelete, h.DELETE, sessionMiddleware.CheckFunc,

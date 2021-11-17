@@ -1,14 +1,15 @@
 package login_handler
 
 import (
+	"context"
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/sessions/sessions_manager"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	"patreon/internal/microservices/auth/sessions/middleware"
 	"time"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -17,19 +18,19 @@ import (
 )
 
 type LoginHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient session_client.AuthCheckerClient
+	userUsecase   usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewLoginHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewLoginHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
 	ucUser usecase_user.Usecase) *LoginHandler {
 	h := &LoginHandler{
-		BaseHandler:    *bh.NewBaseHandler(log),
-		sessionManager: sManager,
-		userUsecase:    ucUser,
+		BaseHandler:   *bh.NewBaseHandler(log),
+		sessionClient: sClient,
+		userUsecase:   ucUser,
 	}
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionClient, log).CheckNotAuthorized)
 	h.AddMethod(http.MethodPost, h.POST)
 	return h
 }
@@ -63,7 +64,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.sessionManager.Create(id)
+	res, err := h.sessionClient.Create(context.Background(), id)
 	if err != nil || res.UserID != id {
 		h.Log(r).Errorf("Error create session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateSession)

@@ -9,10 +9,10 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/gorilla/mux"
 
@@ -25,12 +25,12 @@ type PostsUploadImageHandler struct {
 }
 
 func NewPostsUploadImageHandler(log *logrus.Logger,
-	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUploadImageHandler {
+	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *PostsUploadImageHandler {
 	h := &PostsUploadImageHandler{
 		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
 

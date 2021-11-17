@@ -9,10 +9,10 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -24,12 +24,12 @@ type PostsDataIDHandler struct {
 }
 
 func NewPostsDataIDHandler(log *logrus.Logger,
-	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsDataIDHandler {
+	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *PostsDataIDHandler {
 	h := &PostsDataIDHandler{
 		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
 
 	h.AddMiddleware(middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
 

@@ -3,7 +3,6 @@ package usecase_factory
 import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/sessions_manager"
 	useAccess "patreon/internal/app/usecase/access"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
@@ -21,7 +20,6 @@ type UsecaseFactory struct {
 	userUsecase        useUser.Usecase
 	creatorUsecase     useCreator.Usecase
 	csrfUsecase        usecase_csrf.Usecase
-	sessionsManager    sessions.SessionsManager
 	accessUsecase      useAccess.Usecase
 	subscribersUsecase useSubscr.Usecase
 	awardsUsercase     useAwards.Usecase
@@ -61,12 +59,6 @@ func (f *UsecaseFactory) GetCsrfUsecase() usecase_csrf.Usecase {
 	return f.csrfUsecase
 }
 
-func (f *UsecaseFactory) GetSessionManager() sessions.SessionsManager {
-	if f.sessionsManager == nil {
-		f.sessionsManager = sessions_manager.NewSessionManager(f.repositoryFactory.GetSessionRepository())
-	}
-	return f.sessionsManager
-}
 func (f *UsecaseFactory) GetAccessUsecase() useAccess.Usecase {
 	if f.accessUsecase == nil {
 		f.accessUsecase = useAccess.NewAccessUsecase(f.repositoryFactory.GetAccessRepository())

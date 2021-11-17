@@ -4,18 +4,18 @@ import (
 	"context"
 	"net/http"
 	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/utilits"
+	sessionClient "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/sirupsen/logrus"
 )
 
 type SessionMiddleware struct {
-	SessionManager sessions.SessionsManager
+	SessionManager sessionClient.AuthCheckerClient
 	utilits.LogObject
 }
 
-func NewSessionMiddleware(sessionManager sessions.SessionsManager, log *logrus.Logger) *SessionMiddleware {
+func NewSessionMiddleware(sessionManager sessionClient.AuthCheckerClient, log *logrus.Logger) *SessionMiddleware {
 	return &SessionMiddleware{
 		SessionManager: sessionManager,
 		LogObject:      utilits.NewLogObject(log),
@@ -34,7 +34,7 @@ func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 		}
 
 		uniqID := sessionID.Value
-		if res, err := m.SessionManager.Check(uniqID); err != nil {
+		if res, err := m.SessionManager.Check(context.Background(), uniqID); err != nil {
 			m.Log(r).Warnf("Error in checking session: %v", err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -65,7 +65,7 @@ func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 		}
 
 		uniqID := sessionID.Value
-		if res, err := m.SessionManager.Check(uniqID); err != nil {
+		if res, err := m.SessionManager.Check(context.Background(), uniqID); err != nil {
 			m.Log(r).Debug("User not Authorized")
 			next.ServeHTTP(w, r)
 			return
@@ -83,7 +83,7 @@ func (m *SessionMiddleware) AddUserIdFunc(next hf.HandlerFunc) hf.HandlerFunc {
 		sessionID, err := r.Cookie("session_id")
 		if err == nil {
 			uniqID := sessionID.Value
-			if res, err := m.SessionManager.Check(uniqID); err == nil {
+			if res, err := m.SessionManager.Check(context.Background(), uniqID); err == nil {
 				m.Log(r).Debugf("Get session for user: %d", res.UserID)
 				r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID))
 				r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID))

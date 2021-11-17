@@ -5,14 +5,28 @@ volumes:
   session-redis:
   access-redis:
 services:
+  sessions-service:
+    image: session-service
+    expose:
+      - "5000"
+    ports:
+      - "5050:5050"
+    networks:
+      - default
+    depends_on:
+      - session-redis
+    volumes:
+      - ./logs-sessions:/app/logs
   main:
     image: patreon
     expose:
       - "80"
+      - "8080"
       - "443"
     ports:
       - "443:443"
-      - "80:80"
+#      - "80:80"
+      - "8080:8080"
     networks:
       - default
     volumes:

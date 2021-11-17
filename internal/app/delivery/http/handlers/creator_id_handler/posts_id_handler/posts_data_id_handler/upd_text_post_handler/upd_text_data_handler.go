@@ -2,7 +2,6 @@ package upd_text_data_handler
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
@@ -10,10 +9,12 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -25,12 +26,12 @@ type PostsDataUpdateTextHandler struct {
 
 func NewPostsDataUpdateTextHandler(log *logrus.Logger,
 	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase,
-	manager sessions.SessionsManager) *PostsDataUpdateTextHandler {
+	sClient session_client.AuthCheckerClient) *PostsDataUpdateTextHandler {
 	h := &PostsDataUpdateTextHandler{
 		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
 	h.AddMethod(http.MethodPut, h.PUT)

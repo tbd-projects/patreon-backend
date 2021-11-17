@@ -1,9 +1,13 @@
 package app
 
 const (
-	LoadFileUrl = "media/"
+	LoadFileUrl  = "media/"
 	DefaultImage = ""
 )
+
+type Microservice struct {
+	SessionServerUrl string `toml:"session_url"`
+}
 
 type RepositoryConnections struct {
 	DataBaseUrl     string `toml:"database_url"`
@@ -22,6 +26,7 @@ type Config struct {
 	BindAddr         string                `toml:"bind_addr"`
 	LogLevel         string                `toml:"log_level"`
 	LogAddr          string                `toml:"log_path"`
+	Microservices    Microservice          `toml:"microservice"`
 	ServerRepository RepositoryConnections `toml:"server"`
 	LocalRepository  RepositoryConnections `toml:"local"`
 	Cors             CorsConfig            `toml:"cors"`

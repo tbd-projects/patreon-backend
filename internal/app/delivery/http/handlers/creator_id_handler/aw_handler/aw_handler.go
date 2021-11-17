@@ -11,8 +11,8 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	db_models "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -27,13 +27,13 @@ type AwardsHandler struct {
 }
 
 func NewAwardsHandler(log *logrus.Logger,
-	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsHandler {
+	ucAwards useAwards.Usecase, sClient session_client.AuthCheckerClient) *AwardsHandler {
 	h := &AwardsHandler{
 		BaseHandler:   *bh.NewBaseHandler(log),
 		awardsUsecase: ucAwards,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodPost, h.POST, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
+	h.AddMethod(http.MethodPost, h.POST, sessionMid.NewSessionMiddleware(sClient, log).CheckFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
 		csrf_middleware.NewCsrfMiddleware(log,
 			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)

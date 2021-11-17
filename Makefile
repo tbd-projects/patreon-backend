@@ -3,6 +3,7 @@
 LOG_DIR=./logs
 CHECK_DIR=go list ./... | grep -v /cmd/utilits
 SQL_DIR=./scripts
+MICROSERVICE_DIR=$(PWD)/internal/microservices
 
 stop-redis:
 	systemctl stop redis
@@ -17,18 +18,23 @@ watch-postgress-log:
 	docker attach 2021_2_pyaterochka_patreon-bd_1
 
 generate-api:
-	go get -u github.com/swaggo/swag/cmd/swag
+	go install github.com/swaggo/swag/cmd/swag@v1.6.5
 	swag init -g ./cmd/server/main.go -o docs
 
 build: generate-api
 	mkdir -p ./patreon-secrt
 	go build -o server.out -v ./cmd/server
 
+build-sessions:
+	go build -o sessions.out -v ./cmd/sessions
 build-docker-local:
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
+build-docker-sessions:
+	docker build --no-cache --network host -f ./docker/session-service.Dockerfile . --tag session-service
 build-docker-server:
 	docker build --build-arg RUN_HTTPS=-run-https --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
+
 
 
 run:
@@ -66,7 +72,8 @@ parse-last-log: build-utils
 gen-mock:
 	go generate ./...
 
-
+gen-proto-sessions:
+	protoc --proto_path=${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf session.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf
 test:
 	go test -v -race ./internal/...
 

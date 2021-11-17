@@ -6,26 +6,26 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/sirupsen/logrus"
 )
 
 type CsrfHandler struct {
-	csrfUsecase    usecase_csrf.Usecase
-	sessionManager sessions.SessionsManager
+	csrfUsecase   usecase_csrf.Usecase
+	sessionClient session_client.AuthCheckerClient
 	bh.BaseHandler
 }
 
-func NewCsrfHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewCsrfHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
 	uc usecase_csrf.Usecase) *CsrfHandler {
 	h := &CsrfHandler{
-		BaseHandler:    *bh.NewBaseHandler(log),
-		sessionManager: sManager,
-		csrfUsecase:    uc,
+		BaseHandler:   *bh.NewBaseHandler(log),
+		sessionClient: sClient,
+		csrfUsecase:   uc,
 	}
-	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(sManager, log).CheckFunc)
+	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(sClient, log).CheckFunc)
 	return h
 }
 
@@ -33,7 +33,7 @@ func NewCsrfHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Summary get CSRF Token
 // @Description generate usecase token and return to client
 // @Produce json
-// @Success 200 {object} models_respond.TokenResponse
+// @Success 200 {object} models.TokenResponse
 // @Failure 500 {object} models.ErrResponse "server error"
 // @Failure 401 "user are not authorized"
 // @Router /token [GET]

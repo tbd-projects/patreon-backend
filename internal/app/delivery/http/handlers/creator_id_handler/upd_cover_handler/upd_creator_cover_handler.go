@@ -8,28 +8,28 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
 	middlewareSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 type UpdateCoverCreatorHandler struct {
-	sessionManager sessions.SessionsManager
+	sessionClient  session_client.AuthCheckerClient
 	creatorUsecase usecase_creator.Usecase
 	bh.BaseHandler
 }
 
 func NewUpdateCoverHandler(log *logrus.Logger,
-	sManager sessions.SessionsManager, creatorUsecase usecase_creator.Usecase) *UpdateCoverCreatorHandler {
+	sClient session_client.AuthCheckerClient, creatorUsecase usecase_creator.Usecase) *UpdateCoverCreatorHandler {
 	h := &UpdateCoverCreatorHandler{
-		sessionManager: sManager,
+		sessionClient:  sClient,
 		creatorUsecase: creatorUsecase,
 		BaseHandler:    *bh.NewBaseHandler(log),
 	}
-	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionManager, log).Check,
+	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionClient, log).Check,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser)
 
 	h.AddMethod(http.MethodPut, h.PUT,

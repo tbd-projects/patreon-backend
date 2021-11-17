@@ -7,10 +7,10 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -25,12 +25,12 @@ type PostsDataUploadTextHandler struct {
 
 func NewPostsDataUploadTextHandler(log *logrus.Logger,
 	ucPostsData usePostsData.Usecase, ucPosts usePosts.Usecase,
-	manager sessions.SessionsManager) *PostsDataUploadTextHandler {
+	sClient session_client.AuthCheckerClient) *PostsDataUploadTextHandler {
 	h := &PostsDataUploadTextHandler{
 		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
 	h.AddMethod(http.MethodPost, h.POST)

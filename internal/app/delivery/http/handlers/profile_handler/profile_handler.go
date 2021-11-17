@@ -5,28 +5,28 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_http "patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/sirupsen/logrus"
 )
 
 type ProfileHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient session_client.AuthCheckerClient
+	userUsecase   usecase_user.Usecase
 	bh.BaseHandler
 }
 
 func NewProfileHandler(log *logrus.Logger,
-	sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *ProfileHandler {
+	sManager session_client.AuthCheckerClient, ucUser usecase_user.Usecase) *ProfileHandler {
 	h := &ProfileHandler{
-		sessionManager: sManager,
-		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log),
+		sessionClient: sManager,
+		userUsecase:   ucUser,
+		BaseHandler:   *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET,
-		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+		middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 	return h
 }

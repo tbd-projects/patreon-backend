@@ -10,9 +10,9 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -20,19 +20,19 @@ import (
 )
 
 type UpdateNicknameHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient session_client.AuthCheckerClient
+	userUsecase   usecase_user.Usecase
 	bh.BaseHandler
 }
 
 func NewUpdateNicknameHandler(log *logrus.Logger,
-	sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *UpdateNicknameHandler {
+	sClient session_client.AuthCheckerClient, ucUser usecase_user.Usecase) *UpdateNicknameHandler {
 	h := &UpdateNicknameHandler{
-		sessionManager: sManager,
-		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log),
+		sessionClient: sClient,
+		userUsecase:   ucUser,
+		BaseHandler:   *bh.NewBaseHandler(log),
 	}
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionClient, log).Check)
 
 	h.AddMethod(http.MethodPut, h.PUT,
 		csrf_middleware.NewCsrfMiddleware(log,
@@ -48,7 +48,7 @@ func NewUpdateNicknameHandler(log *logrus.Logger,
 // @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 404 {object} models.ErrResponse "user not found"
 // @Failure 409 {object} models.ErrResponse "nickname already exists"
-// @Failure 422 {object} models.ErrResponse "invalid body in request | user with this oldNickname not found | invalid nickname in body | old nickname not equal current user nickname"
+// @Failure 422 {object} models.ErrResponse "invalid body in request| user with this oldNickname not found | invalid nickname in body | old nickname not equal current user nickname"
 // @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
 // @Failure 418 "User are authorized"
 // @Router /user/update/nickname [PUT]

@@ -4,7 +4,7 @@ bind_addr = ":8080"
 media_dir = "./media"
 
 bind_addr_https = ":443"
-bind_addr_http = ":80"
+bind_addr_http = ":8080"
 
 #domen = "95.163.208.72"
 domen = "api.pyaterochka-team.site"
@@ -18,6 +18,8 @@ database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbna
 session-redis_url = "redis://session-redis/0"
 access-redis_url = "redis://access-redis/0"
 
+[microservice]
+session_url = "localhost:5000"
 
 [cors]
 headers = [

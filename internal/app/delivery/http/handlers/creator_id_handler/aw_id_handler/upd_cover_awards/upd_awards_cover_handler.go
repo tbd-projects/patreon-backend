@@ -1,8 +1,6 @@
 package upd_cover_awards_handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
@@ -10,25 +8,28 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
 	middlewareSes "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type UpdateCoverAwardsHandler struct {
-	sessionManager sessions.SessionsManager
+	sessionsClient session_client.AuthCheckerClient
 	awardsUsecase  useAwards.Usecase
 	bh.BaseHandler
 }
 
 func NewUpdateCoverAwardsHandler(log *logrus.Logger,
-	sManager sessions.SessionsManager, awardsUsecase useAwards.Usecase) *UpdateCoverAwardsHandler {
+	sClient session_client.AuthCheckerClient, awardsUsecase useAwards.Usecase) *UpdateCoverAwardsHandler {
 	h := &UpdateCoverAwardsHandler{
-		sessionManager: sManager,
+		sessionsClient: sClient,
 		awardsUsecase:  awardsUsecase,
 		BaseHandler:    *bh.NewBaseHandler(log),
 	}
-	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionManager, log).Check,
+	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionsClient, log).Check,
 		csrf_middleware.NewCsrfMiddleware(log,
 			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser,

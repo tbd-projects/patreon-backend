@@ -4,7 +4,10 @@ WORKDIR /app
 
 COPY . .
 
-EXPOSE 443 80
+RUN apt-get update
+RUN apt-get install jq -y
+
+EXPOSE 443 80 8080
 
 RUN make build
 

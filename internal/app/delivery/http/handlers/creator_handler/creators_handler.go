@@ -9,10 +9,10 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	db_models "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	middleSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -20,22 +20,22 @@ import (
 )
 
 type CreatorHandler struct {
-	sessionManager sessions.SessionsManager
+	sessionClient  session_client.AuthCheckerClient
 	creatorUsecase usecase_creator.Usecase
 	userUsecase    usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewCreatorHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewCreatorHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient,
 	ucCreator usecase_creator.Usecase, ucUser usecase_user.Usecase) *CreatorHandler {
 	h := &CreatorHandler{
 		BaseHandler:    *bh.NewBaseHandler(log),
 		creatorUsecase: ucCreator,
-		sessionManager: sManager,
+		sessionClient:  sManager,
 		userUsecase:    ucUser,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 	)
 	return h

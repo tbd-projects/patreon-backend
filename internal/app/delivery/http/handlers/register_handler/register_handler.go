@@ -7,8 +7,8 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -16,17 +16,17 @@ import (
 )
 
 type RegisterHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient session_client.AuthCheckerClient
+	userUsecase   usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewRegisterHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient,
 	ucUser usecase_user.Usecase) *RegisterHandler {
 	h := &RegisterHandler{
-		sessionManager: sManager,
-		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log),
+		sessionClient: sManager,
+		userUsecase:   ucUser,
+		BaseHandler:   *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodPost, h.POST)
 	return h
