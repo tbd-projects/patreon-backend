@@ -94,18 +94,18 @@ func (mr *PostsRepositoryMockRecorder) GetPostCreator(arg0 interface{}) *gomock.
 }
 
 // GetPosts mocks base method.
-func (m *PostsRepository) GetPosts(arg0, arg1 int64, arg2 *models.Pagination) ([]models.Post, error) {
+func (m *PostsRepository) GetPosts(arg0, arg1 int64, arg2 *models.Pagination, arg3 bool) ([]models.Post, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPosts", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetPosts", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]models.Post)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetPosts indicates an expected call of GetPosts.
-func (mr *PostsRepositoryMockRecorder) GetPosts(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *PostsRepositoryMockRecorder) GetPosts(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPosts", reflect.TypeOf((*PostsRepository)(nil).GetPosts), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPosts", reflect.TypeOf((*PostsRepository)(nil).GetPosts), arg0, arg1, arg2, arg3)
 }
 
 // UpdateCoverPost mocks base method.

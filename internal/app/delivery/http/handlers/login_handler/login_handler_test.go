@@ -30,7 +30,7 @@ func (s *LoginTestSuite) SetupSuite() {
 func (s *LoginTestSuite) TestLoginHandler_POST_EmptyBody() {
 	s.Tb = handlers.TestTable{
 		Name:              "Empty body in request",
-		Data:              &models.RequestLogin{},
+		Data:              &http_models.RequestLogin{},
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
@@ -73,7 +73,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_InvalidBody() {
 func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
 	s.Tb = handlers.TestTable{
 		Name: "User not found in db",
-		Data: models.RequestLogin{
+		Data: http_models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
@@ -84,8 +84,8 @@ func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
 	recorder := httptest.NewRecorder()
 	expectedId := int64(-1)
 	s.MockUserUsecase.EXPECT().
-		Check(s.Tb.Data.(models.RequestLogin).Login,
-			s.Tb.Data.(models.RequestLogin).Password).
+		Check(s.Tb.Data.(http_models.RequestLogin).Login,
+			s.Tb.Data.(http_models.RequestLogin).Password).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(expectedId, model_data.IncorrectEmailOrPassword)
 
@@ -102,7 +102,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
 func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 	s.Tb = handlers.TestTable{
 		Name: "Create Session Error",
-		Data: models.RequestLogin{
+		Data: http_models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
@@ -113,14 +113,14 @@ func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 
 	user := model_data.User{
 		ID:       1,
-		Login:    s.Tb.Data.(models.RequestLogin).Login,
-		Password: s.Tb.Data.(models.RequestLogin).Password,
+		Login:    s.Tb.Data.(http_models.RequestLogin).Login,
+		Password: s.Tb.Data.(http_models.RequestLogin).Password,
 	}
 	err := user.Encrypt()
 	assert.NoError(s.T(), err)
 	s.MockUserUsecase.EXPECT().
-		Check(s.Tb.Data.(models.RequestLogin).Login,
-			s.Tb.Data.(models.RequestLogin).Password).
+		Check(s.Tb.Data.(http_models.RequestLogin).Login,
+			s.Tb.Data.(http_models.RequestLogin).Password).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(user.ID, nil)
 
@@ -145,7 +145,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 	s.Tb = handlers.TestTable{
 		Name: "Invalid body",
-		Data: models.RequestLogin{
+		Data: http_models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
@@ -156,14 +156,14 @@ func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 
 	user := model_data.User{
 		ID:       1,
-		Login:    s.Tb.Data.(models.RequestLogin).Login,
-		Password: s.Tb.Data.(models.RequestLogin).Password,
+		Login:    s.Tb.Data.(http_models.RequestLogin).Login,
+		Password: s.Tb.Data.(http_models.RequestLogin).Password,
 	}
 	err := user.Encrypt()
 	assert.NoError(s.T(), err)
 	s.MockUserUsecase.EXPECT().
-		Check(s.Tb.Data.(models.RequestLogin).Login,
-			s.Tb.Data.(models.RequestLogin).Password).
+		Check(s.Tb.Data.(http_models.RequestLogin).Login,
+			s.Tb.Data.(http_models.RequestLogin).Password).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(user.ID, nil)
 

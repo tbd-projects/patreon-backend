@@ -43,11 +43,11 @@ func NewPostsUpdateCoverHandler(log *logrus.Logger,
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param cover formData file true "cover file with ext jpeg/png"
 // @Success 200 "successfully upload cover"
-// @Failure 400 {object} models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name for load file"
-// @Failure 404 {object} models.ErrResponse "post with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name for load file"
+// @Failure 404 {object} http_models.ErrResponse "post with this id not found"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/update/cover [PUT]
 func (h *PostsUpdateCoverHandler) PUT(w http.ResponseWriter, r *http.Request) {

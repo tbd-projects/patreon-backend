@@ -5,7 +5,7 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models_respond "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 
@@ -33,8 +33,8 @@ func NewCsrfHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Summary get CSRF Token
 // @Description generate usecase token and return to client
 // @Produce json
-// @Success 200 {object} models_respond.TokenResponse
-// @Failure 500 {object} models.ErrResponse "server error"
+// @Success 200 {object} http_models.TokenResponse
+// @Failure 500 {object} http_models.ErrResponse "server error"
 // @Failure 401 "user are not authorized"
 // @Router /token [GET]
 func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
@@ -57,5 +57,5 @@ func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.Log(r).Debugf("get token %v", token)
-	h.Respond(w, r, http.StatusOK, models_respond.TokenResponse{Token: token})
+	h.Respond(w, r, http.StatusOK, http_models.TokenResponse{Token: token})
 }

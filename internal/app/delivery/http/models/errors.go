@@ -1,4 +1,4 @@
-package models
+package http_models
 
 import (
 	"fmt"

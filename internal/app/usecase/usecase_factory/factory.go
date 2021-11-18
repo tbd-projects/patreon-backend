@@ -11,7 +11,7 @@ import (
 	useLikes "patreon/internal/app/usecase/likes"
 	usePayments "patreon/internal/app/usecase/payments"
 	usePosts "patreon/internal/app/usecase/posts"
-	usePostsData "patreon/internal/app/usecase/posts_data"
+	useAttaches "patreon/internal/app/usecase/attaches"
 	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
 )
@@ -28,7 +28,7 @@ type UsecaseFactory struct {
 	awardsUsecase      useAwards.Usecase
 	sessinManager      sessions.SessionsManager
 	postsUsecase       usePosts.Usecase
-	postsDataUsecase   usePostsData.Usecase
+	attachesUsecase   useAttaches.Usecase
 	infoUsecase        useInfo.Usecase
 	likesUsecase       useLikes.Usecase
 	paymentsUsecase    usePayments.Usecase
@@ -92,7 +92,7 @@ func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
 func (f *UsecaseFactory) GetPostsUsecase() usePosts.Usecase {
 	if f.postsUsecase == nil {
 		f.postsUsecase = usePosts.NewPostsUsecase(f.repositoryFactory.GetPostsRepository(),
-			f.repositoryFactory.GetPostsDataRepository(), f.repositoryFactory.GetFilesRepository())
+			f.repositoryFactory.GetAttachesRepository(), f.repositoryFactory.GetFilesRepository())
 	}
 	return f.postsUsecase
 }
@@ -104,12 +104,12 @@ func (f *UsecaseFactory) GetLikesUsecase() useLikes.Usecase {
 	return f.likesUsecase
 }
 
-func (f *UsecaseFactory) GetPostsDataUsecase() usePostsData.Usecase {
-	if f.postsDataUsecase == nil {
-		f.postsDataUsecase = usePostsData.NewPostsDataUsecase(f.repositoryFactory.GetPostsDataRepository(),
+func (f *UsecaseFactory) GetAttachesUsecase() useAttaches.Usecase {
+	if f.attachesUsecase == nil {
+		f.attachesUsecase = useAttaches.NewAttachesUsecase(f.repositoryFactory.GetAttachesRepository(),
 			f.repositoryFactory.GetFilesRepository())
 	}
-	return f.postsDataUsecase
+	return f.attachesUsecase
 }
 
 func (f *UsecaseFactory) GetPaymentsUsecase() usePayments.Usecase {

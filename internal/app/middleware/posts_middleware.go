@@ -61,7 +61,7 @@ func (mw *PostsMiddleware) CheckCorrectPostFunc(next hf.HandlerFunc) hf.HandlerF
 				return
 			}
 			mw.log.Log(r).Warnf("this post %d not belongs to this creator %d", postId, creatorId)
-			respond.Error(w, r, http.StatusForbidden, IncorrectCreatorForAward)
+			respond.Error(w, r, http.StatusForbidden, IncorrectCreatorForPost)
 			return
 		}
 

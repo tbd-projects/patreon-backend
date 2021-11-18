@@ -4,7 +4,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	responseModels "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
@@ -34,8 +34,8 @@ func NewSubscriptionsHandler(log *logrus.Logger, sManager sessions.SessionsManag
 // @Summary get user subscriptions
 // @Description get user creators
 // @Produce json
-// @Success 200 {object} models.SubscriptionsUserResponse "Successfully get user subscriptions"
-// @Failure 500 {object} models.ErrResponse "serverError"
+// @Success 200 {object} http_models.SubscriptionsUserResponse "Successfully get user subscriptions"
+// @Failure 500 {object} http_models.ErrResponse "serverError"
 // @Failure 401 "user are not authorized"
 // @Router /user/subscriptions [GET]
 func (h SubscriptionsHandler) GET(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,7 @@ func (h SubscriptionsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := responseModels.ToSubscriptionsUser(creators)
+	res := http_models.ToSubscriptionsUser(creators)
 	h.Log(r).Debugf("get creators %v", creators)
 	h.Respond(w, r, http.StatusOK, res)
 }

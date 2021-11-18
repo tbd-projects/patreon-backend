@@ -1,4 +1,4 @@
-package models
+package http_models
 
 import (
 	"github.com/microcosm-cc/bluemonday"
@@ -31,10 +31,10 @@ func TestSanitize(t *testing.T) {
 	sub.Sanitize(*bluemonday.UGCPolicy())
 
 	_ = ToResponsePost(models.Post{})
-	_ = ToResponsePostData(models.PostData{})
+	_ = ToResponseAttach(models.PostData{})
 	_ = ToResponseAward(models.Award{})
 	_ = ToResponseCreator(models.Creator{})
-	_ = ToResponsePostWithData(models.PostWithData{Post:&models.Post{}})
+	_ = ToResponsePostWithAttaches(models.PostWithData{Post:&models.Post{}})
 	_ = ToRProfileResponse(models.User{})
 	_ = ToSubscribersCreatorResponse([]models.User{})
 	_ = ToSubscriptionsUser([]models.CreatorSubscribe{})

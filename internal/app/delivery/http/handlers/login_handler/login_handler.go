@@ -39,16 +39,16 @@ func NewLoginHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Description login user
 // @Accept  json
 // @Produce json
-// @Param user body models.RequestLogin true "Request body for login"
+// @Param user body http_models.RequestLogin true "Request body for login"
 // @Success 200 "Successfully login"
-// @Failure 404 {object} models.ErrResponse "user not found"
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not create session", "can not do bd operation"
-// @Failure 401 {object} models.ErrResponse "incorrect email or password"
+// @Failure 404 {object} http_models.ErrResponse "user not found"
+// @Failure 422 {object} http_models.ErrResponse "invalid body in request"
+// @Failure 500 {object} http_models.ErrResponse "can not create session", "can not do bd operation"
+// @Failure 401 {object} http_models.ErrResponse "incorrect email or password"
 // @Failure 418 "User are authorized"
 // @Router /login [POST]
 func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestLogin{}
+	req := &http_models.RequestLogin{}
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil || len(req.Password) == 0 || len(req.Login) == 0 {
 		h.Log(r).Warnf("can not decode body %s", err)

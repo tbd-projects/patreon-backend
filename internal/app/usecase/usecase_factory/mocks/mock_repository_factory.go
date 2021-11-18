@@ -7,6 +7,7 @@ package mock_repository_factory
 import (
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	repository_access "patreon/internal/app/repository/access"
+	repository_attaches "patreon/internal/app/repository/attaches"
 	repository_awards "patreon/internal/app/repository/awards"
 	repository_creator "patreon/internal/app/repository/creator"
 	repository_files "patreon/internal/app/repository/files"
@@ -14,7 +15,6 @@ import (
 	repository_likes "patreon/internal/app/repository/likes"
 	repository_payments "patreon/internal/app/repository/payments"
 	repository_posts "patreon/internal/app/repository/posts"
-	repository_posts_data "patreon/internal/app/repository/posts_data"
 	repository_subscribers "patreon/internal/app/repository/subscribers"
 	repository_user "patreon/internal/app/repository/user"
 	sessions "patreon/internal/app/sessions"
@@ -58,6 +58,20 @@ func (m *MockRepositoryFactory) GetAccessRepository() repository_access.Reposito
 func (mr *MockRepositoryFactoryMockRecorder) GetAccessRepository() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccessRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetAccessRepository))
+}
+
+// GetAttachesRepository mocks base method.
+func (m *MockRepositoryFactory) GetAttachesRepository() repository_attaches.Repository {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAttachesRepository")
+	ret0, _ := ret[0].(repository_attaches.Repository)
+	return ret0
+}
+
+// GetAttachesRepository indicates an expected call of GetAttachesRepository.
+func (mr *MockRepositoryFactoryMockRecorder) GetAttachesRepository() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAttachesRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetAttachesRepository))
 }
 
 // GetAwardsRepository mocks base method.
@@ -156,20 +170,6 @@ func (m *MockRepositoryFactory) GetPaymentsRepository() repository_payments.Repo
 func (mr *MockRepositoryFactoryMockRecorder) GetPaymentsRepository() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentsRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetPaymentsRepository))
-}
-
-// GetPostsDataRepository mocks base method.
-func (m *MockRepositoryFactory) GetPostsDataRepository() repository_posts_data.Repository {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPostsDataRepository")
-	ret0, _ := ret[0].(repository_posts_data.Repository)
-	return ret0
-}
-
-// GetPostsDataRepository indicates an expected call of GetPostsDataRepository.
-func (mr *MockRepositoryFactoryMockRecorder) GetPostsDataRepository() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsDataRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetPostsDataRepository))
 }
 
 // GetPostsRepository mocks base method.

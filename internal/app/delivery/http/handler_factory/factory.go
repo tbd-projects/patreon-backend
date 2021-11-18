@@ -12,14 +12,15 @@ import (
 	upd_cover_awards_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler/upd_cover_awards"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler"
+	upd_img_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_image_post_handler"
+	upd_text_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_text_post_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/likes_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/posts_data_id_handler"
-	upd_img_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/posts_data_id_handler/upd_image_post_handler"
-	upd_text_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/posts_data_id_handler/upd_text_post_handler"
 	upl_cover_posts_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_cover_post_handler"
 	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_img_data_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_text_data_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_img_attach_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_text_attach_handler"
 	upd_avatar_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_avatar_handler"
 	upd_cover_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_cover_handler"
 	"patreon/internal/app/delivery/http/handlers/csrf_handler"
@@ -64,10 +65,11 @@ const (
 	POST_UPD_COVER
 	POST_ADD_TEXT
 	POST_ADD_IMAGE
-	POST_DATA_UPD_TEXT
-	POST_DATA_UPD_IMAGE
-	POST_DATA_ID
+	ATTACH_UPD_TEXT
+	ATTACH_UPD_IMAGE
+	ATTACH_ID
 	SUBSCRIBES
+	ATTACHES
 	AWARDS_CREATOR_SUBSCRIBE
 	USER_PAYMENTS
 )
@@ -94,7 +96,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucLikes := f.usecaseFactory.GetLikesUsecase()
 	sManager := f.usecaseFactory.GetSessionManager()
 	ucSubscr := f.usecaseFactory.GetSubscribersUsecase()
-	ucPostsData := f.usecaseFactory.GetPostsDataUsecase()
+	ucAttaches := f.usecaseFactory.GetAttachesUsecase()
 	ucPayments := f.usecaseFactory.GetPaymentsUsecase()
 	ucInfo := f.usecaseFactory.GetInfoUsecase()
 
@@ -120,16 +122,17 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		GET_USER_SUBSCRIPTIONS:   subscriptions_handler.NewSubscriptionsHandler(f.logger, sManager, ucSubscr),
 		SUBSCRIBES:               subscribe_handler.NewSubscribeHandler(f.logger, sManager, ucSubscr),
 		POST_UPD_COVER:           upl_cover_posts_handler.NewPostsUpdateCoverHandler(f.logger, ucPosts, sManager),
-		POST_ADD_TEXT:            upl_text_data_handler.NewPostsDataUploadTextHandler(f.logger, ucPostsData, ucPosts, sManager),
-		POST_ADD_IMAGE:           upl_img_data_handler.NewPostsUploadImageHandler(f.logger, ucPostsData, ucPosts, sManager),
-		POST_DATA_ID:             posts_data_id_handler.NewPostsDataIDHandler(f.logger, ucPostsData, ucPosts, sManager),
+		POST_ADD_TEXT:            upl_text_attach_handler.NewAttachesUploadTextHandler(f.logger, ucAttaches, ucPosts, sManager),
+		POST_ADD_IMAGE:           upl_img_attach_handler.NewPostsUploadImageHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_ID:                attaches_id_handler.NewAttachesIDHandler(f.logger, ucAttaches, ucPosts, sManager),
 		CREATOR_AVATAR:           upd_avatar_creator_handler.NewUpdateAvatarHandler(f.logger, sManager, ucCreator),
 		CREATOR_COVER:            upd_cover_creator_handler.NewUpdateCoverHandler(f.logger, sManager, ucCreator),
 		AWARDS_COVER:             upd_cover_awards_handler.NewUpdateCoverAwardsHandler(f.logger, sManager, ucAwards),
-		POST_DATA_UPD_IMAGE:      upd_img_data_handler.NewPostsUploadImageHandler(f.logger, ucPostsData, ucPosts, sManager),
-		POST_DATA_UPD_TEXT:       upd_text_data_handler.NewPostsDataUpdateTextHandler(f.logger, ucPostsData, ucPosts, sManager),
+		ATTACH_UPD_IMAGE:         upd_img_data_handler.NewAttachUploadImageHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_UPD_TEXT:          upd_text_data_handler.NewAttachesUpdateTextHandler(f.logger, ucAttaches, ucPosts, sManager),
 		AWARDS_CREATOR_SUBSCRIBE: aw_subscribe_handler.NewAwardsSubscribeHandler(f.logger, sManager, ucSubscr, ucAwards),
 		USER_PAYMENTS:            payments_handler.NewPaymentsHandler(f.logger, sManager, ucPayments),
+		ATTACHES:                 attaches_handler.NewAttachesHandler(f.logger, ucAttaches, ucPosts, sManager),
 	}
 }
 
@@ -165,18 +168,18 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/update/cover": hs[AWARDS_COVER],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/subscribe":    hs[AWARDS_CREATOR_SUBSCRIBE],
 		// ../posts  ---------------------------------------------------------////
-		"/creators/{creator_id:[0-9]+}/posts":                               hs[POSTS],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":              hs[POSTS_WITH_ID],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update":       hs[POSTS_UPD],
+		"/creators/{creator_id:[0-9]+}/posts":                         hs[POSTS],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":        hs[POSTS_WITH_ID],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update": hs[POSTS_UPD],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/text":   hs[POST_ADD_TEXT],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/image":  hs[POST_ADD_IMAGE],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update/cover": hs[POST_UPD_COVER],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/text":         hs[POST_ADD_TEXT],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/image":        hs[POST_ADD_IMAGE],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":         hs[POSTS_LIKES],
-		// ../posts_data  ----------------------------------------------------////
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}":              hs[POST_DATA_ID],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/text":  hs[POST_DATA_UPD_TEXT],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/image": hs[POST_DATA_UPD_IMAGE],
-
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":   hs[POSTS_LIKES],
+		// ../attaches  ----------------------------------------------------////
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches":                      hs[ATTACHES],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}":              hs[ATTACH_ID],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/text":  hs[ATTACH_UPD_TEXT],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/image": hs[ATTACH_UPD_IMAGE],
 		//   /token  ---------------------------------------------------------////
 		"/token": hs[GET_CSRF_TOKEN],
 	}

@@ -1,20 +1,16 @@
-package models
+package http_models
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	"image/color"
+	"patreon/internal/app/delivery/http/handlers"
+	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	rep "patreon/internal/app/repository"
 	models_utilits "patreon/internal/app/utilits/models"
 
 	validation "github.com/go-ozzo/ozzo-validation"
-)
-
-const (
-	AddStatus    = "add"
-	UpdateStatus = "update"
 )
 
 type RequestCreator struct {
@@ -72,10 +68,10 @@ type RequestPosts struct {
 }
 
 type RequestAttach struct {
-	Type   string `json:"type"`
-	Value  string `json:"value,omitempty"`
-	Id     int64  `json:"id,omitempty"`
-	Status string `json:"status,omitempty"`
+	Type   models.DataType `json:"type"`
+	Value  string          `json:"value,omitempty"`
+	Id     int64           `json:"id,omitempty"`
+	Status string          `json:"status,omitempty"`
 }
 
 type RequestAttaches struct {
@@ -127,23 +123,17 @@ func (req *RequestChangeNickname) Validate() error {
 	return nil
 }
 
-var (
-	IncorrectType = errors.New(
-		fmt.Sprintf("Not allow type, allowed type is: %s, %s, %s, %s, %s",
-			models.Music, models.Video, models.Files, models.Text, models.Image))
-	IncorrectIdAttach = errors.New("Not valid attach id")
-	IncorrectStatus   = errors.New(fmt.Sprintf("Not allow status, allowed status is: %s, %s",
-		AddStatus, UpdateStatus))
-)
+
 
 // requestAttachValidError Errors:
-//		InvalidType
-//		InvalidPostId
+//		handler_errors.IncorrectType
+//		handler_errors.IncorrectIdAttach
+//      handler_errors.IncorrectStatus
 func requestAttachValidError() models_utilits.ExtractorErrorByName {
 	validMap := models_utilits.MapOfValidateError{
-		"type":   IncorrectType,
-		"id":     IncorrectIdAttach,
-		"status": IncorrectStatus,
+		"type":   handler_errors.IncorrectType,
+		"id":     handler_errors.IncorrectIdAttach,
+		"status": handler_errors.IncorrectStatus,
 	}
 	return func(key string) error {
 		if val, ok := validMap[key]; ok {
@@ -153,14 +143,18 @@ func requestAttachValidError() models_utilits.ExtractorErrorByName {
 	}
 }
 
-
+// Validate Errors:
+//		handler_errors.IncorrectType
+//		handler_errors.IncorrectIdAttach
+//      handler_errors.IncorrectStatus
+// can return not specify error
 func (req *RequestAttach) Validate() error {
 	err := validation.Errors{
 		"type": validation.Validate(req.Type, validation.In(models.Music, models.Video,
 			models.Files, models.Text, models.Image)),
 		"id":     validation.Validate(req.Id, validation.Min(1)),
-		"status": validation.Validate(req.Status, validation.In(AddStatus, UpdateStatus)),
-	}
+		"status": validation.Validate(req.Status, validation.In(handlers.AddStatus, handlers.UpdateStatus)),
+	}.Filter()
 
 	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
@@ -170,15 +164,15 @@ func (req *RequestAttach) Validate() error {
 	_, haveIdError := mapOfErr["id"]
 	_, haveStatusError := mapOfErr["status"]
 	if !haveTypeError && haveIdError {
-		if haveStatusError && models.DataType(req.Type) != models.Text {
-			return IncorrectStatus
+		if haveStatusError && req.Type != models.Text {
+			return handler_errors.IncorrectStatus
 		}
 		return nil
 	}
 
-	if haveStatusError && models.DataType(req.Type) != models.Text {
+	if haveStatusError && req.Type != models.Text {
 		if haveIdError {
-			return IncorrectIdAttach
+			return handler_errors.IncorrectIdAttach
 		}
 		return nil
 	}
@@ -190,6 +184,11 @@ func (req *RequestAttach) Validate() error {
 	return nil
 }
 
+// Validate Errors:
+//		handler_errors.IncorrectType
+//		handler_errors.IncorrectIdAttach
+//      handler_errors.IncorrectStatus
+// can return not specify error
 func (req *RequestAttaches) Validate() error {
 	for _, attach := range req.Attaches {
 		if err := attach.Validate(); err != nil {

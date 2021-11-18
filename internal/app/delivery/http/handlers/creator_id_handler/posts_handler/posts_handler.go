@@ -60,13 +60,13 @@ func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 // @Summary get list of posts of some creator
 // @Description get list of posts which belongs the creator with limit and offset in query
 // @Produce json
-// @Success 201 {array} models.ResponsePost
+// @Success 201 {array} http_models.ResponsePost
 // @Param page query uint64 true "start page number of posts mutually exclusive with offset"
 // @Param offset query uint64 true "start number of posts mutually exclusive with page"
 // @Param limit query uint64 true "posts to return"
 // @Param with-draft query bool false "if need add draft posts"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 400 {object} models.ErrResponse "invalid parameters", "invalid parameters in query"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Router /creators/{:creator_id}/posts [GET]
 func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	var limit, offset, page int64
@@ -130,9 +130,9 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondPosts := make([]models.ResponsePost, len(posts))
+	respondPosts := make([]http_models.ResponsePost, len(posts))
 	for i, ps := range posts {
-		respondPosts[i] = models.ToResponsePost(ps)
+		respondPosts[i] = http_models.ToResponsePost(ps)
 	}
 
 	h.Log(r).Debugf("get posts %v", respondPosts)
@@ -142,17 +142,17 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // POST Create Posts
 // @Summary create posts
 // @Description create posts to creator with id from path
-// @Param post body models.RequestPosts true "Request body for posts"
+// @Param post body http_models.RequestPosts true "Request body for posts"
 // @Produce json
-// @Success 201 {object} models.IdResponse "id posts"
-// @Failure 400 {object} models.ErrResponse "invalid body in request"
-// @Failure 422 {object} models.ErrResponse "this creator id not know", "this awards id not know", "empty title", "invalid parameters"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "csrf token is invalid, get new token"
+// @Success 201 {object} http_models.IdResponse "id posts"
+// @Failure 400 {object} http_models.ErrResponse "invalid body in request"
+// @Failure 422 {object} http_models.ErrResponse "this creator id not know", "this awards id not know", "empty title", "invalid parameters"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts [POST]
 func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestPosts{}
+	req := &http_models.RequestPosts{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
@@ -186,5 +186,5 @@ func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, &models.IdResponse{ID: postsId})
+	h.Respond(w, r, http.StatusCreated, &http_models.IdResponse{ID: postsId})
 }

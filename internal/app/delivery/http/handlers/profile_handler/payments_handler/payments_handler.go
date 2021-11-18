@@ -36,9 +36,9 @@ func NewPaymentsHandler(log *logrus.Logger,
 // @Summary get all user payments
 // @Description get all user payments
 // @Produce json
-// @Success 200 {object} models.ResponseUserPayments "Success"
-// @Failure 204 {object} models.OkResponse "payments not Found"
-// @Failure 500 {object} models.ErrResponse "server error"
+// @Success 200 {object} http_models.ResponseUserPayments "Success"
+// @Failure 204 {object} http_models.OkResponse "payments not Found"
+// @Failure 500 {object} http_models.ErrResponse "server error"
 // @Failure 401 "user are not authorized"
 // @Router /user/payments [GET]
 func (h *PaymentsHandler) GET(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,7 @@ func (h *PaymentsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	userPayments, err := h.paymentsUsecase.GetUserPayments(userID.(int64))
 	if err != nil {
 		if err == repository.NotFound {
-			h.Respond(w, r, http.StatusNoContent, models.OkResponse{
+			h.Respond(w, r, http.StatusNoContent, http_models.OkResponse{
 				Ok: handler_errors.PaymentsNotFound.Error(),
 			})
 		} else {
@@ -59,7 +59,7 @@ func (h *PaymentsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	res := models.ToResponseUserPayments(userPayments)
+	res := http_models.ToResponseUserPayments(userPayments)
 
 	h.Respond(w, r, http.StatusOK, res)
 }

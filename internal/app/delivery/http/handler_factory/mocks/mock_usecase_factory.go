@@ -7,13 +7,13 @@ package mock_usecase_factory
 import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	sessions "patreon/internal/app/sessions"
+	attaches "patreon/internal/app/usecase/attaches"
 	usecase_awards "patreon/internal/app/usecase/awards"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_info "patreon/internal/app/usecase/info"
 	usecase_likes "patreon/internal/app/usecase/likes"
 	payments "patreon/internal/app/usecase/payments"
 	posts "patreon/internal/app/usecase/posts"
-	posts_data "patreon/internal/app/usecase/posts_data"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
 	usercase_user "patreon/internal/app/usecase/user"
 	reflect "reflect"
@@ -42,6 +42,20 @@ func NewMockUsecaseFactory(ctrl *gomock.Controller) *MockUsecaseFactory {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockUsecaseFactory) EXPECT() *MockUsecaseFactoryMockRecorder {
 	return m.recorder
+}
+
+// GetAttachesUsecase mocks base method.
+func (m *MockUsecaseFactory) GetAttachesUsecase() attaches.Usecase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAttachesUsecase")
+	ret0, _ := ret[0].(attaches.Usecase)
+	return ret0
+}
+
+// GetAttachesUsecase indicates an expected call of GetAttachesUsecase.
+func (mr *MockUsecaseFactoryMockRecorder) GetAttachesUsecase() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAttachesUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetAttachesUsecase))
 }
 
 // GetAwardsUsecase mocks base method.
@@ -126,20 +140,6 @@ func (m *MockUsecaseFactory) GetPaymentsUsecase() payments.Usecase {
 func (mr *MockUsecaseFactoryMockRecorder) GetPaymentsUsecase() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentsUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetPaymentsUsecase))
-}
-
-// GetPostsDataUsecase mocks base method.
-func (m *MockUsecaseFactory) GetPostsDataUsecase() posts_data.Usecase {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPostsDataUsecase")
-	ret0, _ := ret[0].(posts_data.Usecase)
-	return ret0
-}
-
-// GetPostsDataUsecase indicates an expected call of GetPostsDataUsecase.
-func (mr *MockUsecaseFactoryMockRecorder) GetPostsDataUsecase() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsDataUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetPostsDataUsecase))
 }
 
 // GetPostsUsecase mocks base method.

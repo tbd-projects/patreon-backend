@@ -5,18 +5,18 @@ import (
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
+	repoAttaches "patreon/internal/app/repository/attaches"
 	repoFiles "patreon/internal/app/repository/files"
 	repoPosts "patreon/internal/app/repository/posts"
-	repoPostsData "patreon/internal/app/repository/posts_data"
 )
 
 type PostsUsecase struct {
 	repository      repoPosts.Repository
-	repositoryData  repoPostsData.Repository
+	repositoryData  repoAttaches.Repository
 	filesRepository repoFiles.Repository
 }
 
-func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoPostsData.Repository,
+func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoAttaches.Repository,
 	filesRepository repoFiles.Repository) *PostsUsecase {
 	return &PostsUsecase{
 		repository:      repository,
@@ -43,7 +43,7 @@ func (usecase *PostsUsecase) GetPost(postId int64, userId int64, addView bool) (
 		return nil, err
 	}
 	res := &models.PostWithData{Post: post, Data: []models.PostData{}}
-	res.Data, err = usecase.repositoryData.GetData(postId)
+	res.Data, err = usecase.repositoryData.GetAttaches(postId)
 	if err != nil {
 		return nil, err
 	}

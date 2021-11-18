@@ -1,4 +1,4 @@
-package models
+package http_models
 
 import (
 	"fmt"
@@ -70,15 +70,19 @@ type ResponsePost struct {
 	IsDraft     bool      `json:"is_draft,omitempty"`
 }
 
-type ResponsePostData struct {
+type ResponseAttach struct {
 	ID   int64  `json:"attach_id"`
 	Data string `json:"data"`
 	Type string `json:"type"`
 }
 
-type ResponsePostWithData struct {
+type ResponseApplyAttach struct {
+	IDs   []int64  `json:"attaches_id"`
+}
+
+type ResponsePostWithAttaches struct {
 	Post ResponsePost       `json:"post"`
-	Data []ResponsePostData `json:"attach"`
+	Data []ResponseAttach `json:"attaches"`
 }
 type ResponseBalance struct {
 	ID      int64        `json:"user_id"`
@@ -142,16 +146,16 @@ func ToResponsePost(ps models.Post) ResponsePost {
 	}
 }
 
-func ToResponsePostWithData(ps models.PostWithData) ResponsePostWithData {
-	res := ResponsePostWithData{Post: ToResponsePost(*ps.Post), Data: []ResponsePostData{}}
+func ToResponsePostWithAttaches(ps models.PostWithData) ResponsePostWithAttaches {
+	res := ResponsePostWithAttaches{Post: ToResponsePost(*ps.Post), Data: []ResponseAttach{}}
 	for _, data := range ps.Data {
-		res.Data = append(res.Data, ToResponsePostData(data))
+		res.Data = append(res.Data, ToResponseAttach(data))
 	}
 	return res
 }
 
-func ToResponsePostData(ps models.PostData) ResponsePostData {
-	return ResponsePostData{
+func ToResponseAttach(ps models.PostData) ResponseAttach {
+	return ResponseAttach{
 		ID:   ps.ID,
 		Data: ps.Data,
 		Type: string(ps.Type),

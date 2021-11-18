@@ -8,7 +8,7 @@ import (
 	mock_repository_info "patreon/internal/app/repository/info/mocks"
 	mock_repository_likes "patreon/internal/app/repository/likes/mocks"
 	mock_repository_posts "patreon/internal/app/repository/posts/mocks"
-	mock_repository_posts_data "patreon/internal/app/repository/posts_data/mocks"
+	mock_repository_attaches "patreon/internal/app/repository/attaches/mocks"
 	mock_repository_subscribers "patreon/internal/app/repository/subscribers/mocks"
 	mock_repository_user "patreon/internal/app/repository/user/mocks"
 
@@ -34,7 +34,7 @@ type SuiteUsecase struct {
 	MockPostsRepository       *mock_repository_posts.PostsRepository
 	MockLikesRepository       *mock_repository_likes.LikesRepository
 	MockInfoRepository        *mock_repository_info.InfoRepository
-	MockPostsDataRepository   *mock_repository_posts_data.PostsDataRepository
+	MockAttachesRepository   *mock_repository_attaches.AttachesRepository
 
 	Logger *logrus.Logger
 	Tb     TestTable
@@ -46,7 +46,7 @@ func (s *SuiteUsecase) SetupSuite() {
 	s.MockUserRepository = mock_repository_user.NewUserRepository(s.Mock)
 	s.MockSubscribersRepository = mock_repository_subscribers.NewSubscribersRepository(s.Mock)
 	s.MockFileRepository = mock_repository_files.NewFilesRepository(s.Mock)
-	s.MockPostsDataRepository = mock_repository_posts_data.NewPostsDataRepository(s.Mock)
+	s.MockAttachesRepository = mock_repository_attaches.NewAttachesRepository(s.Mock)
 	s.MockPostsRepository = mock_repository_posts.NewPostsRepository(s.Mock)
 	s.MockAwardsRepository = mock_repository_awards.NewAwardsRepository(s.Mock)
 	s.MockLikesRepository = mock_repository_likes.NewLikesRepository(s.Mock)

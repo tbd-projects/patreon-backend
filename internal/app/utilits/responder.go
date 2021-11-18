@@ -11,7 +11,7 @@ type Responder struct {
 }
 
 func (h *Responder) Error(w http.ResponseWriter, r *http.Request, code int, err error) {
-	h.Respond(w, r, code, models.ErrResponse{Err: err.Error()})
+	h.Respond(w, r, code, http_models.ErrResponse{Err: err.Error()})
 }
 
 func (h *Responder) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {

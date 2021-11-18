@@ -43,10 +43,10 @@ func NewUpdateCoverHandler(log *logrus.Logger,
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param cover formData file true "Cover file with ext jpeg/png"
 // @Success 200 "successfully upload cover"
-// @Failure 400 {object} models.ErrResponse "size of file very big", "invalid form field name", "please upload a JPEG, JPG or PNG files"
-// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
-// @Failure 422 {object} models.ErrResponse "this creator id not know"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name", "please upload a JPEG, JPG or PNG files"
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
+// @Failure 422 {object} http_models.ErrResponse "this creator id not know"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Router /creators/{creator_id:}/update/cover [PUT]
 func (h *UpdateCoverCreatorHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,

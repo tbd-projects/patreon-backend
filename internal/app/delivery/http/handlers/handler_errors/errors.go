@@ -3,6 +3,7 @@ package handler_errors
 import (
 	"errors"
 	"fmt"
+	http_models "patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/models"
 )
 
@@ -12,9 +13,18 @@ var (
 	UserWithNicknameNotFound = errors.New("user with this nickname not found")
 	AwardNotFound            = errors.New("award with this id not found")
 	PostNotFound             = errors.New("post with not found")
-	PostDataNotFound         = errors.New("post data with this id not found")
+	AttachNotFound         = errors.New("attach with this id not found")
 	LikeNotFound             = errors.New("like with this id not found")
 	PaymentsNotFound         = errors.New("this user have not payment")
+)
+
+var (
+	IncorrectType = errors.New(
+		fmt.Sprintf("Not allow type, allowed type is: %s, %s, %s, %s, %s",
+			models.Music, models.Video, models.Files, models.Text, models.Image))
+	IncorrectIdAttach = errors.New("Not valid attach id")
+	IncorrectStatus   = errors.New(fmt.Sprintf("Not allow status, allowed status is: %s, %s",
+		http_models.AddStatus, http_models.UpdateStatus))
 )
 
 /// Fields Incorrect

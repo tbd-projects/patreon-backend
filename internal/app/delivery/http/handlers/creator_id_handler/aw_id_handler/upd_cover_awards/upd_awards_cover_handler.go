@@ -42,10 +42,10 @@ func NewUpdateCoverAwardsHandler(log *logrus.Logger,
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param cover formData file true "Cover file with ext jpeg/png"
 // @Success 200 "successfully upload avatar"
-// @Failure 400 {object} models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name"
-// @Failure 422 {object} models.ErrResponse "this creator id not know"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation". "server error"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this awards not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name"
+// @Failure 422 {object} http_models.ErrResponse "this creator id not know"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation". "server error"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this awards not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/update/cover [PUT]
 func (h *UpdateCoverAwardsHandler) PUT(w http.ResponseWriter, r *http.Request) {

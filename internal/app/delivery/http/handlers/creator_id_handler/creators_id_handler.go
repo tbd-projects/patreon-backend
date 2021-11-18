@@ -36,10 +36,10 @@ func NewCreatorIdHandler(log *logrus.Logger, sManager sessions.SessionsManager, 
 // @Description get creator with id from path
 // @Produce json
 // @Param creator_id path int true "Get creator with id"
-// @Success 200 {object} models.ResponseCreatorWithAwards
-// @Failure 404 {object} models.ErrResponse "user not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Success 200 {object} http_models.ResponseCreatorWithAwards
+// @Failure 404 {object} http_models.ErrResponse "user not found"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Router /creators/{creator_id:} [GET]
 func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
 	userId, ok := r.Context().Value("user_id").(int64)
@@ -65,5 +65,5 @@ func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.Log(r).Debugf("get creator %v with id %v", creator, creatorId)
-	s.Respond(w, r, http.StatusOK, models.ToResponseCreatorWithAwards(*creator))
+	s.Respond(w, r, http.StatusOK, http_models.ToResponseCreatorWithAwards(*creator))
 }

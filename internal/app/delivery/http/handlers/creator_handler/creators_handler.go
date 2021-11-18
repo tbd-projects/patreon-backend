@@ -45,9 +45,9 @@ func NewCreatorHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Summary get list of Creators
 // @Description get list of creators which register on service
 // @Produce json
-// @Success 201 {array} models.ResponseCreator
-// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
+// @Success 201 {array} http_models.ResponseCreator
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
 // @Router /creators [GET]
 func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 	creators, err := h.creatorUsecase.GetCreators()
@@ -56,9 +56,9 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondCreators := make([]models.ResponseCreator, len(creators))
+	respondCreators := make([]http_models.ResponseCreator, len(creators))
 	for i, cr := range creators {
-		respondCreators[i] = models.ToResponseCreator(cr)
+		respondCreators[i] = http_models.ToResponseCreator(cr)
 	}
 
 	h.Log(r).Debugf("get creators %v", respondCreators)
@@ -68,18 +68,18 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // POST Create Creator
 // @Summary create creator
 // @Description create creator with id from path, and respond created creator
-// @Param creator body models.RequestCreator true "Request body for creators"
+// @Param creator body http_models.RequestCreator true "Request body for creators"
 // @Produce json
-// @Success 201 {object} models.IdResponse
-// @Failure 409 {object} models.ErrResponse "creator already exist"
-// @Failure 404 {object} models.ErrResponse "user with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 422 {object} models.ErrResponse "invalid creator nickname", "invalid creator category-description", "invalid creator category", "invalid body in request"
-// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
+// @Success 201 {object} http_models.IdResponse
+// @Failure 409 {object} http_models.ErrResponse "creator already exist"
+// @Failure 404 {object} http_models.ErrResponse "user with this id not found"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 422 {object} http_models.ErrResponse "invalid creator nickname", "invalid creator category-description", "invalid creator category", "invalid body in request"
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators [POST]
 func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestCreator{}
+	req := &http_models.RequestCreator{}
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
@@ -113,5 +113,5 @@ func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, models.IdResponse{ID: creatorId})
+	h.Respond(w, r, http.StatusCreated, http_models.IdResponse{ID: creatorId})
 }

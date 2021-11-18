@@ -4,7 +4,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models_http "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/sessions"
 	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
@@ -36,9 +36,9 @@ func NewProfileHandler(log *logrus.Logger,
 // @Description get nickname and avatar for user
 // @Accept  json
 // @Produce json
-// @Success 201 {object} models.ProfileResponse "Successfully get user"
-// @Failure 404 {object} models.ErrResponse "user with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Success 201 {object} http_models.ProfileResponse "Successfully get user"
+// @Failure 404 {object} http_models.ErrResponse "user with this id not found"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Failure 401 "user are not authorized"
 // @Router /user [GET]
 func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
@@ -56,5 +56,5 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Log(r).Debugf("get user %s", u)
-	h.Respond(w, r, http.StatusOK, models_http.ToRProfileResponse(*u))
+	h.Respond(w, r, http.StatusOK, http_models.ToRProfileResponse(*u))
 }

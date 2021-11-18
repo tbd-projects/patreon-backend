@@ -30,7 +30,7 @@ func TestResponder(t *testing.T) {
 	tmpError := errors.New("some error")
 	responder.Error(recorder, reader, http.StatusOK, tmpError)
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	req := &models.ErrResponse{}
+	req := &http_models.ErrResponse{}
 	decoder := json.NewDecoder(recorder.Body)
 	err = decoder.Decode(req)
 	require.NoError(t, err)

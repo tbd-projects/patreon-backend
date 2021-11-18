@@ -5,7 +5,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models_respond "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
 	usecase_user "patreon/internal/app/usecase/user"
@@ -37,15 +37,15 @@ func NewRegisterHandler(log *logrus.Logger, sManager sessions.SessionsManager,
 // @Description create new account and get cookies
 // @Accept  json
 // @Produce json
-// @Param user body models.RequestRegistration true "Request body for user registration"
-// @Success 201 {object} models.IdResponse "Create user successfully"
-// @Failure 409 {object} models.ErrResponse "user already exist"
-// @Failure 422 {object} models.ErrResponse "invalid body in request", "nickname already exist", "incorrect email or password", "incorrect nickname"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
+// @Param register_info body http_models.RequestRegistration true "Request body for user registration"
+// @Success 201 {object} http_models.IdResponse "Create user successfully"
+// @Failure 409 {object} http_models.ErrResponse "user already exist"
+// @Failure 422 {object} http_models.ErrResponse "invalid body in request", "nickname already exist", "incorrect email or password", "incorrect nickname"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
 // @Failure 418 "User are authorized"
 // @Router /register [POST]
 func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models_respond.RequestRegistration{}
+	req := &http_models.RequestRegistration{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
@@ -69,5 +69,5 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u.MakeEmptyPassword()
-	h.Respond(w, r, http.StatusCreated, models_respond.IdResponse{ID: id})
+	h.Respond(w, r, http.StatusCreated, http_models.IdResponse{ID: id})
 }

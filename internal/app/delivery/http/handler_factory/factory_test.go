@@ -31,7 +31,7 @@ func (s *FactorySuite) TestInitHandlers() {
 	s.usecaseFactory.EXPECT().GetLikesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetSessionManager().Times(1)
 	s.usecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
-	s.usecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetAttachesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetInfoUsecase().Times(1)
 
@@ -59,7 +59,7 @@ func (s *FactorySuite) TestGetHandlersUrlsAlreadyExists() {
 	s.usecaseFactory.EXPECT().GetLikesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetSessionManager().Times(1)
 	s.usecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
-	s.usecaseFactory.EXPECT().GetPostsDataUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetAttachesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetInfoUsecase().Times(1)
 

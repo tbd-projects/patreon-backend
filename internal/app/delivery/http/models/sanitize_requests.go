@@ -1,6 +1,9 @@
-package models
+package http_models
 
-import "github.com/microcosm-cc/bluemonday"
+import (
+	"github.com/microcosm-cc/bluemonday"
+	"patreon/internal/app/models"
+)
 
 func (req *RequestCreator) Sanitize(sanitizer bluemonday.Policy) {
 	req.Category = sanitizer.Sanitize(req.Category)
@@ -44,3 +47,16 @@ func (req *RequestChangeNickname) Sanitize(sanitizer bluemonday.Policy) {
 	req.OldNickname = sanitizer.Sanitize(req.OldNickname)
 	req.NewNickname = sanitizer.Sanitize(req.NewNickname)
 }
+
+func (req *RequestAttach) Sanitize(sanitizer bluemonday.Policy) {
+	req.Value = sanitizer.Sanitize(req.Value)
+	req.Status = sanitizer.Sanitize(req.Status)
+	req.Type = models.DataType(sanitizer.Sanitize(string(req.Type)))
+}
+
+func (req *RequestAttaches) Sanitize(sanitizer bluemonday.Policy) {
+	for _, attach := range req.Attaches {
+		attach.Sanitize(sanitizer)
+	}
+}
+

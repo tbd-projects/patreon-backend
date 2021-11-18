@@ -59,10 +59,10 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 	decoder := json.NewDecoder(recorder.Body)
-	res := &models.ResponseCreatorWithAwards{}
+	res := &http_models.ResponseCreatorWithAwards{}
 	err = decoder.Decode(res)
 	assert.NoError(s.T(), err)
-	expected := models.ToResponseCreatorWithAwards(creator)
+	expected := http_models.ToResponseCreatorWithAwards(creator)
 	assert.Equal(s.T(), &expected, res)
 }
 

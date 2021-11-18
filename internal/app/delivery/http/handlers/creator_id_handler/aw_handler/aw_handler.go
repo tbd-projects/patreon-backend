@@ -45,9 +45,9 @@ func NewAwardsHandler(log *logrus.Logger,
 // @Summary get list of awards of some creator
 // @Description get list of awards which belongs the creator
 // @Produce json
-// @Success 201 {array} models.ResponseAward
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Success 201 {array} http_models.ResponseAward
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Router /creators/{:creator_id}/awards [GET]
 func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	idInt, ok := h.GetInt64FromParam(w, r, "creator_id")
@@ -67,9 +67,9 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondAwards := make([]models.ResponseAward, len(awards))
+	respondAwards := make([]http_models.ResponseAward, len(awards))
 	for i, aw := range awards {
-		respondAwards[i] = models.ToResponseAward(aw)
+		respondAwards[i] = http_models.ToResponseAward(aw)
 	}
 
 	h.Log(r).Debugf("get creators %v", respondAwards)
@@ -79,18 +79,18 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 // POST Create Awards
 // @Summary create awards
 // @Description create awards to creator with id from path
-// @Param award body models.RequestAwards true "Request body for awards"
+// @Param award body http_models.RequestAwards true "Request body for awards"
 // @Produce json
-// @Success 201 {object} models.IdResponse "id awards"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 422 {object} models.ErrResponse "empty name in request", "incorrect value of price", "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 409 {object} models.ErrResponse "awards with this price already exists", "awards with this name already exists"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator",  "csrf token is invalid, get new token"
+// @Success 201 {object} http_models.IdResponse "id awards"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 422 {object} http_models.ErrResponse "empty name in request", "incorrect value of price", "invalid body in request"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 409 {object} http_models.ErrResponse "awards with this price already exists", "awards with this name already exists"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator",  "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards [POST]
 func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestAwards{}
+	req := &http_models.RequestAwards{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
@@ -123,5 +123,5 @@ func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, &models.IdResponse{ID: awardsId})
+	h.Respond(w, r, http.StatusCreated, &http_models.IdResponse{ID: awardsId})
 }

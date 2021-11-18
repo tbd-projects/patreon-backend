@@ -10,7 +10,7 @@ import (
 	repoLikes "patreon/internal/app/repository/likes"
 	repoPayments "patreon/internal/app/repository/payments"
 	repoPosts "patreon/internal/app/repository/posts"
-	repoPostsData "patreon/internal/app/repository/posts_data"
+	repoAttaches "patreon/internal/app/repository/attaches"
 	useSubscr "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 
@@ -29,7 +29,7 @@ type RepositoryFactory interface {
 	GetSubscribersRepository() useSubscr.Repository
 	GetPostsRepository() repoPosts.Repository
 	GetLikesRepository() repoLikes.Repository
-	GetPostsDataRepository() repoPostsData.Repository
+	GetAttachesRepository() repoAttaches.Repository
 	GetFilesRepository() repoFiles.Repository
 	GetPaymentsRepository() repoPayments.Repository
 	GetInfoRepository() repoInfo.Repository

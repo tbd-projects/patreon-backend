@@ -31,7 +31,7 @@ func (s *RegisterTestSuite) SetupSuite() {
 func (s *RegisterTestSuite) TestRegisterHandler_POST_EmptyBody() {
 	s.Tb = handlers.TestTable{
 		Name:              "Empty body from request",
-		Data:              &models.RequestRegistration{},
+		Data:              &http_models.RequestRegistration{},
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
@@ -71,7 +71,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_InvalidBody() {
 func (s *RegisterTestSuite) TestRegisterHandler_POST_UserAlreadyExist() {
 	s.Tb = handlers.TestTable{
 		Name: "User exist in database",
-		Data: models.RequestRegistration{
+		Data: http_models.RequestRegistration{
 			Login:    "dmitriy",
 			Nickname: "linux1998",
 			Password: "mail.ru",
@@ -82,7 +82,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_UserAlreadyExist() {
 
 	recorder := httptest.NewRecorder()
 
-	req := s.Tb.Data.(models.RequestRegistration)
+	req := s.Tb.Data.(http_models.RequestRegistration)
 	user := &models_data.User{
 		Login:    req.Login,
 		Nickname: req.Nickname,
@@ -106,7 +106,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_UserAlreadyExist() {
 func (s *RegisterTestSuite) TestRegisterHandler_POST_SmallPassword() {
 	s.Tb = handlers.TestTable{
 		Name: "Small password in request",
-		Data: models.RequestRegistration{
+		Data: http_models.RequestRegistration{
 			Login:    "dmitriy",
 			Nickname: "linux1998",
 			Password: "mail",
@@ -116,7 +116,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_SmallPassword() {
 	}
 	recorder := httptest.NewRecorder()
 
-	req := s.Tb.Data.(models.RequestRegistration)
+	req := s.Tb.Data.(http_models.RequestRegistration)
 	user := &models_data.User{
 		Login:    req.Login,
 		Nickname: req.Nickname,
@@ -162,7 +162,7 @@ func (match *userWithPasswordMatcher) String() string {
 func (s *RegisterTestSuite) TestRegisterHandler_POST_CreateSuccess() {
 	s.Tb = handlers.TestTable{
 		Name: "Success create user",
-		Data: models.RequestRegistration{
+		Data: http_models.RequestRegistration{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 			Nickname: "linux1998",
@@ -172,7 +172,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_CreateSuccess() {
 	}
 	recorder := httptest.NewRecorder()
 
-	req := s.Tb.Data.(models.RequestRegistration)
+	req := s.Tb.Data.(http_models.RequestRegistration)
 	user := &models_data.User{
 		Login:    req.Login,
 		Password: req.Password,

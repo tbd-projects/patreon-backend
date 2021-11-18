@@ -5,7 +5,9 @@ import (
 	"patreon/internal/app"
 )
 
-const NoAwards = -1
+const (
+	NoAwards = -1
+)
 
 var (
 	DefaultErrDB = errors.New("something wrong DB")

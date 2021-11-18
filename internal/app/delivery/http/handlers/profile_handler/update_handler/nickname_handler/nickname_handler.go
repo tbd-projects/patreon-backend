@@ -43,13 +43,13 @@ func NewUpdateNicknameHandler(log *logrus.Logger,
 // PUT NicknameChange
 // @Summary set new user nickname
 // @Accept  json
-// @Param nickname body models.RequestChangeNickname true "Request body for change nickname"
+// @Param nickname body http_models.RequestChangeNickname true "Request body for change nickname"
 // @Success 200 "successfully change nickname"
-// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token"
-// @Failure 404 {object} models.ErrResponse "user not found"
-// @Failure 409 {object} models.ErrResponse "nickname already exists"
-// @Failure 422 {object} models.ErrResponse "invalid body in request | user with this oldNickname not found | invalid nickname in body | old nickname not equal current user nickname"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
+// @Failure 404 {object} http_models.ErrResponse "user not found"
+// @Failure 409 {object} http_models.ErrResponse "nickname already exists"
+// @Failure 422 {object} http_models.ErrResponse "invalid body in request | user with this oldNickname not found | invalid nickname in body | old nickname not equal current user nickname"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Failure 418 "User are authorized"
 // @Router /user/update/nickname [PUT]
 func (h *UpdateNicknameHandler) PUT(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +61,7 @@ func (h *UpdateNicknameHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	req := &models.RequestChangeNickname{}
+	req := &http_models.RequestChangeNickname{}
 	if err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy()); err != nil {
 		h.Log(r).Warnf("UpdateNicknameHandler: can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
@@ -69,7 +69,7 @@ func (h *UpdateNicknameHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := req.Validate(); err != nil {
 		h.Log(r).Warnf("UpdateNicknameHandler: invalid body on request %s", err)
-		h.Error(w, r, http.StatusUnprocessableEntity, models.NicknameValidateError)
+		h.Error(w, r, http.StatusUnprocessableEntity, http_models.NicknameValidateError)
 		return
 	}
 	err := h.userUsecase.UpdateNickname(id, req.OldNickname, req.NewNickname)

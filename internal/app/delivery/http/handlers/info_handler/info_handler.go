@@ -25,12 +25,12 @@ func NewInfoHandler(log *logrus.Logger, ucInfo usecase_info.Usecase) *InfoHandle
 }
 
 // GET Info
-// @Summary get info about creator category and type of post data
-// @Description get info about creator category and type of post data
+// @Summary get info about creator category and type of attach
+// @Description get info about creator category and type of attach
 // @Produce json
-// @Success 200 {object} models.ResponseInfo
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Success 200 {object} http_models.ResponseInfo
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Router /info [GET]
 func (s *InfoHandler) GET(w http.ResponseWriter, r *http.Request) {
 	info, err := s.infoUsecase.Get()
@@ -40,5 +40,5 @@ func (s *InfoHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.Log(r).Debug("get info")
-	s.Respond(w, r, http.StatusOK, models.ToResponseInfo(*info))
+	s.Respond(w, r, http.StatusOK, http_models.ToResponseInfo(*info))
 }

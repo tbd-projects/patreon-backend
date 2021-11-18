@@ -7,7 +7,7 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	response_models "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
 	"patreon/internal/app/sessions"
@@ -48,11 +48,11 @@ func NewLikesHandler(log *logrus.Logger,
 // @Summary deletes like from the post and return new count of likes
 // @Description deletes like form post id in url
 // @Produce json
-// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 409 {object} models.ErrResponse "this user not have like for this post"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Success 200 {object} http_models.ResponseLike "current count of likes on post"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 409 {object} http_models.ErrResponse "this user not have like for this post"
+// @Failure 403 {object} http_models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [DELETE]
 func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
@@ -81,18 +81,18 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 		h.UsecaseError(w, r, err, codesByErrorsDELETE)
 		return
 	}
-	h.Respond(w, r, http.StatusOK, response_models.ResponseLike{Likes: res})
+	h.Respond(w, r, http.StatusOK, http_models.ResponseLike{Likes: res})
 }
 
 // PUT Likes
 // @Summary add like on the post
 // @Description add like on the post with id = post_id and return new count of likes
 // @Produce json
-// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 409 {object} models.ErrResponse "this user already add like for this post"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Success 200 {object} http_models.ResponseLike "current count of likes on post"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 409 {object} http_models.ErrResponse "this user already add like for this post"
+// @Failure 403 {object} http_models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [PUT]
 func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
@@ -122,5 +122,5 @@ func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusOK, response_models.ResponseLike{Likes: res})
+	h.Respond(w, r, http.StatusOK, http_models.ResponseLike{Likes: res})
 }

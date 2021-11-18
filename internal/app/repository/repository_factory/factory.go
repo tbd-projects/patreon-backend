@@ -18,8 +18,8 @@ import (
 	repoPaymentsPsql "patreon/internal/app/repository/payments/postgresql"
 	repoPosts "patreon/internal/app/repository/posts"
 	repPostsPsql "patreon/internal/app/repository/posts/postgresql"
-	repoPostsData "patreon/internal/app/repository/posts_data"
-	repoPostsDataPsql "patreon/internal/app/repository/posts_data/postgresql"
+	repoAttaches "patreon/internal/app/repository/attaches"
+	repoAttachesPsql "patreon/internal/app/repository/attaches/postgresql"
 	repoSubscribers "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 	repUserPsql "patreon/internal/app/repository/user/postgresql"
@@ -39,7 +39,7 @@ type RepositoryFactory struct {
 	awardsRepository      repoAwrds.Repository
 	postsRepository       repoPosts.Repository
 	likesRepository       repoLikes.Repository
-	PostDataRepository    repoPostsData.Repository
+	PostDataRepository    repoAttaches.Repository
 	csrfRepository        repCsrf.Repository
 	accessRepository      repositoryAccess.Repository
 	subscribersRepository repoSubscribers.Repository
@@ -116,9 +116,9 @@ func (f *RepositoryFactory) GetLikesRepository() repoLikes.Repository {
 	return f.likesRepository
 }
 
-func (f *RepositoryFactory) GetPostsDataRepository() repoPostsData.Repository {
+func (f *RepositoryFactory) GetAttachesRepository() repoAttaches.Repository {
 	if f.PostDataRepository == nil {
-		f.PostDataRepository = repoPostsDataPsql.NewPostsDataRepository(f.expectedConnections.SqlConnection)
+		f.PostDataRepository = repoAttachesPsql.NewAttachesRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.PostDataRepository
 }

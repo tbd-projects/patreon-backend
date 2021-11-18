@@ -44,18 +44,18 @@ func NewPostsUpdateHandler(log *logrus.Logger,
 // PUT Posts
 // @Summary update current posts
 // @Description update current posts from current creator
-// @Param user body models.RequestPosts true "Request body for posts"
+// @Param post body http_models.RequestPosts true "Request body for posts"
 // @Produce json
 // @Success 200
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 404 {object} models.ErrResponse "post with this id not found"
-// @Failure 422 {object} models.ErrResponse "empty title", "this awards id not know", "this creator id not know", "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation", "server error"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 404 {object} http_models.ErrResponse "post with this id not found"
+// @Failure 422 {object} http_models.ErrResponse "empty title", "this awards id not know", "this creator id not know", "invalid body in request"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/update [PUT]
 func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestPosts{}
+	req := &http_models.RequestPosts{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {

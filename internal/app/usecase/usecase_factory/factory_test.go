@@ -186,7 +186,7 @@ func (s *FactorySuite) TestGetAwardsUsecaseSecondCall() {
 func (s *FactorySuite) TestGetPostsUsecaseFirstCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
 	s.mockRepositoryFactory.EXPECT().GetPostsRepository()
-	s.mockRepositoryFactory.EXPECT().GetPostsDataRepository()
+	s.mockRepositoryFactory.EXPECT().GetAttachesRepository()
 	s.mockRepositoryFactory.EXPECT().GetFilesRepository()
 
 	defer func() {
@@ -231,9 +231,9 @@ func (s *FactorySuite) TestGetLikesUsecaseSecondCall() {
 	}()
 	factory.GetLikesUsecase()
 }
-func (s *FactorySuite) TestGetPostsDataUsecaseFirstCall() {
+func (s *FactorySuite) TestGetAttachesUsecaseFirstCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
-	s.mockRepositoryFactory.EXPECT().GetPostsDataRepository()
+	s.mockRepositoryFactory.EXPECT().GetAttachesRepository()
 	s.mockRepositoryFactory.EXPECT().GetFilesRepository()
 
 	defer func() {
@@ -241,7 +241,7 @@ func (s *FactorySuite) TestGetPostsDataUsecaseFirstCall() {
 			assert.Fail(s.T(), "fail on getUserUsecase()")
 		}
 	}()
-	factory.GetPostsDataUsecase()
+	factory.GetAttachesUsecase()
 }
 
 func (s *FactorySuite) TestGetInfoUsecaseFirstCall() {

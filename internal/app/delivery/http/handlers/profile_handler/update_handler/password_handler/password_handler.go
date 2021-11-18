@@ -46,17 +46,17 @@ func NewUpdatePasswordHandler(log *logrus.Logger,
 // @Description change password from user
 // @Accept  json
 // @Produce json
-// @Param password body models.RequestChangePassword true "Request body for change password"
+// @Param password body http_models.RequestChangePassword true "Request body for change password"
 // @Success 200 "success update password"
-// @Failure 409 {object} models.ErrResponse "incorrect new password"(mean old password equal new)
-// @Failure 403 {object} models.ErrResponse "csrf token is invalid, get new token", "incorrect email or password"
-// @Failure 404 {object} models.ErrResponse "user not found"
+// @Failure 409 {object} http_models.ErrResponse "incorrect new password"(mean old password equal new)
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token", "incorrect email or password"
+// @Failure 404 {object} http_models.ErrResponse "user not found"
 // @Failure 418 "User are authorized"
-// @Failure 400 {object} models.ErrResponse "invalid body in request", "incorrect new password"
-// @Failure 500 {object} models.ErrResponse "server error", "can not do bd operation"
+// @Failure 400 {object} http_models.ErrResponse "invalid body in request", "incorrect new password"
+// @Failure 500 {object} http_models.ErrResponse "server error", "can not do bd operation"
 // @Router /user/update/password [PUT]
 func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestChangePassword{}
+	req := &http_models.RequestChangePassword{}
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil || req.OldPassword == "" || req.NewPassword == "" {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
