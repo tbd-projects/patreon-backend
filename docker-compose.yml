@@ -37,6 +37,8 @@ services:
       - session-redis
       - access-redis
       - patreon-bd
+    environment:
+      WAIT_HOSTS: patreon-bd:5432
   session-redis:
     image: "redis:alpine"
     expose:

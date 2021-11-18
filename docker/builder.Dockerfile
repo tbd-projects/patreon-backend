@@ -15,4 +15,6 @@ ARG RUN_HTTPS
 
 ENV HTTPS=$RUN_HTTPS
 
-CMD ./server.out -server-run $HTTPS
+RUN chmod +x ./wait
+
+CMD ./wait && ./server.out -server-run $HTTPS
