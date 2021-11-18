@@ -165,17 +165,18 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/update/cover": hs[AWARDS_COVER],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/subscribe":    hs[AWARDS_CREATOR_SUBSCRIBE],
 		// ../posts  ---------------------------------------------------------////
-		"/creators/{creator_id:[0-9]+}/posts":                         hs[POSTS],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":        hs[POSTS_WITH_ID],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update": hs[POSTS_UPD],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/text":   hs[POST_ADD_TEXT],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/image":  hs[POST_ADD_IMAGE],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/cover":  hs[POST_UPD_COVER],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":   hs[POSTS_LIKES],
+		"/creators/{creator_id:[0-9]+}/posts":                               hs[POSTS],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":              hs[POSTS_WITH_ID],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update":       hs[POSTS_UPD],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update/cover": hs[POST_UPD_COVER],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/text":         hs[POST_ADD_TEXT],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/image":        hs[POST_ADD_IMAGE],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":         hs[POSTS_LIKES],
 		// ../posts_data  ----------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}":              hs[POST_DATA_ID],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/text":  hs[POST_DATA_UPD_TEXT],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/image": hs[POST_DATA_UPD_IMAGE],
+
 		//   /token  ---------------------------------------------------------////
 		"/token": hs[GET_CSRF_TOKEN],
 	}
