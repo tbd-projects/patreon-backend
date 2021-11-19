@@ -8,10 +8,9 @@ services:
   sessions-service:
     image: session-service
     expose:
-      - "9001"
-      - "8080"
+      - "5000"
     ports:
-      - "9001:9001"
+      - "5000:5000"
     networks:
       - default
     depends_on:
@@ -25,7 +24,6 @@ services:
       - "80"
       - "8080"
       - "443"
-      - "9001"
     ports:
       - "443:443"
       #      - "80:80"

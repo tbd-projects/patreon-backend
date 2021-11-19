@@ -19,7 +19,7 @@ session-redis_url = "redis://session-redis/0"
 access-redis_url = "redis://access-redis/0"
 
 [microservice]
-session_url = "localhost:5000"
+session_url = "sessions-service:5001"
 
 [cors]
 headers = [
