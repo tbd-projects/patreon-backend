@@ -1,6 +1,7 @@
 .PHONY = build test
 
 LOG_DIR=./logs
+LOG_SESSION_DIR = ./logs-sessions
 CHECK_DIR=go list ./... | grep -v /cmd/utilits
 SQL_DIR=./scripts
 MICROSERVICE_DIR=$(PWD)/internal/microservices
@@ -50,7 +51,9 @@ open-last-log:
 	cat $(LOG_DIR)/`ls -t $(LOG_DIR) | head -1 `
 
 clear-logs:
-	rm -r $(LOG_DIR)/*.log
+	rm -rf $(LOG_DIR)/*.log
+	rm -rf $(LOG_SESSION_DIR)/*.log
+
 
 stop:
 	docker-compose stop
