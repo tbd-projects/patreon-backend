@@ -2,7 +2,6 @@ package usecase_factory
 
 import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
-	"patreon/internal/app/sessions"
 	useAccess "patreon/internal/app/usecase/access"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
@@ -13,6 +12,7 @@ import (
 	usePostsData "patreon/internal/app/usecase/posts_data"
 	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
+	"patreon/internal/microservices/auth/sessions"
 )
 
 type UsecaseFactory struct {

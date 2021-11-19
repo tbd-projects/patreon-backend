@@ -9,10 +9,10 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
-	middleSes "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -30,11 +30,11 @@ func NewAwardsSubscribeHandler(log *logrus.Logger, sClient session_client.AuthCh
 		BaseHandler:       *bh.NewBaseHandler(log),
 		subscriberUsecase: ucSubscribers,
 	}
-	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(sClient, log).CheckFunc,
+	h.AddMethod(http.MethodPost, h.POST, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
 	)
-	h.AddMethod(http.MethodDelete, h.DELETE, middleSes.NewSessionMiddleware(sClient, log).CheckFunc,
+	h.AddMethod(http.MethodDelete, h.DELETE, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
 	)

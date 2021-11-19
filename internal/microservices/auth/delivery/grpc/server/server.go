@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"net"
-	"patreon/internal/app/sessions"
 	proto "patreon/internal/microservices/auth/delivery/grpc/protobuf"
+	"patreon/internal/microservices/auth/sessions"
 
 	"github.com/sirupsen/logrus"
 
@@ -28,6 +28,8 @@ func NewAuthGRPCServer(logger *logrus.Logger, grpcServer *grpc.Server, sessionMa
 
 func (server *AuthServer) StartGRPCServer(listenUrl string) error {
 	lis, err := net.Listen("tcp", listenUrl)
+	server.logger.Infof("my listen url %s \n", listenUrl)
+
 	if err != nil {
 		server.logger.Errorf("AUTHSERVER\n")
 		server.logger.Errorf("can not listen url: %s err :%v\n", listenUrl, err)
@@ -35,6 +37,7 @@ func (server *AuthServer) StartGRPCServer(listenUrl string) error {
 	}
 	proto.RegisterAuthCheckerServer(server.grpcServer, server)
 
+	server.logger.Info("Start session service\n")
 	return server.grpcServer.Serve(lis)
 }
 

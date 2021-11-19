@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"patreon/internal/app/sessions/models"
+	"patreon/internal/microservices/auth/sessions/models"
 
 	"github.com/pkg/errors"
 

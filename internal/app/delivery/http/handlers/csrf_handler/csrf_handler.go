@@ -6,8 +6,8 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	models_respond "patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions/middleware"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )
@@ -25,7 +25,7 @@ func NewCsrfHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient
 		sessionClient: sClient,
 		csrfUsecase:   uc,
 	}
-	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(sClient, log).CheckFunc)
+	h.AddMethod(http.MethodGet, h.GET, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc)
 	return h
 }
 

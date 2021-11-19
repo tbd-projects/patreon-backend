@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 9001 8080 443 80
 
 RUN make build-sessions
 

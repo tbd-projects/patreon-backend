@@ -8,9 +8,9 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
-	middlewareSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -29,7 +29,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger,
 		creatorUsecase: creatorUsecase,
 		BaseHandler:    *bh.NewBaseHandler(log),
 	}
-	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionClient, log).Check,
+	h.AddMiddleware(session_middleware.NewSessionMiddleware(h.sessionClient, log).Check,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser)
 	h.AddMethod(http.MethodPut, h.PUT,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,

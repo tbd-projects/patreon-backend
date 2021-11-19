@@ -9,10 +9,10 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	usePostsData "patreon/internal/app/usecase/posts_data"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 
@@ -31,7 +31,7 @@ func NewPostsDataUpdateTextHandler(log *logrus.Logger,
 		BaseHandler:      *bh.NewBaseHandler(log),
 		postsDataUsecase: ucPostsData,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
 	h.AddMethod(http.MethodPut, h.PUT)

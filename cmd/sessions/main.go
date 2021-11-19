@@ -2,12 +2,11 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"patreon/internal/app"
-	"patreon/internal/app/sessions/sessions_manager"
 	sessionServer "patreon/internal/microservices/auth/delivery/grpc/server"
 	"patreon/internal/microservices/auth/sessions/repository"
+	sessions_manager2 "patreon/internal/microservices/auth/sessions/sessions_manager"
 	"patreon/pkg/utils"
 
 	grpc2 "google.golang.org/grpc"
@@ -40,6 +39,7 @@ func main() {
 	logger.SetLevel(level)
 
 	sessionRedisPool := utils.NewRedisPool(config.ServerRepository.SessionRedisUrl)
+	logger.Info("Session-service new redis pool create")
 
 	conn, err := sessionRedisPool.Dial()
 	if err != nil {
@@ -48,12 +48,16 @@ func main() {
 	if err = conn.Close(); err != nil {
 		logger.Fatal(err)
 	}
+	logger.Info("Session-service new redis pool success check")
 
 	grpc := grpc2.NewServer()
 	sessionRepository := repository.NewRedisRepository(sessionRedisPool, logger)
+	logger.Info("Session-service create repository")
 
-	server := sessionServer.NewAuthGRPCServer(logger, grpc, sessions_manager.NewSessionManager(sessionRepository))
+	server := sessionServer.NewAuthGRPCServer(logger, grpc, sessions_manager2.NewSessionManager(sessionRepository))
 	if err = server.StartGRPCServer(config.Microservices.SessionServerUrl); err != nil {
-		log.Fatalln(err)
+		logger.Fatalln(err)
 	}
+	logger.Info("Session-service was stopped")
+
 }

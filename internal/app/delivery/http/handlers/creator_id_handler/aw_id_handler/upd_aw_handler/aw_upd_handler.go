@@ -11,9 +11,9 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	bd_modle "patreon/internal/app/models"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -32,7 +32,7 @@ func NewAwardsUpdHandler(log *logrus.Logger,
 		awardsUsecase: ucAwards,
 	}
 
-	h.AddMethod(http.MethodPut, h.PUT, sessionMid.NewSessionMiddleware(sClient, log).CheckFunc,
+	h.AddMethod(http.MethodPut, h.PUT, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log,
 			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,

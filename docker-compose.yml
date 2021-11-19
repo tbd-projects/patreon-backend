@@ -8,24 +8,27 @@ services:
   sessions-service:
     image: session-service
     expose:
-      - "5000"
+      - "9001"
+      - "8080"
     ports:
-      - "5050:5050"
+      - "9001:9001"
     networks:
       - default
     depends_on:
       - session-redis
     volumes:
       - ./logs-sessions:/app/logs
+      - ./configs:/app/configs
   main:
     image: patreon
     expose:
       - "80"
       - "8080"
       - "443"
+      - "9001"
     ports:
       - "443:443"
-#      - "80:80"
+      #      - "80:80"
       - "8080:8080"
     networks:
       - default
@@ -33,10 +36,12 @@ services:
       - ./logs:/app/logs
       - ./media:/app/media
       - ./patreon-secrt:/app/patreon-secrt
+      - ./configs:/app/configs
     depends_on:
       - session-redis
       - access-redis
       - patreon-bd
+      - sessions-service
     environment:
       WAIT_HOSTS: patreon-bd:5432
   session-redis:

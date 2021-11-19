@@ -9,10 +9,10 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	db_models "patreon/internal/app/models"
-	middleSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	"patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -35,7 +35,7 @@ func NewCreatorHandler(log *logrus.Logger, sManager session_client.AuthCheckerCl
 		userUsecase:    ucUser,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
+	h.AddMethod(http.MethodPost, h.POST, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 	)
 	return h

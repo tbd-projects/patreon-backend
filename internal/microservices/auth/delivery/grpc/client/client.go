@@ -20,6 +20,8 @@ func NewSessionClient(con *grpc.ClientConn) *SessionClient {
 	}
 }
 
+// Check Errors:
+//		Status 401 "not authorized user"
 func (c *SessionClient) Check(ctx context.Context, sessionID string) (models.Result, error) {
 	protoSessionID := &proto.SessionID{ID: sessionID}
 	res, err := c.sessionClient.Check(ctx, protoSessionID)

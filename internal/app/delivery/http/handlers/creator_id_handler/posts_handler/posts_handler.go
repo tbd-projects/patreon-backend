@@ -11,9 +11,9 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	db_models "patreon/internal/app/models"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -32,7 +32,7 @@ func NewPostsHandler(log *logrus.Logger,
 		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 
 	h.AddMethod(http.MethodGet, h.GET)
 

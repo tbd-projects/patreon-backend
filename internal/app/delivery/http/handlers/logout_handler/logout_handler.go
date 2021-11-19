@@ -5,8 +5,8 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/sessions/middleware"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -24,7 +24,7 @@ func NewLogoutHandler(log *logrus.Logger,
 		sessionClient: sManager,
 	}
 	h.AddMethod(http.MethodPost, h.POST,
-		middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
+		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 
 	return h

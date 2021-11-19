@@ -5,9 +5,9 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	responseModels "patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions/middleware"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )
@@ -26,7 +26,7 @@ func NewSubscriptionsHandler(log *logrus.Logger, sClient session_client.AuthChec
 		BaseHandler:        *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET,
-		middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
+		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
 	return h
 }
 

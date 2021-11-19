@@ -42,9 +42,9 @@ run:
 	mkdir -p $(LOG_DIR)
 	docker-compose up --build --no-deps
 
-run-with-build-local: build-docker-local run
+run-with-build-local: build-docker-local build-docker-sessions run
 
-run-with-build-server: build-docker-server run
+run-with-build-server: build-docker-server build-docker-sessions run
 
 open-last-log:
 	cat $(LOG_DIR)/`ls -t $(LOG_DIR) | head -1 `

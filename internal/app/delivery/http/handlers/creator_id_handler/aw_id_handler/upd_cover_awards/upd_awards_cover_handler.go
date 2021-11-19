@@ -8,9 +8,9 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
-	middlewareSes "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -29,7 +29,7 @@ func NewUpdateCoverAwardsHandler(log *logrus.Logger,
 		awardsUsecase:  awardsUsecase,
 		BaseHandler:    *bh.NewBaseHandler(log),
 	}
-	h.AddMiddleware(middlewareSes.NewSessionMiddleware(h.sessionsClient, log).Check,
+	h.AddMiddleware(session_middleware.NewSessionMiddleware(h.sessionsClient, log).Check,
 		csrf_middleware.NewCsrfMiddleware(log,
 			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser,

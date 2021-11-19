@@ -3,8 +3,8 @@ package sessions_manager
 import (
 	"encoding/hex"
 	"fmt"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/models"
+	"patreon/internal/microservices/auth/sessions"
+	"patreon/internal/microservices/auth/sessions/models"
 	"strconv"
 	"time"
 

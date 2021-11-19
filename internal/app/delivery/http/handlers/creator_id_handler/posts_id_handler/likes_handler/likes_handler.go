@@ -10,10 +10,10 @@ import (
 	response_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -31,7 +31,7 @@ func NewLikesHandler(log *logrus.Logger,
 		likesUsecase: ucLikes,
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
-	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, postsMiddleware.CheckCorrectPost)
 
 	h.AddMethod(http.MethodDelete, h.DELETE,

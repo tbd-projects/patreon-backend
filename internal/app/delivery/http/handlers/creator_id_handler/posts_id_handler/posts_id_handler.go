@@ -9,9 +9,9 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -28,7 +28,7 @@ func NewPostsIDHandler(log *logrus.Logger,
 		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(sClient, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	postMid := middleware.NewPostsMiddleware(log, ucPosts)
 	h.AddMethod(http.MethodGet, h.GET, postMid.CheckCorrectPostFunc, sessionMiddleware.AddUserIdFunc)
 	h.AddMethod(http.MethodDelete, h.DELETE, sessionMiddleware.CheckFunc,

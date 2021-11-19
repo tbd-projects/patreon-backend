@@ -7,7 +7,7 @@ COPY . .
 RUN apt-get update
 RUN apt-get install jq -y
 
-EXPOSE 443 80 8080
+EXPOSE 443 80 8080 9001
 
 RUN make build
 

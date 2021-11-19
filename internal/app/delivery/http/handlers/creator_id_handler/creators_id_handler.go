@@ -5,9 +5,9 @@ import (
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	"patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 

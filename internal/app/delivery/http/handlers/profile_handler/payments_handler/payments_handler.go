@@ -6,9 +6,9 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/repository"
-	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/usecase/payments"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )
@@ -27,7 +27,7 @@ func NewPaymentsHandler(log *logrus.Logger,
 		BaseHandler:     *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET,
-		middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
+		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 	return h
 }
