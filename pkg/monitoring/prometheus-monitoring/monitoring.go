@@ -16,14 +16,17 @@ func NewPrometheusMetrics() *PrometheusMetrics {
 		Hits: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "hits",
 			Help: "Count requests on service",
-		}, []string{"status", "path", "handler_method"}),
+		}, []string{"status", "path", "method"}),
 	}
 
 	return metrics
 }
 
+func (p *PrometheusMetrics) GetHits() *prometheus.CounterVec {
+	return p.Hits
+}
+
 func (p *PrometheusMetrics) SetupMonitoring(router *mux.Router) {
 	prometheus.MustRegister(p.Hits)
-
 	router.Handle("/metrics", promhttp.Handler())
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 
 	//_ "net/http/pprof"
 	"net/url"
@@ -115,6 +116,9 @@ func (s *Server) Start(config *app.Config) error {
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics()
+	monitoringHandler.SetupMonitoring(routerApi)
+
 	//routerApi.HandleFunc("/debug/pprof/", pprof.Index)
 	//routerApi.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
 	//routerApi.HandleFunc("/debug/pprof/profile", pprof.Profile)
@@ -132,7 +136,7 @@ func (s *Server) Start(config *app.Config) error {
 	for apiUrl, h := range *hs {
 		h.Connect(routerApi.Path(apiUrl))
 	}
-	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger)
+	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)
 	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
 	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger, ddosMiddleware.CheckAccess)
 
