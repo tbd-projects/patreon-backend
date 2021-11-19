@@ -30,12 +30,14 @@ func NewAttachUploadImageHandler(log *logrus.Logger,
 		attachesUsecase: ucAttaches,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
-	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
-		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
+	h.AddMiddleware(sessionMiddleware.Check,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.
+			NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewCreatorsMiddleware(log).CheckAllowUser,
+		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost,
+		middleware.NewAttachesMiddleware(log, ucAttaches).CheckCorrectAttach)
 
-	h.AddMethod(http.MethodPut, h.PUT,
-		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+	h.AddMethod(http.MethodPut, h.PUT)
 
 	return h
 }
@@ -52,12 +54,12 @@ func NewAttachUploadImageHandler(log *logrus.Logger,
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id}/update/image [PUT]
+// @Router /creators/{:creator_id}/posts/{:post_id}/{:attach_id}/update/image [PUT]
 func (h *AttachUploadImageHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var attachId int64
 	var ok bool
 
-	if attachId, ok = h.GetInt64FromParam(w, r, "data_id"); !ok {
+	if attachId, ok = h.GetInt64FromParam(w, r, "attach_id"); !ok {
 		return
 	}
 

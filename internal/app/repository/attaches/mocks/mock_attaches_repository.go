@@ -50,7 +50,7 @@ func (mr *AttachesRepositoryMockRecorder) ApplyChangeAttaches(arg0, arg1, arg2 i
 }
 
 // Create mocks base method.
-func (m *AttachesRepository) Create(arg0 *models.PostData) (int64, error) {
+func (m *AttachesRepository) Create(arg0 *models.AttachWithoutLevel) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(int64)
@@ -98,10 +98,10 @@ func (mr *AttachesRepositoryMockRecorder) ExistsAttach(arg0 ...interface{}) *gom
 }
 
 // Get mocks base method.
-func (m *AttachesRepository) Get(arg0 int64) (*models.PostData, error) {
+func (m *AttachesRepository) Get(arg0 int64) (*models.AttachWithoutLevel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
-	ret0, _ := ret[0].(*models.PostData)
+	ret0, _ := ret[0].(*models.AttachWithoutLevel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -113,10 +113,10 @@ func (mr *AttachesRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
 }
 
 // GetAttaches mocks base method.
-func (m *AttachesRepository) GetAttaches(arg0 int64) ([]models.PostData, error) {
+func (m *AttachesRepository) GetAttaches(arg0 int64) ([]models.AttachWithoutLevel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAttaches", arg0)
-	ret0, _ := ret[0].([]models.PostData)
+	ret0, _ := ret[0].([]models.AttachWithoutLevel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -128,7 +128,7 @@ func (mr *AttachesRepositoryMockRecorder) GetAttaches(arg0 interface{}) *gomock.
 }
 
 // Update mocks base method.
-func (m *AttachesRepository) Update(arg0 *models.PostData) error {
+func (m *AttachesRepository) Update(arg0 *models.AttachWithoutLevel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0)
 	ret0, _ := ret[0].(error)

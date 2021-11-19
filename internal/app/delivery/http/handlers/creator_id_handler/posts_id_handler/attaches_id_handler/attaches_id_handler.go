@@ -26,19 +26,20 @@ type AttachesIDHandler struct {
 func NewAttachesIDHandler(log *logrus.Logger,
 	ucAttaches useAttaches.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *AttachesIDHandler {
 	h := &AttachesIDHandler{
-		BaseHandler:      *bh.NewBaseHandler(log),
+		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
 
-	h.AddMiddleware(middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
+	h.AddMiddleware(middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost,
+		middleware.NewAttachesMiddleware(log, ucAttaches).CheckCorrectAttach)
 
 	h.AddMethod(http.MethodGet, h.GET)
 
 	h.AddMethod(http.MethodDelete, h.DELETE,
-		sessionMiddleware.CheckFunc, middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
-		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
+		sessionMiddleware.CheckFunc, csrf_middleware.NewCsrfMiddleware(log,
+			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
+		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc)
 	return h
 }
 
@@ -51,11 +52,11 @@ func NewAttachesIDHandler(log *logrus.Logger,
 // @Failure 404 {object} http_models.ErrResponse "attach with this id not found"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Failure 403 {object} http_models.ErrResponse "this post not belongs this creators"
-// @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id} [GET]
+// @Router /creators/{:creator_id}/posts/{:post_id}/{:attach_id} [GET]
 func (h *AttachesIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 	var attachId int64
 	var ok bool
-	if attachId, ok = h.GetInt64FromParam(w, r, "data_id"); !ok {
+	if attachId, ok = h.GetInt64FromParam(w, r, "attach_id"); !ok {
 		return
 	}
 
@@ -65,13 +66,13 @@ func (h *AttachesIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := h.attachesUsecase.GetAttach(attachId)
+	attach, err := h.attachesUsecase.GetAttach(attachId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsGET)
 		return
 	}
 
-	respondPost := http_models.ToResponseAttach(*post)
+	respondPost := http_models.ToResponseAttach(*attach)
 
 	h.Log(r).Debugf("get attach with id %d", attachId)
 	h.Respond(w, r, http.StatusOK, respondPost)
@@ -86,11 +87,11 @@ func (h *AttachesIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id} [DELETE]
+// @Router /creators/{:creator_id}/posts/{:post_id}/{:attach_id} [DELETE]
 func (h *AttachesIDHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	var attachId int64
 	var ok bool
-	if attachId, ok = h.GetInt64FromParam(w, r, "data_id"); !ok {
+	if attachId, ok = h.GetInt64FromParam(w, r, "attach_id"); !ok {
 		return
 	}
 

@@ -82,13 +82,13 @@ func (repo *AttachesRepository) getAttachType(dataTypeId int64) (models.DataType
 //		UnknownDataFormat
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *AttachesRepository) Create(postData *models.PostData) (int64, error) {
+func (repo *AttachesRepository) Create(postData *models.AttachWithoutLevel) (int64, error) {
 	type_id, err := repo.getAndCheckAttachTypeId(postData.Type)
 	if err != nil {
 		return app.InvalidInt, err
 	}
 
-	if err = repo.store.QueryRow(createQuery, type_id, postData.Data, postData.PostId).
+	if err = repo.store.QueryRow(createQuery, type_id, postData.Value, postData.PostId).
 		Scan(&postData.ID); err != nil {
 		return app.InvalidInt, repository.NewDBError(err)
 	}
@@ -99,10 +99,10 @@ func (repo *AttachesRepository) Create(postData *models.PostData) (int64, error)
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *AttachesRepository) Get(attachId int64) (*models.PostData, error) {
-	data := &models.PostData{ID: attachId}
+func (repo *AttachesRepository) Get(attachId int64) (*models.AttachWithoutLevel, error) {
+	data := &models.AttachWithoutLevel{ID: attachId}
 	var typeId int64
-	if err := repo.store.QueryRow(getQuery, attachId).Scan(&data.PostId, &data.Data,
+	if err := repo.store.QueryRow(getQuery, attachId).Scan(&data.PostId, &data.Value,
 		&typeId); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
@@ -144,8 +144,8 @@ func (repo *AttachesRepository) ExistsAttach(attachId ...int64) (bool, error) {
 // GetAttaches Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *AttachesRepository) GetAttaches(postsId int64) ([]models.PostData, error) {
-	var res []models.PostData
+func (repo *AttachesRepository) GetAttaches(postsId int64) ([]models.AttachWithoutLevel, error) {
+	var res []models.AttachWithoutLevel
 
 	rows, err := repo.store.Query(getAttachesQuery, postsId)
 	if err != nil {
@@ -153,8 +153,8 @@ func (repo *AttachesRepository) GetAttaches(postsId int64) ([]models.PostData, e
 	}
 
 	for rows.Next() {
-		var data models.PostData
-		if err = rows.Scan(&data.ID, &data.Type, &data.Data); err != nil {
+		var data models.AttachWithoutLevel
+		if err = rows.Scan(&data.ID, &data.Type, &data.Value); err != nil {
 			_ = rows.Close()
 			return nil, repository.NewDBError(err)
 		}
@@ -175,13 +175,13 @@ func (repo *AttachesRepository) GetAttaches(postsId int64) ([]models.PostData, e
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *AttachesRepository) Update(postData *models.PostData) error {
+func (repo *AttachesRepository) Update(postData *models.AttachWithoutLevel) error {
 	type_id, err := repo.getAndCheckAttachTypeId(postData.Type)
 	if err != nil {
 		return err
 	}
 
-	if err = repo.store.QueryRow(updateQuery, type_id, postData.Data, postData.ID).
+	if err = repo.store.QueryRow(updateQuery, type_id, postData.Value, postData.ID).
 		Scan(&postData.ID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return repository.NotFound

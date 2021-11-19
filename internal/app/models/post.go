@@ -104,10 +104,10 @@ func (ps *CreatePost) Validate() error {
 
 type DataType string
 
-type PostData struct {
+type AttachWithoutLevel struct {
 	ID     int64    `json:"data_id"`
 	PostId int64    `json:"posts_id"`
-	Data   string   `json:"data"`
+	Value  string   `json:"value"`
 	Type   DataType `json:"type"`
 }
 
@@ -123,7 +123,7 @@ const (
 //		InvalidType
 //		InvalidPostId
 // Important can return some other error
-func (ps *PostData) Validate() error {
+func (ps *AttachWithoutLevel) Validate() error {
 	err := validation.Errors{
 		"post": validation.Validate(ps.PostId, validation.Min(0)),
 		"type": validation.Validate(ps.Type, validation.In(Music, Video, Files, Text, Image)),
@@ -137,14 +137,14 @@ func (ps *PostData) Validate() error {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = models_utilits.ExtractValidateError(postDataValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(attachWithoutLevelValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 
 	return err
 }
 
-type PostWithData struct {
+type PostWithAttach struct {
 	*Post
-	Data []PostData
+	Data []AttachWithoutLevel
 }

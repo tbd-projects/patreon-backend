@@ -18,13 +18,13 @@ import (
 type SuiteAttachesRepository struct {
 	models.Suite
 	repo *AttachesRepository
-	data models.PostData
+	data models.AttachWithoutLevel
 }
 
 func (s *SuiteAttachesRepository) SetupSuite() {
 	s.InitBD()
 	s.repo = NewAttachesRepository(s.DB)
-	s.data.Data = "asd"
+	s.data.Value = "asd"
 	s.data.Type = "image"
 	s.data.ID = 12
 	s.data.PostId = 2
@@ -80,7 +80,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Create() {
 		WithArgs(data.Type).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(createQuery)).
-		WithArgs(1, data.Data, data.PostId).
+		WithArgs(1, data.Value, data.PostId).
 		WillReturnRows(sqlmock.NewRows([]string{"data_id"}).AddRow(data.ID))
 	id, err := s.repo.Create(&data)
 	assert.Equal(s.T(), id, data.ID)
@@ -96,7 +96,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Create() {
 		WithArgs(data.Type).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(createQuery)).
-		WithArgs(1, data.Data, data.PostId).
+		WithArgs(1, data.Value, data.PostId).
 		WillReturnError(repository.DefaultErrDB)
 	id, err = s.repo.Create(&data)
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
@@ -108,7 +108,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Update() {
 		WithArgs(data.Type).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(updateQuery)).
-		WithArgs(1, data.Data, data.ID).
+		WithArgs(1, data.Value, data.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"data_id"}).AddRow(data.ID))
 	err := s.repo.Update(&data)
 	assert.NoError(s.T(), err)
@@ -123,7 +123,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Update() {
 		WithArgs(data.Type).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(updateQuery)).
-		WithArgs(1, data.Data, data.ID).
+		WithArgs(1, data.Value, data.ID).
 		WillReturnError(repository.DefaultErrDB)
 	err = s.repo.Update(&data)
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
@@ -132,7 +132,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Update() {
 		WithArgs(data.Type).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(updateQuery)).
-		WithArgs(1, data.Data, data.ID).
+		WithArgs(1, data.Value, data.ID).
 		WillReturnError(sql.ErrNoRows)
 	err = s.repo.Update(&data)
 	assert.Error(s.T(), err, repository.NotFound)
@@ -142,7 +142,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Get() {
 	data := s.data
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getQuery)).
 		WithArgs(data.ID).
-		WillReturnRows(sqlmock.NewRows([]string{"post_id", "data", "type"}).AddRow(data.PostId, data.Data, 1))
+		WillReturnRows(sqlmock.NewRows([]string{"post_id", "data", "type"}).AddRow(data.PostId, data.Value, 1))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getDataTypeQuery)).
 		WithArgs(1).
 		WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow(data.Type))
@@ -152,7 +152,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Get() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getQuery)).
 		WithArgs(data.ID).
-		WillReturnRows(sqlmock.NewRows([]string{"post_id", "data", "type"}).AddRow(data.PostId, data.Data, 1))
+		WillReturnRows(sqlmock.NewRows([]string{"post_id", "data", "type"}).AddRow(data.PostId, data.Value, 1))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getDataTypeQuery)).
 		WithArgs(1).
 		WillReturnError(repository.DefaultErrDB)
@@ -218,14 +218,14 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_GetAttach() {
 	data.PostId = 0
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getAttachesQuery)).
 		WithArgs(postId).
-		WillReturnRows(sqlmock.NewRows([]string{"data_id", "type", "data"}).AddRow(data.ID, data.Type, data.Data))
+		WillReturnRows(sqlmock.NewRows([]string{"data_id", "type", "data"}).AddRow(data.ID, data.Type, data.Value))
 	res, err := s.repo.GetAttaches(postId)
 	assert.Equal(s.T(), res[0], data)
 	assert.NoError(s.T(), err)
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getAttachesQuery)).
 		WithArgs(postId).
-		WillReturnRows(sqlmock.NewRows([]string{"data_id", "type", "data"}).AddRow(data.ID, data.Type, data.Data).
+		WillReturnRows(sqlmock.NewRows([]string{"data_id", "type", "data"}).AddRow(data.ID, data.Type, data.Value).
 			RowError(0, repository.DefaultErrDB))
 	_, err = s.repo.GetAttaches(postId)
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
@@ -238,7 +238,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_GetAttach() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getAttachesQuery)).
 		WithArgs(postId).
-		WillReturnRows(sqlmock.NewRows([]string{"data_id", "type", "data"}).AddRow(data.ID, data.ID, data.Data))
+		WillReturnRows(sqlmock.NewRows([]string{"data_id", "type", "data"}).AddRow(data.ID, data.ID, data.Value))
 	_, err = s.repo.GetAttaches(postId)
 	assert.Error(s.T(), err)
 }

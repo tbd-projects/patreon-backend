@@ -26,7 +26,7 @@ func NewAttachesUsecase(repository repoAttaches.Repository, filesRepository repo
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *AttachesUsecase) GetAttach(attachId int64) (*models.PostData, error) {
+func (usecase *AttachesUsecase) GetAttach(attachId int64) (*models.AttachWithoutLevel, error) {
 	return usecase.repository.Get(attachId)
 }
 
@@ -127,7 +127,7 @@ func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileNam
 		return app.InvalidInt, err
 	}
 
-	post := &models.PostData{Type: models.Image, Data: app.LoadFileUrl + path, PostId: postId}
+	post := &models.AttachWithoutLevel{Type: models.Image, Value: app.LoadFileUrl + path, PostId: postId}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return app.InvalidInt, err
@@ -147,7 +147,7 @@ func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileNam
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *AttachesUsecase) LoadText(postData *models.PostData) (int64, error) {
+func (usecase *AttachesUsecase) LoadText(postData *models.AttachWithoutLevel) (int64, error) {
 	postData.Type = models.Text
 	if err := postData.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
@@ -182,7 +182,7 @@ func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileN
 		return err
 	}
 
-	post := &models.PostData{ID: postDataId, Type: models.Image, Data:  app.LoadFileUrl + path}
+	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Image, Value:  app.LoadFileUrl + path}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return err
@@ -203,7 +203,7 @@ func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileN
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *AttachesUsecase) UpdateText(postData *models.PostData) error {
+func (usecase *AttachesUsecase) UpdateText(postData *models.AttachWithoutLevel) error {
 	postData.Type = models.Text
 	if err := postData.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {

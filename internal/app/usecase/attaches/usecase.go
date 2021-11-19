@@ -19,7 +19,7 @@ type Usecase interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetAttach(attachId int64) (*models.PostData, error)
+	GetAttach(attachId int64) (*models.AttachWithoutLevel, error)
 
 	// UpdateAttach Errors:
 	//		repository.NotFound
@@ -54,7 +54,7 @@ type Usecase interface {
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB
-	LoadText(postData *models.PostData) (int64, error)
+	LoadText(postData *models.AttachWithoutLevel) (int64, error)
 
 	// UpdateText Errors:
 	//		models.InvalidPostId
@@ -64,7 +64,7 @@ type Usecase interface {
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB
-	UpdateText(postData *models.PostData) error
+	UpdateText(postData *models.AttachWithoutLevel) error
 
 	// UpdateImage Errors:
 	//		models.InvalidPostId

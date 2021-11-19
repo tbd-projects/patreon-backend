@@ -11,25 +11,25 @@ type Repository interface {
 	//		repository_postgresql.UnknownDataFormat
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(postData *models.PostData) (int64, error)
+	Create(postData *models.AttachWithoutLevel) (int64, error)
 
 	// Get Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Get(attachId int64) (*models.PostData, error)
+	Get(attachId int64) (*models.AttachWithoutLevel, error)
 
 	// GetAttaches Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetAttaches(postsId int64) ([]models.PostData, error)
+	GetAttaches(postsId int64) ([]models.AttachWithoutLevel, error)
 
 	// Update Errors:
 	//		repository_postgresql.UnknownDataFormat
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Update(postData *models.PostData) error
+	Update(postData *models.AttachWithoutLevel) error
 
 	// ExistsAttach Errors:
 	//		repository.NotFound

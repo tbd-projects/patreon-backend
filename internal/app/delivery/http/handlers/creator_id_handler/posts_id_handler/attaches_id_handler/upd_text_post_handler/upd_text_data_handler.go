@@ -5,6 +5,9 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
+	csrf_middleware "patreon/internal/app/csrf/middleware"
+	repository_jwt "patreon/internal/app/csrf/repository/jwt"
+	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
@@ -31,8 +34,11 @@ func NewAttachesUpdateTextHandler(log *logrus.Logger,
 		attachesUsecase: ucAttaches,
 	}
 	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
-	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
-		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
+	h.AddMiddleware(sessionMiddleware.Check, csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.
+		NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewCreatorsMiddleware(log).CheckAllowUser,
+		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost,
+		middleware.NewAttachesMiddleware(log, ucAttaches).CheckCorrectAttach)
 	h.AddMethod(http.MethodPut, h.PUT)
 	return h
 }
@@ -48,7 +54,7 @@ func NewAttachesUpdateTextHandler(log *logrus.Logger,
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters", "invalid data type", "invalid body in request"
 // @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/posts/{:post_id}/{:data_id}/update/text [PUT]
+// @Router /creators/{:creator_id}/posts/{:post_id}/{:attach_id}/update/text [PUT]
 func (h *AttachesUpdateTextHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -60,7 +66,7 @@ func (h *AttachesUpdateTextHandler) PUT(w http.ResponseWriter, r *http.Request) 
 	var attachId int64
 	var ok bool
 
-	if attachId, ok = h.GetInt64FromParam(w, r, "data_id"); !ok {
+	if attachId, ok = h.GetInt64FromParam(w, r, "attach_id"); !ok {
 		return
 	}
 
@@ -78,7 +84,7 @@ func (h *AttachesUpdateTextHandler) PUT(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err := h.attachesUsecase.UpdateText(&models_db.PostData{ID: attachId, Data: req.Text})
+	err := h.attachesUsecase.UpdateText(&models_db.AttachWithoutLevel{ID: attachId, Value: req.Text})
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
 		return

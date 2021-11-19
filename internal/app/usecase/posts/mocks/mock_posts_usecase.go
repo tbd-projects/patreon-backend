@@ -81,10 +81,10 @@ func (mr *PostsUsecaseMockRecorder) GetCreatorId(arg0 interface{}) *gomock.Call 
 }
 
 // GetPost mocks base method.
-func (m *PostsUsecase) GetPost(arg0, arg1 int64, arg2 bool) (*models.PostWithData, error) {
+func (m *PostsUsecase) GetPost(arg0, arg1 int64, arg2 bool) (*models.PostWithAttach, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPost", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*models.PostWithData)
+	ret0, _ := ret[0].(*models.PostWithAttach)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

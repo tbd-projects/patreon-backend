@@ -146,11 +146,11 @@ func TestCreatePost() *CreatePost {
 		CreatorId:   1,
 	}
 }
-func TestPostData() *PostData {
-	return &PostData{
+func TestAttachWithoutLevel() *AttachWithoutLevel {
+	return &AttachWithoutLevel{
 		ID:     1,
 		PostId: 1,
-		Data:   "jfnagd",
+		Value:   "jfnagd",
 		Type:   Image,
 	}
 }

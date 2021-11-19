@@ -71,17 +71,17 @@ type ResponsePost struct {
 }
 
 type ResponseAttach struct {
-	ID   int64  `json:"attach_id"`
-	Data string `json:"data"`
-	Type string `json:"type"`
+	ID    int64  `json:"attach_id"`
+	Value string `json:"value"`
+	Type  string `json:"type"`
 }
 
 type ResponseApplyAttach struct {
-	IDs   []int64  `json:"attaches_id"`
+	IDs []int64 `json:"attaches_id"`
 }
 
 type ResponsePostWithAttaches struct {
-	Post ResponsePost       `json:"post"`
+	Post ResponsePost     `json:"post"`
 	Data []ResponseAttach `json:"attaches"`
 }
 type ResponseBalance struct {
@@ -146,7 +146,7 @@ func ToResponsePost(ps models.Post) ResponsePost {
 	}
 }
 
-func ToResponsePostWithAttaches(ps models.PostWithData) ResponsePostWithAttaches {
+func ToResponsePostWithAttaches(ps models.PostWithAttach) ResponsePostWithAttaches {
 	res := ResponsePostWithAttaches{Post: ToResponsePost(*ps.Post), Data: []ResponseAttach{}}
 	for _, data := range ps.Data {
 		res.Data = append(res.Data, ToResponseAttach(data))
@@ -154,11 +154,11 @@ func ToResponsePostWithAttaches(ps models.PostWithData) ResponsePostWithAttaches
 	return res
 }
 
-func ToResponseAttach(ps models.PostData) ResponseAttach {
+func ToResponseAttach(ps models.AttachWithoutLevel) ResponseAttach {
 	return ResponseAttach{
-		ID:   ps.ID,
-		Data: ps.Data,
-		Type: string(ps.Type),
+		ID:    ps.ID,
+		Value: ps.Value,
+		Type:  string(ps.Type),
 	}
 }
 

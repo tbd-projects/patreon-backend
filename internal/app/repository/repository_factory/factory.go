@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app"
 	repCsrf "patreon/internal/app/csrf/repository/jwt"
 	repositoryAccess "patreon/internal/app/repository/access"
+	repoAttaches "patreon/internal/app/repository/attaches"
+	repoAttachesPsql "patreon/internal/app/repository/attaches/postgresql"
 	repoAwrds "patreon/internal/app/repository/awards"
 	repAwardsPsql "patreon/internal/app/repository/awards/postgresql"
 	repCreator "patreon/internal/app/repository/creator"
@@ -18,8 +20,6 @@ import (
 	repoPaymentsPsql "patreon/internal/app/repository/payments/postgresql"
 	repoPosts "patreon/internal/app/repository/posts"
 	repPostsPsql "patreon/internal/app/repository/posts/postgresql"
-	repoAttaches "patreon/internal/app/repository/attaches"
-	repoAttachesPsql "patreon/internal/app/repository/attaches/postgresql"
 	repoSubscribers "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 	repUserPsql "patreon/internal/app/repository/user/postgresql"
@@ -39,7 +39,7 @@ type RepositoryFactory struct {
 	awardsRepository      repoAwrds.Repository
 	postsRepository       repoPosts.Repository
 	likesRepository       repoLikes.Repository
-	PostDataRepository    repoAttaches.Repository
+	AttachRepository      repoAttaches.Repository
 	csrfRepository        repCsrf.Repository
 	accessRepository      repositoryAccess.Repository
 	subscribersRepository repoSubscribers.Repository
@@ -117,10 +117,10 @@ func (f *RepositoryFactory) GetLikesRepository() repoLikes.Repository {
 }
 
 func (f *RepositoryFactory) GetAttachesRepository() repoAttaches.Repository {
-	if f.PostDataRepository == nil {
-		f.PostDataRepository = repoAttachesPsql.NewAttachesRepository(f.expectedConnections.SqlConnection)
+	if f.AttachRepository == nil {
+		f.AttachRepository = repoAttachesPsql.NewAttachesRepository(f.expectedConnections.SqlConnection)
 	}
-	return f.PostDataRepository
+	return f.AttachRepository
 }
 
 func (f *RepositoryFactory) GetFilesRepository() repoFiles.Repository {

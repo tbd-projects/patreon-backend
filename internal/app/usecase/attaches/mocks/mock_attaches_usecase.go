@@ -51,10 +51,10 @@ func (mr *AttachesUsecaseMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 }
 
 // GetAttach mocks base method.
-func (m *AttachesUsecase) GetAttach(arg0 int64) (*models.PostData, error) {
+func (m *AttachesUsecase) GetAttach(arg0 int64) (*models.AttachWithoutLevel, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAttach", arg0)
-	ret0, _ := ret[0].(*models.PostData)
+	ret0, _ := ret[0].(*models.AttachWithoutLevel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -81,7 +81,7 @@ func (mr *AttachesUsecaseMockRecorder) LoadImage(arg0, arg1, arg2 interface{}) *
 }
 
 // LoadText mocks base method.
-func (m *AttachesUsecase) LoadText(arg0 *models.PostData) (int64, error) {
+func (m *AttachesUsecase) LoadText(arg0 *models.AttachWithoutLevel) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LoadText", arg0)
 	ret0, _ := ret[0].(int64)
@@ -125,7 +125,7 @@ func (mr *AttachesUsecaseMockRecorder) UpdateImage(arg0, arg1, arg2 interface{})
 }
 
 // UpdateText mocks base method.
-func (m *AttachesUsecase) UpdateText(arg0 *models.PostData) error {
+func (m *AttachesUsecase) UpdateText(arg0 *models.AttachWithoutLevel) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateText", arg0)
 	ret0, _ := ret[0].(error)

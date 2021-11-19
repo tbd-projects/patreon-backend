@@ -13,14 +13,14 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler/upl_img_attach_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler/upl_text_attach_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler"
 	upd_img_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_image_post_handler"
 	upd_text_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_text_post_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/likes_handler"
 	upl_cover_posts_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_cover_post_handler"
 	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_img_attach_handler"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upl_text_attach_handler"
 	upd_avatar_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_avatar_handler"
 	upd_cover_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_cover_handler"
 	"patreon/internal/app/delivery/http/handlers/csrf_handler"
@@ -63,8 +63,8 @@ const (
 	GET_CSRF_TOKEN
 	GET_USER_SUBSCRIPTIONS
 	POST_UPD_COVER
-	POST_ADD_TEXT
-	POST_ADD_IMAGE
+	ATTACH_ADD_TEXT
+	ATTACH_ADD_IMAGE
 	ATTACH_UPD_TEXT
 	ATTACH_UPD_IMAGE
 	ATTACH_ID
@@ -122,8 +122,8 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		GET_USER_SUBSCRIPTIONS:   subscriptions_handler.NewSubscriptionsHandler(f.logger, sManager, ucSubscr),
 		SUBSCRIBES:               subscribe_handler.NewSubscribeHandler(f.logger, sManager, ucSubscr),
 		POST_UPD_COVER:           upl_cover_posts_handler.NewPostsUpdateCoverHandler(f.logger, ucPosts, sManager),
-		POST_ADD_TEXT:            upl_text_attach_handler.NewAttachesUploadTextHandler(f.logger, ucAttaches, ucPosts, sManager),
-		POST_ADD_IMAGE:           upl_img_attach_handler.NewPostsUploadImageHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_ADD_TEXT:          upl_text_attach_handler.NewAttachesUploadTextHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_ADD_IMAGE:         upl_img_attach_handler.NewPostsUploadImageHandler(f.logger, ucAttaches, ucPosts, sManager),
 		ATTACH_ID:                attaches_id_handler.NewAttachesIDHandler(f.logger, ucAttaches, ucPosts, sManager),
 		CREATOR_AVATAR:           upd_avatar_creator_handler.NewUpdateAvatarHandler(f.logger, sManager, ucCreator),
 		CREATOR_COVER:            upd_cover_creator_handler.NewUpdateCoverHandler(f.logger, sManager, ucCreator),
@@ -168,18 +168,18 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/update/cover": hs[AWARDS_COVER],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}/subscribe":    hs[AWARDS_CREATOR_SUBSCRIBE],
 		// ../posts  ---------------------------------------------------------////
-		"/creators/{creator_id:[0-9]+}/posts":                         hs[POSTS],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":        hs[POSTS_WITH_ID],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update": hs[POSTS_UPD],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/text":   hs[POST_ADD_TEXT],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/image":  hs[POST_ADD_IMAGE],
+		"/creators/{creator_id:[0-9]+}/posts":                               hs[POSTS],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}":              hs[POSTS_WITH_ID],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update":       hs[POSTS_UPD],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update/cover": hs[POST_UPD_COVER],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":   hs[POSTS_LIKES],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":         hs[POSTS_LIKES],
 		// ../attaches  ----------------------------------------------------////
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches":                      hs[ATTACHES],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}":              hs[ATTACH_ID],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/text":  hs[ATTACH_UPD_TEXT],
-		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{data_id:[0-9]+}/update/image": hs[ATTACH_UPD_IMAGE],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches":                        hs[ATTACHES],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches/text":                   hs[ATTACH_ADD_TEXT],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches/image":                  hs[ATTACH_ADD_IMAGE],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}":              hs[ATTACH_ID],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/text":  hs[ATTACH_UPD_TEXT],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/image": hs[ATTACH_UPD_IMAGE],
 		//   /token  ---------------------------------------------------------////
 		"/token": hs[GET_CSRF_TOKEN],
 	}

@@ -31,10 +31,10 @@ func TestSanitize(t *testing.T) {
 	sub.Sanitize(*bluemonday.UGCPolicy())
 
 	_ = ToResponsePost(models.Post{})
-	_ = ToResponseAttach(models.PostData{})
+	_ = ToResponseAttach(models.AttachWithoutLevel{})
 	_ = ToResponseAward(models.Award{})
 	_ = ToResponseCreator(models.Creator{})
-	_ = ToResponsePostWithAttaches(models.PostWithData{Post:&models.Post{}})
+	_ = ToResponsePostWithAttaches(models.PostWithAttach{Post:&models.Post{}})
 	_ = ToRProfileResponse(models.User{})
 	_ = ToSubscribersCreatorResponse([]models.User{})
 	_ = ToSubscriptionsUser([]models.CreatorSubscribe{})

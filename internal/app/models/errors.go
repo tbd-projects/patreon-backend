@@ -111,7 +111,7 @@ func postValidError() models_utilits.ExtractorErrorByName {
 // postValidError Errors:
 //		InvalidType
 //		InvalidPostId
-func postDataValidError() models_utilits.ExtractorErrorByName {
+func attachWithoutLevelValidError() models_utilits.ExtractorErrorByName {
 	validMap := models_utilits.MapOfValidateError{
 		"post": InvalidPostId,
 		"type": InvalidType,
