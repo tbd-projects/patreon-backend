@@ -10,8 +10,10 @@ bind_addr_http = ":8080"
 domen = "api.pyaterochka-team.site"
 
 [local]
-database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
+database_url = "port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
+#database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
 session-redis_url = "redis://localhost:6379"
+access-redis_url = "redis://localhost:6379"
 
 [server]
 database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"

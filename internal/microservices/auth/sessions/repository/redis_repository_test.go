@@ -2,7 +2,7 @@ package repository
 
 import (
 	"bytes"
-	"patreon/internal/app/sessions/models"
+	"patreon/internal/microservices/auth/sessions/models"
 	"testing"
 	"time"
 

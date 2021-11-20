@@ -25,6 +25,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/http-swagger v1.1.2
 	github.com/swaggo/swag v1.7.0
+	github.com/urfave/negroni v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272
 	golang.org/x/net v0.0.0-20211116231205-47ca1ff31462
 	golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c // indirect

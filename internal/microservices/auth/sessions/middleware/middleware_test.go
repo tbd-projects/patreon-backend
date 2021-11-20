@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/repository"
-	mock_sessions "patreon/internal/app/sessions/mocks"
-	"patreon/internal/app/sessions/models"
+	mock_sessions "patreon/internal/microservices/auth/delivery/grpc/client/mocks"
+	"patreon/internal/microservices/auth/sessions/models"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -23,7 +24,7 @@ func TestSessionMiddleware_Check(t *testing.T) {
 
 	log := &logrus.Logger{}
 	mock := gomock.NewController(t)
-	sessionManager := mock_sessions.NewMockSessionsManager(mock)
+	sessionManager := mock_sessions.NewMockAuthCheckerClient(mock)
 	middleware := NewSessionMiddleware(sessionManager, log)
 
 	b := bytes.Buffer{}
@@ -36,7 +37,7 @@ func TestSessionMiddleware_Check(t *testing.T) {
 	reader.AddCookie(cok)
 	require.NoError(t, err)
 	res := models.Result{UserID: 1, UniqID: "asdasd"}
-	sessionManager.EXPECT().Check(sessionId).Return(res, nil)
+	sessionManager.EXPECT().Check(context.Background(), sessionId).Return(res, nil)
 	middleware.Check(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userIdRaw := r.Context().Value("user_id")
 		sessIdRaw := r.Context().Value("session_id")
@@ -64,7 +65,7 @@ func TestSessionMiddleware_Check(t *testing.T) {
 	reader.AddCookie(cok)
 	require.NoError(t, err)
 	recorder = httptest.NewRecorder()
-	sessionManager.EXPECT().Check(sessionId).Return(res, repository.DefaultErrDB)
+	sessionManager.EXPECT().Check(context.Background(), sessionId).Return(res, repository.DefaultErrDB)
 	middleware.Check(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})).ServeHTTP(recorder, reader)
@@ -79,7 +80,7 @@ func TestSessionMiddleware_CheckNotAuthorized(t *testing.T) {
 
 	log := &logrus.Logger{}
 	mock := gomock.NewController(t)
-	sessionManager := mock_sessions.NewMockSessionsManager(mock)
+	sessionManager := mock_sessions.NewMockAuthCheckerClient(mock)
 	middleware := NewSessionMiddleware(sessionManager, log)
 
 	b := bytes.Buffer{}
@@ -92,7 +93,7 @@ func TestSessionMiddleware_CheckNotAuthorized(t *testing.T) {
 	reader.AddCookie(cok)
 	require.NoError(t, err)
 	res := models.Result{UserID: 1, UniqID: "asdasd"}
-	sessionManager.EXPECT().Check(sessionId).Return(res, nil)
+	sessionManager.EXPECT().Check(context.Background(), sessionId).Return(res, nil)
 	middleware.CheckNotAuthorized(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})).ServeHTTP(recorder, reader)
@@ -110,7 +111,7 @@ func TestSessionMiddleware_CheckNotAuthorized(t *testing.T) {
 	reader.AddCookie(cok)
 	require.NoError(t, err)
 	recorder = httptest.NewRecorder()
-	sessionManager.EXPECT().Check(sessionId).Return(res, repository.DefaultErrDB)
+	sessionManager.EXPECT().Check(context.Background(), sessionId).Return(res, repository.DefaultErrDB)
 	middleware.CheckNotAuthorized(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})).ServeHTTP(recorder, reader)
@@ -125,7 +126,7 @@ func TestSessionMiddleware_AddUserId(t *testing.T) {
 
 	log := &logrus.Logger{}
 	mock := gomock.NewController(t)
-	sessionManager := mock_sessions.NewMockSessionsManager(mock)
+	sessionManager := mock_sessions.NewMockAuthCheckerClient(mock)
 	middleware := NewSessionMiddleware(sessionManager, log)
 
 	b := bytes.Buffer{}
@@ -138,7 +139,7 @@ func TestSessionMiddleware_AddUserId(t *testing.T) {
 	reader.AddCookie(cok)
 	require.NoError(t, err)
 	res := models.Result{UserID: 1, UniqID: "asdasd"}
-	sessionManager.EXPECT().Check(sessionId).Return(res, nil)
+	sessionManager.EXPECT().Check(context.Background(), sessionId).Return(res, nil)
 	middleware.AddUserId(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userIdRaw := r.Context().Value("user_id")
 		sessIdRaw := r.Context().Value("session_id")

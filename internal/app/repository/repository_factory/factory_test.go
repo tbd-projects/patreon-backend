@@ -1,13 +1,14 @@
 package repository_factory
 
 import (
+	"patreon/internal/app"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
-	"patreon/internal/app"
-	"testing"
 )
 
 func TestFactory(t *testing.T) {
@@ -33,7 +34,7 @@ func TestFactory(t *testing.T) {
 		},
 	}
 
-	factory := NewRepositoryFactory(log, app.ExpectedConnections{SqlConnection: db, AccessRedisPool: redisConn, SessionRedisPool: redisConn, PathFiles: "don/"})
+	factory := NewRepositoryFactory(log, app.ExpectedConnections{SqlConnection: db, AccessRedisPool: redisConn, PathFiles: "don/"})
 	factory.GetFilesRepository()
 	factory.GetPostsDataRepository()
 	factory.GetLikesRepository()
@@ -43,7 +44,6 @@ func TestFactory(t *testing.T) {
 	factory.GetAccessRepository()
 	factory.GetCsrfRepository()
 	factory.GetPostsRepository()
-	factory.GetSessionRepository()
 	factory.GetSubscribersRepository()
 	factory.GetInfoRepository()
 	factory.GetPaymentsRepository()

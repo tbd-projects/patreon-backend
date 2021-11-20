@@ -6,7 +6,6 @@ package mock_usecase_factory
 
 import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
-	sessions "patreon/internal/app/sessions"
 	usecase_awards "patreon/internal/app/usecase/awards"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_info "patreon/internal/app/usecase/info"
@@ -154,20 +153,6 @@ func (m *MockUsecaseFactory) GetPostsUsecase() posts.Usecase {
 func (mr *MockUsecaseFactoryMockRecorder) GetPostsUsecase() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetPostsUsecase))
-}
-
-// GetSessionManager mocks base method.
-func (m *MockUsecaseFactory) GetSessionManager() sessions.SessionsManager {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSessionManager")
-	ret0, _ := ret[0].(sessions.SessionsManager)
-	return ret0
-}
-
-// GetSessionManager indicates an expected call of GetSessionManager.
-func (mr *MockUsecaseFactoryMockRecorder) GetSessionManager() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionManager", reflect.TypeOf((*MockUsecaseFactory)(nil).GetSessionManager))
 }
 
 // GetSubscribersUsecase mocks base method.

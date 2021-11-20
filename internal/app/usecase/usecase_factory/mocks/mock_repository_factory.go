@@ -17,7 +17,6 @@ import (
 	repository_posts_data "patreon/internal/app/repository/posts_data"
 	repository_subscribers "patreon/internal/app/repository/subscribers"
 	repository_user "patreon/internal/app/repository/user"
-	sessions "patreon/internal/app/sessions"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -184,20 +183,6 @@ func (m *MockRepositoryFactory) GetPostsRepository() repository_posts.Repository
 func (mr *MockRepositoryFactoryMockRecorder) GetPostsRepository() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetPostsRepository))
-}
-
-// GetSessionRepository mocks base method.
-func (m *MockRepositoryFactory) GetSessionRepository() sessions.SessionRepository {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSessionRepository")
-	ret0, _ := ret[0].(sessions.SessionRepository)
-	return ret0
-}
-
-// GetSessionRepository indicates an expected call of GetSessionRepository.
-func (mr *MockRepositoryFactoryMockRecorder) GetSessionRepository() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetSessionRepository))
 }
 
 // GetSubscribersRepository mocks base method.
