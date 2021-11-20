@@ -1,7 +1,6 @@
 ./media
 ./logs
 ./patreon-secrt
-./configs
 ./docs
 ./docker
 *.out

@@ -19,7 +19,7 @@ watch-postgress-log:
 	docker attach 2021_2_pyaterochka_patreon-bd_1
 
 generate-api:
-	go install github.com/swaggo/swag/cmd/swag@v1.6.5
+	go install github.com/swaggo/swag/cmd/swag@latest
 	swag init -g ./cmd/server/main.go -o docs
 
 build: generate-api
