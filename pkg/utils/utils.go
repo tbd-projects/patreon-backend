@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"os"
 	"patreon/internal/app"
 	"time"
@@ -42,8 +42,8 @@ func NewLogger(config *app.Config, isService bool, serviceName string) (log *log
 	return logger, f.Close
 }
 
-func NewPostgresConnection(config *app.RepositoryConnections) (db *sql.DB, closeResource func() error) {
-	db, err := sql.Open("postgres", config.DataBaseUrl)
+func NewPostgresConnection(config *app.RepositoryConnections) (db *sqlx.DB, closeResource func() error) {
+	db, err := sqlx.Open("postgres", config.DataBaseUrl)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -58,6 +58,7 @@ func NewRedisPool(redisUrl string) *redis.Pool {
 		},
 	}
 }
+
 func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
 	return grpc.Dial(grpcUrl, grpc.WithInsecure())
 }

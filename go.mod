@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/BurntSushi/toml v0.4.1
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/alicebob/miniredis/v2 v2.15.1
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
