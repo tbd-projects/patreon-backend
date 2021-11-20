@@ -7,12 +7,12 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
+	http_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -23,13 +23,16 @@ type AttachesIDHandler struct {
 	bh.BaseHandler
 }
 
-func NewAttachesIDHandler(log *logrus.Logger,
-	ucAttaches useAttaches.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *AttachesIDHandler {
+func NewAttachesIDHandler(
+	log *logrus.Logger,
+	ucAttaches useAttaches.Usecase,
+	ucPosts usePosts.Usecase,
+	sClient session_client.AuthCheckerClient) *AttachesIDHandler {
 	h := &AttachesIDHandler{
 		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 
 	h.AddMiddleware(middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost,
 		middleware.NewAttachesMiddleware(log, ucAttaches).CheckCorrectAttach)

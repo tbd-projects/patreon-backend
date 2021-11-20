@@ -6,7 +6,6 @@ package mock_usecase_factory
 
 import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
-	sessions "patreon/internal/app/sessions"
 	attaches "patreon/internal/app/usecase/attaches"
 	usecase_awards "patreon/internal/app/usecase/awards"
 	usecase_creator "patreon/internal/app/usecase/creator"

@@ -56,5 +56,5 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Log(r).Debugf("get user %s", u)
-	h.Respond(w, r, http.StatusOK, http_models.ToRProfileResponse(*u))
+	h.Respond(w, r, http.StatusOK, models_http.ToRProfileResponse(*u))
 }

@@ -8,10 +8,10 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 
@@ -23,13 +23,16 @@ type AttachUploadImageHandler struct {
 	bh.BaseHandler
 }
 
-func NewAttachUploadImageHandler(log *logrus.Logger,
-	ucAttaches useAttaches.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *AttachUploadImageHandler {
+func NewAttachUploadImageHandler(
+	log *logrus.Logger,
+	ucAttaches useAttaches.Usecase,
+	ucPosts usePosts.Usecase,
+	sClient session_client.AuthCheckerClient) *AttachUploadImageHandler {
 	h := &AttachUploadImageHandler{
-		BaseHandler:      *bh.NewBaseHandler(log),
+		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.
 			NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,

@@ -2,7 +2,6 @@ package upd_text_data_handler
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
@@ -10,13 +9,15 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
+	http_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
@@ -26,14 +27,16 @@ type AttachesUpdateTextHandler struct {
 	bh.BaseHandler
 }
 
-func NewAttachesUpdateTextHandler(log *logrus.Logger,
-	ucAttaches useAttaches.Usecase, ucPosts usePosts.Usecase,
-	manager sessions.SessionsManager) *AttachesUpdateTextHandler {
+func NewAttachesUpdateTextHandler(
+	log *logrus.Logger,
+	ucAttaches useAttaches.Usecase,
+	ucPosts usePosts.Usecase,
+	sClient session_client.AuthCheckerClient) *AttachesUpdateTextHandler {
 	h := &AttachesUpdateTextHandler{
-		BaseHandler:      *bh.NewBaseHandler(log),
+		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.
 		NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser,

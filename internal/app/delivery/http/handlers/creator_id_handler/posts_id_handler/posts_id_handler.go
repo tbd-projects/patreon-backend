@@ -13,9 +13,10 @@ import (
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
+	useUser "patreon/internal/app/usecase/user"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	useUser "patreon/internal/app/usecase/user"
 )
 
 type PostsIDHandler struct {

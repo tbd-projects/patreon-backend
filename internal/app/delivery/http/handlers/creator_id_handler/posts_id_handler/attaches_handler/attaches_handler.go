@@ -1,7 +1,6 @@
 package attaches_handler
 
 import (
-	"github.com/microcosm-cc/bluemonday"
 	"net/http"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
@@ -9,13 +8,15 @@ import (
 	"patreon/internal/app/delivery/http/handlers"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
+	http_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	usePosts "patreon/internal/app/usecase/posts"
+	"patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -27,12 +28,14 @@ type AttachesHandler struct {
 }
 
 func NewAttachesHandler(log *logrus.Logger,
-	ucAttaches useAttaches.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *AttachesHandler {
+	ucAttaches useAttaches.Usecase,
+	ucPosts usePosts.Usecase,
+	sClient client.AuthCheckerClient) *AttachesHandler {
 	h := &AttachesHandler{
 		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 
 	h.AddMiddleware(sessionMiddleware.Check, csrf_middleware.NewCsrfMiddleware(log,
 		usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,

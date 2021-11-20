@@ -4,13 +4,11 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
+	http_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	usePosts "patreon/internal/app/usecase/posts"
-	usePostsData "patreon/internal/app/usecase/posts_data"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
@@ -29,7 +27,7 @@ func NewAttachesUploadTextHandler(log *logrus.Logger,
 	ucAttaches useAttaches.Usecase, ucPosts usePosts.Usecase,
 	sClient session_client.AuthCheckerClient) *AttachesUploadTextHandler {
 	h := &AttachesUploadTextHandler{
-		BaseHandler:      *bh.NewBaseHandler(log),
+		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
 	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
