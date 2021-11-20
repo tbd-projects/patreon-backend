@@ -47,6 +47,7 @@ func NewAttachesHandler(log *logrus.Logger,
 
 // PUT attaches
 // @Summary update current attaches
+// @tags attaches
 // @Description update current attaches from current creator
 // @Produce json
 // @Param attaches body http_models.RequestAttaches true "Request body for set attaches"

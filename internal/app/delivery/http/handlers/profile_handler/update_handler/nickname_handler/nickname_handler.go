@@ -42,6 +42,7 @@ func NewUpdateNicknameHandler(log *logrus.Logger,
 
 // PUT NicknameChange
 // @Summary set new user nickname
+// @tags user
 // @Accept  json
 // @Param nickname body http_models.RequestChangeNickname true "Request body for change nickname"
 // @Success 200 "successfully change nickname"

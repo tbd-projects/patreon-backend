@@ -32,6 +32,7 @@ func NewSubscribeHandler(log *logrus.Logger, sClient session_client.AuthCheckerC
 
 // GET Subscribers
 // @Summary subscribers of the creator
+// @tags creators
 // @Description get subscribers of the creators with id = creator_id
 // @Produce json
 // @Param creator_id path int true "creator_id"

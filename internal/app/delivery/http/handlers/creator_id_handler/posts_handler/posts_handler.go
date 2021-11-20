@@ -58,6 +58,7 @@ func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 
 // GET Posts
 // @Summary get list of posts of some creator
+// @tags posts
 // @Description get list of posts which belongs the creator with limit and offset in query
 // @Produce json
 // @Success 201 {array} http_models.ResponsePost
@@ -141,6 +142,7 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 // POST Create Posts
 // @Summary create posts
+// @tags posts
 // @Description create posts to creator with id from path
 // @Param post body http_models.RequestPosts true "Request body for posts"
 // @Produce json

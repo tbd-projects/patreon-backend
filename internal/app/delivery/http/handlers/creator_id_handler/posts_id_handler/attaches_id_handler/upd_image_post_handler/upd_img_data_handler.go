@@ -47,6 +47,7 @@ func NewAttachUploadImageHandler(
 
 // PUT update image to post
 // @Summary update image to post
+// @tags attaches
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param image formData file true "image file with ext jpeg/png"
 // @Success 200

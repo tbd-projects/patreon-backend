@@ -48,6 +48,7 @@ func NewAttachesUpdateTextHandler(
 
 // PUT update text to post
 // @Summary update text to post
+// @tags attaches
 // @Accept  json
 // @Param attach_text body http_models.RequestText true "Request body for text"
 // @Success 200

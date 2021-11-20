@@ -43,6 +43,7 @@ func NewAwardsHandler(log *logrus.Logger,
 
 // GET Awards
 // @Summary get list of awards of some creator
+// @tags awards
 // @Description get list of awards which belongs the creator
 // @Produce json
 // @Success 201 {array} http_models.ResponseAward
@@ -78,6 +79,7 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 // POST Create Awards
 // @Summary create awards
+// @tags awards
 // @Description create awards to creator with id from path
 // @Param award body http_models.RequestAwards true "Request body for awards"
 // @Produce json

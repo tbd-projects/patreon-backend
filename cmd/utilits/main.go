@@ -92,8 +92,8 @@ func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time
 	return nil
 }
 
-func fileNameWithoutExtension(fileName string) string {
-	if pos := strings.LastIndexByte(fileName, '.'); pos != -1 {
+func getTimeStringFromName(fileName string) string {
+	if pos := strings.LastIndex(fileName, "__"); pos != -1 {
 		return fileName[:pos]
 	}
 	return fileName
@@ -101,7 +101,7 @@ func fileNameWithoutExtension(fileName string) string {
 
 func parseTimeFromFileName(fileName string) (time.Time, error) {
 	formatTime := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d", 2006, 1, 2, 15, 04, 05)
-	tmp, err := time.Parse(formatTime, fileNameWithoutExtension(fileName))
+	tmp, err := time.Parse(formatTime, getTimeStringFromName(fileName))
 	if err != nil {
 		return time.Now(), err
 	}

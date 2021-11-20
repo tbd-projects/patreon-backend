@@ -46,6 +46,7 @@ func NewLikesHandler(log *logrus.Logger,
 
 // DELETE Likes
 // @Summary deletes like from the post and return new count of likes
+// @tags posts
 // @Description deletes like form post id in url
 // @Produce json
 // @Success 200 {object} http_models.ResponseLike "current count of likes on post"
@@ -86,6 +87,7 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 
 // PUT Likes
 // @Summary add like on the post
+// @tags posts
 // @Description add like on the post with id = post_id and return new count of likes
 // @Produce json
 // @Success 200 {object} http_models.ResponseLike "current count of likes on post"

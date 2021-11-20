@@ -40,6 +40,7 @@ func NewUpdateCoverAwardsHandler(log *logrus.Logger,
 
 // PUT CoverChange
 // @Summary set new awards cover
+// @tags awards
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param cover formData file true "Cover file with ext jpeg/png"
 // @Success 200 "successfully upload avatar"

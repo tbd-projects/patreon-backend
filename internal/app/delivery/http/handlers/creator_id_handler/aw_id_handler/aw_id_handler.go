@@ -39,6 +39,7 @@ func NewAwardsIdHandler(log *logrus.Logger,
 
 // DELETE Awards
 // @Summary delete current awards
+// @tags awards
 // @Description delete current awards from current creator
 // @Produce json
 // @Success 200

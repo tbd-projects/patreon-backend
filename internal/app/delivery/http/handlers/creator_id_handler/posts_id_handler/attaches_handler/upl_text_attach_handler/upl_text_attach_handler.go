@@ -39,6 +39,7 @@ func NewAttachesUploadTextHandler(log *logrus.Logger,
 
 // POST add text to post
 // @Summary add text to post
+// @tags attaches
 // @Accept  json
 // @Param text body http_models.RequestText true "Request body for text"
 // @Success 201 {object} http_models.IdResponse "id attaches"

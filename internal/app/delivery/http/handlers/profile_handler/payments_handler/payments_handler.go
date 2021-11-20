@@ -34,6 +34,7 @@ func NewPaymentsHandler(log *logrus.Logger,
 
 // GET UserPayments
 // @Summary get all user payments
+// @tags payments
 // @Description get all user payments
 // @Produce json
 // @Success 200 {object} http_models.ResponseUserPayments "Success"

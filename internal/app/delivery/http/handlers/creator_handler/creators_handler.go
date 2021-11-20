@@ -45,6 +45,7 @@ func NewCreatorHandler(log *logrus.Logger, sManager session_client.AuthCheckerCl
 // @Summary get list of Creators
 // @Description get list of creators which register on service
 // @Produce json
+// @tags creators
 // @Success 201 {array} http_models.ResponseCreator
 // @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
@@ -70,6 +71,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // @Description create creator with id from path, and respond created creator
 // @Param creator body http_models.RequestCreator true "Request body for creators"
 // @Produce json
+// @tags creators
 // @Success 201 {object} http_models.IdResponse
 // @Failure 409 {object} http_models.ErrResponse "creator already exist"
 // @Failure 404 {object} http_models.ErrResponse "user with this id not found"

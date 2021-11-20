@@ -44,6 +44,7 @@ func NewAwardsSubscribeHandler(log *logrus.Logger, sClient session_client.AuthCh
 
 // DELETE Unsubscribe
 // @Summary unsubscribe from the creator
+// @tags awards
 // @Description unsubscribe from the creator with id = creator_id and awards_id = award_id
 // @Produce json
 // @Param award_id path int true "award_id"
@@ -86,6 +87,7 @@ func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) 
 
 // POST Subscribe
 // @Summary subscribes on the creator
+// @tags awards
 // @Description subscribes on the creator with id = creator_id
 // @Accept json
 // @Produce json

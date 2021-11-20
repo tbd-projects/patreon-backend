@@ -45,6 +45,7 @@ func NewPostsIDHandler(log *logrus.Logger,
 
 // GET Post
 // @Summary get current post
+// @tags posts
 // @Description get current post from current creator
 // @Produce json
 // @Param add-view query string false "IMPORTANT: value yes or no, - if need add view to this post"
@@ -111,6 +112,7 @@ func (h *PostsIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 // DELETE Post
 // @Summary delete current post
+// @tags posts
 // @Description delete current post from current creator
 // @Produce json
 // @Success 200 "post was delete"

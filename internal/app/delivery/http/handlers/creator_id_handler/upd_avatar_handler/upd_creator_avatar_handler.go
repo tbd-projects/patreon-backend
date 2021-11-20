@@ -39,6 +39,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger,
 
 // PUT AvatarChange
 // @Summary set new creator avatar
+// @tags creators
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param avatar formData file true "Avatar file with ext jpeg/png"
 // @Success 200 "successfully upload avatar"
