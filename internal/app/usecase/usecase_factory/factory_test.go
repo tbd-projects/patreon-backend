@@ -88,28 +88,6 @@ func (s *FactorySuite) TestGetCsrfUsecaseSecondCall() {
 	}()
 	factory.GetCsrfUsecase()
 }
-func (s *FactorySuite) TestGetSessionManagerFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory)
-	s.mockRepositoryFactory.EXPECT().GetSessionRepository()
-
-	defer func() {
-		if r := recover(); r != nil {
-			assert.Fail(s.T(), "fail on getUserUsecase()")
-		}
-	}()
-	factory.GetSessionManager()
-}
-func (s *FactorySuite) TestGetSessionManagerSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory)
-	factory.sessionsManager = s.MockSessionsManager
-
-	defer func() {
-		if r := recover(); r != nil {
-			assert.Fail(s.T(), "fail on getUserUsecase()")
-		}
-	}()
-	factory.GetSessionManager()
-}
 func (s *FactorySuite) TestGetAccessUsecaseFirstCall() {
 	factory := NewUsecaseFactory(s.mockRepositoryFactory)
 	s.mockRepositoryFactory.EXPECT().GetAccessRepository()

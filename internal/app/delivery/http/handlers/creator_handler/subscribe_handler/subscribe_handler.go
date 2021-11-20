@@ -5,28 +5,28 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	responseModels "patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
-	middleSes "patreon/internal/app/sessions/middleware"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	"patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 type SubscribeHandler struct {
-	sessionManager    sessions.SessionsManager
+	sessionClient     session_client.AuthCheckerClient
 	subscriberUsecase usecase_subscribers.Usecase
 	bh.BaseHandler
 }
 
-func NewSubscribeHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewSubscribeHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
 	ucSubscribers usecase_subscribers.Usecase) *SubscribeHandler {
 	h := &SubscribeHandler{
 		BaseHandler:       *bh.NewBaseHandler(log),
 		subscriberUsecase: ucSubscribers,
-		sessionManager:    sManager,
+		sessionClient:     sClient,
 	}
-	h.AddMethod(http.MethodGet, h.GET, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
+	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
 	return h
 }
 

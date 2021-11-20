@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	queryLimit  = 1000
+	queryLimit  = 100
 	timeLimit   = int(time.Minute.Milliseconds())
 	blackList   = "BLACK_LIST"
 	timeBlocked = int(time.Minute.Milliseconds() * 2)

@@ -8,9 +8,9 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -22,13 +22,13 @@ type AwardsIdHandler struct {
 }
 
 func NewAwardsIdHandler(log *logrus.Logger,
-	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsIdHandler {
+	ucAwards useAwards.Usecase, sClient session_client.AuthCheckerClient) *AwardsIdHandler {
 	h := &AwardsIdHandler{
 		BaseHandler:   *bh.NewBaseHandler(log),
 		awardsUsecase: ucAwards,
 	}
 
-	h.AddMethod(http.MethodDelete, h.DELETE, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
+	h.AddMethod(http.MethodDelete, h.DELETE, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
 		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
 		csrf_middleware.NewCsrfMiddleware(log,

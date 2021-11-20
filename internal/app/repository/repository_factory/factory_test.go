@@ -33,7 +33,7 @@ func TestFactory(t *testing.T) {
 		},
 	}
 
-	factory := NewRepositoryFactory(log, app.ExpectedConnections{SqlConnection: db, AccessRedisPool: redisConn, SessionRedisPool: redisConn, PathFiles: "don/"})
+	factory := NewRepositoryFactory(log, app.ExpectedConnections{SqlConnection: db, AccessRedisPool: redisConn, PathFiles: "don/"})
 	factory.GetFilesRepository()
 	factory.GetAttachesRepository()
 	factory.GetLikesRepository()
@@ -43,7 +43,6 @@ func TestFactory(t *testing.T) {
 	factory.GetAccessRepository()
 	factory.GetCsrfRepository()
 	factory.GetPostsRepository()
-	factory.GetSessionRepository()
 	factory.GetSubscribersRepository()
 	factory.GetInfoRepository()
 	factory.GetPaymentsRepository()

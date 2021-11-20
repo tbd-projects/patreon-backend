@@ -5,28 +5,28 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )
 
 type SubscriptionsHandler struct {
-	sessionManager     sessions.SessionsManager
+	sessionClient      session_client.AuthCheckerClient
 	subscribersUsecase usecase_subscribers.Usecase
 	bh.BaseHandler
 }
 
-func NewSubscriptionsHandler(log *logrus.Logger, sManager sessions.SessionsManager,
+func NewSubscriptionsHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
 	ucSubscribers usecase_subscribers.Usecase) *SubscriptionsHandler {
 	h := &SubscriptionsHandler{
-		sessionManager:     sManager,
+		sessionClient:      sClient,
 		subscribersUsecase: ucSubscribers,
 		BaseHandler:        *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET,
-		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc)
+		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
 	return h
 }
 

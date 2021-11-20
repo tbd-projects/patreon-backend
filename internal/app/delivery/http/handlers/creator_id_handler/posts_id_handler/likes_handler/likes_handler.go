@@ -10,10 +10,10 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -25,13 +25,13 @@ type LikesHandler struct {
 }
 
 func NewLikesHandler(log *logrus.Logger,
-	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *LikesHandler {
+	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *LikesHandler {
 	h := &LikesHandler{
 		BaseHandler:  *bh.NewBaseHandler(log),
 		likesUsecase: ucLikes,
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, postsMiddleware.CheckCorrectPost)
 
 	h.AddMethod(http.MethodDelete, h.DELETE,

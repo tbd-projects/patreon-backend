@@ -2,9 +2,9 @@ package sessions_manager
 
 import (
 	"fmt"
-	"patreon/internal/app/sessions"
-	mock_sessions "patreon/internal/app/sessions/mocks"
-	"patreon/internal/app/sessions/models"
+	"patreon/internal/microservices/auth/sessions"
+	mock_sessions "patreon/internal/microservices/auth/sessions/mocks"
+	"patreon/internal/microservices/auth/sessions/models"
 	"testing"
 
 	"github.com/golang/mock/gomock"

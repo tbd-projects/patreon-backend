@@ -2,6 +2,7 @@ package login_handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/delivery/http/models"
 	model_data "patreon/internal/app/models"
-	session_models "patreon/internal/app/sessions/models"
+	session_models "patreon/internal/microservices/auth/sessions/models"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -125,7 +126,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 		Return(user.ID, nil)
 
 	s.MockSessionsManager.EXPECT().
-		Create(int64(user.ID)).
+		Create(context.Background(), int64(user.ID)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(session_models.Result{
 			UserID: -1,
@@ -168,7 +169,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 		Return(user.ID, nil)
 
 	s.MockSessionsManager.EXPECT().
-		Create(int64(user.ID)).
+		Create(context.Background(), int64(user.ID)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(session_models.Result{UserID: 1, UniqID: "123"}, nil)
 

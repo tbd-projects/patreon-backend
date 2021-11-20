@@ -2,7 +2,6 @@ package handler_factory
 
 import (
 	useCsrf "patreon/internal/app/csrf/usecase"
-	"patreon/internal/app/sessions"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
@@ -22,7 +21,6 @@ type UsecaseFactory interface {
 	GetCsrfUsecase() useCsrf.Usecase
 	GetAwardsUsecase() useAwards.Usecase
 	GetPostsUsecase() usePosts.Usecase
-	GetSessionManager() sessions.SessionsManager
 	GetSubscribersUsecase() useSubscr.Usecase
 	GetLikesUsecase() useLikes.Usecase
 	GetAttachesUsecase() useAttaches.Usecase

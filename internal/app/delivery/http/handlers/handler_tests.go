@@ -3,7 +3,6 @@ package handlers
 import (
 	"io"
 	mock_usecase_csrf "patreon/internal/app/csrf/usecase/mocks"
-	mock_sessions "patreon/internal/app/sessions/mocks"
 	mock_usecase "patreon/internal/app/usecase/access/mocks"
 	mock_usecase_awards "patreon/internal/app/usecase/awards/mocks"
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
@@ -13,6 +12,7 @@ import (
 	mock_usecase_attaches "patreon/internal/app/usecase/attaches/mocks"
 	mock_subscribers "patreon/internal/app/usecase/subscribers/mocks"
 	mock_usecase_user "patreon/internal/app/usecase/user/mocks"
+	mock_auth_checker "patreon/internal/microservices/auth/delivery/grpc/client/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
@@ -36,7 +36,7 @@ type SuiteHandler struct {
 	MockPostsUsecase       *mock_usecase_posts.PostsUsecase
 	MockAttachesUsecase   *mock_usecase_attaches.AttachesUsecase
 	MockAccessUsecase      *mock_usecase.AccessUsecase
-	MockSessionsManager    *mock_sessions.MockSessionsManager
+	MockSessionsManager    *mock_auth_checker.MockAuthCheckerClient
 	MockInfoUsecase        *mock_usecase_info.InfoUsecase
 	Tb                     TestTable
 	Logger                 *logrus.Logger
@@ -49,7 +49,7 @@ func (s *SuiteHandler) SetupSuite() {
 	s.MockUserUsecase = mock_usecase_user.NewUserUsecase(s.Mock)
 	s.MockCreatorUsecase = mock_usecase_creator.NewCreatorUsecase(s.Mock)
 	s.MockAwardsUsecase = mock_usecase_awards.NewAwardsUsecase(s.Mock)
-	s.MockSessionsManager = mock_sessions.NewMockSessionsManager(s.Mock)
+	s.MockSessionsManager = mock_auth_checker.NewMockAuthCheckerClient(s.Mock)
 	s.MockCsrfUsecase = mock_usecase_csrf.NewCsrfUsecase(s.Mock)
 	s.MockSubscribersUsecase = mock_subscribers.NewSubscribersUsecase(s.Mock)
 	s.MockAccessUsecase = mock_usecase.NewAccessUsecase(s.Mock)
@@ -57,7 +57,7 @@ func (s *SuiteHandler) SetupSuite() {
 	s.MockPostsUsecase = mock_usecase_posts.NewPostsUsecase(s.Mock)
 	s.MockAttachesUsecase = mock_usecase_attaches.NewAttachesUsecase(s.Mock)
 	s.MockInfoUsecase = mock_usecase_info.NewInfoUsecase(s.Mock)
-	
+
 	s.Tb = TestTable{}
 	s.Logger = logrus.New()
 	s.Logger.SetOutput(io.Discard)

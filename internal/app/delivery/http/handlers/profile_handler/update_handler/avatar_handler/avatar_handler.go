@@ -9,27 +9,27 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )
 
 type UpdateAvatarHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient session_client.AuthCheckerClient
+	userUsecase   usecase_user.Usecase
 	bh.BaseHandler
 }
 
 func NewUpdateAvatarHandler(log *logrus.Logger,
-	sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *UpdateAvatarHandler {
+	sClient session_client.AuthCheckerClient, ucUser usecase_user.Usecase) *UpdateAvatarHandler {
 	h := &UpdateAvatarHandler{
-		sessionManager: sManager,
-		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log),
+		sessionClient: sClient,
+		userUsecase:   ucUser,
+		BaseHandler:   *bh.NewBaseHandler(log),
 	}
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMiddleware(session_middleware.NewSessionMiddleware(h.sessionClient, log).Check)
 
 	h.AddMethod(http.MethodPut, h.PUT,
 		csrf_middleware.NewCsrfMiddleware(log,

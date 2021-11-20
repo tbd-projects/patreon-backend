@@ -13,8 +13,6 @@ import (
 	repoAttaches "patreon/internal/app/repository/attaches"
 	useSubscr "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
-
-	"patreon/internal/app/sessions"
 )
 
 //go:generate mockgen -destination=mocks/mock_repository_factory.go -package=mock_repository_factory . RepositoryFactory
@@ -24,7 +22,6 @@ type RepositoryFactory interface {
 	GetCreatorRepository() repCreator.Repository
 	GetAwardsRepository() repoAwrds.Repository
 	GetCsrfRepository() repCsrf.Repository
-	GetSessionRepository() sessions.SessionRepository
 	GetAccessRepository() repAccess.Repository
 	GetSubscribersRepository() useSubscr.Repository
 	GetPostsRepository() repoPosts.Repository

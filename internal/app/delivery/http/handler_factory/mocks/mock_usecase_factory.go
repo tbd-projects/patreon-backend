@@ -156,20 +156,6 @@ func (mr *MockUsecaseFactoryMockRecorder) GetPostsUsecase() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetPostsUsecase))
 }
 
-// GetSessionManager mocks base method.
-func (m *MockUsecaseFactory) GetSessionManager() sessions.SessionsManager {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSessionManager")
-	ret0, _ := ret[0].(sessions.SessionsManager)
-	return ret0
-}
-
-// GetSessionManager indicates an expected call of GetSessionManager.
-func (mr *MockUsecaseFactoryMockRecorder) GetSessionManager() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionManager", reflect.TypeOf((*MockUsecaseFactory)(nil).GetSessionManager))
-}
-
 // GetSubscribersUsecase mocks base method.
 func (m *MockUsecaseFactory) GetSubscribersUsecase() usecase_subscribers.Usecase {
 	m.ctrl.T.Helper()

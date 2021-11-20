@@ -3,7 +3,10 @@ package handler_factory
 import (
 	mock_usecase_factory "patreon/internal/app/delivery/http/handler_factory/mocks"
 	"patreon/internal/app/delivery/http/handlers"
+	mock_auth_checker "patreon/internal/microservices/auth/delivery/grpc/client/mocks"
 	"testing"
+
+	"google.golang.org/grpc"
 
 	"github.com/stretchr/testify/suite"
 
@@ -13,13 +16,16 @@ import (
 type FactorySuite struct {
 	handlers.SuiteHandler
 	usecaseFactory *mock_usecase_factory.MockUsecaseFactory
+	sessionService *mock_auth_checker.MockAuthCheckerClient
 	factory        *HandlerFactory
 }
 
 func (s *FactorySuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
 	s.usecaseFactory = mock_usecase_factory.NewMockUsecaseFactory(s.Mock)
-	s.factory = NewFactory(s.Logger, s.usecaseFactory)
+	s.sessionService = mock_auth_checker.NewMockAuthCheckerClient(s.Mock)
+	sessionCon := &grpc.ClientConn{}
+	s.factory = NewFactory(s.Logger, s.usecaseFactory, sessionCon)
 }
 
 func (s *FactorySuite) TestInitHandlers() {
@@ -29,7 +35,6 @@ func (s *FactorySuite) TestInitHandlers() {
 	s.usecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPostsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetLikesUsecase().Times(1)
-	s.usecaseFactory.EXPECT().GetSessionManager().Times(1)
 	s.usecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetAttachesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)
@@ -57,7 +62,6 @@ func (s *FactorySuite) TestGetHandlersUrlsAlreadyExists() {
 	s.usecaseFactory.EXPECT().GetAwardsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPostsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetLikesUsecase().Times(1)
-	s.usecaseFactory.EXPECT().GetSessionManager().Times(1)
 	s.usecaseFactory.EXPECT().GetSubscribersUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetAttachesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)

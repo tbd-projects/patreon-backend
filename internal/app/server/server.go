@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
+
+	//_ "net/http/pprof"
 	"net/url"
 	"patreon/internal/app/delivery/http/handler_factory"
 	"patreon/internal/app/middleware"
@@ -42,19 +45,7 @@ func (s *Server) checkConnection() error {
 
 	s.logger.Info("Success check connection to sql db")
 
-	connSession, err := s.connections.SessionRedisPool.Dial()
-	if err != nil {
-		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
-	}
-
-	s.logger.Info("Success check connection to redis")
-
-	err = connSession.Close()
-	if err != nil {
-		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
-	}
-
-	connAccess, err := s.connections.SessionRedisPool.Dial()
+	connAccess, err := s.connections.AccessRedisPool.Dial()
 	if err != nil {
 		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
 	}
@@ -125,18 +116,27 @@ func (s *Server) Start(config *app.Config) error {
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics()
+	monitoringHandler.SetupMonitoring(routerApi)
+
+	//routerApi.HandleFunc("/debug/pprof/", pprof.Index)
+	//routerApi.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	//routerApi.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	//routerApi.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	//routerApi.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
 	fileServer := http.FileServer(http.Dir(config.MediaDir + "/"))
 	routerApi.PathPrefix("/" + app.LoadFileUrl).Handler(http.StripPrefix("/api/v1/"+app.LoadFileUrl, fileServer))
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
-	factory := handler_factory.NewFactory(s.logger, usecaseFactory)
+	factory := handler_factory.NewFactory(s.logger, usecaseFactory, s.connections.SessionGrpcConnection)
 	hs := factory.GetHandleUrls()
 
 	for apiUrl, h := range *hs {
 		h.Connect(routerApi.Path(apiUrl))
 	}
-	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger)
+	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)
 	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
 	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger, ddosMiddleware.CheckAccess)
 

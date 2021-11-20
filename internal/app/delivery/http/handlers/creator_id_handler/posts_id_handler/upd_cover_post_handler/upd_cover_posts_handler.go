@@ -8,9 +8,9 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 
@@ -23,12 +23,12 @@ type PostsUpdateCoverHandler struct {
 }
 
 func NewPostsUpdateCoverHandler(log *logrus.Logger,
-	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUpdateCoverHandler {
+	ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *PostsUpdateCoverHandler {
 	h := &PostsUpdateCoverHandler{
 		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
 

@@ -34,6 +34,9 @@ import (
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/nickname_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
 	"patreon/internal/app/delivery/http/handlers/register_handler"
+	"patreon/internal/microservices/auth/delivery/grpc/client"
+
+	"google.golang.org/grpc"
 
 	"github.com/sirupsen/logrus"
 )
@@ -75,15 +78,17 @@ const (
 )
 
 type HandlerFactory struct {
-	usecaseFactory UsecaseFactory
-	logger         *logrus.Logger
-	urlHandler     *map[string]app.Handler
+	usecaseFactory    UsecaseFactory
+	sessionClientConn *grpc.ClientConn
+	logger            *logrus.Logger
+	urlHandler        *map[string]app.Handler
 }
 
-func NewFactory(logger *logrus.Logger, usecaseFactory UsecaseFactory) *HandlerFactory {
+func NewFactory(logger *logrus.Logger, usecaseFactory UsecaseFactory, sClientConn *grpc.ClientConn) *HandlerFactory {
 	return &HandlerFactory{
-		usecaseFactory: usecaseFactory,
-		logger:         logger,
+		usecaseFactory:    usecaseFactory,
+		logger:            logger,
+		sessionClientConn: sClientConn,
 	}
 }
 
@@ -94,11 +99,11 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucAwards := f.usecaseFactory.GetAwardsUsecase()
 	ucPosts := f.usecaseFactory.GetPostsUsecase()
 	ucLikes := f.usecaseFactory.GetLikesUsecase()
-	sManager := f.usecaseFactory.GetSessionManager()
 	ucSubscr := f.usecaseFactory.GetSubscribersUsecase()
 	ucAttaches := f.usecaseFactory.GetAttachesUsecase()
 	ucPayments := f.usecaseFactory.GetPaymentsUsecase()
 	ucInfo := f.usecaseFactory.GetInfoUsecase()
+	sManager := client.NewSessionClient(f.sessionClientConn)
 
 	return map[int]app.Handler{
 		INFO:                     info_handler.NewInfoHandler(f.logger, ucInfo),

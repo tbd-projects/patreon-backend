@@ -6,28 +6,28 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/repository"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
 	"patreon/internal/app/usecase/payments"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )
 
 type PaymentsHandler struct {
-	sessionManager  sessions.SessionsManager
+	sessionClient   session_client.AuthCheckerClient
 	paymentsUsecase payments.Usecase
 	bh.BaseHandler
 }
 
 func NewPaymentsHandler(log *logrus.Logger,
-	sManager sessions.SessionsManager, ucPayments payments.Usecase) *PaymentsHandler {
+	sClient session_client.AuthCheckerClient, ucPayments payments.Usecase) *PaymentsHandler {
 	h := &PaymentsHandler{
-		sessionManager:  sManager,
+		sessionClient:   sClient,
 		paymentsUsecase: ucPayments,
 		BaseHandler:     *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodGet, h.GET,
-		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 	return h
 }

@@ -24,9 +24,6 @@ import (
 	repUser "patreon/internal/app/repository/user"
 	repUserPsql "patreon/internal/app/repository/user/postgresql"
 
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/repository"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,7 +32,6 @@ type RepositoryFactory struct {
 	logger                *logrus.Logger
 	userRepository        repUser.Repository
 	creatorRepository     repCreator.Repository
-	sessionRepository     sessions.SessionRepository
 	awardsRepository      repoAwrds.Repository
 	postsRepository       repoPosts.Repository
 	likesRepository       repoLikes.Repository
@@ -76,13 +72,6 @@ func (f *RepositoryFactory) GetCsrfRepository() repCsrf.Repository {
 	return f.csrfRepository
 }
 
-func (f *RepositoryFactory) GetSessionRepository() sessions.SessionRepository {
-	if f.sessionRepository == nil {
-		f.sessionRepository = repository.NewRedisRepository(f.expectedConnections.SessionRedisPool, f.logger)
-	}
-	return f.sessionRepository
-}
-
 func (f *RepositoryFactory) GetAwardsRepository() repoAwrds.Repository {
 	if f.awardsRepository == nil {
 		f.awardsRepository = repAwardsPsql.NewAwardsRepository(f.expectedConnections.SqlConnection)
@@ -91,7 +80,7 @@ func (f *RepositoryFactory) GetAwardsRepository() repoAwrds.Repository {
 }
 func (f *RepositoryFactory) GetAccessRepository() repositoryAccess.Repository {
 	if f.accessRepository == nil {
-		f.accessRepository = repositoryAccess.NewRedisRepository(f.expectedConnections.SessionRedisPool, f.logger)
+		f.accessRepository = repositoryAccess.NewRedisRepository(f.expectedConnections.AccessRedisPool, f.logger)
 	}
 	return f.accessRepository
 }

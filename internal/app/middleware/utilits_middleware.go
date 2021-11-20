@@ -3,7 +3,11 @@ package middleware
 import (
 	"net/http"
 	"patreon/internal/app/utilits"
+	"patreon/pkg/monitoring"
+	"strconv"
 	"time"
+
+	"github.com/urfave/negroni"
 
 	uuid "github.com/satori/go.uuid"
 
@@ -12,21 +16,32 @@ import (
 )
 
 type UtilitiesMiddleware struct {
-	log utilits.LogObject
+	log     utilits.LogObject
+	metrics monitoring.Monitoring
 }
 
-func NewUtilitiesMiddleware(log *logrus.Logger) UtilitiesMiddleware {
-	return UtilitiesMiddleware{utilits.NewLogObject(log)}
+func NewUtilitiesMiddleware(log *logrus.Logger, metrics monitoring.Monitoring) UtilitiesMiddleware {
+	return UtilitiesMiddleware{
+		log:     utilits.NewLogObject(log),
+		metrics: metrics,
+	}
 }
 
 func (mw *UtilitiesMiddleware) CheckPanic(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func(log *logrus.Entry, w http.ResponseWriter) {
+		defer func(log *logrus.Entry, metrics monitoring.Monitoring, w http.ResponseWriter) {
 			if err := recover(); err != nil {
+				responseErr := http.StatusInternalServerError
+				metrics.GetHits().WithLabelValues(
+					strconv.Itoa(responseErr),
+					r.URL.String(),
+					r.Method,
+				)
+
 				log.Errorf("detacted critical error: %v", err)
-				w.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(responseErr)
 			}
-		}(mw.log.Log(r), w)
+		}(mw.log.Log(r), mw.metrics, w)
 		handler.ServeHTTP(w, r)
 	})
 }
@@ -44,7 +59,19 @@ func (mw *UtilitiesMiddleware) UpgradeLogger(handler http.Handler) http.Handler 
 
 		r = r.WithContext(context.WithValue(r.Context(), "logger", upgradeLogger))
 		upgradeLogger.Info("Log was upgraded")
-		handler.ServeHTTP(w, r)
-		upgradeLogger.Infof("work time: %v", time.Since(start).Milliseconds())
+
+		wrappedWriter := negroni.NewResponseWriter(w)
+		handler.ServeHTTP(wrappedWriter, r)
+
+		statusCode := wrappedWriter.Status()
+
+		executeTime := time.Since(start).Milliseconds()
+		upgradeLogger.Infof("work time [ms]: %v", executeTime)
+
+		mw.metrics.GetHits().WithLabelValues(
+			strconv.Itoa(statusCode),
+			r.URL.String(),
+			r.Method,
+		)
 	})
 }

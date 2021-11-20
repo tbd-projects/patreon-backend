@@ -1,8 +1,9 @@
 package repository
 
 import (
+	"patreon/internal/microservices/auth/sessions/models"
+
 	"github.com/pkg/errors"
-	"patreon/internal/app/sessions/models"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"

@@ -46,7 +46,7 @@ func (s *LogoutTestSuite) TestPOST_WithSession() {
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/logout", &b)
 
 	s.MockSessionsManager.EXPECT().
-		Delete(uniqID).
+		Delete(context.Background(), uniqID).
 		Times(test.ExpectedMockTimes).
 		Return(nil)
 	s.handler.POST(recorder, reader)
@@ -71,7 +71,7 @@ func (s *LogoutTestSuite) TestPOST_WithoutCookies() {
 	reader, _ := http.NewRequest(http.MethodPost, "/logout", &b)
 
 	s.MockSessionsManager.EXPECT().
-		Delete(uniqID).
+		Delete(context.Background(), uniqID).
 		Times(test.ExpectedMockTimes).
 		Return(nil)
 	s.handler.POST(recorder, reader)
@@ -97,7 +97,7 @@ func (s *LogoutTestSuite) TestPOST_ErrorSessions() {
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/logout", &b)
 
 	s.MockSessionsManager.EXPECT().
-		Delete(uniqID).
+		Delete(context.Background(), uniqID).
 		Times(test.ExpectedMockTimes).
 		Return(errors.New(""))
 	s.handler.POST(recorder, reader)

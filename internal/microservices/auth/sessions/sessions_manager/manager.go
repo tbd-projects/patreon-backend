@@ -3,18 +3,19 @@ package sessions_manager
 import (
 	"encoding/hex"
 	"fmt"
-	"golang.org/x/crypto/sha3"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/models"
+	"patreon/internal/microservices/auth/sessions"
+	"patreon/internal/microservices/auth/sessions/models"
 	"strconv"
 	"time"
+
+	"golang.org/x/crypto/sha3"
 
 	uuid "github.com/satori/go.uuid"
 )
 
 const (
-	ExpiredCookiesTime  = 48 * time.Hour
-	UnknownUser         = -1
+	ExpiredCookiesTime = 48 * time.Hour
+	UnknownUser        = -1
 )
 
 type SessionManager struct {
