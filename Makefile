@@ -31,6 +31,8 @@ build-sessions:
 build-docker-local:
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
+build-docker-pg:
+	docker build --no-cache --network host -f ./docker/postgresql.Dockerfile . --tag pg-14
 build-docker-sessions:
 	docker build --no-cache --network host -f ./docker/session-service.Dockerfile . --tag session-service
 build-docker-server:
