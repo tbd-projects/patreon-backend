@@ -1,32 +1,46 @@
 package prometheus_monitoring
 
 import (
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 type PrometheusMetrics struct {
-	Hits *prometheus.CounterVec
+	HitsSuccess   *prometheus.CounterVec
+	HitsErrors    *prometheus.CounterVec
+	ExecutionTime *prometheus.HistogramVec
+	TotalHits     prometheus.Counter
 }
 
-func NewPrometheusMetrics() *PrometheusMetrics {
+func NewPrometheusMetrics(serviceName string) *PrometheusMetrics {
 	metrics := &PrometheusMetrics{
-		Hits: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "hits",
-			Help: "Count requests on service",
+		HitsSuccess: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: serviceName + "_hits",
+			Help: "Count success responses from service",
+		}, []string{"status", "path", "method"}),
+		HitsErrors: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: serviceName + "errors",
+			Help: "Count errors response from service",
+		}, []string{"status", "path", "method"}),
+		ExecutionTime: prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Name: serviceName + "_durations",
+			Help: "Duration execution of request",
 		}, []string{"status", "path", "method"}),
 	}
 
 	return metrics
 }
-
-func (p *PrometheusMetrics) GetHits() *prometheus.CounterVec {
-	return p.Hits
-}
-
-func (p *PrometheusMetrics) SetupMonitoring(router *mux.Router) {
-	prometheus.MustRegister(p.Hits)
-	router.Handle("/metrics", promhttp.Handler())
+func (pm *PrometheusMetrics) SetupMonitoring() error {
+	if err := prometheus.Register(pm.HitsErrors); err != nil {
+		return err
+	}
+	if err := prometheus.Register(pm.HitsSuccess); err != nil {
+		return err
+	}
+	if err := prometheus.Register(pm.ExecutionTime); err != nil {
+		return err
+	}
+	if err := prometheus.Register(pm.TotalHits); err != nil {
+		return err
+	}
+	return nil
 }

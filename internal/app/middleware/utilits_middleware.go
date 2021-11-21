@@ -32,11 +32,12 @@ func (mw *UtilitiesMiddleware) CheckPanic(handler http.Handler) http.Handler {
 		defer func(log *logrus.Entry, metrics monitoring.Monitoring, w http.ResponseWriter) {
 			if err := recover(); err != nil {
 				responseErr := http.StatusInternalServerError
-				metrics.GetHits().WithLabelValues(
+				metrics.GetErrorsHits().WithLabelValues(
 					strconv.Itoa(responseErr),
 					r.URL.String(),
 					r.Method,
 				)
+				metrics.GetRequestCounter().Inc()
 
 				log.Errorf("detacted critical error: %v", err)
 				w.WriteHeader(responseErr)
@@ -68,10 +69,20 @@ func (mw *UtilitiesMiddleware) UpgradeLogger(handler http.Handler) http.Handler 
 		executeTime := time.Since(start).Milliseconds()
 		upgradeLogger.Infof("work time [ms]: %v", executeTime)
 
-		mw.metrics.GetHits().WithLabelValues(
-			strconv.Itoa(statusCode),
-			r.URL.String(),
-			r.Method,
-		)
+		mw.metrics.GetRequestCounter().Inc()
+
+		if statusCode < 300 {
+			mw.metrics.GetSuccessHits().WithLabelValues(
+				strconv.Itoa(statusCode),
+				r.URL.String(),
+				r.Method,
+			)
+		} else {
+			mw.metrics.GetErrorsHits().WithLabelValues(
+				strconv.Itoa(statusCode),
+				r.URL.String(),
+				r.Method,
+			)
+		}
 	})
 }

@@ -1,11 +1,11 @@
 package monitoring
 
-import (
-	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus"
-)
+import "github.com/prometheus/client_golang/prometheus"
 
 type Monitoring interface {
-	SetupMonitoring(router *mux.Router)
-	GetHits() *prometheus.CounterVec
+	SetupMonitoring() error
+	GetSuccessHits() *prometheus.CounterVec
+	GetErrorsHits() *prometheus.CounterVec
+	GetRequestCounter() prometheus.Counter
+	GetExecution() *prometheus.HistogramVec
 }
