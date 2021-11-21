@@ -1,11 +1,12 @@
 package utils
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 	"patreon/internal/app"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 
 	"google.golang.org/grpc"
 
@@ -42,8 +43,8 @@ func NewLogger(config *app.Config, isService bool, serviceName string) (log *log
 	return logger, f.Close
 }
 
-func NewPostgresConnection(config *app.RepositoryConnections) (db *sql.DB, closeResource func() error) {
-	db, err := sql.Open("postgres", config.DataBaseUrl)
+func NewPostgresConnection(config *app.RepositoryConnections) (db *sqlx.DB, closeResource func() error) {
+	db, err := sqlx.Open("postgres", config.DataBaseUrl)
 	if err != nil {
 		logrus.Fatal(err)
 	}

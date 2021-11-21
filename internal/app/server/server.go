@@ -113,11 +113,12 @@ func (s *Server) Start(config *app.Config) error {
 	}
 
 	router := mux.NewRouter()
-	routerApi := router.PathPrefix("/api/v1/").Subrouter()
-	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics()
-	monitoringHandler.SetupMonitoring(routerApi)
+	monitoringHandler.SetupMonitoring(router)
+
+	routerApi := router.PathPrefix("/api/v1/").Subrouter()
+	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	//routerApi.HandleFunc("/debug/pprof/", pprof.Index)
 	//routerApi.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
