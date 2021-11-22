@@ -14,6 +14,7 @@ require (
 	github.com/gomodule/redigo v1.8.5
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
+	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.3
 	github.com/mailru/easyjson v0.7.7 // indirect

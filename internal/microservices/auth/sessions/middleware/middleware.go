@@ -12,7 +12,6 @@ import (
 
 type SessionMiddleware struct {
 	SessionClient client.AuthCheckerClient
-	//SessionManager sessions.SessionsManager
 	utilits.LogObject
 }
 

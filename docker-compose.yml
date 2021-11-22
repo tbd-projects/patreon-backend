@@ -9,9 +9,10 @@ services:
   sessions-service:
     image: session-service
     expose:
-      - "5000"
+      - "5001"
     ports:
-      - "5000:5000"
+      - "5001:5001"
+      - "9091:9091"
     networks:
       - default
     depends_on:
@@ -63,6 +64,7 @@ services:
     image: postgres:latest
     expose:
       - "5432"
+    command: "postgres -c shared_preload_libraries='pg_stat_statements'"
     volumes:
       - postgis-data:/var/lib/postgresql
     environment:
@@ -113,6 +115,27 @@ services:
       - "3000:3000"
     expose:
       - "3000"
+  postgres_exporter:
+    container_name: exporter_container
+    image: prometheuscommunity/postgres-exporter
+    environment:
+#      DATA_SOURCE_URI: "patreon-bd:5432"
+      DATA_SOURCE_USER: "patreon"
+      DATA_SOURCE_PASS: "pyaterochka"
+      DATA_SOURCE_URI: patreon-bd:5432/restapi_dev?sslmode=disable
+    #      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    #    volumes:
+    #      - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    ports:
+      - "9187:9187"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 500M
+    depends_on:
+      - patreon-bd
 #  pgadmin:
 #    container_name: pgadmin_container
 #    image: dpage/pgadmin4:5.7

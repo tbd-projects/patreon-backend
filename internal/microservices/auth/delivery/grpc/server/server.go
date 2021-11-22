@@ -3,8 +3,10 @@ package server
 import (
 	"context"
 	"net"
+	"os"
 	proto "patreon/internal/microservices/auth/delivery/grpc/protobuf"
 	"patreon/internal/microservices/auth/sessions"
+	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 
 	"github.com/sirupsen/logrus"
 
@@ -36,6 +38,8 @@ func (server *AuthServer) StartGRPCServer(listenUrl string) error {
 		return err
 	}
 	proto.RegisterAuthCheckerServer(server.grpcServer, server)
+
+	go prometheus_monitoring.CreateNewMonitoringRouter(os.Getenv("sessions-service"))
 
 	server.logger.Info("Start session service\n")
 	return server.grpcServer.Serve(lis)

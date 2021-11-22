@@ -6,6 +6,8 @@ import (
 	"net/http"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	//_ "net/http/pprof"
 	"net/url"
 	"patreon/internal/app/delivery/http/handler_factory"
@@ -113,9 +115,12 @@ func (s *Server) Start(config *app.Config) error {
 	}
 
 	router := mux.NewRouter()
-
-	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics()
-	monitoringHandler.SetupMonitoring(router)
+	router.Handle("/metrics", promhttp.Handler())
+	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("main")
+	err := monitoringHandler.SetupMonitoring()
+	if err != nil {
+		return err
+	}
 
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)

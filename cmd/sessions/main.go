@@ -7,7 +7,10 @@ import (
 	sessionServer "patreon/internal/microservices/auth/delivery/grpc/server"
 	"patreon/internal/microservices/auth/sessions/repository"
 	sessions_manager2 "patreon/internal/microservices/auth/sessions/sessions_manager"
+	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 	"patreon/pkg/utils"
+
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	grpc2 "google.golang.org/grpc"
 
@@ -49,8 +52,21 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Info("Session-service new redis pool success check")
+	metrics := prometheus_monitoring.NewPrometheusMetrics("auth")
+	if err = metrics.SetupMonitoring(); err != nil {
+		logger.Fatal(err)
+	}
 
-	grpc := grpc2.NewServer()
+	grpcDurationMetrics := utils.AuthInterceptor(metrics)
+
+	grpc := grpc2.NewServer(
+		grpc2.UnaryInterceptor(grpcDurationMetrics),
+		grpc2.StreamInterceptor(grpc_prometheus.StreamServerInterceptor),
+	)
+	//grpc2.UnaryInterceptor(grpcDurationMetrics))
+
+	grpc_prometheus.Register(grpc)
+
 	sessionRepository := repository.NewRedisRepository(sessionRedisPool, logger)
 	logger.Info("Session-service create repository")
 
