@@ -1,4 +1,4 @@
-package upl_img_attach_handler
+package upl_audio_attach_handler
 
 import (
 	"net/http"
@@ -19,16 +19,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type PostsUploadImageHandler struct {
+type PostsUploadAudioHandler struct {
 	attachesUsecase useAttaches.Usecase
 	bh.BaseHandler
 }
 
-func NewPostsUploadImageHandler(log *logrus.Logger,
+func NewPostsUploadAudioHandler(log *logrus.Logger,
 	ucAttaches useAttaches.Usecase,
 	ucPosts usePosts.Usecase,
-	sClient session_client.AuthCheckerClient) *PostsUploadImageHandler {
-	h := &PostsUploadImageHandler{
+	sClient session_client.AuthCheckerClient) *PostsUploadAudioHandler {
+	h := &PostsUploadAudioHandler{
 		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
@@ -43,11 +43,11 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 	return h
 }
 
-// POST add image to post
-// @Summary add image to post
+// POST add audio to post
+// @Summary add audio to post
 // @tags attaches
-// @Accept  image/png, image/jpeg, image/jpg
-// @Param image formData file true "image file with ext jpeg/png"
+// @Accept audio/ogg
+// @Param audio formData file true "audio file with ext audio/ogg"
 // @Success 201 {object} http_models.IdResponse "id attaches"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload some types", "invalid form field name for load file"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
@@ -55,8 +55,8 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/posts/{:post_id}/attaches/image [POST]
-func (h *PostsUploadImageHandler) POST(w http.ResponseWriter, r *http.Request) {
+// @Router /creators/{:creator_id}/posts/{:post_id}/attaches/audio [POST]
+func (h *PostsUploadAudioHandler) POST(w http.ResponseWriter, r *http.Request) {
 	var attachId, postId int64
 	var ok bool
 
@@ -70,13 +70,13 @@ func (h *PostsUploadImageHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
-		"image", []string{"image/png", "image/jpeg", "image/jpg"})
+		"audio", []string{"audio/ogg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return
 	}
 
-	attachId, err = h.attachesUsecase.LoadImage(file, filename, postId)
+	attachId, err = h.attachesUsecase.LoadAudio(file, filename, postId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
 		return

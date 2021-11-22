@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"os"
 	"patreon/internal/app"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -61,4 +62,12 @@ func NewRedisPool(redisUrl string) *redis.Pool {
 
 func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
 	return grpc.Dial(grpcUrl, grpc.WithInsecure())
+}
+
+func StringsToLowerCase(array[]string) []string {
+	res := make([]string, len(array))
+	for i, str := range array {
+		res[i] = strings.ToLower(str)
+	}
+	return res
 }

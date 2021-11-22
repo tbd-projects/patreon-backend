@@ -2,14 +2,17 @@ package base_handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	repFiles "patreon/internal/app/repository/files"
+	usePosts "patreon/internal/app/usecase/posts"
 	"patreon/internal/app/utilits"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -56,6 +59,56 @@ func (h *HelpHandlers) GetInt64FromParam(w http.ResponseWriter, r *http.Request,
 		return app.InvalidInt, false
 	}
 	return numberInt, true
+}
+
+func (h *HelpHandlers) redirect(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	query.Set("page", "1")
+	query.Set("limit", fmt.Sprintf("%d", usePosts.BaseLimit))
+	r.URL.RawQuery = query.Encode()
+	redirectUrl := r.URL.String()
+	h.Log(r).Debugf("redirect to url: %s, with offest 0 and limit %d", redirectUrl, usePosts.BaseLimit)
+
+	http.Redirect(w, r, redirectUrl, http.StatusPermanentRedirect)
+}
+
+// GetPaginationFromQuery Expected api param:
+// 	Auto redirect if some param not passed
+//	Param page query uint64 true "start page number of posts mutually exclusive with offset"
+// 	Param offset query uint64 true "start number of posts mutually exclusive with page"
+// 	Param limit query uint64 true "posts to return"
+//
+// Errors:
+// 	Status 400 handler_errors.InvalidQueries
+func (h *HelpHandlers) GetPaginationFromQuery(w http.ResponseWriter, r *http.Request) (int64, int64, bool) {
+	var limit, offset, page int64
+	var ok bool
+	limit, ok = h.GetInt64FromQueries(w, r, "limit")
+	if !ok {
+		if limit == EmptyQuery {
+			h.redirect(w, r)
+		}
+		return app.InvalidInt, app.InvalidInt, false
+	}
+
+	offset, ok = h.GetInt64FromQueries(w, r, "offset")
+	if !ok {
+		if offset != EmptyQuery {
+			return app.InvalidInt, app.InvalidInt, false
+		}
+		page, ok = h.GetInt64FromQueries(w, r, "page")
+		if !ok {
+			if offset == EmptyQuery {
+				h.redirect(w, r)
+			}
+			return app.InvalidInt, app.InvalidInt, false
+		}
+		if page <= 0 {
+			page = 1
+		}
+		offset = (page - 1) * limit
+	}
+	return limit, offset, true
 }
 
 // GetInt64FromQueries HTTPErrors
@@ -145,8 +198,9 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 	}
 	sort.Strings(validTypes)
 	fType := http.DetectContentType(buff)
-	if pos := sort.SearchStrings(validTypes, fType); pos == len(validTypes) {
-		return nil, "", http.StatusBadRequest, handler_errors.InvalidImageExt
+	if pos := sort.SearchStrings(validTypes, fType); pos == len(validTypes) || validTypes[pos] != fType {
+		return nil, "", http.StatusBadRequest, fmt.Errorf("%s, %s",
+			handler_errors.InvalidExt, strings.Join(validTypes, " ,"))
 	}
 
 	if _, err = f.Seek(0, io.SeekStart); err != nil {

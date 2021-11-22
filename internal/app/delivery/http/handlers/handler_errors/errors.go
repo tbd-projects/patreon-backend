@@ -13,7 +13,7 @@ var (
 	UserWithNicknameNotFound = errors.New("user with this nickname not found")
 	AwardNotFound            = errors.New("award with this id not found")
 	PostNotFound             = errors.New("post with not found")
-	AttachNotFound         = errors.New("attach with this id not found")
+	AttachNotFound           = errors.New("attach with this id not found")
 	LikeNotFound             = errors.New("like with this id not found")
 	PaymentsNotFound         = errors.New("this user have not payment")
 )
@@ -70,7 +70,7 @@ var (
 	InvalidQueries       = errors.New("invalid parameters in query")
 	FileSizeError        = errors.New("size of file very big")
 	InvalidFormFieldName = errors.New("invalid form field name for load file")
-	InvalidImageExt      = errors.New("please upload a JPEG, JPG or PNG files")
+	InvalidExt           = errors.New("please upload: ")
 	UserAlreadySubscribe = errors.New("this user already have subscribe on creator")
 	SubscribesNotFound   = errors.New("subscribes on the creator not found")
 	InvalidUserNickname  = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",

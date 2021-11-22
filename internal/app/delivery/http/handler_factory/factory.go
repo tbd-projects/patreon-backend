@@ -3,6 +3,7 @@ package handler_factory
 import (
 	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/creator_handler"
+	search_creators_handler "patreon/internal/app/delivery/http/handlers/creator_handler/search_creators"
 	"patreon/internal/app/delivery/http/handlers/creator_handler/subscribe_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
@@ -13,11 +14,15 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler/upl_audio_attach_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler/upl_img_attach_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler/upl_text_attach_handler"
+	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler/upl_video_attach_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler"
+	upd_audio_attach_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_audio_post_handler"
 	upd_img_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_image_post_handler"
 	upd_text_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_text_post_handler"
+	upd_video_attach_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_video_post_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/likes_handler"
 	upl_cover_posts_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_cover_post_handler"
 	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_handler"
@@ -52,6 +57,7 @@ const (
 	CREATOR_WITH_ID
 	CREATOR_AVATAR
 	CREATOR_COVER
+	SEARCH_CREATORS
 	UPDATE_PASSWORD
 	UPDATE_AVATAR
 	UPDATE_NICKNAME
@@ -68,6 +74,8 @@ const (
 	POST_UPD_COVER
 	ATTACH_ADD_TEXT
 	ATTACH_ADD_IMAGE
+	ATTACH_ADD_AUDIO
+	ATTACH_ADD_VIDEO
 	ATTACH_UPD_TEXT
 	ATTACH_UPD_IMAGE
 	ATTACH_ID
@@ -75,6 +83,8 @@ const (
 	ATTACHES
 	AWARDS_CREATOR_SUBSCRIBE
 	USER_PAYMENTS
+	ATTACH_UPD_VIDEO
+	ATTACH_UPD_AUDIO
 )
 
 type HandlerFactory struct {
@@ -113,6 +123,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		PROFILE:                  profile_handler.NewProfileHandler(f.logger, sManager, ucUser),
 		CREATORS:                 creator_handler.NewCreatorHandler(f.logger, sManager, ucCreator, ucUser),
 		CREATOR_WITH_ID:          creator_id_handler.NewCreatorIdHandler(f.logger, sManager, ucCreator),
+		SEARCH_CREATORS:          search_creators_handler.NewCreatorHandler(f.logger, sManager, ucCreator),
 		UPDATE_PASSWORD:          password_handler.NewUpdatePasswordHandler(f.logger, sManager, ucUser),
 		UPDATE_AVATAR:            avatar_handler.NewUpdateAvatarHandler(f.logger, sManager, ucUser),
 		UPDATE_NICKNAME:          nickname_handler.NewUpdateNicknameHandler(f.logger, sManager, ucUser),
@@ -138,6 +149,10 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		AWARDS_CREATOR_SUBSCRIBE: aw_subscribe_handler.NewAwardsSubscribeHandler(f.logger, sManager, ucSubscr, ucAwards),
 		USER_PAYMENTS:            payments_handler.NewPaymentsHandler(f.logger, sManager, ucPayments),
 		ATTACHES:                 attaches_handler.NewAttachesHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_ADD_VIDEO:         upl_video_attach_handler.NewPostsUploadVideoHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_ADD_AUDIO:         upl_audio_attach_handler.NewPostsUploadAudioHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_UPD_VIDEO:         upd_video_attach_handler.NewAttachUploadVideoHandler(f.logger, ucAttaches, ucPosts, sManager),
+		ATTACH_UPD_AUDIO:         upd_audio_attach_handler.NewAttachUploadAudioHandler(f.logger, ucAttaches, ucPosts, sManager),
 	}
 }
 
@@ -166,6 +181,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/subscribers":   hs[SUBSCRIBES],
 		"/creators/{creator_id:[0-9]+}/update/avatar": hs[CREATOR_AVATAR],
 		"/creators/{creator_id:[0-9]+}/update/cover":  hs[CREATOR_COVER],
+		"/creators/search":                            hs[SEARCH_CREATORS],
 		// ../awards ---------------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/awards":                                hs[AWARDS],
 		"/creators/{creator_id:[0-9]+}/awards/{award_id:[0-9]+}":              hs[AWARDS_WITH_ID],
@@ -182,9 +198,13 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches":                        hs[ATTACHES],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches/text":                   hs[ATTACH_ADD_TEXT],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches/image":                  hs[ATTACH_ADD_IMAGE],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches/video":                  hs[ATTACH_ADD_VIDEO],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches/audio":                  hs[ATTACH_ADD_AUDIO],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}":              hs[ATTACH_ID],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/text":  hs[ATTACH_UPD_TEXT],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/image": hs[ATTACH_UPD_IMAGE],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/video": hs[ATTACH_UPD_VIDEO],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/audio": hs[ATTACH_UPD_AUDIO],
 		//   /token  ---------------------------------------------------------////
 		"/token": hs[GET_CSRF_TOKEN],
 	}

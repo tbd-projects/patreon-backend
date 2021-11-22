@@ -47,6 +47,28 @@ type Usecase interface {
 	//   		repository_os.ErrorCopyFile
 	LoadImage(data io.Reader, name repoFiles.FileName, postId int64) (int64, error)
 
+	// LoadAudio Errors:
+	//		models.InvalidPostId
+	//		models.InvalidType
+	//		repository_postgresql.UnknownDataFormat
+	//		app.GeneralError with Errors:
+	//			app.UnknownError
+	//			repository.DefaultErrDB
+	//			repository_os.ErrorCreate
+	//   		repository_os.ErrorCopyFile
+	LoadAudio(data io.Reader, name repoFiles.FileName, postId int64) (int64, error)
+
+	// LoadVideo Errors:
+	//		models.InvalidPostId
+	//		models.InvalidType
+	//		repository_postgresql.UnknownDataFormat
+	//		app.GeneralError with Errors:
+	//			app.UnknownError
+	//			repository.DefaultErrDB
+	//			repository_os.ErrorCreate
+	//   		repository_os.ErrorCopyFile
+	LoadVideo(data io.Reader, name repoFiles.FileName, postId int64) (int64, error)
+
 	// LoadText Errors:
 	//		models.InvalidPostId
 	//		models.InvalidType
@@ -76,5 +98,29 @@ type Usecase interface {
 	//			repository.DefaultErrDB
 	//			repository_os.ErrorCreate
 	//   		repository_os.ErrorCopyFile
-	UpdateImage(data io.Reader, name repoFiles.FileName, postDataId int64) error
+	UpdateImage(data io.Reader, name repoFiles.FileName, AttachId int64) error
+
+	// UpdateAudio Errors:
+	//		models.InvalidPostId
+	//		models.InvalidType
+	//		repository.NotFound
+	//		repository_postgresql.UnknownDataFormat
+	//		app.GeneralError with Errors:
+	//			app.UnknownError
+	//			repository.DefaultErrDB
+	//			repository_os.ErrorCreate
+	//   		repository_os.ErrorCopyFile
+	UpdateAudio(data io.Reader, name repoFiles.FileName, AttachId int64) error
+
+	// UpdateVideo Errors:
+	//		models.InvalidPostId
+	//		models.InvalidType
+	//		repository.NotFound
+	//		repository_postgresql.UnknownDataFormat
+	//		app.GeneralError with Errors:
+	//			app.UnknownError
+	//			repository.DefaultErrDB
+	//			repository_os.ErrorCreate
+	//   		repository_os.ErrorCopyFile
+	UpdateVideo(data io.Reader, name repoFiles.FileName, AttachId int64) error
 }

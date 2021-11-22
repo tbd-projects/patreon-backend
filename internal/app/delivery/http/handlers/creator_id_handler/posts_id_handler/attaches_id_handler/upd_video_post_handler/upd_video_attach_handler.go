@@ -1,4 +1,4 @@
-package upl_img_attach_handler
+package upd_video_attach_handler
 
 import (
 	"net/http"
@@ -7,7 +7,6 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	http_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	usePosts "patreon/internal/app/usecase/posts"
@@ -19,68 +18,73 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type PostsUploadImageHandler struct {
+type AttachUploadVideoHandler struct {
 	attachesUsecase useAttaches.Usecase
 	bh.BaseHandler
 }
 
-func NewPostsUploadImageHandler(log *logrus.Logger,
+func NewAttachUploadVideoHandler(
+	log *logrus.Logger,
 	ucAttaches useAttaches.Usecase,
 	ucPosts usePosts.Usecase,
-	sClient session_client.AuthCheckerClient) *PostsUploadImageHandler {
-	h := &PostsUploadImageHandler{
+	sClient session_client.AuthCheckerClient) *AttachUploadVideoHandler {
+	h := &AttachUploadVideoHandler{
 		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
 	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
-	h.AddMiddleware(sessionMiddleware.Check, middleware.NewCreatorsMiddleware(log).CheckAllowUser,
-		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost, sessionMiddleware.AddUserId)
+	h.AddMiddleware(sessionMiddleware.Check,
+		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.
+			NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfToken,
+		middleware.NewCreatorsMiddleware(log).CheckAllowUser,
+		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost,
+		middleware.NewAttachesMiddleware(log, ucAttaches).CheckCorrectAttach)
 
-	h.AddMethod(http.MethodPost, h.POST,
-		csrf_middleware.NewCsrfMiddleware(log,
-			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
-	)
+	h.AddMethod(http.MethodPut, h.PUT)
+
 	return h
 }
 
-// POST add image to post
-// @Summary add image to post
+// PUT update video to post
+// @Summary update video to post
 // @tags attaches
-// @Accept  image/png, image/jpeg, image/jpg
-// @Param image formData file true "image file with ext jpeg/png"
-// @Success 201 {object} http_models.IdResponse "id attaches"
-// @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload some types", "invalid form field name for load file"
+// @Accept  video/3gpp, video/mp4
+// @Param video formData file true "image file with ext video/3gpp, video/mp4"
+// @Success 200
+// @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some type"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Failure 422 {object} http_models.ErrResponse "invalid data type", "this post id not know"
+// @Failure 404 {object} http_models.ErrResponse "attach with this id not found"
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/posts/{:post_id}/attaches/image [POST]
-func (h *PostsUploadImageHandler) POST(w http.ResponseWriter, r *http.Request) {
-	var attachId, postId int64
+// @Router /creators/{:creator_id}/posts/{:post_id}/{:attach_id}/update/video [PUT]
+func (h *AttachUploadVideoHandler) PUT(w http.ResponseWriter, r *http.Request) {
+	var attachId int64
 	var ok bool
 
-	if postId, ok = h.GetInt64FromParam(w, r, "post_id"); !ok {
+	if attachId, ok = h.GetInt64FromParam(w, r, "attach_id"); !ok {
 		return
 	}
-	if len(mux.Vars(r)) > 2 {
+
+	if len(mux.Vars(r)) > 3 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
-		"image", []string{"image/png", "image/jpeg", "image/jpg"})
+		"video", []string{"video/3gpp", "video/mp4"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return
 	}
 
-	attachId, err = h.attachesUsecase.LoadImage(file, filename, postId)
+	err = h.attachesUsecase.UpdateVideo(file, filename, attachId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, &http_models.IdResponse{ID: attachId})
+	w.WriteHeader(http.StatusOK)
 }

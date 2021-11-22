@@ -140,6 +140,62 @@ func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileNam
 	return usecase.repository.Create(post)
 }
 
+// LoadVideo Errors:
+//		models.InvalidPostId
+//		models.InvalidType
+//		repository_postgresql.UnknownDataFormat
+//		app.GeneralError with Errors:
+//			app.UnknownError
+//			repository.DefaultErrDB
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
+func (usecase *AttachesUsecase) LoadVideo(data io.Reader, name repoFiles.FileName, postId int64) (int64, error) {
+	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Video)
+	if err != nil {
+		return app.InvalidInt, err
+	}
+
+	post := &models.AttachWithoutLevel{Type: models.Video, Value: app.LoadFileUrl + path, PostId: postId}
+	if err = post.Validate(); err != nil {
+		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
+			return app.InvalidInt, err
+		}
+		return app.InvalidInt, &app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
+		}
+	}
+	return usecase.repository.Create(post)
+}
+
+// LoadAudio Errors:
+//		models.InvalidPostId
+//		models.InvalidType
+//		repository_postgresql.UnknownDataFormat
+//		app.GeneralError with Errors:
+//			app.UnknownError
+//			repository.DefaultErrDB
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
+func (usecase *AttachesUsecase) LoadAudio(data io.Reader, name repoFiles.FileName, postId int64) (int64, error) {
+	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Music)
+	if err != nil {
+		return app.InvalidInt, err
+	}
+
+	post := &models.AttachWithoutLevel{Type: models.Music, Value: app.LoadFileUrl + path, PostId: postId}
+	if err = post.Validate(); err != nil {
+		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
+			return app.InvalidInt, err
+		}
+		return app.InvalidInt, &app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
+		}
+	}
+	return usecase.repository.Create(post)
+}
+
 // LoadText Errors:
 //		models.InvalidPostId
 //		models.InvalidType
@@ -183,6 +239,72 @@ func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileN
 	}
 
 	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Image, Value:  app.LoadFileUrl + path}
+	if err = post.Validate(); err != nil {
+		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
+			return err
+		}
+		return &app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
+		}
+	}
+	return usecase.repository.Update(post)
+}
+
+// UpdateAudio Errors:
+//		models.InvalidPostId
+//		models.InvalidType
+//		repository_postgresql.UnknownDataFormat
+//		repository.NotFound
+//		app.GeneralError with Errors:
+//			app.UnknownError
+//			repository.DefaultErrDB
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
+func (usecase *AttachesUsecase) UpdateAudio(data io.Reader, name repoFiles.FileName, postDataId int64) error {
+	if _, err := usecase.repository.ExistsAttach(postDataId); err != nil {
+		return err
+	}
+
+	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Music)
+	if err != nil {
+		return err
+	}
+
+	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Music, Value:  app.LoadFileUrl + path}
+	if err = post.Validate(); err != nil {
+		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
+			return err
+		}
+		return &app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
+		}
+	}
+	return usecase.repository.Update(post)
+}
+
+// UpdateVideo Errors:
+//		models.InvalidPostId
+//		models.InvalidType
+//		repository_postgresql.UnknownDataFormat
+//		repository.NotFound
+//		app.GeneralError with Errors:
+//			app.UnknownError
+//			repository.DefaultErrDB
+//			repository_os.ErrorCreate
+//   		repository_os.ErrorCopyFile
+func (usecase *AttachesUsecase) UpdateVideo(data io.Reader, name repoFiles.FileName, postDataId int64) error {
+	if _, err := usecase.repository.ExistsAttach(postDataId); err != nil {
+		return err
+	}
+
+	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Video)
+	if err != nil {
+		return err
+	}
+
+	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Video, Value:  app.LoadFileUrl + path}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return err

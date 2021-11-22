@@ -1,7 +1,6 @@
 package posts_handler
 
 import (
-	"fmt"
 	"net/http"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
@@ -45,17 +44,6 @@ func NewPostsHandler(log *logrus.Logger,
 	return h
 }
 
-func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	query.Set("page", "1")
-	query.Set("limit", fmt.Sprintf("%d", usePosts.BaseLimit))
-	r.URL.RawQuery = query.Encode()
-	redirectUrl := r.URL.String()
-	h.Log(r).Debugf("redirect to url: %s, with offest 0 and limit %d", redirectUrl, usePosts.BaseLimit)
-
-	http.Redirect(w, r, redirectUrl, http.StatusPermanentRedirect)
-}
-
 // GET Posts
 // @Summary get list of posts of some creator
 // @tags posts
@@ -70,36 +58,13 @@ func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Router /creators/{:creator_id}/posts [GET]
 func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
-	var limit, offset, page int64
-	var ok, withDraft bool
-
-	limit, ok = h.GetInt64FromQueries(w, r, "limit")
+	limit, offset, ok := h.GetPaginationFromQuery(w, r)
 	if !ok {
-		if limit == bh.EmptyQuery {
-			h.redirect(w, r)
-		}
 		return
 	}
 
-	offset, ok = h.GetInt64FromQueries(w, r, "offset")
-	if !ok {
-		if offset != bh.EmptyQuery {
-			return
-		}
-		page, ok = h.GetInt64FromQueries(w, r, "page")
-		if !ok {
-			if offset == bh.EmptyQuery {
-				h.redirect(w, r)
-			}
-			return
-		}
-		if page <= 0 {
-			page = 1
-		}
-		offset = (page - 1) * limit
-	}
-
 	var err error
+	var withDraft bool
 	if res := r.URL.Query().Get("with-draft"); res == "" {
 		withDraft = false
 	} else if withDraft, err = strconv.ParseBool(res); err != nil {

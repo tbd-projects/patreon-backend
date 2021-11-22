@@ -43,6 +43,10 @@ type ResponseCreator struct {
 	models.Creator
 }
 
+type ResponseCreators struct {
+	Creators []ResponseCreator `json:"creators"`
+}
+
 type ResponseCreatorSubscrube struct {
 	models.CreatorSubscribe
 }
@@ -109,6 +113,14 @@ func ToResponseInfo(info models.Info) ResponseInfo {
 	return ResponseInfo{
 		info,
 	}
+}
+
+func ToResponseCreators(crs []models.Creator) ResponseCreators {
+	respondCreators := make([]ResponseCreator, len(crs))
+	for i, cr := range crs {
+		respondCreators[i] = ToResponseCreator(cr)
+	}
+	return ResponseCreators{respondCreators}
 }
 
 func ToResponseCreatorWithAwards(cr models.CreatorWithAwards) ResponseCreatorWithAwards {

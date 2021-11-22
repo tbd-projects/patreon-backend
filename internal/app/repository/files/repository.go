@@ -9,8 +9,8 @@ type TypeFiles string
 const (
 	Image = TypeFiles("image")
 	File  = TypeFiles("file")
-	Video = TypeFiles("music")
-	Music = TypeFiles("video")
+	Video = TypeFiles("video")
+	Music = TypeFiles("audio")
 )
 
 type FileName string

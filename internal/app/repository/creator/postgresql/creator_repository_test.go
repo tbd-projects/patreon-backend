@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/zhashkevych/go-sqlxmock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -32,8 +32,6 @@ func (s *SuiteCreatorRepository) AfterTest(_, _ string) {
 }
 
 func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
-	queryCategory := `SELECT category_id FROM creator_category WHERE name = $1`
-
 	query := `INSERT INTO creator_profile (creator_id, category,
 		description, avatar, cover) VALUES ($1, $2, $3, $4, $5)
 		RETURNING creator_id
@@ -42,7 +40,7 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
 
 	cr.ID = 1
 	categoryId := int64(1)
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategory)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategoryCreate)).
 		WithArgs(cr.Category).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(categoryId))))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -52,7 +50,7 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
 	assert.Equal(s.T(), id, cr.ID)
 	assert.NoError(s.T(), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategory)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategoryCreate)).
 		WithArgs(cr.Category).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(categoryId))))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -61,13 +59,13 @@ func (s *SuiteCreatorRepository) TestCreatorRepository_Create() {
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategory)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategoryCreate)).
 		WithArgs(cr.Category).
 		WillReturnError(models.BDError)
 	_, err = s.repo.Create(cr)
 	assert.Error(s.T(), repository.NewDBError(models.BDError), err)
 
-	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategory)).
+	s.Mock.ExpectQuery(regexp.QuoteMeta(queryCategoryCreate)).
 		WithArgs(cr.Category).
 		WillReturnError(sql.ErrNoRows)
 	_, err = s.repo.Create(cr)

@@ -1,4 +1,4 @@
-package upd_img_data_handler
+package upd_img_attach_handler
 
 import (
 	"net/http"
@@ -7,8 +7,8 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_os "patreon/internal/app/repository/files/os"
 	repository_postgresql "patreon/internal/app/repository/attaches/postgresql"
+	repository_os "patreon/internal/app/repository/files/os"
 
 	"github.com/sirupsen/logrus"
 )

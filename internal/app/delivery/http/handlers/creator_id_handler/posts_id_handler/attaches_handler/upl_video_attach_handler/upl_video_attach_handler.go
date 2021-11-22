@@ -1,4 +1,4 @@
-package upl_img_attach_handler
+package upl_video_attach_handler
 
 import (
 	"net/http"
@@ -19,16 +19,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type PostsUploadImageHandler struct {
+type PostsUploadVideoHandler struct {
 	attachesUsecase useAttaches.Usecase
 	bh.BaseHandler
 }
 
-func NewPostsUploadImageHandler(log *logrus.Logger,
+func NewPostsUploadVideoHandler(log *logrus.Logger,
 	ucAttaches useAttaches.Usecase,
 	ucPosts usePosts.Usecase,
-	sClient session_client.AuthCheckerClient) *PostsUploadImageHandler {
-	h := &PostsUploadImageHandler{
+	sClient session_client.AuthCheckerClient) *PostsUploadVideoHandler {
+	h := &PostsUploadVideoHandler{
 		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
@@ -43,11 +43,11 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 	return h
 }
 
-// POST add image to post
-// @Summary add image to post
+// POST add video to post
+// @Summary add video to post
 // @tags attaches
-// @Accept  image/png, image/jpeg, image/jpg
-// @Param image formData file true "image file with ext jpeg/png"
+// @Accept video/3gpp, video/mp4
+// @Param video formData file true "image file with ext video/3gpp, video/mp4"
 // @Success 201 {object} http_models.IdResponse "id attaches"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload some types", "invalid form field name for load file"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
@@ -55,8 +55,8 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/posts/{:post_id}/attaches/image [POST]
-func (h *PostsUploadImageHandler) POST(w http.ResponseWriter, r *http.Request) {
+// @Router /creators/{:creator_id}/posts/{:post_id}/attaches/video [POST]
+func (h *PostsUploadVideoHandler) POST(w http.ResponseWriter, r *http.Request) {
 	var attachId, postId int64
 	var ok bool
 
@@ -70,13 +70,13 @@ func (h *PostsUploadImageHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
-		"image", []string{"image/png", "image/jpeg", "image/jpg"})
+		"video", []string{"video/3gpp", "video/mp4"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return
 	}
 
-	attachId, err = h.attachesUsecase.LoadImage(file, filename, postId)
+	attachId, err = h.attachesUsecase.LoadVideo(file, filename, postId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
 		return

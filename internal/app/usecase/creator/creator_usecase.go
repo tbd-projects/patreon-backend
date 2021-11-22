@@ -65,6 +65,14 @@ func (usecase *CreatorUsecase) GetCreators() ([]models.Creator, error) {
 	return usecase.repository.GetCreators()
 }
 
+// SearchCreators Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *CreatorUsecase) SearchCreators(pag *models.Pagination,
+	searchString string, categories ...string) ([]models.Creator, error) {
+	return usecase.repository.SearchCreators(pag, searchString, categories...)
+}
+
 // GetCreator Errors:
 // 		repository.NotFound
 // 		app.GeneralError with Errors:

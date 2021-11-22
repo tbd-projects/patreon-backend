@@ -94,6 +94,26 @@ func (mr *CreatorRepositoryMockRecorder) GetCreators() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreators", reflect.TypeOf((*CreatorRepository)(nil).GetCreators))
 }
 
+// SearchCreators mocks base method.
+func (m *CreatorRepository) SearchCreators(arg0 *models.Pagination, arg1 string, arg2 ...string) ([]models.Creator, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SearchCreators", varargs...)
+	ret0, _ := ret[0].([]models.Creator)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchCreators indicates an expected call of SearchCreators.
+func (mr *CreatorRepositoryMockRecorder) SearchCreators(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchCreators", reflect.TypeOf((*CreatorRepository)(nil).SearchCreators), varargs...)
+}
+
 // UpdateAvatar mocks base method.
 func (m *CreatorRepository) UpdateAvatar(arg0 int64, arg1 string) error {
 	m.ctrl.T.Helper()

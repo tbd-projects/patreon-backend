@@ -27,7 +27,7 @@ const (
 	existsAttachQuery = `SELECT post_id FROM posts_data WHERE data_id in (?)`
 
 	getAttachesQuery = `SELECT data_id, pst.type, data FROM posts_data JOIN posts_type AS pst 
-    			ON (pst.posts_type_id = posts_data.type) WHERE post_id = $1 ORDER BY level`
+    			ON (pst.posts_type_id = posts_data.type) WHERE post_id = $1 AND level != -1 ORDER BY level`
 
 	updateQuery = `UPDATE posts_data SET type = $1, data = $2 WHERE data_id = $3 RETURNING data_id`
 

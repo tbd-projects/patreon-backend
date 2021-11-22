@@ -3,6 +3,7 @@
 ./patreon-secrt
 ./docs
 ./docker
+./scripts
 *.out
 *.txt
 *.html
