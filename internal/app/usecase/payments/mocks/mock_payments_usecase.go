@@ -35,10 +35,10 @@ func (m *PaymentsUsecase) EXPECT() *PaymentsUsecaseMockRecorder {
 }
 
 // GetCreatorPayments mocks base method.
-func (m *PaymentsUsecase) GetCreatorPayments(arg0 int64) ([]models.Payments, error) {
+func (m *PaymentsUsecase) GetCreatorPayments(arg0 int64) ([]models.CreatorPayments, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCreatorPayments", arg0)
-	ret0, _ := ret[0].([]models.Payments)
+	ret0, _ := ret[0].([]models.CreatorPayments)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +50,10 @@ func (mr *PaymentsUsecaseMockRecorder) GetCreatorPayments(arg0 interface{}) *gom
 }
 
 // GetUserPayments mocks base method.
-func (m *PaymentsUsecase) GetUserPayments(arg0 int64) ([]models.Payments, error) {
+func (m *PaymentsUsecase) GetUserPayments(arg0 int64) ([]models.UserPayments, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserPayments", arg0)
-	ret0, _ := ret[0].([]models.Payments)
+	ret0, _ := ret[0].([]models.UserPayments)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

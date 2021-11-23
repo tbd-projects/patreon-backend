@@ -1,10 +1,11 @@
 package payments_handler
 
 import (
+	"fmt"
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
+	http_models "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/repository"
 	"patreon/internal/app/usecase/payments"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
@@ -30,6 +31,17 @@ func NewPaymentsHandler(log *logrus.Logger,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 	return h
+}
+
+func (h *PaymentsHandler) redirect(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	query.Set("page", "1")
+	query.Set("limit", fmt.Sprintf("%d", payments.BaseLimit))
+	r.URL.RawQuery = query.Encode()
+	redirectUrl := r.URL.String()
+	h.Log(r).Debugf("redirect to url: %s, with offest 0 and limit %d", redirectUrl, payments.BaseLimit)
+
+	http.Redirect(w, r, redirectUrl, http.StatusPermanentRedirect)
 }
 
 // GET UserPayments

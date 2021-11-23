@@ -19,7 +19,7 @@ func TestUtilitiesMiddleware_CheckPanic(t *testing.T) {
 	}(t)
 
 	log := &logrus.Logger{}
-	utilits := NewUtilitiesMiddleware(log, prometheus_monitoring.NewPrometheusMetrics())
+	utilits := NewUtilitiesMiddleware(log, prometheus_monitoring.NewPrometheusMetrics("TEST"))
 
 	b := bytes.Buffer{}
 	recorder := httptest.NewRecorder()
@@ -38,7 +38,7 @@ func TestUtilitiesMiddleware_UpgradeLogger(t *testing.T) {
 	}(t)
 
 	log := &logrus.Logger{}
-	utilits := NewUtilitiesMiddleware(log, prometheus_monitoring.NewPrometheusMetrics())
+	utilits := NewUtilitiesMiddleware(log, prometheus_monitoring.NewPrometheusMetrics("TEST"))
 
 	b := bytes.Buffer{}
 	recorder := httptest.NewRecorder()

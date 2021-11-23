@@ -19,7 +19,7 @@ func NewPaymentsUsecase(repo repository_payments.Repository) *PaymentsUsecase {
 //		repository.NotFound
 //		app.GeneralError with Errors:
 //			repository.DefaultErrDB
-func (usecase *PaymentsUsecase) GetUserPayments(userID int64) ([]models.Payments, error) {
+func (usecase *PaymentsUsecase) GetUserPayments(userID int64) ([]models.UserPayments, error) {
 	userPayments, err := usecase.repository.GetUserPayments(userID)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (usecase *PaymentsUsecase) GetUserPayments(userID int64) ([]models.Payments
 //		repository.NotFound
 //		app.GeneralError with Errors:
 //			repository.DefaultErrDB
-func (usecase *PaymentsUsecase) GetCreatorPayments(creatorID int64) ([]models.Payments, error) {
+func (usecase *PaymentsUsecase) GetCreatorPayments(creatorID int64) ([]models.CreatorPayments, error) {
 	creatorPayments, err := usecase.repository.GetCreatorPayments(creatorID)
 	if err != nil {
 		return nil, err

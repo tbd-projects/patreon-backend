@@ -35,10 +35,10 @@ func (m *PaymentsRepository) EXPECT() *PaymentsRepositoryMockRecorder {
 }
 
 // GetCreatorPayments mocks base method.
-func (m *PaymentsRepository) GetCreatorPayments(arg0 int64) ([]models.Payments, error) {
+func (m *PaymentsRepository) GetCreatorPayments(arg0 int64) ([]models.CreatorPayments, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCreatorPayments", arg0)
-	ret0, _ := ret[0].([]models.Payments)
+	ret0, _ := ret[0].([]models.CreatorPayments)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +50,10 @@ func (mr *PaymentsRepositoryMockRecorder) GetCreatorPayments(arg0 interface{}) *
 }
 
 // GetUserPayments mocks base method.
-func (m *PaymentsRepository) GetUserPayments(arg0 int64) ([]models.Payments, error) {
+func (m *PaymentsRepository) GetUserPayments(arg0 int64) ([]models.UserPayments, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserPayments", arg0)
-	ret0, _ := ret[0].([]models.Payments)
+	ret0, _ := ret[0].([]models.UserPayments)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

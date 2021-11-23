@@ -220,16 +220,21 @@ type ResponseLike struct {
 }
 
 type ResponseUserPayments struct {
-	Payments []models.Payments `json:"payments"`
+	Payments []models.UserPayments `json:"payments"`
 }
 
-func ToResponseUserPayments(payments []models.Payments) ResponseUserPayments {
-	res := make([]models.Payments, 0, len(payments))
+func ToResponseUserPayments(payments []models.UserPayments) ResponseUserPayments {
+	res := make([]models.UserPayments, 0, len(payments))
 	for _, payment := range payments {
-		res = append(res, models.Payments{
-			Amount:    payment.Amount,
-			Date:      payment.Date,
-			CreatorID: payment.CreatorID,
+		res = append(res, models.UserPayments{
+			Payments: models.Payments{
+				Amount:    payment.Amount,
+				Date:      payment.Date,
+				CreatorID: payment.CreatorID,
+			},
+			CreatorNickname:    payment.CreatorNickname,
+			CreatorDescription: payment.CreatorDescription,
+			CreatorCategory:    payment.CreatorCategory,
 		})
 	}
 	return ResponseUserPayments{
