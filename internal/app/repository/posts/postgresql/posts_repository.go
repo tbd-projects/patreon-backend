@@ -3,13 +3,14 @@ package repository_postgresql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	rp "patreon/internal/app/repository"
 	repository_posts "patreon/internal/app/repository/posts"
 	putilits "patreon/internal/app/utilits/postgresql"
+
+	"github.com/jmoiron/sqlx"
 
 	"github.com/pkg/errors"
 )
@@ -150,7 +151,7 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64,
 	if err != nil {
 		return nil, err
 	}
-	var res []models.Post
+	res := make([]models.Post, 0, limit)
 
 	rows, err := repo.store.Query(query, userId, creatorsId)
 	if err != nil {

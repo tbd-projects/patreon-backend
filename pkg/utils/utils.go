@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"os"
 	"patreon/internal/app"
 	"strings"
@@ -66,7 +65,7 @@ func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
 	return grpc.Dial(grpcUrl, grpc.WithInsecure())
 }
 
-func StringsToLowerCase(array[]string) []string {
+func StringsToLowerCase(array []string) []string {
 	res := make([]string, len(array))
 	for i, str := range array {
 		res[i] = strings.ToLower(str)

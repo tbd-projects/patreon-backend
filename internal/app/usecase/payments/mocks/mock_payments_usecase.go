@@ -35,31 +35,31 @@ func (m *PaymentsUsecase) EXPECT() *PaymentsUsecaseMockRecorder {
 }
 
 // GetCreatorPayments mocks base method.
-func (m *PaymentsUsecase) GetCreatorPayments(arg0 int64) ([]models.CreatorPayments, error) {
+func (m *PaymentsUsecase) GetCreatorPayments(arg0 int64, arg1 *models.Pagination) ([]models.CreatorPayments, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCreatorPayments", arg0)
+	ret := m.ctrl.Call(m, "GetCreatorPayments", arg0, arg1)
 	ret0, _ := ret[0].([]models.CreatorPayments)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetCreatorPayments indicates an expected call of GetCreatorPayments.
-func (mr *PaymentsUsecaseMockRecorder) GetCreatorPayments(arg0 interface{}) *gomock.Call {
+func (mr *PaymentsUsecaseMockRecorder) GetCreatorPayments(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreatorPayments", reflect.TypeOf((*PaymentsUsecase)(nil).GetCreatorPayments), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreatorPayments", reflect.TypeOf((*PaymentsUsecase)(nil).GetCreatorPayments), arg0, arg1)
 }
 
 // GetUserPayments mocks base method.
-func (m *PaymentsUsecase) GetUserPayments(arg0 int64) ([]models.UserPayments, error) {
+func (m *PaymentsUsecase) GetUserPayments(arg0 int64, arg1 *models.Pagination) ([]models.UserPayments, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserPayments", arg0)
+	ret := m.ctrl.Call(m, "GetUserPayments", arg0, arg1)
 	ret0, _ := ret[0].([]models.UserPayments)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserPayments indicates an expected call of GetUserPayments.
-func (mr *PaymentsUsecaseMockRecorder) GetUserPayments(arg0 interface{}) *gomock.Call {
+func (mr *PaymentsUsecaseMockRecorder) GetUserPayments(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPayments", reflect.TypeOf((*PaymentsUsecase)(nil).GetUserPayments), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPayments", reflect.TypeOf((*PaymentsUsecase)(nil).GetUserPayments), arg0, arg1)
 }

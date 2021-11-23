@@ -6,6 +6,7 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	http_models "patreon/internal/app/delivery/http/models"
+	db_models "patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"patreon/internal/app/usecase/payments"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
@@ -55,13 +56,19 @@ func (h *PaymentsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 "user are not authorized"
 // @Router /user/payments [GET]
 func (h *PaymentsHandler) GET(w http.ResponseWriter, r *http.Request) {
+	limit, offset, ok := h.GetPaginationFromQuery(w, r)
+	if !ok {
+		return
+	}
+
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
 		return
 	}
-	userPayments, err := h.paymentsUsecase.GetUserPayments(userID.(int64))
+	userPayments, err := h.paymentsUsecase.GetUserPayments(userID.(int64),
+		&db_models.Pagination{Limit: limit, Offset: offset})
 	if err != nil {
 		if err == repository.NotFound {
 			h.Respond(w, r, http.StatusNoContent, http_models.OkResponse{

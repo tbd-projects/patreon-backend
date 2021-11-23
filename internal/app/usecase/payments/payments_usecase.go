@@ -2,6 +2,7 @@ package payments
 
 import (
 	"patreon/internal/app/models"
+	db_models "patreon/internal/app/models"
 	repository_payments "patreon/internal/app/repository/payments"
 )
 
@@ -19,8 +20,8 @@ func NewPaymentsUsecase(repo repository_payments.Repository) *PaymentsUsecase {
 //		repository.NotFound
 //		app.GeneralError with Errors:
 //			repository.DefaultErrDB
-func (usecase *PaymentsUsecase) GetUserPayments(userID int64) ([]models.UserPayments, error) {
-	userPayments, err := usecase.repository.GetUserPayments(userID)
+func (usecase *PaymentsUsecase) GetUserPayments(userID int64, pag *db_models.Pagination) ([]models.UserPayments, error) {
+	userPayments, err := usecase.repository.GetUserPayments(userID, pag)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +33,8 @@ func (usecase *PaymentsUsecase) GetUserPayments(userID int64) ([]models.UserPaym
 //		repository.NotFound
 //		app.GeneralError with Errors:
 //			repository.DefaultErrDB
-func (usecase *PaymentsUsecase) GetCreatorPayments(creatorID int64) ([]models.CreatorPayments, error) {
-	creatorPayments, err := usecase.repository.GetCreatorPayments(creatorID)
+func (usecase *PaymentsUsecase) GetCreatorPayments(creatorID int64, pag *db_models.Pagination) ([]models.CreatorPayments, error) {
+	creatorPayments, err := usecase.repository.GetCreatorPayments(creatorID, pag)
 	if err != nil {
 		return nil, err
 	}

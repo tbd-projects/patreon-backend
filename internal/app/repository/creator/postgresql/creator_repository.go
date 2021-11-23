@@ -2,8 +2,6 @@ package repository_postgresql
 
 import (
 	"database/sql"
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -12,8 +10,10 @@ import (
 	"patreon/pkg/utils"
 	"strconv"
 	"strings"
-)
 
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
+)
 
 const (
 	// Create
@@ -24,7 +24,7 @@ const (
 	queryCategoryCreate = `SELECT category_id FROM creator_category WHERE lower(name) = lower($1)`
 
 	// GetCreators
-	queryCountGetCreators = `SELECT count(*) from creator_profile`
+	queryCountGetCreators   = `SELECT count(*) from creator_profile`
 	queryCreatorGetCreators = `SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
 					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
 					JOIN creator_category As cc ON creator_profile.category = cc.category_id`
@@ -149,12 +149,11 @@ func customRebind(startIndex int, query string) string {
 	return string(append(rqb, query...))
 }
 
-
 // SearchCreators Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *CreatorRepository) SearchCreators(pag *models.Pagination,
-				searchString string, categories ...string) ([]models.Creator, error) {
+	searchString string, categories ...string) ([]models.Creator, error) {
 	limit, offset, err := postgresql_utilits.AddPagination("search_creators", pag, repo.store)
 	if err != nil {
 		return nil, err
@@ -183,7 +182,9 @@ func (repo *CreatorRepository) SearchCreators(pag *models.Pagination,
 	}
 
 	i := 0
-	var res []models.Creator
+
+	res := make([]models.Creator, 0, limit)
+
 	for rows.Next() {
 		var creator models.Creator
 		if err = rows.Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,

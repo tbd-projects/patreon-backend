@@ -65,6 +65,21 @@ func (mr *AttachesUsecaseMockRecorder) GetAttach(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAttach", reflect.TypeOf((*AttachesUsecase)(nil).GetAttach), arg0)
 }
 
+// LoadAudio mocks base method.
+func (m *AttachesUsecase) LoadAudio(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadAudio", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadAudio indicates an expected call of LoadAudio.
+func (mr *AttachesUsecaseMockRecorder) LoadAudio(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadAudio", reflect.TypeOf((*AttachesUsecase)(nil).LoadAudio), arg0, arg1, arg2)
+}
+
 // LoadImage mocks base method.
 func (m *AttachesUsecase) LoadImage(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) (int64, error) {
 	m.ctrl.T.Helper()
@@ -95,6 +110,21 @@ func (mr *AttachesUsecaseMockRecorder) LoadText(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadText", reflect.TypeOf((*AttachesUsecase)(nil).LoadText), arg0)
 }
 
+// LoadVideo mocks base method.
+func (m *AttachesUsecase) LoadVideo(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadVideo", arg0, arg1, arg2)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadVideo indicates an expected call of LoadVideo.
+func (mr *AttachesUsecaseMockRecorder) LoadVideo(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadVideo", reflect.TypeOf((*AttachesUsecase)(nil).LoadVideo), arg0, arg1, arg2)
+}
+
 // UpdateAttach mocks base method.
 func (m *AttachesUsecase) UpdateAttach(arg0 int64, arg1, arg2 []models.Attach) ([]int64, error) {
 	m.ctrl.T.Helper()
@@ -108,6 +138,20 @@ func (m *AttachesUsecase) UpdateAttach(arg0 int64, arg1, arg2 []models.Attach) (
 func (mr *AttachesUsecaseMockRecorder) UpdateAttach(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAttach", reflect.TypeOf((*AttachesUsecase)(nil).UpdateAttach), arg0, arg1, arg2)
+}
+
+// UpdateAudio mocks base method.
+func (m *AttachesUsecase) UpdateAudio(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAudio", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAudio indicates an expected call of UpdateAudio.
+func (mr *AttachesUsecaseMockRecorder) UpdateAudio(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAudio", reflect.TypeOf((*AttachesUsecase)(nil).UpdateAudio), arg0, arg1, arg2)
 }
 
 // UpdateImage mocks base method.
@@ -136,4 +180,18 @@ func (m *AttachesUsecase) UpdateText(arg0 *models.AttachWithoutLevel) error {
 func (mr *AttachesUsecaseMockRecorder) UpdateText(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateText", reflect.TypeOf((*AttachesUsecase)(nil).UpdateText), arg0)
+}
+
+// UpdateVideo mocks base method.
+func (m *AttachesUsecase) UpdateVideo(arg0 io.Reader, arg1 repository_files.FileName, arg2 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateVideo", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateVideo indicates an expected call of UpdateVideo.
+func (mr *AttachesUsecaseMockRecorder) UpdateVideo(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVideo", reflect.TypeOf((*AttachesUsecase)(nil).UpdateVideo), arg0, arg1, arg2)
 }

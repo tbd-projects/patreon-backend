@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/zhashkevych/go-sqlxmock"
+	sqlmock "github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/stretchr/testify/require"
 )

@@ -1,12 +1,13 @@
 package postgresql_utilits
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/zhashkevych/go-sqlxmock"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	sqlmock "github.com/zhashkevych/go-sqlxmock"
 )
 
 func Test_AddPagintation(t *testing.T) {
