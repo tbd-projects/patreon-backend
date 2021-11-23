@@ -30,6 +30,7 @@ func NewCsrfHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient
 }
 
 // GET CSRF Token
+// @tags utilities
 // @Summary get CSRF Token
 // @Description generate usecase token and return to client
 // @Produce json

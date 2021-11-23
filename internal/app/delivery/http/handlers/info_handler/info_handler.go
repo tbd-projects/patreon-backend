@@ -26,6 +26,7 @@ func NewInfoHandler(log *logrus.Logger, ucInfo usecase_info.Usecase) *InfoHandle
 
 // GET Info
 // @Summary get info about creator category and type of attach
+// @tags utilities
 // @Description get info about creator category and type of attach
 // @Produce json
 // @Success 200 {object} http_models.ResponseInfo

@@ -40,6 +40,7 @@ func NewUpdateCoverHandler(log *logrus.Logger,
 
 // PUT CoverChange
 // @Summary set new creator cover
+// @tags creators
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param cover formData file true "Cover file with ext jpeg/png"
 // @Success 200 "successfully upload cover"

@@ -43,6 +43,7 @@ func NewPostsUpdateHandler(log *logrus.Logger,
 
 // PUT Posts
 // @Summary update current posts
+// @tags posts
 // @Description update current posts from current creator
 // @Param post body http_models.RequestPosts true "Request body for posts"
 // @Produce json

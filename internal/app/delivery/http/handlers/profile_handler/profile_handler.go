@@ -33,6 +33,7 @@ func NewProfileHandler(log *logrus.Logger,
 
 // GET Profile
 // @Summary get information from user for user
+// @tags user
 // @Description get nickname and avatar for user
 // @Accept  json
 // @Produce json

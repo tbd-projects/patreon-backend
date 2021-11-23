@@ -29,6 +29,27 @@ func init() {
 // @version 1.0
 // @description Server for Patreon application.
 
+// @tag.name user
+// @tag.description "Some methods for work with user"
+
+// @tag.name creators
+// @tag.description "Some methods for work with creators"
+
+// @tag.name attaches
+// @tag.description "Some methods for work with attaches of post"
+
+// @tag.name posts
+// @tag.description "Some methods for work with posts"
+
+// @tag.name awards
+// @tag.description "Some methods for work with posts"
+
+// @tag.name payments
+// @tag.description "Some methods for work with payments"
+
+// @tag.name utilities
+// @tag.description "Some methods for front work"
+
 // @host api.pyaterochka-team.site
 // @BasePath /api/v1
 

@@ -43,6 +43,7 @@ func NewUpdatePasswordHandler(log *logrus.Logger,
 
 // PUT ChangePassword
 // @Summary set new user password
+// @tags user
 // @Description change password from user
 // @Accept  json
 // @Produce json

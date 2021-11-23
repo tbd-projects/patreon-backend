@@ -33,6 +33,7 @@ func NewLogoutHandler(log *logrus.Logger,
 // POST Logout
 // @Summary logout user
 // @Description logout user
+// @tags user
 // @Accept  json
 // @Produce json
 // @Success 201 "Successfully logout"

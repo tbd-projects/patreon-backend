@@ -34,6 +34,7 @@ func NewRegisterHandler(log *logrus.Logger, sManager session_client.AuthCheckerC
 
 // POST Registration
 // @Summary create new user
+// @tags user
 // @Description create new account and get cookies
 // @Accept  json
 // @Produce json

@@ -36,6 +36,7 @@ func NewCreatorIdHandler(log *logrus.Logger, sManager session_client.AuthChecker
 // @Summary get creator
 // @Description get creator with id from path
 // @Produce json
+// @tags creators
 // @Param creator_id path int true "Get creator with id"
 // @Success 200 {object} http_models.ResponseCreatorWithAwards
 // @Failure 404 {object} http_models.ErrResponse "user not found"

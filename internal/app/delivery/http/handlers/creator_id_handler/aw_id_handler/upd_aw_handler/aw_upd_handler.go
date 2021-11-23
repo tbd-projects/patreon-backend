@@ -44,6 +44,7 @@ func NewAwardsUpdHandler(log *logrus.Logger,
 
 // PUT Awards
 // @Summary update current awards
+// @tags awards
 // @Description update current awards from current creator
 // @Param award body http_models.RequestAwards true "Request body for update awards"
 // @Produce json

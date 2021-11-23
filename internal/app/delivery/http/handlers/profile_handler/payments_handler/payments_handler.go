@@ -46,6 +46,7 @@ func (h *PaymentsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 
 // GET UserPayments
 // @Summary get all user payments
+// @tags payments
 // @Description get all user payments
 // @Produce json
 // @Success 200 {object} http_models.ResponseUserPayments "Success"

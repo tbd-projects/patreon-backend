@@ -1,4 +1,4 @@
-package upd_img_data_handler
+package upd_audio_attach_handler
 
 import (
 	"net/http"
@@ -18,17 +18,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type AttachUploadImageHandler struct {
+type AttachUploadAudioHandler struct {
 	attachesUsecase useAttaches.Usecase
 	bh.BaseHandler
 }
 
-func NewAttachUploadImageHandler(
+func NewAttachUploadAudioHandler(
 	log *logrus.Logger,
 	ucAttaches useAttaches.Usecase,
 	ucPosts usePosts.Usecase,
-	sClient session_client.AuthCheckerClient) *AttachUploadImageHandler {
-	h := &AttachUploadImageHandler{
+	sClient session_client.AuthCheckerClient) *AttachUploadAudioHandler {
+	h := &AttachUploadAudioHandler{
 		BaseHandler:     *bh.NewBaseHandler(log),
 		attachesUsecase: ucAttaches,
 	}
@@ -45,20 +45,21 @@ func NewAttachUploadImageHandler(
 	return h
 }
 
-// PUT update image to post
-// @Summary update image to post
-// @Accept  image/png, image/jpeg, image/jpg
-// @Param image formData file true "image file with ext jpeg/png"
+// PUT update audio to post
+// @Summary update audio to post
+// @tags attaches
+// @Accept  audio/ogg
+// @Param audio formData file true "image file with ext audio/ogg"
 // @Success 200
-// @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a JPEG, JPG or PNG files"
+// @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some types"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Failure 422 {object} http_models.ErrResponse "invalid data type", "this post id not know"
 // @Failure 404 {object} http_models.ErrResponse "attach with this id not found"
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /creators/{:creator_id}/posts/{:post_id}/{:attach_id}/update/image [PUT]
-func (h *AttachUploadImageHandler) PUT(w http.ResponseWriter, r *http.Request) {
+// @Router /creators/{:creator_id}/posts/{:post_id}/{:attach_id}/update/audio [PUT]
+func (h *AttachUploadAudioHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var attachId int64
 	var ok bool
 
@@ -73,13 +74,13 @@ func (h *AttachUploadImageHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
-		"image", []string{"image/png", "image/jpeg", "image/jpg"})
+		"audio", []string{"audio/ogg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return
 	}
 
-	err = h.attachesUsecase.UpdateImage(file, filename, attachId)
+	err = h.attachesUsecase.UpdateAudio(file, filename, attachId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPUT)
 		return

@@ -1,4 +1,4 @@
-package upd_text_data_handler
+package upd_text_attach_handler
 
 import (
 	"net/http"

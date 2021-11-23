@@ -38,6 +38,7 @@ func NewLoginHandler(log *logrus.Logger, sClient session_client.AuthCheckerClien
 // POST Login
 // @Summary login user
 // @Description login user
+// @tags user
 // @Accept  json
 // @Produce json
 // @Param user body http_models.RequestLogin true "Request body for login"

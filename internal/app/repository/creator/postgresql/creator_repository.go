@@ -8,6 +8,10 @@ import (
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	rp "patreon/internal/app/repository"
+	postgresql_utilits "patreon/internal/app/utilits/postgresql"
+	"patreon/pkg/utils"
+	"strconv"
+	"strings"
 )
 
 
@@ -17,7 +21,7 @@ const (
 		description, avatar, cover) VALUES ($1, $2, $3, $4, $5)
 		RETURNING creator_id
 	`
-	queryCategoryCreate = `SELECT category_id FROM creator_category WHERE name = $1`
+	queryCategoryCreate = `SELECT category_id FROM creator_category WHERE lower(name) = lower($1)`
 
 	// GetCreators
 	queryCountGetCreators = `SELECT count(*) from creator_profile`
@@ -25,12 +29,30 @@ const (
 					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
 					JOIN creator_category As cc ON creator_profile.category = cc.category_id`
 
+	// SearchCreators
+	querySearchCreators = `
+					WITH searched_creators AS (
+					    SELECT id, least(sc.description <=> to_tsquery($1), sc.nickname <=> to_tsquery($1)) AS rank
+					    FROM search_creators as sc
+					    WHERE sc.description @@ to_tsquery($1) OR sc.nickname @@ to_tsquery($1)
+					    ORDER BY rank
+					    LIMIT $2 OFFSET $3
+					)
+					SELECT sc.id, cc.name, cp.description, cp.avatar, cp.cover, usr.nickname 
+					FROM searched_creators as sc
+					JOIN creator_profile AS cp ON cp.creator_id = sc.id
+					JOIN users AS usr ON usr.users_id = sc.id
+					JOIN creator_category AS cc ON cp.category = cc.category_id
+					`
+	queryCategorySearchCreators = `
+				WHERE lower(cc.name) IN (?)`
+
 	// GetCreator
 	queryGetCreator = `SELECT cp.creator_id, cc.name, cp.description, cp.avatar, cp.cover, usr.nickname, sb.awards_id
 			FROM creator_profile as cp JOIN users AS usr ON usr.users_id = cp.creator_id 
 			JOIN creator_category As cc ON cp.category = cc.category_id 
 			LEFT JOIN subscribers AS sb on (cp.creator_id = sb.creator_id and sb.users_id = $1)
-			where cp.creator_id=$2`
+			WHERE cp.creator_id=$2`
 
 	// ExistsCreator
 	queryExistsCreator = `SELECT creator_id from creator_profile where creator_id=$1`
@@ -97,6 +119,79 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 			return nil, repository.NewDBError(err)
 		}
 		res[i] = creator
+		i++
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, repository.NewDBError(err)
+	}
+
+	return res, nil
+}
+
+func customRebind(startIndex int, query string) string {
+	// Add space enough for 10 params before we have to allocate
+	rqb := make([]byte, 0, len(query)+10)
+
+	var i int
+	j := startIndex - 1
+	for i = strings.Index(query, "?"); i != -1; i = strings.Index(query, "?") {
+		rqb = append(rqb, query[:i]...)
+
+		rqb = append(rqb, '$')
+
+		j++
+		rqb = strconv.AppendInt(rqb, int64(j), 10)
+
+		query = query[i+1:]
+	}
+
+	return string(append(rqb, query...))
+}
+
+
+// SearchCreators Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *CreatorRepository) SearchCreators(pag *models.Pagination,
+				searchString string, categories ...string) ([]models.Creator, error) {
+	limit, offset, err := postgresql_utilits.AddPagination("search_creators", pag, repo.store)
+	if err != nil {
+		return nil, err
+	}
+
+	query := querySearchCreators
+	var args []interface{}
+	args = append(args, searchString)
+	args = append(args, limit)
+	args = append(args, offset)
+	if categories != nil {
+		var argsCategory []interface{}
+		query += queryCategorySearchCreators
+		query, argsCategory, err = sqlx.In(query, utils.StringsToLowerCase(categories))
+		if err != nil {
+			return nil, repository.NewDBError(err)
+		}
+		args = append(args, argsCategory...)
+	}
+
+	query = customRebind(4, query)
+
+	rows, err := repo.store.Query(query, args...)
+	if err != nil {
+		return nil, repository.NewDBError(err)
+	}
+
+	i := 0
+	var res []models.Creator
+	for rows.Next() {
+		var creator models.Creator
+		if err = rows.Scan(&creator.ID, &creator.Category, &creator.Description, &creator.Avatar,
+			&creator.Cover, &creator.Nickname); err != nil {
+			_ = rows.Close()
+			return nil, repository.NewDBError(err)
+		}
+		res = append(res, creator)
 		i++
 	}
 

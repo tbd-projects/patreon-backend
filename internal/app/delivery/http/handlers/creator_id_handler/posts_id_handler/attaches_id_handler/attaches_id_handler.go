@@ -48,6 +48,7 @@ func NewAttachesIDHandler(
 
 // GET attaches
 // @Summary get current attaches
+// @tags attaches
 // @Description get current attaches from current creator
 // @Produce json
 // @Success 200 {object} http_models.ResponseAttach
@@ -83,6 +84,7 @@ func (h *AttachesIDHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 // DELETE attaches
 // @Summary delete current attaches
+// @tags attaches
 // @Description delete current attaches from current creator
 // @Produce json
 // @Success 200

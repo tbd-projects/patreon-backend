@@ -45,10 +45,11 @@ func NewPostsUploadImageHandler(log *logrus.Logger,
 
 // POST add image to post
 // @Summary add image to post
+// @tags attaches
 // @Accept  image/png, image/jpeg, image/jpg
 // @Param image formData file true "image file with ext jpeg/png"
 // @Success 201 {object} http_models.IdResponse "id attaches"
-// @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name for load file"
+// @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload some types", "invalid form field name for load file"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Failure 422 {object} http_models.ErrResponse "invalid data type", "this post id not know"
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"

@@ -32,6 +32,7 @@ func NewSubscriptionsHandler(log *logrus.Logger, sClient session_client.AuthChec
 
 // GET Subscriptions
 // @Summary get user subscriptions
+// @tags user
 // @Description get user creators
 // @Produce json
 // @Success 200 {object} http_models.SubscriptionsUserResponse "Successfully get user subscriptions"

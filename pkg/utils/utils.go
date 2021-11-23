@@ -2,8 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"os"
 	"patreon/internal/app"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -29,7 +31,7 @@ func NewLogger(config *app.Config, isService bool, serviceName string) (log *log
 	}
 	formatted := config.LogAddr + fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
 		currentTime.Year(), currentTime.Month(), currentTime.Day(),
-		currentTime.Hour(), currentTime.Minute(), currentTime.Second()) + "-" + servicePath + ".log"
+		currentTime.Hour(), currentTime.Minute(), currentTime.Second()) + "__" + servicePath + ".log"
 
 	f, err := os.OpenFile(formatted, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -59,6 +61,15 @@ func NewRedisPool(redisUrl string) *redis.Pool {
 		},
 	}
 }
+
 func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
 	return grpc.Dial(grpcUrl, grpc.WithInsecure())
+}
+
+func StringsToLowerCase(array[]string) []string {
+	res := make([]string, len(array))
+	for i, str := range array {
+		res[i] = strings.ToLower(str)
+	}
+	return res
 }

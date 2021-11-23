@@ -14,6 +14,11 @@ type Usecase interface {
 	// 			repository.DefaultErrDB
 	GetCreators() ([]models.Creator, error)
 
+	// SearchCreators Errors:
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	SearchCreators(pag *models.Pagination, searchString string, categories ...string) ([]models.Creator, error)
+
 	// GetCreator Errors:
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:

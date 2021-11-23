@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/connectivity"
 	"net/http"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 
@@ -57,6 +58,11 @@ func (s *Server) checkConnection() error {
 	err = connAccess.Close()
 	if err != nil {
 		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
+	}
+
+	state := s.connections.SessionGrpcConnection.GetState()
+	if state != connectivity.Ready {
+		return fmt.Errorf("Session connection not ready, status is: %s ", state)
 	}
 
 	return nil
