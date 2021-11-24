@@ -9,6 +9,7 @@ import (
 	"patreon/internal/app/repository"
 	repository_postgresql "patreon/internal/app/repository/attaches/postgresql"
 	repository_os "patreon/internal/microservices/files/files/repository/files/os"
+	"patreon/pkg/utils"
 
 	"github.com/sirupsen/logrus"
 )
@@ -29,5 +30,9 @@ var codeByErrorPUT = base_handler.CodeMap{
 	repository_os.ErrorCopyFile: {
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
 	repository_os.ErrorCreate: {
+		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
+	utils.ConvertErr: {
+		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
+	utils.UnknownExtOfFileName: {
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
 }

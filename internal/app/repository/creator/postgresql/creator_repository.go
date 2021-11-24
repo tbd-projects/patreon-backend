@@ -24,7 +24,7 @@ const (
 	queryCategoryCreate = `SELECT category_id FROM creator_category WHERE lower(name) = lower($1)`
 
 	// GetCreators
-	queryCountGetCreators   = `SELECT count(*) from creator_profile`
+	queryCountGetCreators = `SELECT count(*) from creator_profile`
 	queryCreatorGetCreators = `SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
 					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
 					JOIN creator_category As cc ON creator_profile.category = cc.category_id`
@@ -129,25 +129,6 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	return res, nil
 }
 
-func customRebind(startIndex int, query string) string {
-	// Add space enough for 10 params before we have to allocate
-	rqb := make([]byte, 0, len(query)+10)
-
-	var i int
-	j := startIndex - 1
-	for i = strings.Index(query, "?"); i != -1; i = strings.Index(query, "?") {
-		rqb = append(rqb, query[:i]...)
-
-		rqb = append(rqb, '$')
-
-		j++
-		rqb = strconv.AppendInt(rqb, int64(j), 10)
-
-		query = query[i+1:]
-	}
-
-	return string(append(rqb, query...))
-}
 
 // SearchCreators Errors:
 // 		app.GeneralError with Errors:
@@ -174,7 +155,7 @@ func (repo *CreatorRepository) SearchCreators(pag *models.Pagination,
 		args = append(args, argsCategory...)
 	}
 
-	query = customRebind(4, query)
+	query = postgresql_utilits.CustomRebind(4, query)
 
 	rows, err := repo.store.Query(query, args...)
 	if err != nil {

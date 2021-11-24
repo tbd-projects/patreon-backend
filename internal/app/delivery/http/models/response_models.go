@@ -213,7 +213,7 @@ type SubscribersCreatorResponse struct {
 }
 
 func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorResponse {
-	res := make([]ResponseUser, 0, len(users))
+	res := make([]ResponseUser, len(users))
 	for i, user := range users {
 		res[i] = ResponseUser{
 			ID:       user.ID,

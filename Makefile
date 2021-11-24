@@ -72,7 +72,7 @@ rm-docker:
 
 run-coverage:
 	go test -covermode=atomic -coverpkg=./internal/... -coverprofile=cover ./internal/...
-	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs"  | fgrep -v "config" | fgrep -v "main.go" > cover2
+	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "config" | fgrep -v "main.go" > cover2
 	go tool cover -func=cover2
 
 build-utils:

@@ -11,16 +11,19 @@ import (
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
 
 	"github.com/pkg/errors"
+	"patreon/pkg/utils"
 )
 
 type AttachesUsecase struct {
 	repository      repoAttaches.Repository
 	filesRepository client.FileServiceClient
+	imageConvector  utils.ConverterToWebp
 }
 
 func NewAttachesUsecase(repository repoAttaches.Repository, fileClient client.FileServiceClient) *AttachesUsecase {
 	return &AttachesUsecase{
 		repository:      repository,
+		imageConvector: utils.ConverterToWebp{},
 		filesRepository: fileClient,
 	}
 }
@@ -123,7 +126,14 @@ func (usecase *AttachesUsecase) Delete(postId int64) error {
 //			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileName, postId int64) (int64, error) {
+	var err error
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return app.InvalidInt, nil
+	}
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return app.InvalidInt, err
@@ -230,9 +240,16 @@ func (usecase *AttachesUsecase) LoadText(postData *models.AttachWithoutLevel) (i
 //			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileName, postDataId int64) error {
 	if _, err := usecase.repository.ExistsAttach(postDataId); err != nil {
 		return err
+	}
+	var err error
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return nil
 	}
 
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)

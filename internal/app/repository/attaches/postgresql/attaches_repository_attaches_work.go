@@ -32,7 +32,7 @@ const (
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *AttachesRepository) getAttachTypeAndId() (map[models.DataType]int64, error) {
-	if repo.dataTypes != nil && repo.lastUpdate.Add(reloadDataType).Before(time.Now()) {
+	if repo.dataTypes != nil && repo.lastUpdate.Add(reloadDataType).After(time.Now()) {
 		return repo.dataTypes, nil
 	}
 	repo.lastUpdate = time.Now()
@@ -51,6 +51,10 @@ func (repo *AttachesRepository) getAttachTypeAndId() (map[models.DataType]int64,
 			return nil, repository.NewDBError(err)
 		}
 		tmpDataTypes[dataType] = attachId
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, repository.NewDBError(err)
 	}
 
 	repo.dataTypes = tmpDataTypes
@@ -144,7 +148,7 @@ func (repo *AttachesRepository) ApplyChangeAttaches(postId int64,
 	}
 
 	if err = trans.Commit(); err != nil {
-		return nil, err
+		return nil, repository.NewDBError(err)
 	}
 
 	for _, attach := range newAttaches {
