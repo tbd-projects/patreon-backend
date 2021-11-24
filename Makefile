@@ -28,6 +28,10 @@ build: generate-api
 
 build-sessions:
 	go build -o sessions.out -v ./cmd/sessions
+
+build-files:
+	go build -o files.out -v ./cmd/files
+
 build-docker-local:
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
@@ -35,6 +39,9 @@ build-docker-pg:
 	docker build --no-cache --network host -f ./docker/postgresql.Dockerfile . --tag pg-14
 build-docker-sessions:
 	docker build --no-cache --network host -f ./docker/session-service.Dockerfile . --tag session-service
+build-docker-files:
+	docker build --no-cache --network host -f ./docker/files-service.Dockerfile . --tag files-service
+
 build-docker-server:
 	docker build --build-arg RUN_HTTPS=-run-https --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
@@ -45,9 +52,9 @@ run:
 	mkdir -p $(LOG_DIR)
 	docker-compose up --build --no-deps
 
-run-with-build-local: build-docker-local build-docker-sessions run
+run-with-build-local: build-docker-local build-docker-sessions build-docker-files run
 
-run-with-build-server: build-docker-server build-docker-sessions run
+run-with-build-server: build-docker-server build-docker-sessions build-docker-files run
 
 open-last-log:
 	cat $(LOG_DIR)/`ls -t $(LOG_DIR) | head -1 `
@@ -79,6 +86,9 @@ gen-mock:
 
 gen-proto-sessions:
 	protoc --proto_path=${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf session.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf
+
+gen-proto-files:
+	protoc --proto_path=${MICROSERVICE_DIR}/files/delivery/grpc/protobuf files.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/files/delivery/grpc/protobuf
 test:
 	go test -v -race ./internal/...
 

@@ -94,9 +94,14 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	filesConn, err := utils.NewGrpcConnection(config.Microservices.FilesUrl)
+	if err != nil {
+		logger.Fatal(err)
+	}
 	server := main_server.New(config,
 		app.ExpectedConnections{
 			SessionGrpcConnection: sessionConn,
+			FilesGrpcConnection:   filesConn,
 			AccessRedisPool:       utils.NewRedisPool(repositoryConfig.AccessRedisUrl),
 			SqlConnection:         db,
 			PathFiles:             config.MediaDir,

@@ -1,27 +1,30 @@
 package posts
 
 import (
-	"github.com/pkg/errors"
+	"context"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	repoAttaches "patreon/internal/app/repository/attaches"
-	repoFiles "patreon/internal/app/repository/files"
 	repoPosts "patreon/internal/app/repository/posts"
+	"patreon/internal/microservices/files/delivery/grpc/client"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
+
+	"github.com/pkg/errors"
 )
 
 type PostsUsecase struct {
 	repository      repoPosts.Repository
 	repositoryData  repoAttaches.Repository
-	filesRepository repoFiles.Repository
+	filesRepository client.FileServiceClient
 }
 
 func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoAttaches.Repository,
-	filesRepository repoFiles.Repository) *PostsUsecase {
+	fileClient client.FileServiceClient) *PostsUsecase {
 	return &PostsUsecase{
 		repository:      repository,
 		repositoryData:  repositoryData,
-		filesRepository: filesRepository,
+		filesRepository: fileClient,
 	}
 }
 
@@ -129,7 +132,7 @@ func (usecase *PostsUsecase) LoadCover(data io.Reader, name repoFiles.FileName, 
 		return err
 	}
 
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}

@@ -22,6 +22,7 @@ access-redis_url = "redis://access-redis/0"
 
 [microservice]
 session_url = "sessions-service:5001"
+files_url = "files-service:5002"
 
 [cors]
 headers = [

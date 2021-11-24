@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 	"patreon/internal/app"
-	repFiles "patreon/internal/app/repository/files"
+	repFiles "patreon/internal/microservices/files/files/repository/files"
 	"time"
 )
 
@@ -28,7 +28,7 @@ func NewFileRepository(staticDir string) *FileRepository {
 func (fr *FileRepository) SaveFile(file io.Reader, name repFiles.FileName, typeF repFiles.TypeFiles) (string, error) {
 	date := time.Now()
 	path := fmt.Sprintf("%s/%d/%s/%d", typeF, date.Year(), date.Month(), date.Day())
-	if err := os.MkdirAll(fr.staticDir + "/" + path, createChmod); err != nil {
+	if err := os.MkdirAll(fr.staticDir+"/"+path, createChmod); err != nil {
 		return "", &app.GeneralError{Err: ErrorCreate, ExternalErr: err}
 	}
 

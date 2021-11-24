@@ -2,12 +2,13 @@ package usercase_user
 
 import (
 	"bytes"
+	"context"
 	"patreon/internal/app"
 	models2 "patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_files "patreon/internal/app/repository/files"
 	"patreon/internal/app/usecase"
+	repository_files "patreon/internal/microservices/files/files/repository/files"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -27,7 +28,7 @@ type SuiteUserUsecase struct {
 
 func (s *SuiteUserUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-	s.uc = NewUserUsecase(s.MockUserRepository, s.MockFileRepository)
+	s.uc = NewUserUsecase(s.MockUserRepository, s.MockFileClient)
 }
 
 func (s *SuiteUserUsecase) TestCreatorUsecase_GetProfile_DB_Error() {
@@ -464,8 +465,8 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ErrorSave() {
 	u := s.Tb.Data.(*models.User)
 	out := bytes.NewBufferString("")
 	name := repository_files.FileName("asd")
-	s.MockFileRepository.EXPECT().
-		SaveFile(out, name, repository_files.Image).
+	s.MockFileClient.EXPECT().
+		SaveFile(context.Background(), out, name, repository_files.Image).
 		Times(s.Tb.ExpectedMockTimes).
 		Return("ASd", repository.DefaultErrDB)
 
@@ -483,8 +484,8 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ok() {
 	u := s.Tb.Data.(*models.User)
 	out := bytes.NewBufferString("")
 	name := repository_files.FileName("asd")
-	s.MockFileRepository.EXPECT().
-		SaveFile(out, name, repository_files.Image).
+	s.MockFileClient.EXPECT().
+		SaveFile(context.Background(), out, name, repository_files.Image).
 		Times(s.Tb.ExpectedMockTimes).
 		Return("ASd", nil)
 	s.MockUserRepository.EXPECT().UpdateAvatar(u.ID, app.LoadFileUrl+"ASd").Times(1).Return(nil)
@@ -502,8 +503,8 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ErrorAdd() {
 	u := s.Tb.Data.(*models.User)
 	out := bytes.NewBufferString("")
 	name := repository_files.FileName("asd")
-	s.MockFileRepository.EXPECT().
-		SaveFile(out, name, repository_files.Image).
+	s.MockFileClient.EXPECT().
+		SaveFile(context.Background(), out, name, repository_files.Image).
 		Times(s.Tb.ExpectedMockTimes).
 		Return("ASd", nil)
 	s.MockUserRepository.EXPECT().UpdateAvatar(u.ID, app.LoadFileUrl+"ASd").Times(1).Return(repository.DefaultErrDB)

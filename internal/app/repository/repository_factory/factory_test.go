@@ -8,7 +8,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
-	"github.com/zhashkevych/go-sqlxmock"
+	sqlmock "github.com/zhashkevych/go-sqlxmock"
 )
 
 func TestFactory(t *testing.T) {
@@ -35,7 +35,6 @@ func TestFactory(t *testing.T) {
 	}
 
 	factory := NewRepositoryFactory(log, app.ExpectedConnections{SqlConnection: db, AccessRedisPool: redisConn, PathFiles: "don/"})
-	factory.GetFilesRepository()
 	factory.GetAttachesRepository()
 	factory.GetLikesRepository()
 	factory.GetAwardsRepository()

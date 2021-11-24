@@ -2,12 +2,13 @@ package usecase_creator
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_files "patreon/internal/app/repository/files"
 	"patreon/internal/app/usecase"
+	repository_files "patreon/internal/microservices/files/files/repository/files"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -24,7 +25,7 @@ type SuiteCreatorUsecase struct {
 
 func (s *SuiteCreatorUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-	s.uc = NewCreatorUsecase(s.MockCreatorRepository, s.MockFileRepository)
+	s.uc = NewCreatorUsecase(s.MockCreatorRepository, s.MockFileClient)
 }
 
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_DB_Error() {
@@ -117,8 +118,8 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateAvatar_Success() {
 
 	name := "true"
 	out := io.Reader(bytes.NewBufferString(""))
-	s.MockFileRepository.EXPECT().
-		SaveFile(out, repository_files.FileName(name), repository_files.Image).
+	s.MockFileClient.EXPECT().
+		SaveFile(context.Background(), out, repository_files.FileName(name), repository_files.Image).
 		Times(1).
 		Return(name, nil)
 
@@ -141,8 +142,8 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateCover_Success() {
 		Times(1).
 		Return(true, nil)
 
-	s.MockFileRepository.EXPECT().
-		SaveFile(out, repository_files.FileName(name), repository_files.Image).
+	s.MockFileClient.EXPECT().
+		SaveFile(context.Background(), out, repository_files.FileName(name), repository_files.Image).
 		Times(1).
 		Return(name, nil)
 

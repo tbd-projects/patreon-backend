@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package files;
+option go_package = ".;files";
+
+message File {
+  bytes file = 1;
+}
+message SaveArgs {
+  File file = 1;
+  string name = 2;
+  string type = 3;
+}
+message FilePath {
+  string path = 1;
+}
+
+message Nothing {
+  bool dummy = 1;
+}
+
+service FileService {
+  rpc MakeUnused(FilePath) returns (Nothing);
+  rpc SaveFile(SaveArgs) returns (FilePath);
+  rpc LoadFile(FilePath) returns (File);
+}

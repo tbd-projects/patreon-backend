@@ -1,27 +1,29 @@
 package usercase_user
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repoFiles "patreon/internal/app/repository/files"
 	repoUser "patreon/internal/app/repository/user"
 	usePosts "patreon/internal/app/usecase/posts"
+	"patreon/internal/microservices/files/delivery/grpc/client"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
 
 	"github.com/pkg/errors"
 )
 
 type UserUsecase struct {
 	repository     repoUser.Repository
-	repositoryFile repoFiles.Repository
+	repositoryFile client.FileServiceClient
 }
 
-func NewUserUsecase(repository repoUser.Repository, repositoryFile repoFiles.Repository) *UserUsecase {
+func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServiceClient) *UserUsecase {
 	return &UserUsecase{
 		repository:     repository,
-		repositoryFile: repositoryFile,
+		repositoryFile: fileClient,
 	}
 }
 
@@ -154,7 +156,7 @@ func (usecase *UserUsecase) UpdatePassword(userId int64, oldPassword, newPasswor
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error {
-	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}

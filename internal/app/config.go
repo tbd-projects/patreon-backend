@@ -7,6 +7,7 @@ const (
 
 type Microservice struct {
 	SessionServerUrl string `toml:"session_url"`
+	FilesUrl         string `toml:"files_url"`
 }
 
 type RepositoryConnections struct {

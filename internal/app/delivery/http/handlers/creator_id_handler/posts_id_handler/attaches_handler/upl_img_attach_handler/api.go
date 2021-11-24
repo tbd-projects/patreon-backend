@@ -7,7 +7,8 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_os "patreon/internal/app/repository/files/os"
+	repository_os "patreon/internal/microservices/files/files/repository/files/os"
+
 	repository_postgresql "patreon/internal/app/repository/attaches/postgresql"
 
 	"github.com/sirupsen/logrus"

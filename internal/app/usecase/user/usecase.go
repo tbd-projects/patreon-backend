@@ -3,7 +3,7 @@ package usercase_user
 import (
 	"io"
 	"patreon/internal/app/models"
-	repoFiles "patreon/internal/app/repository/files"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
 )
 
 //go:generate mockgen -destination=mocks/mock_user_usecase.go -package=mock_usecase -mock_names=Usecase=UserUsecase . Usecase

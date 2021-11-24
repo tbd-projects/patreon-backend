@@ -3,14 +3,13 @@ package usecase_factory
 import (
 	repCsrf "patreon/internal/app/csrf/repository/jwt"
 	repAccess "patreon/internal/app/repository/access"
+	repoAttaches "patreon/internal/app/repository/attaches"
 	repoAwrds "patreon/internal/app/repository/awards"
 	repCreator "patreon/internal/app/repository/creator"
-	repoFiles "patreon/internal/app/repository/files"
 	repoInfo "patreon/internal/app/repository/info"
 	repoLikes "patreon/internal/app/repository/likes"
 	repoPayments "patreon/internal/app/repository/payments"
 	repoPosts "patreon/internal/app/repository/posts"
-	repoAttaches "patreon/internal/app/repository/attaches"
 	useSubscr "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 )
@@ -27,7 +26,6 @@ type RepositoryFactory interface {
 	GetPostsRepository() repoPosts.Repository
 	GetLikesRepository() repoLikes.Repository
 	GetAttachesRepository() repoAttaches.Repository
-	GetFilesRepository() repoFiles.Repository
 	GetPaymentsRepository() repoPayments.Repository
 	GetInfoRepository() repoInfo.Repository
 }

@@ -10,8 +10,6 @@ import (
 	repAwardsPsql "patreon/internal/app/repository/awards/postgresql"
 	repCreator "patreon/internal/app/repository/creator"
 	repCreatorPsql "patreon/internal/app/repository/creator/postgresql"
-	repoFiles "patreon/internal/app/repository/files"
-	repoFilesOs "patreon/internal/app/repository/files/os"
 	repoInfo "patreon/internal/app/repository/info"
 	repInfoPsql "patreon/internal/app/repository/info/postgresql"
 	repoLikes "patreon/internal/app/repository/likes"
@@ -39,7 +37,6 @@ type RepositoryFactory struct {
 	csrfRepository        repCsrf.Repository
 	accessRepository      repositoryAccess.Repository
 	subscribersRepository repoSubscribers.Repository
-	FilesRepository       repoFiles.Repository
 	paymentsRepository    repoPayments.Repository
 	infoRepository        repoInfo.Repository
 }
@@ -110,13 +107,6 @@ func (f *RepositoryFactory) GetAttachesRepository() repoAttaches.Repository {
 		f.AttachRepository = repoAttachesPsql.NewAttachesRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.AttachRepository
-}
-
-func (f *RepositoryFactory) GetFilesRepository() repoFiles.Repository {
-	if f.FilesRepository == nil {
-		f.FilesRepository = repoFilesOs.NewFileRepository(f.expectedConnections.PathFiles)
-	}
-	return f.FilesRepository
 }
 
 func (f *RepositoryFactory) GetPaymentsRepository() repoPayments.Repository {

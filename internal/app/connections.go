@@ -10,6 +10,7 @@ import (
 
 type ExpectedConnections struct {
 	SessionGrpcConnection *grpc.ClientConn
+	FilesGrpcConnection   *grpc.ClientConn
 	AccessRedisPool       *redis.Pool
 	SqlConnection         *sqlx.DB
 	PathFiles             string

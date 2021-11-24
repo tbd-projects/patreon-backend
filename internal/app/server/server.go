@@ -3,9 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/connectivity"
 	"net/http"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
+
+	"google.golang.org/grpc/connectivity"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -141,7 +142,8 @@ func (s *Server) Start(config *app.Config) error {
 	routerApi.PathPrefix("/" + app.LoadFileUrl).Handler(http.StripPrefix("/api/v1/"+app.LoadFileUrl, fileServer))
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
-	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
+
+	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory, s.connections.FilesGrpcConnection)
 	factory := handler_factory.NewFactory(s.logger, usecaseFactory, s.connections.SessionGrpcConnection)
 	hs := factory.GetHandleUrls()
 

@@ -3,16 +3,18 @@ package usecase_factory
 import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	useAccess "patreon/internal/app/usecase/access"
+	useAttaches "patreon/internal/app/usecase/attaches"
 	useAwards "patreon/internal/app/usecase/awards"
 	useCreator "patreon/internal/app/usecase/creator"
 	useInfo "patreon/internal/app/usecase/info"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePayments "patreon/internal/app/usecase/payments"
 	usePosts "patreon/internal/app/usecase/posts"
-	useAttaches "patreon/internal/app/usecase/attaches"
 	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
-	"patreon/internal/microservices/auth/sessions"
+	"patreon/internal/microservices/files/delivery/grpc/client"
+
+	"google.golang.org/grpc"
 )
 
 type UsecaseFactory struct {
@@ -24,23 +26,25 @@ type UsecaseFactory struct {
 	subscribersUsecase useSubscr.Usecase
 	awardsUsercase     useAwards.Usecase
 	awardsUsecase      useAwards.Usecase
-	sessinManager      sessions.SessionsManager
 	postsUsecase       usePosts.Usecase
-	attachesUsecase   useAttaches.Usecase
+	attachesUsecase    useAttaches.Usecase
 	infoUsecase        useInfo.Usecase
 	likesUsecase       useLikes.Usecase
 	paymentsUsecase    usePayments.Usecase
+	fileClient         client.FileServiceClient
 }
 
-func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
+func NewUsecaseFactory(repositoryFactory RepositoryFactory, fileConn *grpc.ClientConn) *UsecaseFactory {
+	fileClient := client.NewFileServiceClient(fileConn)
 	return &UsecaseFactory{
 		repositoryFactory: repositoryFactory,
+		fileClient:        fileClient,
 	}
 }
 
 func (f *UsecaseFactory) GetUserUsecase() useUser.Usecase {
 	if f.userUsecase == nil {
-		f.userUsecase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository(), f.repositoryFactory.GetFilesRepository())
+		f.userUsecase = useUser.NewUserUsecase(f.repositoryFactory.GetUserRepository(), f.fileClient)
 	}
 	return f.userUsecase
 }
@@ -48,7 +52,7 @@ func (f *UsecaseFactory) GetUserUsecase() useUser.Usecase {
 func (f *UsecaseFactory) GetCreatorUsecase() useCreator.Usecase {
 	if f.creatorUsecase == nil {
 		f.creatorUsecase = useCreator.NewCreatorUsecase(f.repositoryFactory.GetCreatorRepository(),
-			f.repositoryFactory.GetFilesRepository())
+			f.fileClient)
 	}
 	return f.creatorUsecase
 }
@@ -76,7 +80,7 @@ func (f *UsecaseFactory) GetSubscribersUsecase() useSubscr.Usecase {
 func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
 	if f.awardsUsecase == nil {
 		f.awardsUsecase = useAwards.NewAwardsUsecase(f.repositoryFactory.GetAwardsRepository(),
-			f.repositoryFactory.GetFilesRepository())
+			f.fileClient)
 	}
 	return f.awardsUsecase
 }
@@ -84,7 +88,7 @@ func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
 func (f *UsecaseFactory) GetPostsUsecase() usePosts.Usecase {
 	if f.postsUsecase == nil {
 		f.postsUsecase = usePosts.NewPostsUsecase(f.repositoryFactory.GetPostsRepository(),
-			f.repositoryFactory.GetAttachesRepository(), f.repositoryFactory.GetFilesRepository())
+			f.repositoryFactory.GetAttachesRepository(), f.fileClient)
 	}
 	return f.postsUsecase
 }
@@ -99,7 +103,7 @@ func (f *UsecaseFactory) GetLikesUsecase() useLikes.Usecase {
 func (f *UsecaseFactory) GetAttachesUsecase() useAttaches.Usecase {
 	if f.attachesUsecase == nil {
 		f.attachesUsecase = useAttaches.NewAttachesUsecase(f.repositoryFactory.GetAttachesRepository(),
-			f.repositoryFactory.GetFilesRepository())
+			f.fileClient)
 	}
 	return f.attachesUsecase
 }

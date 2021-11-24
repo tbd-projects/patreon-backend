@@ -1,24 +1,27 @@
 package attaches
 
 import (
+	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	repoAttaches "patreon/internal/app/repository/attaches"
-	repoFiles "patreon/internal/app/repository/files"
+	"patreon/internal/microservices/files/delivery/grpc/client"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
+
+	"github.com/pkg/errors"
 )
 
 type AttachesUsecase struct {
 	repository      repoAttaches.Repository
-	filesRepository repoFiles.Repository
+	filesRepository client.FileServiceClient
 }
 
-func NewAttachesUsecase(repository repoAttaches.Repository, filesRepository repoFiles.Repository) *AttachesUsecase {
+func NewAttachesUsecase(repository repoAttaches.Repository, fileClient client.FileServiceClient) *AttachesUsecase {
 	return &AttachesUsecase{
 		repository:      repository,
-		filesRepository: filesRepository,
+		filesRepository: fileClient,
 	}
 }
 
@@ -29,7 +32,6 @@ func NewAttachesUsecase(repository repoAttaches.Repository, filesRepository repo
 func (usecase *AttachesUsecase) GetAttach(attachId int64) (*models.AttachWithoutLevel, error) {
 	return usecase.repository.Get(attachId)
 }
-
 
 func (usecase *AttachesUsecase) processingValidateErrorAttach(err error) error {
 	if !(errors.Is(err, models.IncorrectType) || errors.Is(err, models.IncorrectAttachId) ||
@@ -122,7 +124,7 @@ func (usecase *AttachesUsecase) Delete(postId int64) error {
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileName, postId int64) (int64, error) {
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return app.InvalidInt, err
 	}
@@ -150,7 +152,7 @@ func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileNam
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 func (usecase *AttachesUsecase) LoadVideo(data io.Reader, name repoFiles.FileName, postId int64) (int64, error) {
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Video)
+	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Video)
 	if err != nil {
 		return app.InvalidInt, err
 	}
@@ -178,7 +180,7 @@ func (usecase *AttachesUsecase) LoadVideo(data io.Reader, name repoFiles.FileNam
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 func (usecase *AttachesUsecase) LoadAudio(data io.Reader, name repoFiles.FileName, postId int64) (int64, error) {
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Music)
+	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Music)
 	if err != nil {
 		return app.InvalidInt, err
 	}
@@ -233,12 +235,12 @@ func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileN
 		return err
 	}
 
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}
 
-	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Image, Value:  app.LoadFileUrl + path}
+	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Image, Value: app.LoadFileUrl + path}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return err
@@ -266,12 +268,12 @@ func (usecase *AttachesUsecase) UpdateAudio(data io.Reader, name repoFiles.FileN
 		return err
 	}
 
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Music)
+	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Music)
 	if err != nil {
 		return err
 	}
 
-	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Music, Value:  app.LoadFileUrl + path}
+	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Music, Value: app.LoadFileUrl + path}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return err
@@ -299,12 +301,12 @@ func (usecase *AttachesUsecase) UpdateVideo(data io.Reader, name repoFiles.FileN
 		return err
 	}
 
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Video)
+	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Video)
 	if err != nil {
 		return err
 	}
 
-	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Video, Value:  app.LoadFileUrl + path}
+	post := &models.AttachWithoutLevel{ID: postDataId, Type: models.Video, Value: app.LoadFileUrl + path}
 	if err = post.Validate(); err != nil {
 		if errors.Is(err, models.InvalidType) || errors.Is(err, models.InvalidPostId) {
 			return err

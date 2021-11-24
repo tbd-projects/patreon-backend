@@ -21,4 +21,9 @@ type Repository interface {
 	//			repository_os.ErrorCreate
 	//			repository_os.ErrorCopyFile
 	SaveFile(file io.Reader, name FileName, typeF TypeFiles) (string, error)
+
+	// LoadFile Errors:
+	//		app.GeneralError Errors:
+	//			repository_os.ErrorOpenFile
+	LoadFile(path string) (io.Reader, error)
 }

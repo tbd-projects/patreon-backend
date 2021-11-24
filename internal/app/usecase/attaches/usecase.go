@@ -3,7 +3,7 @@ package attaches
 import (
 	"io"
 	"patreon/internal/app/models"
-	repoFiles "patreon/internal/app/repository/files"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
 )
 
 const (

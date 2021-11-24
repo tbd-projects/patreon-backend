@@ -8,7 +8,7 @@ import (
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repository_postgresql "patreon/internal/app/repository/attaches/postgresql"
-	repository_os "patreon/internal/app/repository/files/os"
+	repository_os "patreon/internal/microservices/files/files/repository/files/os"
 
 	"github.com/sirupsen/logrus"
 )

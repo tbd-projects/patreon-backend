@@ -7,7 +7,7 @@ package mock_usecase
 import (
 	io "io"
 	models "patreon/internal/app/models"
-	repository_files "patreon/internal/app/repository/files"
+	repository_files "patreon/internal/microservices/files/files/repository/files"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
