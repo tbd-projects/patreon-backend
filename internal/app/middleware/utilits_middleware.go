@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"patreon/internal/app/utilits"
 	"patreon/pkg/monitoring"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -38,7 +39,7 @@ func (mw *UtilitiesMiddleware) CheckPanic(handler http.Handler) http.Handler {
 					r.Method,
 				)
 
-				log.Errorf("detacted critical error: %v", err)
+				log.Errorf("detacted critical error: %v, with stack: %s", err, debug.Stack())
 				w.WriteHeader(responseErr)
 			}
 		}(mw.log.Log(r), mw.metrics, w)

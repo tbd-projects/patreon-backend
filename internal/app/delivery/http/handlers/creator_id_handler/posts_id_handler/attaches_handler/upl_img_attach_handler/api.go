@@ -7,8 +7,9 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_os "patreon/internal/app/repository/files/os"
 	repository_postgresql "patreon/internal/app/repository/attaches/postgresql"
+	repository_os "patreon/internal/app/repository/files/os"
+	"patreon/pkg/utils"
 
 	"github.com/sirupsen/logrus"
 )
@@ -27,5 +28,9 @@ var codeByErrorPUT = base_handler.CodeMap{
 	repository_os.ErrorCopyFile: {
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
 	repository_os.ErrorCreate: {
+		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
+	utils.ConvertErr: {
+		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
+	utils.UnknownExtOfFileName: {
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
 }

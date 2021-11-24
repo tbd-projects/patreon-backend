@@ -1,6 +1,7 @@
 package attaches
 
 import (
+	"context"
 	"fmt"
 	"github.com/pkg/errors"
 	"io"
@@ -8,17 +9,20 @@ import (
 	"patreon/internal/app/models"
 	repoAttaches "patreon/internal/app/repository/attaches"
 	repoFiles "patreon/internal/app/repository/files"
+	"patreon/pkg/utils"
 )
 
 type AttachesUsecase struct {
 	repository      repoAttaches.Repository
 	filesRepository repoFiles.Repository
+	imageConvector  utils.ConverterToWebp
 }
 
 func NewAttachesUsecase(repository repoAttaches.Repository, filesRepository repoFiles.Repository) *AttachesUsecase {
 	return &AttachesUsecase{
 		repository:      repository,
 		filesRepository: filesRepository,
+		imageConvector: utils.ConverterToWebp{},
 	}
 }
 
@@ -121,7 +125,15 @@ func (usecase *AttachesUsecase) Delete(postId int64) error {
 //			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileName, postId int64) (int64, error) {
+	var err error
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return app.InvalidInt, nil
+	}
+
 	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Image)
 	if err != nil {
 		return app.InvalidInt, err
@@ -228,9 +240,17 @@ func (usecase *AttachesUsecase) LoadText(postData *models.AttachWithoutLevel) (i
 //			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileName, postDataId int64) error {
 	if _, err := usecase.repository.ExistsAttach(postDataId); err != nil {
 		return err
+	}
+
+	var err error
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return nil
 	}
 
 	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Image)

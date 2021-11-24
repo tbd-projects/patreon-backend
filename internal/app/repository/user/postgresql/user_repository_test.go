@@ -2,6 +2,7 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -11,10 +12,10 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/zhashkevych/go-sqlxmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/zhashkevych/go-sqlxmock"
 )
 
 type SuiteUserRepository struct {
@@ -219,6 +220,261 @@ func (s *SuiteUserRepository) TestUserRepository_UpdatePassword_Error() {
 	assert.Error(s.T(), models.BDError, res)
 }
 
+func (s *SuiteUserRepository) TestUserRepository_UpdateNickname() {
+	oldNickName := "d"
+	newNickName := "32"
+	runFunc := func(input ...interface{}) (res []interface{}) {
+		oldNick, _ := input[0].(string)
+		newNick, _ := input[1].(string)
+		err := s.repo.UpdateNickname(oldNick, newNick)
+		return []interface{}{err}
+	}
+
+	testings := []models.TestCase{
+		{
+			Name: "Correct",
+			Args: []interface{}{oldNickName, newNickName},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     nil,
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query: updateNicknameQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnResult: driver.RowsAffected(1),
+					},
+					Args:    []driver.Value{newNickName, oldNickName},
+					RunType: models.Exec,
+				},
+			},
+		},
+		{
+			Name: "NothingAffected",
+			Args: []interface{}{oldNickName, newNickName},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				CheckError:      true,
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query: updateNicknameQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnResult: driver.RowsAffected(0),
+					},
+					Args:    []driver.Value{newNickName, oldNickName},
+					RunType: models.Exec,
+				},
+			},
+		},
+		{
+			Name: "BDError",
+			Args: []interface{}{oldNickName, newNickName},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NewDBError(models.BDError),
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query:   updateNicknameQuery,
+					Err:     models.BDError,
+					Rows:    nil,
+					Args:    []driver.Value{newNickName, oldNickName},
+					RunType: models.Exec,
+				},
+			},
+		},
+	}
+
+	for _, test := range testings {
+		s.RunTestCase(test)
+	}
+}
+
+func (s *SuiteUserRepository) TestUserRepository_IsAllowedAward() {
+	userId := int64(1)
+	awardId := int64(2)
+	runFunc := func(input ...interface{}) (res []interface{}) {
+		userId, _ := input[0].(int64)
+		awardId, _ := input[1].(int64)
+		is, err := s.repo.IsAllowedAward(userId, awardId)
+		return []interface{}{is, err}
+	}
+
+	testings := []models.TestCase{
+		{
+			Name: "Correct",
+			Args: []interface{}{userId, awardId},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     nil,
+				ExpectedReturns: []interface{}{true},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query: isAllowedAwardQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnRows: sqlmock.NewRows([]string{"count"}).AddRow(1),
+					},
+					Args:    []driver.Value{awardId, userId},
+					RunType: models.Query,
+				},
+			},
+		},
+		{
+			Name: "NotFound",
+			Args: []interface{}{userId, awardId},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     nil,
+				ExpectedReturns: []interface{}{false},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query:   isAllowedAwardQuery,
+					Err:     sql.ErrNoRows,
+					Rows:    nil,
+					Args:    []driver.Value{awardId, userId},
+					RunType: models.Query,
+				},
+			},
+		},
+		{
+			Name: "BDError",
+			Args: []interface{}{userId, awardId},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NewDBError(models.BDError),
+				ExpectedReturns: []interface{}{false},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query:   isAllowedAwardQuery,
+					Err:     models.BDError,
+					Rows:    nil,
+					Args:    []driver.Value{awardId, userId},
+					RunType: models.Query,
+				},
+			},
+		},
+		{
+			Name: "CorrectNotAllowed",
+			Args: []interface{}{userId, awardId},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     nil,
+				ExpectedReturns: []interface{}{false},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query: isAllowedAwardQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnRows: sqlmock.NewRows([]string{"count"}).AddRow(0),
+					},
+					Args:    []driver.Value{awardId, userId},
+					RunType: models.Query,
+				},
+			},
+		},
+	}
+
+	for _, test := range testings {
+		s.RunTestCase(test)
+	}
+}
+
+func (s *SuiteUserRepository) TestUserRepository_FindByNickname() {
+	user := models.TestUser()
+	user.Password = ""
+	nickname := "dor"
+	runFunc := func(input ...interface{}) (res []interface{}) {
+		nickname, _ := input[0].(string)
+		user, err := s.repo.FindByNickname(nickname)
+		return []interface{}{user, err}
+	}
+
+	testings := []models.TestCase{
+		{
+			Name: "Correct",
+			Args: []interface{}{nickname},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     nil,
+				ExpectedReturns: []interface{}{user},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query: findByNicknameQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnRows: sqlmock.NewRows([]string{"id", "login", "nickname", "avatar", "pass", "haveCreator"}).
+							AddRow(user.ID, user.Login, user.Nickname, user.Avatar,
+								user.EncryptedPassword, user.HaveCreator),
+					},
+					Args:    []driver.Value{nickname},
+					RunType: models.Query,
+				},
+			},
+		},
+		{
+			Name: "NotFound",
+			Args: []interface{}{nickname},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NotFound,
+				ExpectedReturns: []interface{}{(*models.User)(nil)},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query:   findByNicknameQuery,
+					Err:     sql.ErrNoRows,
+					Rows:    nil,
+					Args:    []driver.Value{nickname},
+					RunType: models.Query,
+				},
+			},
+		},
+		{
+			Name: "BdError",
+			Args: []interface{}{nickname},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NewDBError(repository.DefaultErrDB),
+				ExpectedReturns: []interface{}{(*models.User)(nil)},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Query:   findByNicknameQuery,
+					Err:     repository.DefaultErrDB,
+					Rows:    nil,
+					Args:    []driver.Value{nickname},
+					RunType: models.Query,
+				},
+			},
+		},
+	}
+
+	for _, test := range testings {
+		s.RunTestCase(test)
+	}
+}
 func TestUserRepository(t *testing.T) {
 	suite.Run(t, new(SuiteUserRepository))
 }

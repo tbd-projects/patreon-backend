@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.4.1
 	github.com/alicebob/miniredis/v2 v2.15.1
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/conku/webp v1.1.6 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible

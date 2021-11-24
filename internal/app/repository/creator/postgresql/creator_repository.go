@@ -10,8 +10,6 @@ import (
 	rp "patreon/internal/app/repository"
 	postgresql_utilits "patreon/internal/app/utilits/postgresql"
 	"patreon/pkg/utils"
-	"strconv"
-	"strings"
 )
 
 
@@ -129,27 +127,6 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 	return res, nil
 }
 
-func customRebind(startIndex int, query string) string {
-	// Add space enough for 10 params before we have to allocate
-	rqb := make([]byte, 0, len(query)+10)
-
-	var i int
-	j := startIndex - 1
-	for i = strings.Index(query, "?"); i != -1; i = strings.Index(query, "?") {
-		rqb = append(rqb, query[:i]...)
-
-		rqb = append(rqb, '$')
-
-		j++
-		rqb = strconv.AppendInt(rqb, int64(j), 10)
-
-		query = query[i+1:]
-	}
-
-	return string(append(rqb, query...))
-}
-
-
 // SearchCreators Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
@@ -175,7 +152,7 @@ func (repo *CreatorRepository) SearchCreators(pag *models.Pagination,
 		args = append(args, argsCategory...)
 	}
 
-	query = customRebind(4, query)
+	query = postgresql_utilits.CustomRebind(4, query)
 
 	rows, err := repo.store.Query(query, args...)
 	if err != nil {

@@ -2,6 +2,7 @@ package postgresql_utilits
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/zhashkevych/go-sqlxmock"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -9,8 +10,19 @@ import (
 	"testing"
 )
 
+func MockCallAddPagination(mock sqlmock.Sqlmock, tableName string, res int64) {
+	mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(res))
+}
+
+func MockCallAddPaginationWithError(mock sqlmock.Sqlmock, tableName string, err error) {
+	mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
+		WithArgs(tableName).
+		WillReturnError(err)
+}
+
 func Test_AddPagintation(t *testing.T) {
-	queryStat := "SELECT n_live_tup FROM pg_stat_all_tables WHERE relname = $1"
 	db, mock, err := sqlmock.Newx()
 	if err != nil {
 		t.Fatal(err)
@@ -18,33 +30,27 @@ func Test_AddPagintation(t *testing.T) {
 
 	tableName := "dddd"
 	pag := &models.Pagination{Limit: 10, Offset: 20}
-	mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
-		WithArgs(tableName).
-		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5000)))
+	MockCallAddPagination(mock, tableName, 5000)
 	limit, offset, err := AddPagination(tableName, pag, db)
 	assert.NoError(t, err)
 	assert.Equal(t, limit, pag.Limit)
 	assert.Equal(t, offset, pag.Offset)
 
-	mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
-		WithArgs(tableName).
-		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(10)))
+	MockCallAddPagination(mock, tableName, 10)
 	limit, offset, err = AddPagination(tableName, pag, db)
 	assert.NoError(t, err)
 	assert.Equal(t, limit, pag.Limit)
 	assert.Equal(t, offset, int64(0))
 
-	mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
-		WithArgs(tableName).
-		WillReturnRows(sqlmock.NewRows([]string{"n_live_tup"}).AddRow(int64(5)))
+	MockCallAddPagination(mock, tableName, 5)
 	limit, offset, err = AddPagination(tableName, pag, db)
 	assert.NoError(t, err)
 	assert.Equal(t, limit, pag.Limit)
 	assert.Equal(t, offset, int64(0))
 
-	mock.ExpectQuery(regexp.QuoteMeta(queryStat)).
-		WithArgs(tableName).
-		WillReturnError(repository.DefaultErrDB)
+	MockCallAddPaginationWithError(mock, tableName, repository.DefaultErrDB)
 	limit, offset, err = AddPagination(tableName, pag, db)
 	assert.Error(t, err, repository.NewDBError(repository.DefaultErrDB))
+
+	require.NoError(t, mock.ExpectationsWereMet())
 }

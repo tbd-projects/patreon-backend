@@ -213,7 +213,7 @@ type SubscribersCreatorResponse struct {
 }
 
 func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorResponse {
-	res := make([]ResponseUser, 0, len(users))
+	res := make([]ResponseUser, len(users))
 	for i, user := range users {
 		res[i] = ResponseUser{
 			ID:       user.ID,
@@ -236,7 +236,7 @@ type ResponseUserPayments struct {
 }
 
 func ToResponseUserPayments(payments []models.Payments) ResponseUserPayments {
-	res := make([]models.Payments, 0, len(payments))
+	res := make([]models.Payments, len(payments))
 	for _, payment := range payments {
 		res = append(res, models.Payments{
 			Amount:    payment.Amount,
