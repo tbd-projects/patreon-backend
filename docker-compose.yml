@@ -31,6 +31,7 @@ services:
       - default
     volumes:
       - ./logs-files:/app/logs
+      - ./media:/app/media
       - ./configs:/app/configs
   main:
     image: patreon
@@ -40,7 +41,7 @@ services:
       - "443"
     ports:
       - "443:443"
-      #      - "80:80"
+      - "80:80"
       - "8080:8080"
     networks:
       - default

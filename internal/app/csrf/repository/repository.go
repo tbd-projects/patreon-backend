@@ -3,6 +3,6 @@ package repository_token
 import "patreon/internal/app/csrf/models"
 
 type Repository interface {
-	Check(sources models.TokenSources, tokenString models.Token) error
-	Create(sources models.TokenSources) (models.Token, error)
+	Check(sources csrf_models.TokenSources, tokenString csrf_models.Token) error
+	Create(sources csrf_models.TokenSources) (csrf_models.Token, error)
 }

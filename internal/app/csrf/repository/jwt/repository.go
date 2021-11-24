@@ -10,10 +10,10 @@ type Repository interface {
 	// 		app.GeneralError with Error
 	// 			ParseClaimsError
 	// 			TokenExpired
-	Check(sources models.TokenSources, tokenString models.Token) error
+	Check(sources csrf_models.TokenSources, tokenString csrf_models.Token) error
 
 	// Create Errors:
 	// 		app.GeneralError with Error
 	// 			ErrorSignedToken
-	Create(sources models.TokenSources) (models.Token, error)
+	Create(sources csrf_models.TokenSources) (csrf_models.Token, error)
 }

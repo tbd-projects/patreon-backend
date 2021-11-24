@@ -15,5 +15,5 @@ type Usecase interface {
 	// Create Errors:
 	// 		app.GeneralError with Error
 	// 			repository_jwt.ErrorSignedToken
-	Create(sessionId string, userId int64) (models.Token, error)
+	Create(sessionId string, userId int64) (csrf_models.Token, error)
 }

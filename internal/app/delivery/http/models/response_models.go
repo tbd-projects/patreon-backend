@@ -3,14 +3,14 @@ package http_models
 import (
 	"fmt"
 	"math"
-	models_csrf "patreon/internal/app/csrf/models"
+	"patreon/internal/app/csrf/models"
 	"patreon/internal/app/models"
 	"strconv"
 	"time"
 )
 
 type TokenResponse struct {
-	Token models_csrf.Token `json:"token"`
+	Token csrf_models.Token `json:"token"`
 }
 type ErrResponse struct {
 	Err string `json:"error"`

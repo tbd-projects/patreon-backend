@@ -63,7 +63,7 @@ func (s *SuiteJwtRepository) TestJwtRepository_Check_IncorrectEncoding() {
 	testToken, err := token.SignedString(s.repository.Secret)
 	assert.NoError(s.T(), err)
 
-	err = s.repository.Check(sourses, models.Token(testToken))
+	err = s.repository.Check(sourses, csrf_models.Token(testToken))
 
 	var generalError *app.GeneralError
 	assert.True(s.T(), errors.As(err, &generalError))

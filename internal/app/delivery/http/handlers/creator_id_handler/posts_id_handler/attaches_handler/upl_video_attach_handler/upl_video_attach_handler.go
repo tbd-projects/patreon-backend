@@ -7,7 +7,7 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	http_models "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	usePosts "patreon/internal/app/usecase/posts"

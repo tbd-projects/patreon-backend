@@ -5,7 +5,7 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	http_models "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 

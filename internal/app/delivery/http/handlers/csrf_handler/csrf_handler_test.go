@@ -92,7 +92,7 @@ func (s *CsrfTestSuite) TestCsrfHandlerGet_CreateTokenError() {
 	s.MockCsrfUsecase.EXPECT().
 		Create(session_id, user_id).
 		Times(1).
-		Return(models.Token(""), &app.GeneralError{
+		Return(csrf_models.Token(""), &app.GeneralError{
 			Err: repository_jwt.ErrorSignedToken,
 		})
 
@@ -122,7 +122,7 @@ func (s *CsrfTestSuite) TestCsrfHandlerGet_Ok() {
 	s.MockCsrfUsecase.EXPECT().
 		Create(session_id, user_id).
 		Times(1).
-		Return(models.Token("token"), nil)
+		Return(csrf_models.Token("token"), nil)
 
 	s.handler.GET(w, r)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, w.Code)

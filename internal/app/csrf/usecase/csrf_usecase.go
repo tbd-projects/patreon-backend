@@ -24,19 +24,19 @@ func NewCsrfUsecase(repo repository_token.Repository) *CsrfUsecase {
 // 			repository_jwt.ParseClaimsError
 //			repository_jwt.TokenExpired
 func (u *CsrfUsecase) Check(sessionId string, userId int64, token string) error {
-	sources := models.TokenSources{
+	sources := csrf_models.TokenSources{
 		UserId:    userId,
 		SessionId: sessionId,
 	}
-	return u.repository.Check(sources, models.Token(token))
+	return u.repository.Check(sources, csrf_models.Token(token))
 
 }
 
 // Create Errors:
 // 		app.GeneralError with Error
 // 			repository_jwt.ErrorSignedToken
-func (u *CsrfUsecase) Create(sessionId string, userId int64) (models.Token, error) {
-	data := models.TokenSources{
+func (u *CsrfUsecase) Create(sessionId string, userId int64) (csrf_models.Token, error) {
+	data := csrf_models.TokenSources{
 		UserId:      userId,
 		SessionId:   sessionId,
 		ExpiredTime: time.Now().Add(expiredCsrfTime),

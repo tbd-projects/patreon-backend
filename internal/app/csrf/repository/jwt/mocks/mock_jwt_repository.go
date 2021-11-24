@@ -5,7 +5,7 @@
 package mock_repository
 
 import (
-	models "patreon/internal/app/csrf/models"
+	csrf_models "patreon/internal/app/csrf/models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,7 +35,7 @@ func (m *JwtRepository) EXPECT() *JwtRepositoryMockRecorder {
 }
 
 // Check mocks base method.
-func (m *JwtRepository) Check(arg0 models.TokenSources, arg1 models.Token) error {
+func (m *JwtRepository) Check(arg0 csrf_models.TokenSources, arg1 csrf_models.Token) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Check", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -49,10 +49,10 @@ func (mr *JwtRepositoryMockRecorder) Check(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // Create mocks base method.
-func (m *JwtRepository) Create(arg0 models.TokenSources) (models.Token, error) {
+func (m *JwtRepository) Create(arg0 csrf_models.TokenSources) (csrf_models.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
-	ret0, _ := ret[0].(models.Token)
+	ret0, _ := ret[0].(csrf_models.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -41,7 +41,7 @@ func (tk *JwtRepository) parseClaims(token *jwt.Token) (interface{}, error) {
 // 		app.GeneralError with Error
 // 			repository_jwt.ParseClaimsError
 // 			repository_jwt.TokenExpired
-func (tk *JwtRepository) Check(sources models.TokenSources, tokenString models.Token) error {
+func (tk *JwtRepository) Check(sources csrf_models.TokenSources, tokenString csrf_models.Token) error {
 	claims := &jwtCsrfClaims{}
 	token, err := jwt.ParseWithClaims(string(tokenString), claims, tk.parseClaims)
 	if err != nil || !token.Valid {
@@ -68,7 +68,7 @@ func (tk *JwtRepository) Check(sources models.TokenSources, tokenString models.T
 // Create Errors:
 // 		app.GeneralError with Error
 // 			repository_jwt.ErrorSignedToken
-func (tk *JwtRepository) Create(sources models.TokenSources) (models.Token, error) {
+func (tk *JwtRepository) Create(sources csrf_models.TokenSources) (csrf_models.Token, error) {
 	data := jwtCsrfClaims{
 		SessionId: sources.SessionId,
 		UserId:    sources.UserId,
@@ -85,5 +85,5 @@ func (tk *JwtRepository) Create(sources models.TokenSources) (models.Token, erro
 			ExternalErr: err,
 		}
 	}
-	return models.Token(res), nil
+	return csrf_models.Token(res), nil
 }

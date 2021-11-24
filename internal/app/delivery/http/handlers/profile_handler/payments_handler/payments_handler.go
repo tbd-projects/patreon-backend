@@ -5,7 +5,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	http_models "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	db_models "patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"patreon/internal/app/usecase/payments"

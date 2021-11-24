@@ -5,7 +5,7 @@
 package mock_usecase_csrf
 
 import (
-	models "patreon/internal/app/csrf/models"
+	csrf_models "patreon/internal/app/csrf/models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -49,10 +49,10 @@ func (mr *CsrfUsecaseMockRecorder) Check(arg0, arg1, arg2 interface{}) *gomock.C
 }
 
 // Create mocks base method.
-func (m *CsrfUsecase) Create(arg0 string, arg1 int64) (models.Token, error) {
+func (m *CsrfUsecase) Create(arg0 string, arg1 int64) (csrf_models.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
-	ret0, _ := ret[0].(models.Token)
+	ret0, _ := ret[0].(csrf_models.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
