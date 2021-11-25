@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"io"
+	mock_repository "patreon/internal/app/repository/access/mocks"
 	mock_repository_attaches "patreon/internal/app/repository/attaches/mocks"
 	mock_repository_awards "patreon/internal/app/repository/awards/mocks"
 	mock_repository_creator "patreon/internal/app/repository/creator/mocks"
@@ -33,6 +34,7 @@ type SuiteUsecase struct {
 	MockAwardsRepository      *mock_repository_awards.AwardsRepository
 	MockPostsRepository       *mock_repository_posts.PostsRepository
 	MockLikesRepository       *mock_repository_likes.LikesRepository
+	MockAccessRepository      *mock_repository.AccessRepository
 	MockInfoRepository        *mock_repository_info.InfoRepository
 	MockAttachesRepository    *mock_repository_attaches.AttachesRepository
 	MockFileClient            *mock_files.MockFileServiceClient
@@ -54,6 +56,7 @@ func (s *SuiteUsecase) SetupSuite() {
 	s.MockLikesRepository = mock_repository_likes.NewLikesRepository(s.Mock)
 	s.MockInfoRepository = mock_repository_info.NewInfoRepository(s.Mock)
 	s.MockConvector = mock_utils.NewMockImageConverter(s.Mock)
+	s.MockAccessRepository = mock_repository.NewAccessRepository(s.Mock)
 
 	s.Logger = logrus.New()
 	s.Logger.SetOutput(io.Discard)
