@@ -1,17 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
-	"fmt"
 	"os"
+	_ "patreon/docs"
 	"patreon/internal/app"
 	main_server "patreon/internal/app/server"
-	"time"
-
-	"github.com/gomodule/redigo/redis"
-
-	_ "patreon/docs"
+	"patreon/pkg/utils"
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
@@ -23,47 +18,6 @@ var (
 	runHttps            bool
 )
 
-func newLogger(config *app.Config) (log *logrus.Logger, closeResource func() error) {
-	level, err := logrus.ParseLevel(config.LogLevel)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-
-	logger := logrus.New()
-	currentTime := time.Now().In(time.UTC)
-	formatted := config.LogAddr + fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
-		currentTime.Year(), currentTime.Month(), currentTime.Day(),
-		currentTime.Hour(), currentTime.Minute(), currentTime.Second()) + ".log"
-
-	f, err := os.OpenFile(formatted, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		logrus.Fatalf("error opening file: %v", err)
-	}
-
-	logger.SetOutput(f)
-	logger.Writer()
-	logger.SetLevel(level)
-	logger.SetFormatter(&logrus.JSONFormatter{})
-	return logger, f.Close
-}
-
-func newPostgresConnection(config *app.RepositoryConnections) (db *sql.DB, closeResource func() error) {
-	db, err := sql.Open("postgres", config.DataBaseUrl)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-
-	return db, db.Close
-}
-
-func newRedisPool(redisUrl string) *redis.Pool {
-	return &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.DialURL(redisUrl)
-		},
-	}
-}
-
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/server.toml", "path to config file")
 	flag.BoolVar(&useServerRepository, "server-run", false, "true if it server run, false if it local run")
@@ -74,6 +28,27 @@ func init() {
 // @title Patreon
 // @version 1.0
 // @description Server for Patreon application.
+
+// @tag.name user
+// @tag.description "Some methods for work with user"
+
+// @tag.name creators
+// @tag.description "Some methods for work with creators"
+
+// @tag.name attaches
+// @tag.description "Some methods for work with attaches of post"
+
+// @tag.name posts
+// @tag.description "Some methods for work with posts"
+
+// @tag.name awards
+// @tag.description "Some methods for work with posts"
+
+// @tag.name payments
+// @tag.description "Some methods for work with payments"
+
+// @tag.name utilities
+// @tag.description "Some methods for front work"
 
 // @host api.pyaterochka-team.site
 // @BasePath /api/v1
@@ -92,7 +67,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	logger, closeResource := newLogger(config)
+	logger, closeResource := utils.NewLogger(config, false, "")
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -106,7 +81,7 @@ func main() {
 		repositoryConfig = &config.ServerRepository
 	}
 
-	db, closeResource := newPostgresConnection(repositoryConfig)
+	db, closeResource := utils.NewPostgresConnection(repositoryConfig)
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -115,12 +90,21 @@ func main() {
 		}
 	}(closeResource, logger)
 
+	sessionConn, err := utils.NewGrpcConnection(config.Microservices.SessionServerUrl)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	filesConn, err := utils.NewGrpcConnection(config.Microservices.FilesUrl)
+	if err != nil {
+		logger.Fatal(err)
+	}
 	server := main_server.New(config,
 		app.ExpectedConnections{
-			SessionRedisPool: newRedisPool(repositoryConfig.SessionRedisUrl),
-			AccessRedisPool:  newRedisPool(repositoryConfig.AccessRedisUrl),
-			SqlConnection:    db,
-			PathFiles:        config.MediaDir,
+			SessionGrpcConnection: sessionConn,
+			FilesGrpcConnection:   filesConn,
+			AccessRedisPool:       utils.NewRedisPool(repositoryConfig.AccessRedisUrl),
+			SqlConnection:         db,
+			PathFiles:             config.MediaDir,
 		},
 		logger,
 	)

@@ -12,7 +12,7 @@ type PostsIdTestSuite struct {
 /*
 func (s *PostsIdTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewPostsIDHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
+	s.handler = NewPostsIDHandler(s.Logger, s.MockAwardsUsecase, s.MockSessionsManager)
 }
 
 func (s *PostsIdTestSuite) TestCreatorIdHandler_POST_No_Params() {

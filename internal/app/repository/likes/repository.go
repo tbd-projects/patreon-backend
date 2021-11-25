@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app/models"
 )
 
+//go:generate mockgen -destination=mocks/mock_likes_repository.go -package=mock_repository -mock_names=Repository=LikesRepository . Repository
+
 type Repository interface {
 	// Get Errors:
 	//		repository.NotFound

@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app/models"
 )
 
+//go:generate mockgen -destination=mocks/mock_likes_usecase.go -package=mock_usecase -mock_names=Usecase=LikesUsecase . Usecase
+
 type Usecase interface {
 
 	// Add Errors:

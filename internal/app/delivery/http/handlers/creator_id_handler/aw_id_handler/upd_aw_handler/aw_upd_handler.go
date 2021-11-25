@@ -3,7 +3,6 @@ package aw_upd_handler
 import (
 	"image/color"
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -12,9 +11,9 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	bd_modle "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -26,14 +25,14 @@ type AwardsUpdHandler struct {
 	bh.BaseHandler
 }
 
-func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsUpdHandler {
+func NewAwardsUpdHandler(log *logrus.Logger,
+	ucAwards useAwards.Usecase, sClient session_client.AuthCheckerClient) *AwardsUpdHandler {
 	h := &AwardsUpdHandler{
-		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:   *bh.NewBaseHandler(log),
 		awardsUsecase: ucAwards,
 	}
 
-	h.AddMethod(http.MethodPut, h.PUT, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
+	h.AddMethod(http.MethodPut, h.PUT, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log,
 			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
@@ -45,24 +44,21 @@ func NewAwardsUpdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 
 // PUT Awards
 // @Summary update current awards
+// @tags awards
 // @Description update current awards from current creator
-// @Param award body models.RequestAwards true "Request body for update awards"
+// @Param award body http_models.RequestAwards true "Request body for update awards"
 // @Produce json
 // @Success 200
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 404 {object} models.ErrResponse "award with this id not found"
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 422 {object} models.ErrResponse "empty name in request"
-// @Failure 422 {object} models.ErrResponse "incorrect value of price"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 401 "User are not authorized"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 404 {object} http_models.ErrResponse "award with this id not found"
+// @Failure 422 {object} http_models.ErrResponse "invalid body in request", "incorrect value of price", "empty name in request"
+// @Failure 409 {object} http_models.ErrResponse "awards with this name already exists", "awards with this price already exists"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this awards not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/update [PUT]
 func (h *AwardsUpdHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestAwards{}
+	req := &http_models.RequestAwards{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {

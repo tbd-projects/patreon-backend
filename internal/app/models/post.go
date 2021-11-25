@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	models_utilits "patreon/internal/app/utilits/models"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -13,6 +14,7 @@ type UpdatePost struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Awards      int64  `json:"type_awards"`
+	IsDraft     bool   `json:"is_draft"`
 }
 
 type CreatePost struct {
@@ -21,6 +23,7 @@ type CreatePost struct {
 	Description string `json:"description"`
 	Awards      int64  `json:"type_awards"`
 	CreatorId   int64  `json:"creator_id"`
+	IsDraft     bool   `json:"is_draft"`
 }
 
 type Post struct {
@@ -34,6 +37,7 @@ type Post struct {
 	Views       int64     `json:"views"`
 	AddLike     bool      `json:"add_like"`
 	Date        time.Time `json:"date"`
+	IsDraft     bool      `json:"is_draft"`
 }
 
 func (ps *UpdatePost) String() string {
@@ -54,12 +58,12 @@ func (ps *UpdatePost) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(postValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(postValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 
@@ -86,12 +90,12 @@ func (ps *CreatePost) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(postValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(postValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 
@@ -100,10 +104,10 @@ func (ps *CreatePost) Validate() error {
 
 type DataType string
 
-type PostData struct {
+type AttachWithoutLevel struct {
 	ID     int64    `json:"data_id"`
 	PostId int64    `json:"posts_id"`
-	Data   string   `json:"data"`
+	Value  string   `json:"value"`
 	Type   DataType `json:"type"`
 }
 
@@ -119,7 +123,7 @@ const (
 //		InvalidType
 //		InvalidPostId
 // Important can return some other error
-func (ps *PostData) Validate() error {
+func (ps *AttachWithoutLevel) Validate() error {
 	err := validation.Errors{
 		"post": validation.Validate(ps.PostId, validation.Min(0)),
 		"type": validation.Validate(ps.Type, validation.In(Music, Video, Files, Text, Image)),
@@ -128,19 +132,19 @@ func (ps *PostData) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(postDataValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(attachWithoutLevelValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 
 	return err
 }
 
-type PostWithData struct {
+type PostWithAttach struct {
 	*Post
-	Data []PostData
+	Data []AttachWithoutLevel
 }

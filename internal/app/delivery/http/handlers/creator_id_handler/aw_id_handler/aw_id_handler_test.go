@@ -11,7 +11,7 @@ type AwardsIdTestSuite struct {
 
 func (s *AwardsIdTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewAwardsIdHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
+	s.handler = NewAwardsIdHandler(s.Logger, s.MockAwardsUsecase, s.MockSessionsManager)
 }
 
 /*

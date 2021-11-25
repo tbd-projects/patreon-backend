@@ -12,7 +12,7 @@ type AwardsUpOtherTestSuite struct {
 
 func (s *AwardsUpOtherTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = aw_handler.NewAwardsHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
+	s.handler = aw_handler.NewAwardsHandler(s.Logger, s.MockAwardsUsecase, s.MockSessionsManager)
 }
 
 /*

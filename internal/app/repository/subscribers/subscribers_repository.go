@@ -1,16 +1,16 @@
 package repository_subscribers
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 )
 
 type SubscribersRepository struct {
-	store *sql.DB
+	store *sqlx.DB
 }
 
-func NewSubscribersRepository(store *sql.DB) *SubscribersRepository {
+func NewSubscribersRepository(store *sqlx.DB) *SubscribersRepository {
 	return &SubscribersRepository{
 		store: store,
 	}

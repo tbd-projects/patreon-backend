@@ -1,5 +1,7 @@
 package repository_access
 
+//go:generate mockgen -destination=mocks/mock_access_repository.go -package=mock_repository -mock_names=Repository=AccessRepository . Repository
+
 type Repository interface {
 	// Set Errors:
 	// 		app.GeneralError with Errors

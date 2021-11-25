@@ -1,24 +1,27 @@
 package usecase_awards
 
 import (
+	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	repoAwrds "patreon/internal/app/repository/awards"
-	repoFiles "patreon/internal/app/repository/files"
+	"patreon/internal/microservices/files/delivery/grpc/client"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
+
+	"github.com/pkg/errors"
 )
 
 type AwardsUsecase struct {
-	repository      repoAwrds.Repository
-	repositoryFiles repoFiles.Repository
+	repository repoAwrds.Repository
+	fileClient client.FileServiceClient
 }
 
-func NewAwardsUsecase(repository repoAwrds.Repository, repositoryFiles repoFiles.Repository) *AwardsUsecase {
+func NewAwardsUsecase(repository repoAwrds.Repository, fileClient client.FileServiceClient) *AwardsUsecase {
 	return &AwardsUsecase{
-		repository:      repository,
-		repositoryFiles: repositoryFiles,
+		repository: repository,
+		fileClient: fileClient,
 	}
 }
 
@@ -40,6 +43,7 @@ func (usecase *AwardsUsecase) Delete(id int64) error {
 // Update Errors:
 // 		repository.NotFound
 //		repository_postgresql.NameAlreadyExist
+//		repository_postgresql.PriceAlreadyExist
 //		models.IncorrectAwardsPrice
 //		models.EmptyName
 //		app.GeneralError with Errors:
@@ -61,6 +65,7 @@ func (usecase *AwardsUsecase) Update(awards *models.Award) error {
 
 // Create Errors:
 //		repository_postgresql.NameAlreadyExist
+//		repository_postgresql.PriceAlreadyExist
 //		models.IncorrectAwardsPrice
 //		models.EmptyName
 //		app.GeneralError with Errors:
@@ -104,7 +109,7 @@ func (usecase *AwardsUsecase) UpdateCover(data io.Reader, name repoFiles.FileNam
 		return err
 	}
 
-	path, err := usecase.repositoryFiles.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.fileClient.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
 	"image/color"
+	models_utilits "patreon/internal/app/utilits/models"
 	"strconv"
 )
 
@@ -15,6 +16,7 @@ type Award struct {
 	Price       int64      `json:"price,omitempty"`
 	CreatorId   int64      `json:"creator_id"`
 	Color       color.RGBA `json:"color.omitempty"`
+	ChildAward  int64      `json:"child_award"`
 	Cover       string     `json:"cover"`
 }
 
@@ -36,12 +38,12 @@ func (aw *Award) Validate() error {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate creator")
 	}
 
-	if knowError = extractValidateError(awardsValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(awardsValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 

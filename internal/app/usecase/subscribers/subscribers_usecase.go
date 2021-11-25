@@ -36,14 +36,6 @@ func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber) error {
 		return SubscriptionAlreadyExists
 	}
 
-	//exist, err = uc.repoAwards.FindByName(subscriber.CreatorID, awardName)
-	//if err != nil {
-	//	return err
-	//}
-	//if !exist {
-	//	return repository_postgresql.AwardNameNotFound
-	//}
-
 	return uc.repoSubscr.Create(subscriber)
 }
 

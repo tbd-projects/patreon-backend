@@ -2,7 +2,6 @@ package posts_upd_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -11,9 +10,9 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -25,13 +24,13 @@ type PostsUpdateHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsUpdateHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsUpdateHandler {
+func NewPostsUpdateHandler(log *logrus.Logger,
+	ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *PostsUpdateHandler {
 	h := &PostsUpdateHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
-	h.AddMiddleware(sessionMid.NewSessionMiddleware(manager, log).Check,
+	h.AddMiddleware(session_middleware.NewSessionMiddleware(sClient, log).Check,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUser,
 		middleware.NewPostsMiddleware(log, ucPosts).CheckCorrectPost)
 
@@ -44,25 +43,20 @@ func NewPostsUpdateHandler(log *logrus.Logger, router *mux.Router, cors *app.Cor
 
 // PUT Posts
 // @Summary update current posts
+// @tags posts
 // @Description update current posts from current creator
-// @Param user body models.RequestPosts true "Request body for posts"
+// @Param post body http_models.RequestPosts true "Request body for posts"
 // @Produce json
 // @Success 200
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 404 {object} models.ErrResponse "post with this id not found"
-// @Failure 422 {object} models.ErrResponse "empty title"
-// @Failure 422 {object} models.ErrResponse "this creator id not know"
-// @Failure 422 {object} models.ErrResponse "this awards id not know"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
-// @Failure 401 "User are not authorized"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 404 {object} http_models.ErrResponse "post with this id not found"
+// @Failure 422 {object} http_models.ErrResponse "empty title", "this awards id not know", "this creator id not know", "invalid body in request"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/update [PUT]
 func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestPosts{}
+	req := &http_models.RequestPosts{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
@@ -83,7 +77,7 @@ func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = h.postsUsecase.Update(&models_db.UpdatePost{ID: postId, Title: req.Title,
-		Description: req.Description, Awards: req.AwardsId}); err != nil {
+		Description: req.Description, Awards: req.AwardsId, IsDraft: req.IsDraft}); err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)
 		return
 	}

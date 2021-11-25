@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
+	"patreon/internal/app/delivery/http/models"
 	models_data "patreon/internal/app/models"
+	usecase_creator "patreon/internal/app/usecase/creator"
 	"strconv"
 	"testing"
 
@@ -24,7 +26,7 @@ type CreatorCreateTestSuite struct {
 
 func (s *CreatorCreateTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorIdHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase, s.MockCreatorUsecase)
+	s.handler = NewCreatorIdHandler(s.Logger, s.MockSessionsManager, s.MockCreatorUsecase)
 }
 
 func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
@@ -46,21 +48,22 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 	vars := map[string]string{
 		"creator_id": strconv.Itoa(int(userID)),
 	}
-	creator := models_data.Creator{
+	creator := models_data.CreatorWithAwards{
 		ID: userID, Avatar: "some", Nickname: "done"}
 	reader := mux.SetURLVars(req, vars)
 	s.MockCreatorUsecase.
 		EXPECT().
-		GetCreator(userID).
+		GetCreator(userID, usecase_creator.NoUser).
 		Times(test.ExpectedMockTimes).
 		Return(&creator, nil)
 	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 	decoder := json.NewDecoder(recorder.Body)
-	res := &models_data.Creator{}
+	res := &http_models.ResponseCreatorWithAwards{}
 	err = decoder.Decode(res)
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), &creator, res)
+	expected := http_models.ToResponseCreatorWithAwards(creator)
+	assert.Equal(s.T(), &expected, res)
 }
 
 func TestCreatorCreateSuite(t *testing.T) {

@@ -1,14 +1,17 @@
 package app
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
+
+	"google.golang.org/grpc"
 
 	"github.com/gomodule/redigo/redis"
 )
 
 type ExpectedConnections struct {
-	SessionRedisPool *redis.Pool
-	AccessRedisPool  *redis.Pool
-	SqlConnection    *sql.DB
-	PathFiles        string
+	SessionGrpcConnection *grpc.ClientConn
+	FilesGrpcConnection   *grpc.ClientConn
+	AccessRedisPool       *redis.Pool
+	SqlConnection         *sqlx.DB
+	PathFiles             string
 }

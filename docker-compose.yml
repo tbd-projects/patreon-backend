@@ -1,28 +1,63 @@
 version: "3"
+
 volumes:
   dbbackups:
   postgis-data:
   session-redis:
   access-redis:
 services:
+  sessions-service:
+    image: session-service
+    expose:
+      - "5001"
+    ports:
+      - "5001:5001"
+      - "9091:9091"
+    networks:
+      - default
+    depends_on:
+      - session-redis
+    volumes:
+      - ./logs-sessions:/app/logs
+      - ./configs:/app/configs
+  files-service:
+    image: files-service
+    expose:
+      - "5002"
+    ports:
+      - "5002:5002"
+      - "9092:9091"
+    networks:
+      - default
+    volumes:
+      - ./logs-files:/app/logs
+      - ./media:/app/media
+      - ./configs:/app/configs
   main:
     image: patreon
     expose:
       - "80"
+      - "8080"
       - "443"
     ports:
       - "443:443"
       - "80:80"
+      - "8080:8080"
     networks:
       - default
     volumes:
       - ./logs:/app/logs
       - ./media:/app/media
       - ./patreon-secrt:/app/patreon-secrt
+      - ./configs:/app/configs
     depends_on:
       - session-redis
       - access-redis
       - patreon-bd
+      - sessions-service
+      - files-service
+    environment:
+      WAIT_HOSTS: patreon-bd:5432
   session-redis:
     image: "redis:alpine"
     expose:
@@ -40,12 +75,11 @@ services:
     volumes:
       - access-redis:/data
   patreon-bd:
-    image: postgres:latest
+    image: pg-14
     expose:
       - "5432"
+    command: "postgres -c shared_preload_libraries='pg_stat_statements'"
     volumes:
-      - ./scripts/user.sql:/docker-entrypoint-initdb.d/1_init.sql
-      - ./scripts/start_initialization.sql:/docker-entrypoint-initdb.d/2_init.sql
       - postgis-data:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=pyaterochka
@@ -61,6 +95,61 @@ services:
         limits:
           cpus: '2'
           memory: 4G
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: 'node_exporter'
+    user: root
+    privileged: true
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - "9100"
+    ports:
+      - "9100:9100"
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+      - node_exporter
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+  postgres_exporter:
+    container_name: exporter_container
+    image: prometheuscommunity/postgres-exporter
+    environment:
+#      DATA_SOURCE_URI: "patreon-bd:5432"
+      DATA_SOURCE_USER: "patreon"
+      DATA_SOURCE_PASS: "pyaterochka"
+      DATA_SOURCE_URI: patreon-bd:5432/restapi_dev?sslmode=disable
+    #      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    #    volumes:
+    #      - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    ports:
+      - "9187:9187"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 500M
+    depends_on:
+      - patreon-bd
 #  pgadmin:
 #    container_name: pgadmin_container
 #    image: dpage/pgadmin4:5.7
@@ -81,5 +170,5 @@ services:
 #    networks:
 #      - postgres
 networks:
-  postgres:
+  default:
     driver: bridge

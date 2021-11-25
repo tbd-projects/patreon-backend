@@ -2,12 +2,12 @@ package creator_id_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/sessions"
+	"patreon/internal/app/delivery/http/models"
 	usecase_creator "patreon/internal/app/usecase/creator"
-	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	"patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 
@@ -15,21 +15,20 @@ import (
 )
 
 type CreatorIdHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient  session_client.AuthCheckerClient
 	creatorUsecase usecase_creator.Usecase
 	base_handler.BaseHandler
 }
 
-func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
-	ucUser usecase_user.Usecase, ucCreator usecase_creator.Usecase) *CreatorIdHandler {
+func NewCreatorIdHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient, ucCreator usecase_creator.Usecase) *CreatorIdHandler {
 	h := &CreatorIdHandler{
-		BaseHandler:    *base_handler.NewBaseHandler(log, router, cors),
-		sessionManager: sManager,
-		userUsecase:    ucUser,
+		BaseHandler:    *base_handler.NewBaseHandler(log),
+		sessionClient:  sManager,
 		creatorUsecase: ucCreator,
 	}
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionClient, log).AddUserId)
 	h.AddMethod(http.MethodGet, h.GET)
+
 	return h
 }
 
@@ -37,13 +36,19 @@ func NewCreatorIdHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsC
 // @Summary get creator
 // @Description get creator with id from path
 // @Produce json
+// @tags creators
 // @Param creator_id path int true "Get creator with id"
-// @Success 200 {object} models.Creator
-// @Failure 404 {object} models.ErrResponse "user with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Success 200 {object} http_models.ResponseCreatorWithAwards
+// @Failure 404 {object} http_models.ErrResponse "user not found"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Router /creators/{creator_id:} [GET]
 func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("user_id").(int64)
+	if !ok {
+		userId = usecase_creator.NoUser
+	}
+
 	creatorId, ok := s.GetInt64FromParam(w, r, "creator_id")
 	if !ok {
 		return
@@ -55,13 +60,12 @@ func (s *CreatorIdHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	creator, err := s.creatorUsecase.GetCreator(creatorId)
+	creator, err := s.creatorUsecase.GetCreator(creatorId, userId)
 	if err != nil {
 		s.UsecaseError(w, r, err, codesByErrors)
 		return
 	}
 
 	s.Log(r).Debugf("get creator %v with id %v", creator, creatorId)
-	s.Respond(w, r, http.StatusOK, creator)
-
+	s.Respond(w, r, http.StatusOK, http_models.ToResponseCreatorWithAwards(*creator))
 }

@@ -1,38 +1,36 @@
 package login_handler
 
 import (
+	"context"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
-	"patreon/internal/app/sessions/sessions_manager"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	"patreon/internal/microservices/auth/sessions/middleware"
+	"patreon/internal/microservices/auth/sessions/sessions_manager"
 	"time"
 
 	"github.com/microcosm-cc/bluemonday"
-
-	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
 
 type LoginHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient session_client.AuthCheckerClient
+	userUsecase   usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewLoginHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewLoginHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
 	ucUser usecase_user.Usecase) *LoginHandler {
 	h := &LoginHandler{
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
-		sessionManager: sManager,
-		userUsecase:    ucUser,
+		BaseHandler:   *bh.NewBaseHandler(log),
+		sessionClient: sClient,
+		userUsecase:   ucUser,
 	}
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).CheckNotAuthorized)
+	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionClient, log).CheckNotAuthorized)
 	h.AddMethod(http.MethodPost, h.POST)
 	return h
 }
@@ -40,19 +38,19 @@ func NewLoginHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 // POST Login
 // @Summary login user
 // @Description login user
+// @tags user
 // @Accept  json
 // @Produce json
-// @Param user body models.RequestLogin true "Request body for login"
+// @Param user body http_models.RequestLogin true "Request body for login"
 // @Success 200 "Successfully login"
-// @Failure 404 {object} models.ErrResponse "user with this id not found"
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "can not create session"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 401 {object} models.ErrResponse "incorrect email or password"
+// @Failure 404 {object} http_models.ErrResponse "user not found"
+// @Failure 422 {object} http_models.ErrResponse "invalid body in request"
+// @Failure 500 {object} http_models.ErrResponse "can not create session", "can not do bd operation"
+// @Failure 401 {object} http_models.ErrResponse "incorrect email or password"
 // @Failure 418 "User are authorized"
 // @Router /login [POST]
 func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestLogin{}
+	req := &http_models.RequestLogin{}
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil || len(req.Password) == 0 || len(req.Login) == 0 {
 		h.Log(r).Warnf("can not decode body %s", err)
@@ -67,7 +65,7 @@ func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.sessionManager.Create(id)
+	res, err := h.sessionClient.Create(context.Background(), id)
 	if err != nil || res.UserID != id {
 		h.Log(r).Errorf("Error create session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.ErrorCreateSession)

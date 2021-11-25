@@ -1,27 +1,211 @@
 package models
 
 import (
-	"database/sql"
+	"context"
+	"database/sql/driver"
 	"errors"
+	"regexp"
+	"testing"
+	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jmoiron/sqlx"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
+	sqlmock "github.com/zhashkevych/go-sqlxmock"
 )
 
 var BDError = errors.New("BD error")
 
+type typeQuery int64
+
+const (
+	Exec = iota
+	Query
+	TransBegin
+	TransCommit
+	TransRollback
+)
+
+const (
+	TransactionContext = "trans"
+)
+
+var (
+	//NotValidTestCase = errors.New("Not found transaction in context queries ")
+	UnknownQueryType = errors.New("Unknown query type, only can be: Exec, Query, TransBegin, TransRollback ")
+)
+
+type TestRowError struct {
+	Err error
+	Row int
+}
+
+type TestRow struct {
+	ReturnRows   *sqlmock.Rows
+	ReturnResult driver.Result
+	RowError     *TestRowError
+	RowClose     error
+}
+
+func (row *TestRow) addRow(expect *sqlmock.ExpectedQuery) {
+	if row.RowError == nil && row.RowClose == nil {
+		expect.WillReturnRows(row.ReturnRows)
+		return
+	}
+
+	if row.RowClose != nil {
+		expect.WillReturnRows(row.ReturnRows.CloseError(row.RowClose))
+		return
+	}
+
+	expect.WillReturnRows(row.ReturnRows.RowError(row.RowError.Row, row.RowError.Err))
+}
+
+type TestQuery struct {
+	Query   string
+	Err     error
+	Rows    *TestRow
+	Args    []driver.Value
+	RunType typeQuery
+}
+
+type TestExpected struct {
+	CheckError      bool // mean only check error without compare
+	HaveError       bool // in returning values end of values is error
+	ExpectedErr     error
+	ExpectedReturns []interface{}
+}
+
+type TestCase struct {
+	Name     string
+	Args     []interface{}
+	Queries  []TestQuery
+	RunFunc  func(...interface{}) []interface{}
+	Expected TestExpected
+}
+
 type Suite struct {
 	suite.Suite
-	DB   *sql.DB
+	DB   *sqlx.DB
 	Mock sqlmock.Sqlmock
+}
+
+func (s *Suite) transBeginQuery(_ context.Context, returnErr error) error {
+	s.Mock.ExpectBegin().WillReturnError(returnErr)
+	return nil
+}
+
+func (s *Suite) transRollbackQuery(_ context.Context, returnErr error) error {
+	s.Mock.ExpectRollback().WillReturnError(returnErr)
+	return nil
+}
+
+func (s *Suite) transCommitQuery(_ context.Context, returnErr error) error {
+	s.Mock.ExpectCommit().WillReturnError(returnErr)
+	return nil
+}
+
+func (s *Suite) execQuery(_ context.Context, query TestQuery) error {
+	exec := s.Mock.ExpectExec(regexp.QuoteMeta(query.Query)).WithArgs(query.Args...)
+
+	if query.Err != nil {
+		exec.WillReturnError(query.Err)
+	} else {
+		if query.Rows == nil || query.Rows.ReturnResult == nil {
+			exec.WillReturnResult(driver.ResultNoRows)
+		} else {
+			exec.WillReturnResult(query.Rows.ReturnResult)
+		}
+	}
+	return nil
+}
+
+func (s *Suite) baseQuery(_ context.Context, query TestQuery) error {
+	exec := s.Mock.ExpectQuery(regexp.QuoteMeta(query.Query)).WithArgs(query.Args...)
+
+	if query.Err != nil {
+		exec.WillReturnError(query.Err)
+	} else {
+		query.Rows.addRow(exec)
+	}
+	return nil
+}
+
+func (s *Suite) runQuery(ctx context.Context, query TestQuery) error {
+	switch query.RunType {
+	case Exec:
+		return s.execQuery(ctx, query)
+	case Query:
+		return s.baseQuery(ctx, query)
+	case TransCommit:
+		return s.transCommitQuery(ctx, query.Err)
+	case TransRollback:
+		return s.transRollbackQuery(ctx, query.Err)
+	case TransBegin:
+		return s.transBeginQuery(ctx, query.Err)
+	default:
+		return UnknownQueryType
+	}
+}
+
+func (s *Suite) checkExpected(res []interface{}, expected TestExpected, caseName string) {
+	if expected.HaveError {
+		size := len(res)
+		require.NotZerof(s.T(), size, "Testcase with name: %s, return nothing, but wait return error", caseName)
+		gottedError, ok := res[size-1].(error)
+		if !ok && gottedError != nil {
+			require.Failf(s.T(), "Last value not error, but expected error",
+				"Testcase with name: %s", caseName)
+		}
+
+		if expected.CheckError {
+			assert.Error(s.T(), gottedError, "Testcase with name: %s", caseName)
+		} else {
+			if expected.ExpectedErr == nil {
+				assert.NoError(s.T(), gottedError,
+					"Testcase with name: %s", caseName)
+			} else {
+				assert.EqualError(s.T(), gottedError, expected.ExpectedErr.Error(),
+					"Testcase with name: %s", caseName)
+			}
+		}
+		res = res[:size-1]
+	}
+
+	require.Equalf(s.T(), len(res), len(expected.ExpectedReturns),
+		"Testcase with name: %s, different len of expected and gotten return values", caseName)
+
+	for i, expected := range expected.ExpectedReturns {
+		assert.Equalf(s.T(), expected, res[i], "Testcase with name: %s", caseName)
+	}
+}
+
+func (s *Suite) RunTestCase(test TestCase) {
+	defer func(t *testing.T) {
+		if r := recover(); r != nil {
+			assert.Failf(t, "Error testcase: ", "%s %s", test.Name, r.(error).Error())
+		}
+	}(s.T())
+
+	ctx := context.Background()
+	for _, query := range test.Queries {
+		err := s.runQuery(ctx, query)
+		require.NoErrorf(s.T(), err, "Testcase with name: %s", test.Name)
+	}
+	res := test.RunFunc(test.Args...)
+
+	s.checkExpected(res, test.Expected, test.Name)
+
 }
 
 func (s *Suite) InitBD() {
 	s.T().Helper()
 
 	var err error
-	s.DB, s.Mock, err = sqlmock.New()
+	s.DB, s.Mock, err = sqlmock.Newx()
 	if err != nil {
 		s.T().Fatal(err)
 	}
@@ -64,6 +248,16 @@ func TestCreator() *Creator {
 	}
 }
 
+func TestCreatorWithAwards() *CreatorWithAwards {
+	return &CreatorWithAwards{
+		ID:          1,
+		Nickname:    "doggy2005",
+		Category:    "podcasts",
+		Description: "i love podcasts",
+		AwardsId:    1,
+	}
+}
+
 func TestCreatorSubscriber() *CreatorSubscribe {
 	return &CreatorSubscribe{
 		ID:          1,
@@ -98,6 +292,16 @@ func TestSubscriber() *Subscriber {
 		UserID:    1,
 		CreatorID: 2,
 		AwardID:   3,
+	}
+
+}
+func TestCreatorSubscribe() *CreatorSubscribe {
+	return &CreatorSubscribe{
+		ID:          1,
+		Category:    "cat",
+		Nickname:    "nick",
+		Description: "desc",
+		AwardsId:    2,
 	}
 
 }
@@ -136,11 +340,29 @@ func TestCreatePost() *CreatePost {
 		CreatorId:   1,
 	}
 }
-func TestPostData() *PostData {
-	return &PostData{
+func TestAttachWithoutLevel() *AttachWithoutLevel {
+	return &AttachWithoutLevel{
 		ID:     1,
 		PostId: 1,
-		Data:   "jfnagd",
+		Value:  "jfnagd",
 		Type:   Image,
+	}
+}
+
+func TestPayment() *Payments {
+	return &Payments{
+		Amount:    100,
+		Date:      time.Now(),
+		CreatorID: 1,
+		UserID:    11,
+	}
+}
+
+func TestAttach() *Attach {
+	return &Attach{
+		Id:    1,
+		Level: 1,
+		Value: "jfnagd",
+		Type:  Image,
 	}
 }

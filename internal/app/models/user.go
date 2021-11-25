@@ -6,8 +6,19 @@ import (
 
 	"github.com/pkg/errors"
 
+	models_utilits "patreon/internal/app/utilits/models"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	MIN_LOGIN_LENGTH    = 5
+	MAX_LOGIN_LENGTH    = 25
+	MIN_NICKNAME_LENGTH = 4
+	MAX_NICKNAME_LENGTH = 25
+	MIN_PASSWORD_LENGTH = 6
+	MAX_PASSWORD_LENGTH = 50
 )
 
 type Profile struct {
@@ -32,23 +43,25 @@ func (u *User) String() string {
 
 // Validate Errors:
 //		IncorrectEmailOrPassword
+//		IncorrectNickname
 // Important can return some other error
 func (u *User) Validate() error {
 	err := validation.Errors{
-		"login": validation.Validate(u.Login, validation.Required, validation.Length(5, 25)),
-		"password": validation.Validate(u.Password, validation.By(requiredIf(u.EncryptedPassword == "")),
-			validation.Length(6, 50)),
+		"login": validation.Validate(u.Login, validation.Required, validation.Length(MIN_LOGIN_LENGTH, MAX_LOGIN_LENGTH)),
+		"password": validation.Validate(u.Password, validation.By(models_utilits.RequiredIf(u.EncryptedPassword == "")),
+			validation.Length(MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)),
+		"nickname": validation.Validate(u.Nickname, validation.Required, validation.Length(MIN_NICKNAME_LENGTH, MAX_NICKNAME_LENGTH)),
 	}.Filter()
 	if err == nil {
 		return nil
 	}
 
-	mapOfErr, knowError := parseErrorToMap(err)
+	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(err, "failed error getting in validate user")
 	}
 
-	if knowError = extractValidateError(userValidError(), mapOfErr); knowError != nil {
+	if knowError = models_utilits.ExtractValidateError(userValidError(), mapOfErr); knowError != nil {
 		return knowError
 	}
 

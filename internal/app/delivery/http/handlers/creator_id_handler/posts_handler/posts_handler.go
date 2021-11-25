@@ -1,9 +1,7 @@
 package posts_handler
 
 import (
-	"fmt"
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -12,9 +10,10 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	db_models "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
+	"strconv"
 
 	"github.com/microcosm-cc/bluemonday"
 
@@ -27,13 +26,13 @@ type PostsHandler struct {
 	bh.BaseHandler
 }
 
-func NewPostsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	ucPosts usePosts.Usecase, manager sessions.SessionsManager) *PostsHandler {
+func NewPostsHandler(log *logrus.Logger,
+	ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *PostsHandler {
 	h := &PostsHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		postsUsecase: ucPosts,
 	}
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 
 	h.AddMethod(http.MethodGet, h.GET)
 
@@ -45,60 +44,31 @@ func NewPostsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 	return h
 }
 
-// GETRedirect Posts
-// @Summary redirect to get post with default query
-// @Description redirect to get post with default query
-// @Produce json
-// @Success 308
-// @Router /creators/{:creator_id}/posts [GET]
-func (h *PostsHandler) redirect(w http.ResponseWriter, r *http.Request) {
-	redirectUrl := fmt.Sprintf("%s?page=1&limit=%d", r.RequestURI, usePosts.BaseLimit)
-	h.Log(r).Debugf("redirect to url: %s, with offest 0 and limit %d", redirectUrl, usePosts.BaseLimit)
-
-	http.Redirect(w, r, redirectUrl, http.StatusPermanentRedirect)
-}
-
 // GET Posts
 // @Summary get list of posts of some creator
+// @tags posts
 // @Description get list of posts which belongs the creator with limit and offset in query
 // @Produce json
-// @Success 201 {array} models.ResponsePost
+// @Success 201 {array} http_models.ResponsePost
 // @Param page query uint64 true "start page number of posts mutually exclusive with offset"
 // @Param offset query uint64 true "start number of posts mutually exclusive with page"
 // @Param limit query uint64 true "posts to return"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 400 {object} models.ErrResponse "invalid parameters in query"
-// @Failure 500 {object} models.ErrResponse "server error
+// @Param with-draft query bool false "if need add draft posts"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Router /creators/{:creator_id}/posts [GET]
 func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
-	var limit, offset, page int64
-	var ok bool
-
-	limit, ok = h.GetInt64FromQueries(w, r, "limit")
+	limit, offset, ok := h.GetPaginationFromQuery(w, r)
 	if !ok {
-		if limit == bh.EmptyQuery {
-			h.redirect(w, r)
-		}
 		return
 	}
 
-	offset, ok = h.GetInt64FromQueries(w, r, "offset")
-	if !ok {
-		if offset != bh.EmptyQuery {
-			return
-		}
-		page, ok = h.GetInt64FromQueries(w, r, "page")
-		if !ok {
-			if offset == bh.EmptyQuery {
-				h.redirect(w, r)
-			}
-			return
-		}
-		if page <= 0 {
-			page = 1
-		}
-		offset = (page - 1) * limit
+	var err error
+	var withDraft bool
+	if res := r.URL.Query().Get("with-draft"); res == "" {
+		withDraft = false
+	} else if withDraft, err = strconv.ParseBool(res); err != nil {
+		withDraft = true
 	}
 
 	if len(mux.Vars(r)) > 1 {
@@ -119,15 +89,16 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		userId = usePosts.EmptyUser
 	}
 
-	posts, err := h.postsUsecase.GetPosts(creatorId, userId, &db_models.Pagination{Limit: limit, Offset: offset})
+	posts, err := h.postsUsecase.GetPosts(creatorId, userId,
+		&db_models.Pagination{Limit: limit, Offset: offset}, withDraft)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsGET)
 		return
 	}
 
-	respondPosts := make([]models.ResponsePost, len(posts))
+	respondPosts := make([]http_models.ResponsePost, len(posts))
 	for i, ps := range posts {
-		respondPosts[i] = models.ToResponsePost(ps)
+		respondPosts[i] = http_models.ToResponsePost(ps)
 	}
 
 	h.Log(r).Debugf("get posts %v", respondPosts)
@@ -136,23 +107,19 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 // POST Create Posts
 // @Summary create posts
+// @tags posts
 // @Description create posts to creator with id from path
-// @Param post body models.RequestPosts true "Request body for posts"
+// @Param post body http_models.RequestPosts true "Request body for posts"
 // @Produce json
-// @Success 201 {object} models.IdResponse "id posts"
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 422 {object} models.ErrResponse "empty title"
-// @Failure 422 {object} models.ErrResponse "this creator id not know"
-// @Failure 422 {object} models.ErrResponse "this awards id not know"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 401 "User are not authorized"
+// @Success 201 {object} http_models.IdResponse "id posts"
+// @Failure 400 {object} http_models.ErrResponse "invalid body in request"
+// @Failure 422 {object} http_models.ErrResponse "this creator id not know", "this awards id not know", "empty title", "invalid parameters"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator", "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts [POST]
 func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestPosts{}
+	req := &http_models.RequestPosts{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
@@ -177,6 +144,7 @@ func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Description: req.Description,
 		Awards:      req.AwardsId,
 		CreatorId:   idInt,
+		IsDraft:     req.IsDraft,
 	}
 
 	postsId, err := h.postsUsecase.Create(aw)
@@ -185,5 +153,5 @@ func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, &models.IdResponse{ID: postsId})
+	h.Respond(w, r, http.StatusCreated, &http_models.IdResponse{ID: postsId})
 }

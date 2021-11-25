@@ -2,12 +2,14 @@ package middleware
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
+	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
+	"testing"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestUtilitiesMiddleware_CheckPanic(t *testing.T) {
@@ -17,7 +19,7 @@ func TestUtilitiesMiddleware_CheckPanic(t *testing.T) {
 	}(t)
 
 	log := &logrus.Logger{}
-	utilits := NewUtilitiesMiddleware(log)
+	utilits := NewUtilitiesMiddleware(log, prometheus_monitoring.NewPrometheusMetrics("TEST"))
 
 	b := bytes.Buffer{}
 	recorder := httptest.NewRecorder()
@@ -36,7 +38,7 @@ func TestUtilitiesMiddleware_UpgradeLogger(t *testing.T) {
 	}(t)
 
 	log := &logrus.Logger{}
-	utilits := NewUtilitiesMiddleware(log)
+	utilits := NewUtilitiesMiddleware(log, prometheus_monitoring.NewPrometheusMetrics("TEST"))
 
 	b := bytes.Buffer{}
 	recorder := httptest.NewRecorder()
@@ -51,9 +53,9 @@ func TestUtilitiesMiddleware_UpgradeLogger(t *testing.T) {
 		assert.Equal(t, entryParse.Data["urls"], r.URL)
 		assert.Equal(t, entryParse.Data["method"], r.Method)
 		assert.Equal(t, entryParse.Data["remote_addr"], r.RemoteAddr)
-		_, ok =  entryParse.Data["work_time"]
-		assert.True(t,ok)
-		_, ok =  entryParse.Data["req_id"]
-		assert.True(t,ok)
+		_, ok = entryParse.Data["work_time"]
+		assert.True(t, ok)
+		_, ok = entryParse.Data["req_id"]
+		assert.True(t, ok)
 	})).ServeHTTP(recorder, reader)
 }

@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app/models"
 )
 
+//go:generate mockgen -destination=mocks/mock_creator_repository.go -package=mock_repository -mock_names=Repository=CreatorRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	//		repository_postgresql.IncorrectCategory
@@ -16,11 +18,16 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	GetCreators() ([]models.Creator, error)
 
+	// SearchCreators Errors:
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	SearchCreators(pag *models.Pagination, searchString string, categories ...string) ([]models.Creator, error)
+
 	// GetCreator Errors:
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetCreator(int64) (*models.Creator, error)
+	GetCreator(creatorId int64, userId int64) (*models.CreatorWithAwards, error)
 
 	// ExistsCreator Errors:
 	// 		app.GeneralError with Errors:

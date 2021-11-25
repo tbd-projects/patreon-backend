@@ -1,26 +1,29 @@
 package usercase_user
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repoFiles "patreon/internal/app/repository/files"
 	repoUser "patreon/internal/app/repository/user"
+	usePosts "patreon/internal/app/usecase/posts"
+	"patreon/internal/microservices/files/delivery/grpc/client"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
 
 	"github.com/pkg/errors"
 )
 
 type UserUsecase struct {
 	repository     repoUser.Repository
-	repositoryFile repoFiles.Repository
+	repositoryFile client.FileServiceClient
 }
 
-func NewUserUsecase(repository repoUser.Repository, repositoryFile repoFiles.Repository) *UserUsecase {
+func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServiceClient) *UserUsecase {
 	return &UserUsecase{
 		repository:     repository,
-		repositoryFile: repositoryFile,
+		repositoryFile: fileClient,
 	}
 }
 
@@ -38,6 +41,7 @@ func (usecase *UserUsecase) GetProfile(userID int64) (*models.User, error) {
 
 // Create Errors:
 //		models.EmptyPassword
+//		models.IncorrectNickname
 // 		models.IncorrectEmailOrPassword
 //		repository_postgresql.LoginAlreadyExist
 //		repository_postgresql.NicknameAlreadyExist
@@ -55,7 +59,7 @@ func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
 	}
 
 	if err = user.Validate(); err != nil {
-		if errors.Is(err, models.IncorrectEmailOrPassword) {
+		if errors.Is(err, models.IncorrectEmailOrPassword) || errors.Is(err, models.IncorrectNickname) {
 			return -1, err
 		}
 		return -1, &app.GeneralError{
@@ -148,10 +152,11 @@ func (usecase *UserUsecase) UpdatePassword(userId int64, oldPassword, newPasswor
 // UpdateAvatar Errors:
 // 		app.GeneralError with Errors
 //			app.UnknownError
+//			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error {
-	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}
@@ -163,4 +168,48 @@ func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName
 		}
 	}
 	return nil
+}
+
+// UpdateNickname Errors:
+//		InvalidOldNickname
+//		repository.NotFound
+//		NicknameExists
+// 		app.GeneralError with Errors
+//			repository.DefaultErrDB
+func (usecase *UserUsecase) UpdateNickname(userID int64, oldNickname string, newNickname string) error {
+	u, err := usecase.repository.FindByNickname(oldNickname)
+	if err != nil {
+		return err
+	}
+	if u.ID != userID {
+		return InvalidOldNickname
+	}
+
+	_, err = usecase.repository.FindByNickname(newNickname)
+	if err == nil {
+		return NicknameExists
+	}
+	if err != repository.NotFound {
+		return err
+	}
+
+	if err = usecase.repository.UpdateNickname(oldNickname, newNickname); err != nil {
+		return err
+	}
+	return nil
+}
+
+// CheckAccessForAward Errors:
+// 		app.GeneralError with Errors
+//			repository.DefaultErrDBr
+func (usecase *UserUsecase) CheckAccessForAward(userID int64, awardsId int64, creatorId int64) (bool, error) {
+	if awardsId == repository.NoAwards || userID == creatorId {
+		return true, nil
+	}
+
+	if userID == usePosts.EmptyUser {
+		return false, nil
+	}
+
+	return usecase.repository.IsAllowedAward(userID, awardsId)
 }

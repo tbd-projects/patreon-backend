@@ -3,8 +3,10 @@ package usercase_user
 import (
 	"io"
 	"patreon/internal/app/models"
-	repoFiles "patreon/internal/app/repository/files"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
 )
+
+//go:generate mockgen -destination=mocks/mock_user_usecase.go -package=mock_usecase -mock_names=Usecase=UserUsecase . Usecase
 
 type Usecase interface {
 	// GetProfile Errors:
@@ -15,6 +17,7 @@ type Usecase interface {
 
 	// Create Errors:
 	//		models.EmptyPassword
+	//		models.IncorrectNickname
 	// 		models.IncorrectEmailOrPassword
 	//		repository_postgresql.LoginAlreadyExist
 	//		repository_postgresql.NicknameAlreadyExist
@@ -48,4 +51,17 @@ type Usecase interface {
 	//			repository_os.ErrorCreate
 	//   		repository_os.ErrorCopyFile
 	UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error
+
+	// UpdateNickname Errors:
+	//		InvalidOldNickname
+	//		repository.NotFound
+	//		NicknameExists
+	// 		app.GeneralError with Errors
+	//			app.UnknownError
+	UpdateNickname(userID int64, oldNickname string, newNickname string) error
+
+	// CheckAccessForAward Errors:
+	// 		app.GeneralError with Errors
+	//			repository.DefaultErrDBr
+	CheckAccessForAward(userID int64, awardsId int64, creatorId int64) (bool, error)
 }

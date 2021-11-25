@@ -29,7 +29,7 @@ type CreatorTestSuite struct {
 
 func (s *CreatorTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewCreatorHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockCreatorUsecase,
+	s.handler = NewCreatorHandler(s.Logger, s.MockSessionsManager, s.MockCreatorUsecase,
 		s.MockUserUsecase)
 }
 
@@ -41,7 +41,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {
 		ExpectedCode:      http.StatusInternalServerError,
 	}
 
-	reqBody := models.RequestCreator{
+	reqBody := http_models.RequestCreator{
 		Description: "description",
 		Category:    "category",
 	}
@@ -91,7 +91,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusInternalServerError,
 	}
-	reqBody := models.RequestCreator{
+	reqBody := http_models.RequestCreator{
 		Description: "description",
 		Category:    "category",
 	}
@@ -119,7 +119,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Create_Err() {
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
-	reqBody := models.RequestCreator{
+	reqBody := http_models.RequestCreator{
 		Description: "description",
 		Category:    "category",
 	}
@@ -151,7 +151,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Correct() {
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusCreated,
 	}
-	reqBody := models.RequestCreator{
+	reqBody := http_models.RequestCreator{
 		Description: "description",
 		Category:    "category",
 	}
@@ -181,11 +181,11 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Correct() {
 		Return(creator.ID, nil)
 	s.handler.POST(recorder, reader)
 	decoder := json.NewDecoder(recorder.Body)
-	var res interface{}
+	var res http_models.IdResponse
 	err = decoder.Decode(&res)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
-	assert.Equal(s.T(), int(userId), int(res.(float64)))
+	assert.Equal(s.T(), http_models.IdResponse{ID: userId}, res)
 
 }
 
@@ -233,13 +233,13 @@ func (s *CreatorTestSuite) TestCreatorHandler_GET_Correct() {
 		Return([]models_data.Creator{*s.Tb.Data.(*models_data.Creator)}, nil)
 	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
-	req := &[]models.ResponseCreator{}
+	req := &[]http_models.ResponseCreator{}
 	decoder := json.NewDecoder(recorder.Body)
 	err = decoder.Decode(req)
 	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), req, &[]models.ResponseCreator{
-		models.ToResponseCreator(*s.Tb.Data.(*models_data.Creator))})
+	assert.Equal(s.T(), req, &[]http_models.ResponseCreator{
+		http_models.ToResponseCreator(*s.Tb.Data.(*models_data.Creator))})
 }
 
 func (s *CreatorTestSuite) TestCreatorHandler_GET_EmptyCreators() {

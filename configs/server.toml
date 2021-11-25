@@ -10,14 +10,19 @@ bind_addr_http = ":80"
 domen = "api.pyaterochka-team.site"
 
 [local]
-database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
+database_url = "port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
+#database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
 session-redis_url = "redis://localhost:6379"
+access-redis_url = "redis://localhost:6379"
 
 [server]
 database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
 session-redis_url = "redis://session-redis/0"
 access-redis_url = "redis://access-redis/0"
 
+[microservice]
+session_url = "sessions-service:5001"
+files_url = "files-service:5002"
 
 [cors]
 headers = [
@@ -28,6 +33,7 @@ headers = [
 ]
 methods = ["GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"]
 urls = [
+    "http://pyaterochka-team.site", "https://pyaterochka-team.site",
    "http://dev.pyaterochka-team.site", "https://dev.pyaterochka-team.site",
    "http://localhost:3001", "http://localhost:8080", "https://patreon-dev.herokuapp.com",
     "https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",

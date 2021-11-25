@@ -2,6 +2,7 @@ package login_handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/delivery/http/models"
 	model_data "patreon/internal/app/models"
-	session_models "patreon/internal/app/sessions/models"
+	session_models "patreon/internal/microservices/auth/sessions/models"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -24,13 +25,13 @@ type LoginTestSuite struct {
 
 func (s *LoginTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	s.handler = NewLoginHandler(s.Logger, s.Router, s.Cors, s.MockSessionsManager, s.MockUserUsecase)
+	s.handler = NewLoginHandler(s.Logger, s.MockSessionsManager, s.MockUserUsecase)
 }
 
 func (s *LoginTestSuite) TestLoginHandler_POST_EmptyBody() {
 	s.Tb = handlers.TestTable{
 		Name:              "Empty body in request",
-		Data:              &models.RequestLogin{},
+		Data:              &http_models.RequestLogin{},
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
@@ -73,7 +74,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_InvalidBody() {
 func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
 	s.Tb = handlers.TestTable{
 		Name: "User not found in db",
-		Data: models.RequestLogin{
+		Data: http_models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
@@ -84,8 +85,8 @@ func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
 	recorder := httptest.NewRecorder()
 	expectedId := int64(-1)
 	s.MockUserUsecase.EXPECT().
-		Check(s.Tb.Data.(models.RequestLogin).Login,
-			s.Tb.Data.(models.RequestLogin).Password).
+		Check(s.Tb.Data.(http_models.RequestLogin).Login,
+			s.Tb.Data.(http_models.RequestLogin).Password).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(expectedId, model_data.IncorrectEmailOrPassword)
 
@@ -102,7 +103,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
 func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 	s.Tb = handlers.TestTable{
 		Name: "Create Session Error",
-		Data: models.RequestLogin{
+		Data: http_models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
@@ -113,19 +114,19 @@ func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 
 	user := model_data.User{
 		ID:       1,
-		Login:    s.Tb.Data.(models.RequestLogin).Login,
-		Password: s.Tb.Data.(models.RequestLogin).Password,
+		Login:    s.Tb.Data.(http_models.RequestLogin).Login,
+		Password: s.Tb.Data.(http_models.RequestLogin).Password,
 	}
 	err := user.Encrypt()
 	assert.NoError(s.T(), err)
 	s.MockUserUsecase.EXPECT().
-		Check(s.Tb.Data.(models.RequestLogin).Login,
-			s.Tb.Data.(models.RequestLogin).Password).
+		Check(s.Tb.Data.(http_models.RequestLogin).Login,
+			s.Tb.Data.(http_models.RequestLogin).Password).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(user.ID, nil)
 
 	s.MockSessionsManager.EXPECT().
-		Create(int64(user.ID)).
+		Create(context.Background(), int64(user.ID)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(session_models.Result{
 			UserID: -1,
@@ -145,7 +146,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 	s.Tb = handlers.TestTable{
 		Name: "Invalid body",
-		Data: models.RequestLogin{
+		Data: http_models.RequestLogin{
 			Login:    "dmitriy",
 			Password: "mail.ru",
 		},
@@ -156,19 +157,19 @@ func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 
 	user := model_data.User{
 		ID:       1,
-		Login:    s.Tb.Data.(models.RequestLogin).Login,
-		Password: s.Tb.Data.(models.RequestLogin).Password,
+		Login:    s.Tb.Data.(http_models.RequestLogin).Login,
+		Password: s.Tb.Data.(http_models.RequestLogin).Password,
 	}
 	err := user.Encrypt()
 	assert.NoError(s.T(), err)
 	s.MockUserUsecase.EXPECT().
-		Check(s.Tb.Data.(models.RequestLogin).Login,
-			s.Tb.Data.(models.RequestLogin).Password).
+		Check(s.Tb.Data.(http_models.RequestLogin).Login,
+			s.Tb.Data.(http_models.RequestLogin).Password).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(user.ID, nil)
 
 	s.MockSessionsManager.EXPECT().
-		Create(int64(user.ID)).
+		Create(context.Background(), int64(user.ID)).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(session_models.Result{UserID: 1, UniqID: "123"}, nil)
 

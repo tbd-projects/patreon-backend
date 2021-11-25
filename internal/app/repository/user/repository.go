@@ -4,6 +4,8 @@ import (
 	"patreon/internal/app/models"
 )
 
+//go:generate mockgen -destination=mocks/mock_user_repository.go -package=mock_repository -mock_names=Repository=UserRepository . Repository
+
 type Repository interface {
 	// Create Errors:
 	// 		LoginAlreadyExist
@@ -24,6 +26,12 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	FindByID(int64) (*models.User, error)
 
+	// FindByNickname Errors:
+	// 		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	FindByNickname(string) (*models.User, error)
+
 	// UpdatePassword Errors:
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
@@ -33,4 +41,14 @@ type Repository interface {
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	UpdateAvatar(id int64, newAvatar string) error
+
+	// UpdateNickname Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	UpdateNickname(oldNickname string, newNickname string) error
+
+	// IsAllowedAward Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	IsAllowedAward(userId int64, awardId int64) (bool, error)
 }

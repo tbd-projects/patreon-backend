@@ -4,6 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
+
+	"google.golang.org/grpc/connectivity"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	//_ "net/http/pprof"
 	"net/url"
 	"patreon/internal/app/delivery/http/handler_factory"
 	"patreon/internal/app/middleware"
@@ -42,19 +49,7 @@ func (s *Server) checkConnection() error {
 
 	s.logger.Info("Success check connection to sql db")
 
-	connSession, err := s.connections.SessionRedisPool.Dial()
-	if err != nil {
-		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
-	}
-
-	s.logger.Info("Success check connection to redis")
-
-	err = connSession.Close()
-	if err != nil {
-		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
-	}
-
-	connAccess, err := s.connections.SessionRedisPool.Dial()
+	connAccess, err := s.connections.AccessRedisPool.Dial()
 	if err != nil {
 		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
 	}
@@ -66,11 +61,16 @@ func (s *Server) checkConnection() error {
 		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
 	}
 
+	state := s.connections.SessionGrpcConnection.GetState()
+	if state != connectivity.Ready {
+		return fmt.Errorf("Session connection not ready, status is: %s ", state)
+	}
+
 	return nil
 }
 
 //return http[0] and https[1] servers
-func makingHTTPSServerWithRedirect(config *app.Config, router *mux.Router) (*http.Server, *http.Server) {
+func makingHTTPSServerWithRedirect(config *app.Config, router http.Handler) (*http.Server, *http.Server) {
 	serverHTTP := &http.Server{
 		Addr: config.BindHttpAddr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -122,25 +122,43 @@ func (s *Server) Start(config *app.Config) error {
 	}
 
 	router := mux.NewRouter()
+	router.Handle("/metrics", promhttp.Handler())
+	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("main")
+	err := monitoringHandler.SetupMonitoring()
+	if err != nil {
+		return err
+	}
+
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 	routerApi.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
+	//routerApi.HandleFunc("/debug/pprof/", pprof.Index)
+	//routerApi.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	//routerApi.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	//routerApi.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	//routerApi.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
 	fileServer := http.FileServer(http.Dir(config.MediaDir + "/"))
 	routerApi.PathPrefix("/" + app.LoadFileUrl).Handler(http.StripPrefix("/api/v1/"+app.LoadFileUrl, fileServer))
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
-	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory)
-	factory := handler_factory.NewFactory(s.logger, router, &config.Cors, usecaseFactory)
+
+	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory, s.connections.FilesGrpcConnection)
+	factory := handler_factory.NewFactory(s.logger, usecaseFactory, s.connections.SessionGrpcConnection)
 	hs := factory.GetHandleUrls()
 
 	for apiUrl, h := range *hs {
 		h.Connect(routerApi.Path(apiUrl))
 	}
+	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)
 	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
-	routerApi.Use(ddosMiddleware.CheckAccess)
+	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger, ddosMiddleware.CheckAccess)
+
+	cors := middleware.NewCorsMiddleware(&config.Cors, router)
+	routerCors := cors.SetCors(router)
 
 	if config.IsHTTPSServer {
-		serverHTTP, serverHTTPS := makingHTTPSServerWithRedirect(config, routerApi)
+		serverHTTP, serverHTTPS := makingHTTPSServerWithRedirect(config, routerCors)
 
 		go func(logger *log.Logger, server *http.Server) {
 			logger.Info("Start http server")
@@ -154,6 +172,6 @@ func (s *Server) Start(config *app.Config) error {
 		return serverHTTPS.ListenAndServeTLS("", "")
 	} else {
 		s.logger.Info("start no production http server")
-		return http.ListenAndServe(config.BindHttpAddr, routerApi)
+		return http.ListenAndServe(config.BindHttpAddr, routerCors)
 	}
 }

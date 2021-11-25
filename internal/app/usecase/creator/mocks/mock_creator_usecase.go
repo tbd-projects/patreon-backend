@@ -7,7 +7,7 @@ package mock_usecase
 import (
 	io "io"
 	models "patreon/internal/app/models"
-	repository_files "patreon/internal/app/repository/files"
+	repository_files "patreon/internal/microservices/files/files/repository/files"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -52,18 +52,18 @@ func (mr *CreatorUsecaseMockRecorder) Create(arg0 interface{}) *gomock.Call {
 }
 
 // GetCreator mocks base method.
-func (m *CreatorUsecase) GetCreator(arg0 int64) (*models.Creator, error) {
+func (m *CreatorUsecase) GetCreator(arg0, arg1 int64) (*models.CreatorWithAwards, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCreator", arg0)
-	ret0, _ := ret[0].(*models.Creator)
+	ret := m.ctrl.Call(m, "GetCreator", arg0, arg1)
+	ret0, _ := ret[0].(*models.CreatorWithAwards)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetCreator indicates an expected call of GetCreator.
-func (mr *CreatorUsecaseMockRecorder) GetCreator(arg0 interface{}) *gomock.Call {
+func (mr *CreatorUsecaseMockRecorder) GetCreator(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreator", reflect.TypeOf((*CreatorUsecase)(nil).GetCreator), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreator", reflect.TypeOf((*CreatorUsecase)(nil).GetCreator), arg0, arg1)
 }
 
 // GetCreators mocks base method.
@@ -79,6 +79,26 @@ func (m *CreatorUsecase) GetCreators() ([]models.Creator, error) {
 func (mr *CreatorUsecaseMockRecorder) GetCreators() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreators", reflect.TypeOf((*CreatorUsecase)(nil).GetCreators))
+}
+
+// SearchCreators mocks base method.
+func (m *CreatorUsecase) SearchCreators(arg0 *models.Pagination, arg1 string, arg2 ...string) ([]models.Creator, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SearchCreators", varargs...)
+	ret0, _ := ret[0].([]models.Creator)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchCreators indicates an expected call of SearchCreators.
+func (mr *CreatorUsecaseMockRecorder) SearchCreators(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchCreators", reflect.TypeOf((*CreatorUsecase)(nil).SearchCreators), varargs...)
 }
 
 // UpdateAvatar mocks base method.

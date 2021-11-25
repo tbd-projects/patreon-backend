@@ -2,42 +2,41 @@ package csrf_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	models_respond "patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
-
-	"github.com/gorilla/mux"
+	"patreon/internal/app/delivery/http/models"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )
 
 type CsrfHandler struct {
-	csrfUsecase    usecase_csrf.Usecase
-	sessionManager sessions.SessionsManager
+	csrfUsecase   usecase_csrf.Usecase
+	sessionClient session_client.AuthCheckerClient
 	bh.BaseHandler
 }
 
-func NewCsrfHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewCsrfHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
 	uc usecase_csrf.Usecase) *CsrfHandler {
 	h := &CsrfHandler{
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
-		sessionManager: sManager,
-		csrfUsecase:    uc,
+		BaseHandler:   *bh.NewBaseHandler(log),
+		sessionClient: sClient,
+		csrfUsecase:   uc,
 	}
-	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(sManager, log).CheckFunc)
+	h.AddMethod(http.MethodGet, h.GET, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc)
 	return h
 }
 
 // GET CSRF Token
+// @tags utilities
 // @Summary get CSRF Token
 // @Description generate usecase token and return to client
 // @Produce json
-// @Success 200 {object} models_respond.TokenResponse
-// @Failure 500 {object} models.ErrResponse "server error"
+// @Success 200 {object} http_models.TokenResponse
+// @Failure 500 {object} http_models.ErrResponse "server error"
+// @Failure 401 "user are not authorized"
 // @Router /token [GET]
 func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
 	sessionId, ok := r.Context().Value("session_id").(string)
@@ -59,5 +58,5 @@ func (h *CsrfHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.Log(r).Debugf("get token %v", token)
-	h.Respond(w, r, http.StatusOK, models_respond.TokenResponse{Token: token})
+	h.Respond(w, r, http.StatusOK, http_models.TokenResponse{Token: token})
 }

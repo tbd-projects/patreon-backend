@@ -78,6 +78,36 @@ func (mr *UserRepositoryMockRecorder) FindByLogin(arg0 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByLogin", reflect.TypeOf((*UserRepository)(nil).FindByLogin), arg0)
 }
 
+// FindByNickname mocks base method.
+func (m *UserRepository) FindByNickname(arg0 string) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByNickname", arg0)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByNickname indicates an expected call of FindByNickname.
+func (mr *UserRepositoryMockRecorder) FindByNickname(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByNickname", reflect.TypeOf((*UserRepository)(nil).FindByNickname), arg0)
+}
+
+// IsAllowedAward mocks base method.
+func (m *UserRepository) IsAllowedAward(arg0, arg1 int64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsAllowedAward", arg0, arg1)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsAllowedAward indicates an expected call of IsAllowedAward.
+func (mr *UserRepositoryMockRecorder) IsAllowedAward(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAllowedAward", reflect.TypeOf((*UserRepository)(nil).IsAllowedAward), arg0, arg1)
+}
+
 // UpdateAvatar mocks base method.
 func (m *UserRepository) UpdateAvatar(arg0 int64, arg1 string) error {
 	m.ctrl.T.Helper()
@@ -90,6 +120,20 @@ func (m *UserRepository) UpdateAvatar(arg0 int64, arg1 string) error {
 func (mr *UserRepositoryMockRecorder) UpdateAvatar(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAvatar", reflect.TypeOf((*UserRepository)(nil).UpdateAvatar), arg0, arg1)
+}
+
+// UpdateNickname mocks base method.
+func (m *UserRepository) UpdateNickname(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNickname", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateNickname indicates an expected call of UpdateNickname.
+func (mr *UserRepositoryMockRecorder) UpdateNickname(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNickname", reflect.TypeOf((*UserRepository)(nil).UpdateNickname), arg0, arg1)
 }
 
 // UpdatePassword mocks base method.

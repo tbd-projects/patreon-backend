@@ -1,4 +1,4 @@
-package models
+package csrf_models
 
 import (
 	"time"

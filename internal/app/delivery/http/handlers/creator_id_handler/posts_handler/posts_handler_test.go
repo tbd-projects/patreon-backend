@@ -11,7 +11,7 @@ type PostsTestSuite struct {
 
 func (s *PostsTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
-	//s.handler = NewPostsHandler(s.Logger, s.Router, s.Cors, s.MockAwardsUsecase, s.MockSessionsManager)
+	//s.handler = NewPostsHandler(s.Logger, s.MockAwardsUsecase, s.MockSessionsManager)
 }
 
 /*

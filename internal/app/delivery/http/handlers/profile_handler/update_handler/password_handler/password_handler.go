@@ -10,30 +10,29 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/microcosm-cc/bluemonday"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
 type UpdatePasswordHandler struct {
-	sessionManager sessions.SessionsManager
-	userUsecase    usecase_user.Usecase
+	sessionClient session_client.AuthCheckerClient
+	userUsecase   usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	sManager sessions.SessionsManager, ucUser usecase_user.Usecase) *UpdatePasswordHandler {
+func NewUpdatePasswordHandler(log *logrus.Logger,
+	sClient session_client.AuthCheckerClient, ucUser usecase_user.Usecase) *UpdatePasswordHandler {
 	h := &UpdatePasswordHandler{
-		sessionManager: sManager,
-		userUsecase:    ucUser,
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		sessionClient: sClient,
+		userUsecase:   ucUser,
+		BaseHandler:   *bh.NewBaseHandler(log),
 	}
-	h.AddMiddleware(middleware.NewSessionMiddleware(h.sessionManager, log).Check)
+	h.AddMiddleware(session_middleware.NewSessionMiddleware(h.sessionClient, log).Check)
 
 	h.AddMethod(http.MethodPut, h.PUT,
 		csrf_middleware.NewCsrfMiddleware(log,
@@ -44,22 +43,21 @@ func NewUpdatePasswordHandler(log *logrus.Logger, router *mux.Router, cors *app.
 
 // PUT ChangePassword
 // @Summary set new user password
+// @tags user
 // @Description change password from user
 // @Accept  json
 // @Produce json
-// @Param password body models.RequestChangePassword true "Request body for change password"
+// @Param password body http_models.RequestChangePassword true "Request body for change password"
 // @Success 200 "success update password"
-// @Failure 400 {object} models.ErrResponse "incorrect new password"
-// @Failure 403 "csrf token is invalid, get new token"
-// @Failure 403 "incorrect email or password"
-// @Failure 404 {object} models.ErrResponse "User not found"
+// @Failure 409 {object} http_models.ErrResponse "incorrect new password"(mean old password equal new)
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token", "incorrect email or password"
+// @Failure 404 {object} http_models.ErrResponse "user not found"
 // @Failure 418 "User are authorized"
-// @Failure 422 {object} models.ErrResponse "Not valid body"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "database error"
+// @Failure 400 {object} http_models.ErrResponse "invalid body in request", "incorrect new password"
+// @Failure 500 {object} http_models.ErrResponse "server error", "can not do bd operation"
 // @Router /user/update/password [PUT]
 func (h *UpdatePasswordHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestChangePassword{}
+	req := &http_models.RequestChangePassword{}
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil || req.OldPassword == "" || req.NewPassword == "" {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)

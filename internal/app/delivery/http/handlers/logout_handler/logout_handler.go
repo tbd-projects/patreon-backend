@@ -1,32 +1,30 @@
 package logout_handler
 
 import (
+	"context"
 	"net/http"
-	"patreon/internal/app"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/sessions"
-	"patreon/internal/app/sessions/middleware"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 	"time"
-
-	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
 
 type LogoutHandler struct {
-	sessionManager sessions.SessionsManager
+	sessionClient session_client.AuthCheckerClient
 	bh.BaseHandler
 }
 
-func NewLogoutHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	sManager sessions.SessionsManager) *LogoutHandler {
+func NewLogoutHandler(log *logrus.Logger,
+	sManager session_client.AuthCheckerClient) *LogoutHandler {
 	h := &LogoutHandler{
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
-		sessionManager: sManager,
+		BaseHandler:   *bh.NewBaseHandler(log),
+		sessionClient: sManager,
 	}
 	h.AddMethod(http.MethodPost, h.POST,
-		middleware.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 
 	return h
@@ -35,10 +33,11 @@ func NewLogoutHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConf
 // POST Logout
 // @Summary logout user
 // @Description logout user
+// @tags user
 // @Accept  json
 // @Produce json
 // @Success 201 "Successfully logout"
-// @Failure 500 {object} models.ErrResponse "server error
+// @Failure 500 {object} http_models.ErrResponse "server error"
 // @Failure 401 "User not are authorized"
 // @Router /logout [POST]
 func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +50,7 @@ func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	h.Log(r).Debugf("Logout session: %s", uniqID)
 
-	err := h.sessionManager.Delete(uniqID.(string))
+	err := h.sessionClient.Delete(context.Background(), uniqID.(string))
 	if err != nil {
 		h.Log(r).Errorf("can not delete session %s", err)
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.DeleteCookieFail)

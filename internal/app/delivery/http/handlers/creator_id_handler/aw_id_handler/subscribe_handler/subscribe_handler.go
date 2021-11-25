@@ -2,7 +2,6 @@ package aw_subscribe_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -10,10 +9,10 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	middleSes "patreon/internal/app/sessions/middleware"
 	useAwards "patreon/internal/app/usecase/awards"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -25,18 +24,17 @@ type AwardsSubscribeHandler struct {
 	bh.BaseHandler
 }
 
-func NewAwardsSubscribeHandler(log *logrus.Logger, router *mux.Router,
-	cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewAwardsSubscribeHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
 	ucSubscribers usecase_subscribers.Usecase, ucAwards useAwards.Usecase) *AwardsSubscribeHandler {
 	h := &AwardsSubscribeHandler{
-		BaseHandler:       *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:       *bh.NewBaseHandler(log),
 		subscriberUsecase: ucSubscribers,
 	}
-	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(sManager, log).CheckFunc,
+	h.AddMethod(http.MethodPost, h.POST, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
 	)
-	h.AddMethod(http.MethodDelete, h.DELETE, middleSes.NewSessionMiddleware(sManager, log).CheckFunc,
+	h.AddMethod(http.MethodDelete, h.DELETE, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 		middleware.NewAwardsMiddleware(log, ucAwards).CheckCorrectAwardFunc,
 	)
@@ -46,18 +44,18 @@ func NewAwardsSubscribeHandler(log *logrus.Logger, router *mux.Router,
 
 // DELETE Unsubscribe
 // @Summary unsubscribe from the creator
+// @tags awards
 // @Description unsubscribe from the creator with id = creator_id and awards_id = award_id
 // @Produce json
 // @Param award_id path int true "award_id"
 // @Param creator_id path int true "creator_id"
 // @Success 200 "Successfully unsubscribe on the creator with id = creator_id"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 403 {object} models.ErrResponse "invalid csrf token"
-// @Failure 403 {object} models.ErrResponse "incorrect award for creator"
-// @Failure 404 {object} models.ErrResponse "award with this id not found"
-// @Failure 401 {object} models.ErrResponse "User are not authorized"
-// @Failure 409 {object} models.ErrResponse "this user is not subscribed on the creator"
-// @Failure 500 {object} models.ErrResponse "serverError"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 404 {object} http_models.ErrResponse "award with this id not found"
+// @Failure 409 {object} http_models.ErrResponse "subscribes on the creator not found"
+// @Failure 500 {object} http_models.ErrResponse "server error", "can not do bd operation"
+// @Failure 403 {object} http_models.ErrResponse "this awards not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/subscribe [DELETE]
 func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id")
@@ -89,18 +87,19 @@ func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) 
 
 // POST Subscribe
 // @Summary subscribes on the creator
+// @tags awards
 // @Description subscribes on the creator with id = creator_id
 // @Accept json
 // @Produce json
 // @Param award_id path int true "award_id"
 // @Param creator_id path int true "creator_id"
 // @Success 201 "Successfully subscribe on the creator with id = creator_id"
-// @Failure 400 {object} models.ErrResponse "invalid parameters - creator_id"
-// @Failure 401 {object} models.ErrResponse "User are not authorized"
-// @Failure 403 {object} models.ErrResponse "invalid csrf token"
-// @Failure 403 {object} models.ErrResponse "incorrect award for creator"
-// @Failure 409 {object} models.ErrResponse "this user already subscribed on the creator"
-// @Failure 500 {object} models.ErrResponse "serverError"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 409 {object} http_models.ErrResponse "this user already have subscribe on creator"
+// @Failure 404 {object} http_models.ErrResponse "award with this id not found"
+// @Failure 500 {object} http_models.ErrResponse "server error", "can not do bd operation"
+// @Failure 403 {object} http_models.ErrResponse "this awards not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/subscribe [POST]
 func (h *AwardsSubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 	//req := &responseModels.SubscribeRequest{}

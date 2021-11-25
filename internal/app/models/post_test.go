@@ -67,32 +67,32 @@ func TestCreatePost_Validate_OK(t *testing.T) {
 	assert.NoError(t, res)
 }
 
-func TestPostData_ValidateIncorrectPostId(t *testing.T) {
-	post := TestPostData()
+func TestAttachWithoutLevel_ValidateIncorrectPostId(t *testing.T) {
+	post := TestAttachWithoutLevel()
 	post.PostId = -1
 	expErr := InvalidPostId
 
 	res := post.Validate()
 	assert.Equal(t, expErr, res)
 }
-func TestPostData_ValidateIncorrectPostDataType(t *testing.T) {
-	post := TestPostData()
+func TestAttachWithoutLevel_ValidateIncorrectAttachWithoutLevelType(t *testing.T) {
+	post := TestAttachWithoutLevel()
 	post.Type = "invalid"
 	expErr := InvalidType
 
 	res := post.Validate()
 	assert.Equal(t, expErr, res)
 }
-func TestPostData_ValidateIncorrectPostDataCombination(t *testing.T) {
-	post := TestPostData()
+func TestAttachWithoutLevel_ValidateIncorrectAttachWithoutLevelCombination(t *testing.T) {
+	post := TestAttachWithoutLevel()
 	post.Type = "invalid"
 	post.PostId = -2
 
 	res := post.Validate()
 	assert.True(t, res == InvalidPostId || res == InvalidType)
 }
-func TestPostData_ValidateIncorrectPostDataOk(t *testing.T) {
-	post := TestPostData()
+func TestAttachWithoutLevel_ValidateIncorrectAttachWithoutLevelOk(t *testing.T) {
+	post := TestAttachWithoutLevel()
 	res := post.Validate()
 	assert.NoError(t, res)
 }

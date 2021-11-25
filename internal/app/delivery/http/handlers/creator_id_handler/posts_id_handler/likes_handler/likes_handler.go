@@ -2,19 +2,18 @@ package likes_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	response_models "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
 	useLikes "patreon/internal/app/usecase/likes"
 	usePosts "patreon/internal/app/usecase/posts"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -25,14 +24,14 @@ type LikesHandler struct {
 	bh.BaseHandler
 }
 
-func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, manager sessions.SessionsManager) *LikesHandler {
+func NewLikesHandler(log *logrus.Logger,
+	ucLikes useLikes.Usecase, ucPosts usePosts.Usecase, sClient session_client.AuthCheckerClient) *LikesHandler {
 	h := &LikesHandler{
-		BaseHandler:  *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:  *bh.NewBaseHandler(log),
 		likesUsecase: ucLikes,
 	}
 	postsMiddleware := middleware.NewPostsMiddleware(log, ucPosts)
-	sessionMiddleware := sessionMid.NewSessionMiddleware(manager, log)
+	sessionMiddleware := session_middleware.NewSessionMiddleware(sClient, log)
 	h.AddMiddleware(sessionMiddleware.Check, postsMiddleware.CheckCorrectPost)
 
 	h.AddMethod(http.MethodDelete, h.DELETE,
@@ -47,16 +46,15 @@ func NewLikesHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfi
 
 // DELETE Likes
 // @Summary deletes like from the post and return new count of likes
+// @tags posts
 // @Description deletes like form post id in url
 // @Produce json
-// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 404 {object} models.ErrResponse "like with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 409 {object} models.ErrResponse "this user not have like for this post"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
+// @Success 200 {object} http_models.ResponseLike "current count of likes on post"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 409 {object} http_models.ErrResponse "this user not have like for this post"
+// @Failure 403 {object} http_models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [DELETE]
 func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 	var postsId, userId int64
@@ -84,21 +82,20 @@ func (h *LikesHandler) DELETE(w http.ResponseWriter, r *http.Request) {
 		h.UsecaseError(w, r, err, codesByErrorsDELETE)
 		return
 	}
-	h.Respond(w, r, http.StatusOK, response_models.ResponseLike{Likes: res})
+	h.Respond(w, r, http.StatusOK, http_models.ResponseLike{Likes: res})
 }
 
 // PUT Likes
 // @Summary add like on the post
+// @tags posts
 // @Description add like on the post with id = post_id and return new count of likes
 // @Produce json
-// @Success 200 {object} response_models.ResponseLike "current count of likes on post"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 404 {object} models.ErrResponse "like with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 409 {object} models.ErrResponse "this user already add like for this post"
-// @Failure 403 {object} models.ErrResponse "this post not belongs this creators"
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
+// @Success 200 {object} http_models.ResponseLike "current count of likes on post"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 409 {object} http_models.ErrResponse "this user already add like for this post"
+// @Failure 403 {object} http_models.ErrResponse "this post not belongs this creators", "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/posts/{:post_id}/like [PUT]
 func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	var postsId, userId int64
@@ -127,5 +124,5 @@ func (h *LikesHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusOK, response_models.ResponseLike{Likes: res})
+	h.Respond(w, r, http.StatusOK, http_models.ResponseLike{Likes: res})
 }

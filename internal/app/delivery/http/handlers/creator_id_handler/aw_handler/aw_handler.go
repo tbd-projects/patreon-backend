@@ -3,7 +3,6 @@ package aw_handler
 import (
 	"image/color"
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -12,8 +11,8 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	db_models "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	sessionMid "patreon/internal/app/sessions/middleware"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -27,14 +26,14 @@ type AwardsHandler struct {
 	bh.BaseHandler
 }
 
-func NewAwardsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig,
-	ucAwards useAwards.Usecase, manager sessions.SessionsManager) *AwardsHandler {
+func NewAwardsHandler(log *logrus.Logger,
+	ucAwards useAwards.Usecase, sClient session_client.AuthCheckerClient) *AwardsHandler {
 	h := &AwardsHandler{
-		BaseHandler:   *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:   *bh.NewBaseHandler(log),
 		awardsUsecase: ucAwards,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodPost, h.POST, sessionMid.NewSessionMiddleware(manager, log).CheckFunc,
+	h.AddMethod(http.MethodPost, h.POST, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		middleware.NewCreatorsMiddleware(log).CheckAllowUserFunc,
 		csrf_middleware.NewCsrfMiddleware(log,
 			usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc)
@@ -44,11 +43,12 @@ func NewAwardsHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConf
 
 // GET Awards
 // @Summary get list of awards of some creator
+// @tags awards
 // @Description get list of awards which belongs the creator
 // @Produce json
-// @Success 201 {array} models.ResponseAward
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
+// @Success 201 {array} http_models.ResponseAward
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Router /creators/{:creator_id}/awards [GET]
 func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	idInt, ok := h.GetInt64FromParam(w, r, "creator_id")
@@ -68,9 +68,9 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondAwards := make([]models.ResponseAward, len(awards))
+	respondAwards := make([]http_models.ResponseAward, len(awards))
 	for i, aw := range awards {
-		respondAwards[i] = models.ToResponseAward(aw)
+		respondAwards[i] = http_models.ToResponseAward(aw)
 	}
 
 	h.Log(r).Debugf("get creators %v", respondAwards)
@@ -79,22 +79,20 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 // POST Create Awards
 // @Summary create awards
+// @tags awards
 // @Description create awards to creator with id from path
-// @Param award body models.RequestAwards true "Request body for awards"
+// @Param award body http_models.RequestAwards true "Request body for awards"
 // @Produce json
-// @Success 201 {object} models.IdResponse "id awards"
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 400 {object} models.ErrResponse "invalid parameters"
-// @Failure 422 {object} models.ErrResponse "empty name in request"
-// @Failure 422 {object} models.ErrResponse "incorrect value of price"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 403 {object} models.ErrResponse "for this user forbidden change creator"
-// @Failure 401 "User are not authorized"
+// @Success 201 {object} http_models.IdResponse "id awards"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 422 {object} http_models.ErrResponse "empty name in request", "incorrect value of price", "invalid body in request"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 409 {object} http_models.ErrResponse "awards with this price already exists", "awards with this name already exists"
+// @Failure 403 {object} http_models.ErrResponse "for this user forbidden change creator",  "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards [POST]
 func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestAwards{}
+	req := &http_models.RequestAwards{}
 
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
@@ -127,5 +125,5 @@ func (h *AwardsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, &models.IdResponse{ID: awardsId})
+	h.Respond(w, r, http.StatusCreated, &http_models.IdResponse{ID: awardsId})
 }

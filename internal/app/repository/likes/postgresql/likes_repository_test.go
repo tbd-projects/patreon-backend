@@ -17,7 +17,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/stretchr/testify/require"
 )

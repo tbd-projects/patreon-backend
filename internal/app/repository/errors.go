@@ -5,6 +5,10 @@ import (
 	"patreon/internal/app"
 )
 
+const (
+	NoAwards = -1
+)
+
 var (
 	DefaultErrDB = errors.New("something wrong DB")
 	NotFound     = errors.New("user not found")

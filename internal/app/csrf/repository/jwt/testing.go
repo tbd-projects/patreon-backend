@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-func TestSources(t *testing.T) *models.TokenSources {
+func TestSources(t *testing.T) *csrf_models.TokenSources {
 	t.Helper()
-	return &models.TokenSources{
+	return &csrf_models.TokenSources{
 		UserId:      1,
 		SessionId:   "session_id",
 		ExpiredTime: time.Now().Add(time.Minute),

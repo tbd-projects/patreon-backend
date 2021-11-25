@@ -1,25 +1,30 @@
 package usecase_creator
 
 import (
+	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	repoCreator "patreon/internal/app/repository/creator"
-	repoFiles "patreon/internal/app/repository/files"
+	"patreon/internal/microservices/files/delivery/grpc/client"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
+
+	"github.com/pkg/errors"
 )
+
+const NoUser int64 = -2
 
 type CreatorUsecase struct {
 	repository     repoCreator.Repository
-	repositoryFile repoFiles.Repository
+	repositoryFile client.FileServiceClient
 }
 
-func NewCreatorUsecase(repository repoCreator.Repository, repositoryFile repoFiles.Repository) *CreatorUsecase {
+func NewCreatorUsecase(repository repoCreator.Repository, repoClient client.FileServiceClient) *CreatorUsecase {
 	return &CreatorUsecase{
 		repository:     repository,
-		repositoryFile: repositoryFile,
+		repositoryFile: repoClient,
 	}
 }
 
@@ -63,12 +68,20 @@ func (usecase *CreatorUsecase) GetCreators() ([]models.Creator, error) {
 	return usecase.repository.GetCreators()
 }
 
+// SearchCreators Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *CreatorUsecase) SearchCreators(pag *models.Pagination,
+	searchString string, categories ...string) ([]models.Creator, error) {
+	return usecase.repository.SearchCreators(pag, searchString, categories...)
+}
+
 // GetCreator Errors:
 // 		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *CreatorUsecase) GetCreator(id int64) (*models.Creator, error) {
-	cr, err := usecase.repository.GetCreator(id)
+func (usecase *CreatorUsecase) GetCreator(id int64, userId int64) (*models.CreatorWithAwards, error) {
+	cr, err := usecase.repository.GetCreator(id, userId)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("creator with ID = %v not found", id))
 	}
@@ -87,7 +100,7 @@ func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileNa
 		return err
 	}
 
-	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}
@@ -110,7 +123,7 @@ func (usecase *CreatorUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileN
 		return err
 	}
 
-	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
+	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err
 	}

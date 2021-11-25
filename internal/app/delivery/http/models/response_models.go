@@ -1,19 +1,22 @@
-package models
+package http_models
 
 import (
 	"fmt"
 	"math"
-	models_csrf "patreon/internal/app/csrf/models"
+	"patreon/internal/app/csrf/models"
 	"patreon/internal/app/models"
 	"strconv"
 	"time"
 )
 
 type TokenResponse struct {
-	Token models_csrf.Token `json:"token"`
+	Token csrf_models.Token `json:"token"`
 }
 type ErrResponse struct {
 	Err string `json:"error"`
+}
+type OkResponse struct {
+	Ok string `json:"OK"`
 }
 
 type IdResponse struct {
@@ -28,8 +31,20 @@ type ProfileResponse struct {
 	HaveCreator bool   `json:"have_creator"`
 }
 
+type ResponseInfo struct {
+	models.Info
+}
+
+type ResponseCreatorWithAwards struct {
+	models.CreatorWithAwards
+}
+
 type ResponseCreator struct {
 	models.Creator
+}
+
+type ResponseCreators struct {
+	Creators []ResponseCreator `json:"creators"`
 }
 
 type ResponseCreatorSubscrube struct {
@@ -43,6 +58,7 @@ type ResponseAward struct {
 	Price       int64  `json:"price,omitempty"`
 	Color       Color  `json:"color,omitempty"`
 	Cover       string `json:"cover"`
+	ChildAward  int64  `json:"child_award,omitempty"`
 }
 
 type ResponsePost struct {
@@ -55,17 +71,22 @@ type ResponsePost struct {
 	AddLike     bool      `json:"add_like,omitempty"`
 	Views       int64     `json:"views"`
 	Date        time.Time `json:"date"`
+	IsDraft     bool      `json:"is_draft,omitempty"`
 }
 
-type ResponsePostData struct {
-	ID   int64  `json:"attach_id"`
-	Data string `json:"data"`
-	Type string `json:"type"`
+type ResponseAttach struct {
+	ID    int64  `json:"attach_id"`
+	Value string `json:"value"`
+	Type  string `json:"type"`
 }
 
-type ResponsePostWithData struct {
-	Post ResponsePost       `json:"post"`
-	Data []ResponsePostData `json:"attach"`
+type ResponseApplyAttach struct {
+	IDs []int64 `json:"attaches_id"`
+}
+
+type ResponsePostWithAttaches struct {
+	Post ResponsePost     `json:"post"`
+	Data []ResponseAttach `json:"attaches"`
 }
 type ResponseBalance struct {
 	ID      int64        `json:"user_id"`
@@ -88,6 +109,28 @@ func ToResponseCreator(cr models.Creator) ResponseCreator {
 	}
 }
 
+func ToResponseInfo(info models.Info) ResponseInfo {
+	return ResponseInfo{
+		info,
+	}
+}
+
+func ToResponseCreators(crs []models.Creator) ResponseCreators {
+	respondCreators := make([]ResponseCreator, len(crs))
+	for i, cr := range crs {
+		respondCreators[i] = ToResponseCreator(cr)
+	}
+	return ResponseCreators{respondCreators}
+}
+
+func ToResponseCreatorWithAwards(cr models.CreatorWithAwards) ResponseCreatorWithAwards {
+	res := ResponseCreatorWithAwards{
+		cr,
+	}
+	res.AwardsId = int64(math.Max(float64(res.AwardsId), 0))
+	return res
+}
+
 func ToResponseAward(aw models.Award) ResponseAward {
 	return ResponseAward{
 		ID:          aw.ID,
@@ -96,6 +139,7 @@ func ToResponseAward(aw models.Award) ResponseAward {
 		Description: aw.Description,
 		Color:       NewColor(aw.Color),
 		Cover:       aw.Cover,
+		ChildAward:  int64(math.Max(float64(aw.ChildAward), 0)),
 	}
 }
 
@@ -110,22 +154,23 @@ func ToResponsePost(ps models.Post) ResponsePost {
 		Cover:       ps.Cover,
 		AddLike:     ps.AddLike,
 		Views:       ps.Views,
+		IsDraft:     ps.IsDraft,
 	}
 }
 
-func ToResponsePostWithData(ps models.PostWithData) ResponsePostWithData {
-	res := ResponsePostWithData{Post: ToResponsePost(*ps.Post), Data: []ResponsePostData{}}
+func ToResponsePostWithAttaches(ps models.PostWithAttach) ResponsePostWithAttaches {
+	res := ResponsePostWithAttaches{Post: ToResponsePost(*ps.Post), Data: []ResponseAttach{}}
 	for _, data := range ps.Data {
-		res.Data = append(res.Data, ToResponsePostData(data))
+		res.Data = append(res.Data, ToResponseAttach(data))
 	}
 	return res
 }
 
-func ToResponsePostData(ps models.PostData) ResponsePostData {
-	return ResponsePostData{
-		ID:   ps.ID,
-		Data: ps.Data,
-		Type: string(ps.Type),
+func ToResponseAttach(ps models.AttachWithoutLevel) ResponseAttach {
+	return ResponseAttach{
+		ID:    ps.ID,
+		Value: ps.Value,
+		Type:  string(ps.Type),
 	}
 }
 
@@ -168,7 +213,7 @@ type SubscribersCreatorResponse struct {
 }
 
 func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorResponse {
-	res := make([]ResponseUser, 0, len(users))
+	res := make([]ResponseUser, len(users))
 	for i, user := range users {
 		res[i] = ResponseUser{
 			ID:       user.ID,
@@ -184,4 +229,27 @@ func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorRespons
 
 type ResponseLike struct {
 	Likes int64 `json:"likes"`
+}
+
+type ResponseUserPayments struct {
+	Payments []models.UserPayments `json:"payments"`
+}
+
+func ToResponseUserPayments(payments []models.UserPayments) ResponseUserPayments {
+	res := make([]models.UserPayments, 0, len(payments))
+	for _, payment := range payments {
+		res = append(res, models.UserPayments{
+			Payments: models.Payments{
+				Amount:    payment.Amount,
+				Date:      payment.Date,
+				CreatorID: payment.CreatorID,
+			},
+			CreatorNickname:    payment.CreatorNickname,
+			CreatorDescription: payment.CreatorDescription,
+			CreatorCategory:    payment.CreatorCategory,
+		})
+	}
+	return ResponseUserPayments{
+		Payments: res,
+	}
 }

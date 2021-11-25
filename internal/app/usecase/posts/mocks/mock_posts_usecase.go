@@ -7,7 +7,7 @@ package mock_usecase
 import (
 	io "io"
 	models "patreon/internal/app/models"
-	repository_files "patreon/internal/app/repository/files"
+	repository_files "patreon/internal/microservices/files/files/repository/files"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -81,10 +81,10 @@ func (mr *PostsUsecaseMockRecorder) GetCreatorId(arg0 interface{}) *gomock.Call 
 }
 
 // GetPost mocks base method.
-func (m *PostsUsecase) GetPost(arg0, arg1 int64, arg2 bool) (*models.PostWithData, error) {
+func (m *PostsUsecase) GetPost(arg0, arg1 int64, arg2 bool) (*models.PostWithAttach, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPost", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*models.PostWithData)
+	ret0, _ := ret[0].(*models.PostWithAttach)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -96,18 +96,18 @@ func (mr *PostsUsecaseMockRecorder) GetPost(arg0, arg1, arg2 interface{}) *gomoc
 }
 
 // GetPosts mocks base method.
-func (m *PostsUsecase) GetPosts(arg0, arg1 int64, arg2 *models.Pagination) ([]models.Post, error) {
+func (m *PostsUsecase) GetPosts(arg0, arg1 int64, arg2 *models.Pagination, arg3 bool) ([]models.Post, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPosts", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetPosts", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]models.Post)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetPosts indicates an expected call of GetPosts.
-func (mr *PostsUsecaseMockRecorder) GetPosts(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *PostsUsecaseMockRecorder) GetPosts(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPosts", reflect.TypeOf((*PostsUsecase)(nil).GetPosts), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPosts", reflect.TypeOf((*PostsUsecase)(nil).GetPosts), arg0, arg1, arg2, arg3)
 }
 
 // LoadCover mocks base method.

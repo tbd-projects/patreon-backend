@@ -2,7 +2,6 @@ package creator_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
@@ -10,35 +9,33 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/delivery/http/models"
 	db_models "patreon/internal/app/models"
-	"patreon/internal/app/sessions"
-	middleSes "patreon/internal/app/sessions/middleware"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_user "patreon/internal/app/usecase/user"
+	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	"patreon/internal/microservices/auth/sessions/middleware"
 
 	"github.com/microcosm-cc/bluemonday"
-
-	"github.com/gorilla/mux"
 
 	"github.com/sirupsen/logrus"
 )
 
 type CreatorHandler struct {
-	sessionManager sessions.SessionsManager
+	sessionClient  session_client.AuthCheckerClient
 	creatorUsecase usecase_creator.Usecase
 	userUsecase    usecase_user.Usecase
 	bh.BaseHandler
 }
 
-func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsConfig, sManager sessions.SessionsManager,
+func NewCreatorHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient,
 	ucCreator usecase_creator.Usecase, ucUser usecase_user.Usecase) *CreatorHandler {
 	h := &CreatorHandler{
-		BaseHandler:    *bh.NewBaseHandler(log, router, cors),
+		BaseHandler:    *bh.NewBaseHandler(log),
 		creatorUsecase: ucCreator,
-		sessionManager: sManager,
+		sessionClient:  sManager,
 		userUsecase:    ucUser,
 	}
 	h.AddMethod(http.MethodGet, h.GET)
-	h.AddMethod(http.MethodPost, h.POST, middleSes.NewSessionMiddleware(h.sessionManager, log).CheckFunc,
+	h.AddMethod(http.MethodPost, h.POST, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 	)
 	return h
@@ -48,9 +45,10 @@ func NewCreatorHandler(log *logrus.Logger, router *mux.Router, cors *app.CorsCon
 // @Summary get list of Creators
 // @Description get list of creators which register on service
 // @Produce json
-// @Success 201 {array} models.ResponseCreator
-// @Failure 403 "csrf token is invalid, get new token"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
+// @tags creators
+// @Success 201 {array} http_models.ResponseCreator
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
 // @Router /creators [GET]
 func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 	creators, err := h.creatorUsecase.GetCreators()
@@ -59,9 +57,9 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondCreators := make([]models.ResponseCreator, len(creators))
+	respondCreators := make([]http_models.ResponseCreator, len(creators))
 	for i, cr := range creators {
-		respondCreators[i] = models.ToResponseCreator(cr)
+		respondCreators[i] = http_models.ToResponseCreator(cr)
 	}
 
 	h.Log(r).Debugf("get creators %v", respondCreators)
@@ -71,22 +69,19 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 // POST Create Creator
 // @Summary create creator
 // @Description create creator with id from path, and respond created creator
-// @Param creator body models.RequestCreator true "Request body for creators"
+// @Param creator body http_models.RequestCreator true "Request body for creators"
 // @Produce json
-// @Success 201 {object} models.Creator
-// @Failure 422 {object} models.ErrResponse "invalid body in request"
-// @Failure 500 {object} models.ErrResponse "server error
-// @Failure 409 {object} models.ErrResponse "creator already exist"
-// @Failure 404 {object} models.ErrResponse "user with this id not found"
-// @Failure 500 {object} models.ErrResponse "can not do bd operation"
-// @Failure 500 {object} models.ErrResponse "server error"
-// @Failure 422 {object} models.ErrResponse "invalid creator category"
-// @Failure 422 {object} models.ErrResponse "invalid creator nickname"
-// @Failure 422 {object} models.ErrResponse "invalid creator category-description"
-// @Failure 401 "User are not authorized"
+// @tags creators
+// @Success 201 {object} http_models.IdResponse
+// @Failure 409 {object} http_models.ErrResponse "creator already exist"
+// @Failure 404 {object} http_models.ErrResponse "user with this id not found"
+// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
+// @Failure 422 {object} http_models.ErrResponse "invalid creator nickname", "invalid creator category-description", "invalid creator category", "invalid body in request"
+// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
+// @Failure 401 "user are not authorized"
 // @Router /creators [POST]
 func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
-	req := &models.RequestCreator{}
+	req := &http_models.RequestCreator{}
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
@@ -120,5 +115,5 @@ func (h *CreatorHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, creatorId)
+	h.Respond(w, r, http.StatusCreated, http_models.IdResponse{ID: creatorId})
 }

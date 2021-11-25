@@ -20,13 +20,13 @@ import (
 type SuiteCsrfUsecase struct {
 	suite.Suite
 	Mock               *gomock.Controller
-	MockCsrfRepository *mock_repository_jwt.MockRepository
+	MockCsrfRepository *mock_repository_jwt.JwtRepository
 	uc                 Usecase
 }
 
 func (s *SuiteCsrfUsecase) SetupSuite() {
 	s.Mock = gomock.NewController(s.T())
-	s.MockCsrfRepository = mock_repository_jwt.NewMockRepository(s.Mock)
+	s.MockCsrfRepository = mock_repository_jwt.NewJwtRepository(s.Mock)
 	s.uc = NewCsrfUsecase(s.MockCsrfRepository)
 }
 
@@ -35,10 +35,10 @@ func TestSuiteCsrfUsecase(t *testing.T) {
 }
 
 type SourcesWithMathcher struct {
-	sources *models.TokenSources
+	sources *csrf_models.TokenSources
 }
 
-func newSourcesWithMatcher(sources *models.TokenSources) gomock.Matcher {
+func newSourcesWithMatcher(sources *csrf_models.TokenSources) gomock.Matcher {
 	return &SourcesWithMathcher{sources: sources}
 
 }
@@ -49,9 +49,9 @@ func (match *SourcesWithMathcher) String() string {
 
 func (match *SourcesWithMathcher) Matches(x interface{}) bool {
 	switch x.(type) {
-	case models.TokenSources:
-		return x.(models.TokenSources).UserId == match.sources.UserId &&
-			x.(models.TokenSources).SessionId == match.sources.SessionId
+	case csrf_models.TokenSources:
+		return x.(csrf_models.TokenSources).UserId == match.sources.UserId &&
+			x.(csrf_models.TokenSources).SessionId == match.sources.SessionId
 	default:
 		return false
 	}
@@ -59,7 +59,7 @@ func (match *SourcesWithMathcher) Matches(x interface{}) bool {
 
 func (s *SuiteCsrfUsecase) TestCsrfUsecase_Create_Ok() {
 	sources := repository_jwt.TestSources(s.T())
-	exp := models.Token("token")
+	exp := csrf_models.Token("token")
 	s.MockCsrfRepository.EXPECT().
 		Create(newSourcesWithMatcher(sources)).
 		Times(1).
@@ -75,10 +75,10 @@ func (s *SuiteCsrfUsecase) TestCsrfUsecase_Create_ErrorRepository() {
 	s.MockCsrfRepository.EXPECT().
 		Create(newSourcesWithMatcher(sources)).
 		Times(1).
-		Return(models.Token(""), &app.GeneralError{Err: repository_jwt.ErrorSignedToken})
+		Return(csrf_models.Token(""), &app.GeneralError{Err: repository_jwt.ErrorSignedToken})
 
 	token, err := s.uc.Create(sources.SessionId, sources.UserId)
-	assert.Equal(s.T(), token, models.Token(""))
+	assert.Equal(s.T(), token, csrf_models.Token(""))
 	assert.Error(s.T(), err)
 	assert.Equal(s.T(), expErr, errors.Cause(err).(*app.GeneralError).Err)
 }
@@ -86,7 +86,7 @@ func (s *SuiteCsrfUsecase) TestCsrfUsecase_Check_Ok() {
 	sources := repository_jwt.TestSources(s.T())
 	token := "token"
 	s.MockCsrfRepository.EXPECT().
-		Check(newSourcesWithMatcher(sources), models.Token(token)).
+		Check(newSourcesWithMatcher(sources), csrf_models.Token(token)).
 		Times(1).
 		Return(nil)
 
@@ -98,7 +98,7 @@ func (s *SuiteCsrfUsecase) TestCsrfUsecase_Check_BadToken() {
 	expErr := repository_jwt.BadToken
 	token := "token"
 	s.MockCsrfRepository.EXPECT().
-		Check(newSourcesWithMatcher(sources), models.Token(token)).
+		Check(newSourcesWithMatcher(sources), csrf_models.Token(token)).
 		Times(1).
 		Return(&app.GeneralError{Err: repository_jwt.BadToken})
 
@@ -111,7 +111,7 @@ func (s *SuiteCsrfUsecase) TestCsrfUsecase_Check_TokenExpired() {
 	expErr := repository_jwt.TokenExpired
 	token := "token"
 	s.MockCsrfRepository.EXPECT().
-		Check(newSourcesWithMatcher(sources), models.Token(token)).
+		Check(newSourcesWithMatcher(sources), csrf_models.Token(token)).
 		Times(1).
 		Return(&app.GeneralError{Err: repository_jwt.TokenExpired})
 
@@ -124,7 +124,7 @@ func (s *SuiteCsrfUsecase) TestCsrfUsecase_Check_ParseTokenError() {
 	expErr := repository_jwt.ParseClaimsError
 	token := "token"
 	s.MockCsrfRepository.EXPECT().
-		Check(newSourcesWithMatcher(sources), models.Token(token)).
+		Check(newSourcesWithMatcher(sources), csrf_models.Token(token)).
 		Times(1).
 		Return(&app.GeneralError{Err: repository_jwt.ParseClaimsError})
 

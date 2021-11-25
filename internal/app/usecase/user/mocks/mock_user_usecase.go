@@ -7,7 +7,7 @@ package mock_usecase
 import (
 	io "io"
 	models "patreon/internal/app/models"
-	repository_files "patreon/internal/app/repository/files"
+	repository_files "patreon/internal/microservices/files/files/repository/files"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -49,6 +49,21 @@ func (m *UserUsecase) Check(arg0, arg1 string) (int64, error) {
 func (mr *UserUsecaseMockRecorder) Check(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check", reflect.TypeOf((*UserUsecase)(nil).Check), arg0, arg1)
+}
+
+// CheckAccessForAward mocks base method.
+func (m *UserUsecase) CheckAccessForAward(arg0, arg1, arg2 int64) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckAccessForAward", arg0, arg1, arg2)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckAccessForAward indicates an expected call of CheckAccessForAward.
+func (mr *UserUsecaseMockRecorder) CheckAccessForAward(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAccessForAward", reflect.TypeOf((*UserUsecase)(nil).CheckAccessForAward), arg0, arg1, arg2)
 }
 
 // Create mocks base method.
@@ -93,6 +108,20 @@ func (m *UserUsecase) UpdateAvatar(arg0 io.Reader, arg1 repository_files.FileNam
 func (mr *UserUsecaseMockRecorder) UpdateAvatar(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAvatar", reflect.TypeOf((*UserUsecase)(nil).UpdateAvatar), arg0, arg1, arg2)
+}
+
+// UpdateNickname mocks base method.
+func (m *UserUsecase) UpdateNickname(arg0 int64, arg1, arg2 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNickname", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateNickname indicates an expected call of UpdateNickname.
+func (mr *UserUsecaseMockRecorder) UpdateNickname(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNickname", reflect.TypeOf((*UserUsecase)(nil).UpdateNickname), arg0, arg1, arg2)
 }
 
 // UpdatePassword mocks base method.

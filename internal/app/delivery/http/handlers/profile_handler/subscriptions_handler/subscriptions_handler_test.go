@@ -11,7 +11,7 @@ type SubscriptionsTestSuite struct {
 
 //func (s *SubscriptionsTestSuite) SetupSuite() {
 //	s.SuiteHandler.SetupSuite()
-//	s.handler = NewSubscriptionsHandler(s.Logger, s.Router, s.Cors,
+//	s.handler = NewSubscriptionsHandler(s.Logger,
 //		s.MockSessionsManager, s.MockSubscribersUsecase)
 //}
 //func (s *SubscriptionsTestSuite) TestSubscriptionsHandler_GET_OK_NoOneCreators() {
