@@ -71,7 +71,7 @@ func (h *PostsUploadAudioHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_AUDIO_SIZE,
-		"audio", []string{"audio/ogg"})
+		"audio", []string{"audio/ogg", "video/ogg", "application/ogg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return
