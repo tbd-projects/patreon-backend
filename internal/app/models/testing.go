@@ -295,6 +295,16 @@ func TestSubscriber() *Subscriber {
 	}
 
 }
+func TestCreatorSubscribe() *CreatorSubscribe {
+	return &CreatorSubscribe{
+		ID:          1,
+		Category:    "cat",
+		Nickname:    "nick",
+		Description: "desc",
+		AwardsId:    2,
+	}
+
+}
 func TestAward() *Award {
 	return &Award{
 		ID:          1,

@@ -37,6 +37,7 @@ type SuiteUsecase struct {
 	MockAttachesRepository    *mock_repository_attaches.AttachesRepository
 	MockFileClient            *mock_files.MockFileServiceClient
 	MockConvector             *mock_utils.MockImageConverter
+	MockSubscriberRepository  *mock_repository_subscribers.SubscribersRepository
 	Logger                    *logrus.Logger
 	Tb                        TestTable
 }
