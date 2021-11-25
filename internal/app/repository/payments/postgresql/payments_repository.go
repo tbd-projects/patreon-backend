@@ -17,12 +17,12 @@ const (
 	querySelectUserPayments = "SELECT p.amount, p.date, p.creator_id, u.nickname, cp.category, cp.description FROM payments p " +
 		"JOIN creator_profile cp on p.creator_id = cp.creator_id " +
 		"JOIN users u on cp.creator_id = u.users_id where p.users_id = $1 " +
-		"ORDER BY p.date DESC"
+		"ORDER BY p.date DESC "
 
 	queryCountCreatorPayments  = "SELECT count(*) FROM payments where creator_id = $1"
 	querySelectCreatorPayments = "SELECT p.amount, p.date, p.users_id, u.nickname FROM payments p " +
 		"JOIN users u on p.users_id = u.users_id where p.creator_id = $1 " +
-		"ORDER BY p.date DESC"
+		"ORDER BY p.date DESC "
 )
 
 type PaymentsRepository struct {
@@ -43,7 +43,7 @@ func (repo *PaymentsRepository) GetUserPayments(userID int64, pag *db_models.Pag
 	query := querySelectUserPayments
 
 	limit, offset, err := putilits.AddPagination("payments", pag, repo.store)
-	query = query + fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
+	query = query + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64, pag *db_mode
 	query := querySelectCreatorPayments
 
 	limit, offset, err := putilits.AddPagination("payments", pag, repo.store)
-	query = query + fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
+	query = query + fmt.Sprintf("LIMIT %d OFFSET %d", limit, offset)
 
 	if err != nil {
 		return nil, err

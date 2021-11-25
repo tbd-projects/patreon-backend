@@ -4,15 +4,17 @@ import (
 	"context"
 	"database/sql/driver"
 	"errors"
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"regexp"
-	"testing"
 
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
-	"github.com/zhashkevych/go-sqlxmock"
+	sqlmock "github.com/zhashkevych/go-sqlxmock"
 )
 
 var BDError = errors.New("BD error")
@@ -334,5 +336,13 @@ func TestAttachWithoutLevel() *AttachWithoutLevel {
 		PostId: 1,
 		Value:  "jfnagd",
 		Type:   Image,
+	}
+}
+func TestPayment() *Payments {
+	return &Payments{
+		Amount:    100,
+		Date:      time.Now(),
+		CreatorID: 1,
+		UserID:    11,
 	}
 }
