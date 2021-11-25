@@ -17,7 +17,7 @@ import (
 
 type SuiteAttachesUsecase struct {
 	usecase.SuiteUsecase
-	uc Usecase
+	uc *AttachesUsecase
 
 }
 
@@ -443,6 +443,80 @@ func (s *SuiteAttachesUsecase) TestCreatorUsecase_LoadText() {
 	att.PostId = -1
 	_, err = s.uc.LoadText(att)
 	assert.Error(s.T(), err)
+}
+
+func (s *SuiteAttachesUsecase) MockcheckAttach(updId int64) {
+	s.MockAttachesRepository.EXPECT().
+		ExistsAttach(updId).
+		Times(1).
+		Return(false, nil)
+}
+
+func (s *SuiteAttachesUsecase) MockcheckAttachError(updId int64, err error) {
+	s.MockAttachesRepository.EXPECT().
+		ExistsAttach(updId).
+		Times(1).
+		Return(false, err)
+}
+
+func (s *SuiteAttachesUsecase) TestCreatorUsecase_checkAttach() {
+	newAtt := []models.Attach{*models.TestAttach()}
+	updAtt := []models.Attach{*models.TestAttach()}
+
+	s.MockAttachesRepository.EXPECT().
+		ExistsAttach(updAtt[0].Id).
+		Times(1).
+		Return(false, nil)
+	err := s.uc.checkAttach(newAtt, updAtt)
+	assert.NoError(s.T(), err)
+
+	s.MockAttachesRepository.EXPECT().
+		ExistsAttach(updAtt[0].Id).
+		Times(1).
+		Return(false, nil)
+	err = s.uc.checkAttach(newAtt, updAtt)
+	assert.NoError(s.T(), err)
+
+	newAtt[0].Id = -1
+	err = s.uc.checkAttach(newAtt, updAtt)
+	assert.ErrorIs(s.T(), err, models.IncorrectAttachId)
+
+	newAtt[0].Id = 1
+	updAtt[0].Id = -1
+	err = s.uc.checkAttach(newAtt, updAtt)
+	assert.ErrorIs(s.T(), err, models.IncorrectAttachId)
+
+	updAtt[0].Id = 0
+	err = s.uc.checkAttach(newAtt, updAtt)
+	assert.ErrorIs(s.T(), err, models.IncorrectAttachId)
+}
+
+func (s *SuiteAttachesUsecase) TestCreatorUsecase_UpdateAttaches() {
+	newAtt := []models.Attach{*models.TestAttach()}
+	updAtt := []models.Attach{*models.TestAttach()}
+	postId := int64(3)
+	res := []int64{1, 2}
+
+	s.MockcheckAttach(updAtt[0].Id)
+	s.MockAttachesRepository.EXPECT().
+		ApplyChangeAttaches(postId, newAtt, updAtt).
+		Times(1).
+		Return(res, nil)
+	got, err := s.uc.UpdateAttach(postId, newAtt, updAtt)
+	assert.Equal(s.T(), res, got)
+	assert.NoError(s.T(), err)
+
+	s.MockcheckAttachError(updAtt[0].Id, repository.DefaultErrDB)
+	_, err = s.uc.UpdateAttach(postId, newAtt, updAtt)
+	assert.ErrorIs(s.T(), err, repository.DefaultErrDB)
+
+	s.MockcheckAttach(updAtt[0].Id)
+	s.MockAttachesRepository.EXPECT().
+		ApplyChangeAttaches(postId, newAtt, updAtt).
+		Times(1).
+		Return(res, repository.DefaultErrDB)
+	_, err = s.uc.UpdateAttach(postId, newAtt, updAtt)
+	assert.ErrorIs(s.T(), err, repository.DefaultErrDB)
 }
 
 func (s *SuiteAttachesUsecase) TestCreatorUsecase_UpdateText() {
