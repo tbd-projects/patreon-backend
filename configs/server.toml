@@ -4,7 +4,7 @@ bind_addr = ":8080"
 media_dir = "./media"
 
 bind_addr_https = ":443"
-bind_addr_http = ":80"
+bind_addr_http = ":8080"
 
 #domen = "95.163.208.72"
 domen = "api.pyaterochka-team.site"

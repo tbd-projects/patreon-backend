@@ -6,6 +6,24 @@ volumes:
   session-redis:
   access-redis:
 services:
+  ngnix-proxy:
+    image: nginx:latest
+    expose:
+      - "80"
+      - "443"
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - main
+      - grafana
+      - prometheus
+    networks:
+      - default
+    volumes:
+      - ./logs-ngnix:/var/log/nginx/
+      - ./patreon-secrt/api.pyaterochka-team.site:/etc/letsencrypt/live/api.pyaterochka-team.site
+      - ./configs/nginx-local.conf:/etc/nginx/conf.d/default.conf
   sessions-service:
     image: session-service
     expose:
@@ -34,15 +52,10 @@ services:
       - ./media:/app/media
       - ./configs:/app/configs
   main:
+    container_name: server
     image: patreon
     expose:
-      - "80"
       - "8080"
-      - "443"
-    ports:
-      - "443:443"
-      - "80:80"
-      - "8080:8080"
     networks:
       - default
     volumes:
@@ -105,6 +118,7 @@ services:
       - ./prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.external-url=http://localhost/prometheus'
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: 'node_exporter'
@@ -129,6 +143,8 @@ services:
       - node_exporter
     ports:
       - "3000:3000"
+    environment:
+      - GF_SERVER_ROOT_URL=http://localhost:80/grafana/
     expose:
       - "3000"
   postgres_exporter:

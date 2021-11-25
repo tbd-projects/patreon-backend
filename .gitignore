@@ -19,6 +19,7 @@ local
 media
 logs-sessions
 logs-files
+logs-ngnix
 patreon-secrt
 
 cover2
