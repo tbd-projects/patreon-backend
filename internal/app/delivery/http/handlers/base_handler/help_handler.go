@@ -24,7 +24,7 @@ import (
 
 const (
 	EmptyQuery      = -2
-	MAX_UPLOAD_SIZE = 1024 * 1024 * 4 // 4MB
+
 )
 
 type Sanitizable interface {

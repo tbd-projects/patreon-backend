@@ -5,6 +5,7 @@ import (
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
+	"patreon/internal/app/delivery/http/handlers"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
@@ -49,7 +50,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger,
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Router /creators/{creator_id:}/update/avatar [PUT]
 func (h *UpdateAvatarCreatorHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
+	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
 		"avatar", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
