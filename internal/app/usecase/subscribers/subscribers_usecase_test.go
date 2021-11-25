@@ -75,7 +75,8 @@ func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_RepositoryCrea
 
 func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetCreators_OK() {
 	subscriber := models.TestSubscriber()
-	expCreators := []models.CreatorSubscribe{}
+	creatorSubsc := models.TestCreatorSubscribe()
+	expCreators := []models.CreatorSubscribe{*creatorSubsc}
 	s.MockSubscribersRepository.EXPECT().
 		GetCreators(subscriber.UserID).
 		Times(1).
@@ -86,43 +87,48 @@ func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetCreators_OK() {
 	assert.Equal(s.T(), expCreators, res)
 }
 
-//func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetCreators_RepositoryError() {
-//	subscriber := models.TestSubscriber()
-//	expCreators := []int64{}
-//	s.MockSubscribersRepository.EXPECT().
-//		GetCreators(subscriber.UserID).
-//		Times(1).
-//		Return(expCreators, repository.NewDBError(repository.DefaultErrDB))
-//	res, err := s.uc.GetCreators(subscriber.UserID)
-//	assert.Equal(s.T(), expCreators, res)
-//	assert.Error(s.T(), err)
-//	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
-//}
-//func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetSubscribers_OK() {
-//	subscriber := models.TestSubscriber()
-//	expUsers := []int64{1, 2}
-//	s.MockSubscribersRepository.EXPECT().
-//		GetSubscribers(subscriber.CreatorID).
-//		Times(1).
-//		Return(expUsers, nil)
-//	res, err := s.uc.GetSubscribers(subscriber.CreatorID)
-//
-//	assert.NoError(s.T(), err)
-//	assert.Equal(s.T(), expUsers, res)
-//}
-//func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetSubscribers_RepositoryError() {
-//	subscriber := models.TestSubscriber()
-//	expUsers := []int64{}
-//	s.MockSubscribersRepository.EXPECT().
-//		GetSubscribers(subscriber.CreatorID).
-//		Times(1).
-//		Return(expUsers, repository.NewDBError(repository.DefaultErrDB))
-//
-//	res, err := s.uc.GetSubscribers(subscriber.CreatorID)
-//	assert.Equal(s.T(), expUsers, res)
-//	assert.Error(s.T(), err)
-//	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
-//}
+func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetCreators_RepositoryError() {
+	subscriber := models.TestSubscriber()
+	creator := models.TestCreatorSubscribe()
+	expCreators := []models.CreatorSubscribe{*creator, *creator}
+	s.MockSubscribersRepository.EXPECT().
+		GetCreators(subscriber.UserID).
+		Times(1).
+		Return(expCreators, repository.NewDBError(repository.DefaultErrDB))
+	res, err := s.uc.GetCreators(subscriber.UserID)
+	assert.Equal(s.T(), expCreators, res)
+	assert.Error(s.T(), err)
+	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
+}
+
+func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetSubscribers_OK() {
+	subscriber := models.TestSubscriber()
+	users := models.TestUsers()
+	expUsers := users
+	s.MockSubscribersRepository.EXPECT().
+		GetSubscribers(subscriber.CreatorID).
+		Times(1).
+		Return(expUsers, nil)
+	res, err := s.uc.GetSubscribers(subscriber.CreatorID)
+
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), expUsers, res)
+}
+
+func (s *SuiteSubscribersUsecase) TestSubscriberUsecaseGetSubscribers_RepositoryError() {
+	subscriber := models.TestSubscriber()
+	users := models.TestUsers()
+	expUsers := users
+	s.MockSubscribersRepository.EXPECT().
+		GetSubscribers(subscriber.CreatorID).
+		Times(1).
+		Return(expUsers, repository.NewDBError(repository.DefaultErrDB))
+
+	res, err := s.uc.GetSubscribers(subscriber.CreatorID)
+	assert.Equal(s.T(), expUsers, res)
+	assert.Error(s.T(), err)
+	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
+}
 func TestSubscribersUsecase(t *testing.T) {
 	suite.Run(t, new(SuiteSubscribersUsecase))
 }
