@@ -15,6 +15,16 @@ import (
 	"strings"
 )
 
+//go:generate mockgen -destination=mocks/mock_convert_utils.go -package=mock_utils . ImageConverter
+
+type ImageConverter interface {
+	// Convert Errors:
+	// 	app.GeneralError:
+	//		utils.ConvertErr
+	// 		utils.UnknownExtOfFileName
+	Convert(context.Context, io.Reader, repoFiles.FileName) (io.Reader, repoFiles.FileName, error)
+}
+
 type ConverterToWebp struct {
 }
 

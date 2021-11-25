@@ -338,11 +338,21 @@ func TestAttachWithoutLevel() *AttachWithoutLevel {
 		Type:   Image,
 	}
 }
+
 func TestPayment() *Payments {
 	return &Payments{
 		Amount:    100,
 		Date:      time.Now(),
 		CreatorID: 1,
 		UserID:    11,
+	}
+}
+
+func TestAttach() *Attach {
+	return &Attach{
+		Id:    1,
+		Level: 1,
+		Value: "jfnagd",
+		Type:  Image,
 	}
 }

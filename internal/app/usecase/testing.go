@@ -11,6 +11,7 @@ import (
 	mock_repository_subscribers "patreon/internal/app/repository/subscribers/mocks"
 	mock_repository_user "patreon/internal/app/repository/user/mocks"
 	mock_files "patreon/internal/microservices/files/delivery/grpc/client/mocks"
+	mock_utils "patreon/pkg/utils/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
@@ -35,9 +36,9 @@ type SuiteUsecase struct {
 	MockInfoRepository        *mock_repository_info.InfoRepository
 	MockAttachesRepository    *mock_repository_attaches.AttachesRepository
 	MockFileClient            *mock_files.MockFileServiceClient
-
-	Logger *logrus.Logger
-	Tb     TestTable
+	MockConvector             *mock_utils.MockImageConverter
+	Logger                    *logrus.Logger
+	Tb                        TestTable
 }
 
 func (s *SuiteUsecase) SetupSuite() {
@@ -51,6 +52,7 @@ func (s *SuiteUsecase) SetupSuite() {
 	s.MockAwardsRepository = mock_repository_awards.NewAwardsRepository(s.Mock)
 	s.MockLikesRepository = mock_repository_likes.NewLikesRepository(s.Mock)
 	s.MockInfoRepository = mock_repository_info.NewInfoRepository(s.Mock)
+	s.MockConvector = mock_utils.NewMockImageConverter(s.Mock)
 
 	s.Logger = logrus.New()
 	s.Logger.SetOutput(io.Discard)

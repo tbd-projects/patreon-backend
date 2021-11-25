@@ -17,13 +17,19 @@ import (
 type AttachesUsecase struct {
 	repository      repoAttaches.Repository
 	filesRepository client.FileServiceClient
-	imageConvector  utils.ConverterToWebp
+	imageConvector  utils.ImageConverter
 }
 
-func NewAttachesUsecase(repository repoAttaches.Repository, fileClient client.FileServiceClient) *AttachesUsecase {
+func NewAttachesUsecase(repository repoAttaches.Repository, fileClient client.FileServiceClient,
+	convector ...utils.ImageConverter) *AttachesUsecase {
+	conv := utils.ImageConverter(&utils.ConverterToWebp{})
+	if len(convector) != 0 {
+		conv = convector[0]
+	}
+
 	return &AttachesUsecase{
 		repository:      repository,
-		imageConvector: utils.ConverterToWebp{},
+		imageConvector:  conv,
 		filesRepository: fileClient,
 	}
 }
@@ -132,7 +138,7 @@ func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileNam
 	var err error
 	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
 	if err != nil {
-		return app.InvalidInt, nil
+		return app.InvalidInt, err
 	}
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
@@ -249,7 +255,7 @@ func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileN
 	var err error
 	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
