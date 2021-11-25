@@ -2,17 +2,14 @@ package repository_postgresql
 
 import (
 	"database/sql"
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	rp "patreon/internal/app/repository"
 	postgresql_utilits "patreon/internal/app/utilits/postgresql"
 	"patreon/pkg/utils"
-	"strconv"
-	"strings"
-
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -24,7 +21,7 @@ const (
 	queryCategoryCreate = `SELECT category_id FROM creator_category WHERE lower(name) = lower($1)`
 
 	// GetCreators
-	queryCountGetCreators = `SELECT count(*) from creator_profile`
+	queryCountGetCreators   = `SELECT count(*) from creator_profile`
 	queryCreatorGetCreators = `SELECT creator_id, cc.name, description, creator_profile.avatar, cover, usr.nickname 
 					FROM creator_profile JOIN users AS usr ON usr.users_id = creator_profile.creator_id
 					JOIN creator_category As cc ON creator_profile.category = cc.category_id`
@@ -128,7 +125,6 @@ func (repo *CreatorRepository) GetCreators() ([]models.Creator, error) {
 
 	return res, nil
 }
-
 
 // SearchCreators Errors:
 // 		app.GeneralError with Errors:

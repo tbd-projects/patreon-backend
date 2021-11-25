@@ -43,7 +43,7 @@ func TestSanitize(t *testing.T) {
 	_ = ToSubscribersCreatorResponse([]models.User{{Nickname: ""}})
 	_ = ToSubscriptionsUser([]models.CreatorSubscribe{{ID: 3}})
 	_ = ToResponseAttach(models.AttachWithoutLevel{})
-	_ = ToResponseUserPayments([]models.Payments{{Amount: 0}})
+	_ = ToResponseUserPayments([]models.UserPayments{{Payments: models.Payments{Amount: 0}}})
 	_ = ToResponseInfo(models.Info{})
 	_ = ToResponseCreators([]models.Creator{{Nickname: ""}})
 }

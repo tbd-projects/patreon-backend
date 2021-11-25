@@ -11,7 +11,7 @@ import (
 	_ "image/png"
 	"io"
 	"patreon/internal/app"
-	repoFiles "patreon/internal/app/repository/files"
+	repoFiles "patreon/internal/microservices/files/files/repository/files"
 	"strings"
 )
 

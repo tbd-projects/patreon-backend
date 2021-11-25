@@ -8,9 +8,6 @@ import (
 	"patreon/internal/app/repository"
 	"regexp"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-	sqlmock "github.com/zhashkevych/go-sqlxmock"
 )
 
 func MockCallAddPagination(mock sqlmock.Sqlmock, tableName string, res int64) {

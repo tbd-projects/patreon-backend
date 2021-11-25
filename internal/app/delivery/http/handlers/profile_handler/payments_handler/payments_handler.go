@@ -50,6 +50,9 @@ func (h *PaymentsHandler) redirect(w http.ResponseWriter, r *http.Request) {
 // @tags payments
 // @Description get all user payments
 // @Produce json
+// @Param page query uint64 true "start page number of posts mutually exclusive with offset"
+// @Param offset query uint64 true "start number of posts mutually exclusive with page"
+// @Param limit query uint64 true "posts to return"
 // @Success 200 {object} http_models.ResponseUserPayments "Success"
 // @Failure 204 {object} http_models.OkResponse "payments not Found"
 // @Failure 500 {object} http_models.ErrResponse "server error"
