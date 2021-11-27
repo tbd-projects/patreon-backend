@@ -112,13 +112,11 @@ services:
     image: prom/prometheus
     expose:
       - "9090"
-    ports:
-      - "9090:9090"
     volumes:
       - ./prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.external-url=http://localhost/prometheus'
+      - '--web.external-url=http://prometheus:9090/prometheus/'
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: 'node_exporter'
@@ -134,15 +132,11 @@ services:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     expose:
       - "9100"
-    ports:
-      - "9100:9100"
   grafana:
     image: grafana/grafana
     depends_on:
       - prometheus
       - node_exporter
-    ports:
-      - "3000:3000"
     environment:
       - GF_SERVER_ROOT_URL=http://localhost:80/grafana/
     expose:
