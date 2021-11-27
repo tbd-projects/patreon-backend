@@ -122,6 +122,7 @@ func (s *Server) Start(config *app.Config) error {
 	}
 
 	router := mux.NewRouter()
+
 	router.Handle("/metrics", promhttp.Handler())
 	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("main")
 	err := monitoringHandler.SetupMonitoring()

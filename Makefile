@@ -2,6 +2,7 @@
 
 LOG_DIR=./logs
 LOG_SESSION_DIR = ./logs-sessions
+LOG_SESSION_DIR = ./logs-files
 CHECK_DIR=go list ./... | grep -v /cmd/utilits
 SQL_DIR=./scripts
 MICROSERVICE_DIR=$(PWD)/internal/microservices
@@ -62,6 +63,8 @@ open-last-log:
 clear-logs:
 	rm -rf $(LOG_DIR)/*.log
 	rm -rf $(LOG_SESSION_DIR)/*.log
+	rm -rf $(LOG_FILES_DIR)/*.log
+
 
 
 stop:

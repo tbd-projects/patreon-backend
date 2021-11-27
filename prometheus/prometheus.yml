@@ -6,7 +6,7 @@ scrape_configs:
   - job_name: main
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['main:8080', 'sessions-service:9091']
+      - targets: ['main:8080', 'sessions-service:9091', 'files-service:9091']
 
   - job_name: node
     static_configs:
