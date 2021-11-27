@@ -5,6 +5,7 @@ import (
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
+	"patreon/internal/app/delivery/http/handlers"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
@@ -73,7 +74,7 @@ func (h *AttachUploadVideoHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
+	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_VIDEO_SIZE,
 		"video", []string{"video/3gpp", "video/mp4"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)

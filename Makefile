@@ -42,7 +42,8 @@ build-docker-sessions:
 	docker build --no-cache --network host -f ./docker/session-service.Dockerfile . --tag session-service
 build-docker-files:
 	docker build --no-cache --network host -f ./docker/files-service.Dockerfile . --tag files-service
-
+build-docker-ngnix:
+	docker build --no-cache --network host -f ./docker/ngnix.Dockerfile . --tag ngnix
 build-docker-server:
 	docker build --build-arg RUN_HTTPS=-run-https --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
