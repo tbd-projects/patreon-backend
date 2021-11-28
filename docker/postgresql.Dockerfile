@@ -7,4 +7,13 @@ RUN apt-get update \
            postgresql-$PG_MAJOR-rum  postgresql-$PG_MAJOR-rum-dbgsym\
       && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y make
+RUN git clone https://github.com/postgrespro/hunspell_dicts
+WORKDIR /hunspell_dicts/hunspell_ru_ru_aot
+RUN make USE_PGXS=1 install
+
+WORKDIR /
+
+
 RUN mkdir -p /docker-entrypoint-initdb.d
