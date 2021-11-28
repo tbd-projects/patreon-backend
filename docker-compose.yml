@@ -118,7 +118,7 @@ services:
       - ./prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.external-url=http://prometheus:9090/prometheus/'
+      - '--web.external-url=${PROMETHEUS_URL}'
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: 'node_exporter'
@@ -140,7 +140,7 @@ services:
       - prometheus
       - node_exporter
     environment:
-      - GF_SERVER_ROOT_URL=http://localhost:80/grafana/
+      - GF_SERVER_ROOT_URL=${GRAFANA_URL}
     expose:
       - "3000"
   postgres_exporter:
