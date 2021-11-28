@@ -77,13 +77,13 @@ func (mw *UtilitiesMiddleware) UpgradeLogger(handler http.Handler) http.Handler 
 				strconv.Itoa(statusCode),
 				r.URL.String(),
 				r.Method,
-			)
+			).Add(1)
 		} else {
 			mw.metrics.GetErrorsHits().WithLabelValues(
 				strconv.Itoa(statusCode),
 				r.URL.String(),
 				r.Method,
-			)
+			).Add(1)
 		}
 	})
 }
