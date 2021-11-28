@@ -1,6 +1,30 @@
-ALTER TABLE search_creators
-    ADD COLUMN nickname tsvector default to_tsvector('') not null;
+DROP INDEX idx_rum_search_creators;
 
+ALTER TABLE search_creators
+    ADD COLUMN nickname tsvector default to_tsvector('') not null,
+    DROP COLUMN description_ru;
+
+ALTER TABLE search_creators RENAME COLUMN description_en TO description;
+
+CREATE OR REPLACE FUNCTION upd_creators_search_creators()
+    RETURNS trigger AS
+$$
+BEGIN
+    UPDATE search_creators
+    SET description = to_tsvector(NEW.description)
+    WHERE ID = NEW.creator_id;
+    RETURN NEW;
+END;
+$$
+    LANGUAGE plpgsql;
+
+DROP TRIGGER update_creator_search ON creator_profile;
+
+CREATE TRIGGER update_creator_search
+    AFTER UPDATE
+    ON creator_profile
+    FOR EACH ROW
+EXECUTE FUNCTION upd_creators_search_creators();
 
 CREATE OR REPLACE FUNCTION insert_search_creators()
     RETURNS trigger AS
@@ -41,8 +65,6 @@ CREATE TRIGGER update_user_search
     FOR EACH ROW
 EXECUTE FUNCTION upd_user_search_creators();
 
-DROP INDEX idx_rum_search_creators;
-
 CREATE INDEX idx_rum_search_creators
     ON search_creators
         USING RUM (description rum_tsvector_ops, nickname rum_tsvector_ops);
@@ -68,3 +90,7 @@ CALL set_nick_search_creators();
 DROP PROCEDURE set_nick_search_creators();
 
 DROP INDEX idx_like_search_nick_creators;
+
+DROP EXTENSION hunspell_ru_ru_aot;
+
+DROP PROCEDURE add_rus_search_creators();

@@ -1,5 +1,6 @@
 .PHONY = build test
 
+GRAFANA_DIR=./grafana
 LOG_DIR=./logs
 LOG_SESSION_DIR = ./logs-sessions
 LOG_SESSION_DIR = ./logs-files
@@ -27,39 +28,45 @@ build-sessions:
 build-files:
 	go build -o files.out -v ./cmd/files
 
-build-docker-server:
+build-docker-server: # запуск обычного http servera
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
-build-docker-server-https:
+build-docker-server-https: # запуск https serverа
 	docker build --build-arg RUN_HTTPS=-run-https --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
 
-build-docker-pg:
+build-docker-pg: # сборка образа базы
 	docker build --no-cache --network host -f ./docker/postgresql.Dockerfile . --tag pg-14
-build-docker-sessions:
+build-docker-sessions: # сборка образа сервиса авторизаций
 	docker build --no-cache --network host -f ./docker/session-service.Dockerfile . --tag session-service
-build-docker-files:
+build-docker-files: # сборка образа сервиса файлов
 	docker build --no-cache --network host -f ./docker/files-service.Dockerfile . --tag files-service
-build-docker-nginx:
+build-docker-nginx: # сборка образа сервиса nginx
 	docker build --no-cache --network host -f ./docker/nginx.Dockerfile . --tag nginx-ssl
 
 
-run-https:
+run-https: # запустить https сервер
 	#sudo chown -R 5050:5050 ./pgadmin
 	mkdir -p $(LOG_DIR)
+	mkdir -p $(GRAFANA_DIR)
+	sudo chown 777 ./grafana
 	docker-compose --env-file ./configs/run-https.env up --build --no-deps
 
-run-http:
+run-http:  # запустить http сервер
 	#sudo chown -R 5050:5050 ./pgadmin
 	mkdir -p $(LOG_DIR)
+	mkdir -p $(GRAFANA_DIR)
+	sudo chown 777 ./grafana
 	docker-compose --env-file ./configs/run-http.env up --build --no-deps
 
-stop:
+stop:  # остановить сервер
 	docker-compose stop
 
-
+# запустить http сервер с http nginx
 run-with-build-http: build-docker-server build-docker-sessions build-docker-files build-docker-pg run-http
 
+# запустить https сервер с http nginx
 run-with-build-https: build-docker-server-https build-docker-sessions build-docker-files build-docker-pg run-http
 
+# запустить http сервер с https nginx
 run-with-build: build-docker-server build-docker-sessions build-docker-files build-docker-pg run-https
 
 
