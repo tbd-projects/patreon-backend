@@ -22,7 +22,7 @@ services:
       - default
     volumes:
       - ./logs-ngnix:/var/log/nginx/
-      - ./patreon-secrt/api.pyaterochka-team.site:/etc/letsencrypt/live/api.pyaterochka-team.site
+      - ./patreon-secrt/ngnix/letsencrypt:/etc/letsencrypt
       - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
   sessions-service:
     image: session-service
