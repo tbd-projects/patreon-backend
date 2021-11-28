@@ -48,7 +48,7 @@ func NewPostsUploadVideoHandler(log *logrus.Logger,
 // @Summary add video to post
 // @tags attaches
 // @Accept 	video/mpeg4-generic, video/mp4,  video/mpeg
-// @Param video formData file true "image file with ext video/mpeg4-generic, video/mpeg, video/mp4"
+// @Param video formData file true "image file with ext video/mpeg4-generic, video/mpeg, video/mp4, max size 80 MB"
 // @Success 201 {object} http_models.IdResponse "id attaches"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload some types", "invalid form field name for load file"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"

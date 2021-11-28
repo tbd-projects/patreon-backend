@@ -43,7 +43,7 @@ func NewPostsUpdateCoverHandler(log *logrus.Logger,
 // @Summary set new post cover
 // @tags posts
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param cover formData file true "cover file with ext jpeg/png"
+// @Param cover formData file true "cover file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200 "successfully upload cover"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name for load file"
 // @Failure 404 {object} http_models.ErrResponse "post with this id not found"

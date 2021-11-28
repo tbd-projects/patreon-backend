@@ -50,7 +50,7 @@ func NewAttachUploadAudioHandler(
 // @Summary update audio to post
 // @tags attaches
 // @Accept  audio/mp3, audio/mpeg, audio/mpeg3
-// @Param audio formData file true "image file with ext audio/mp3, audio/mpeg, audio/mpeg3"
+// @Param audio formData file true "image file with ext audio/mp3, audio/mpeg, audio/mpeg3, max size 30 MB"
 // @Success 200
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some types"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"

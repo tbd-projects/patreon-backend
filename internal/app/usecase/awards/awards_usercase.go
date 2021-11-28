@@ -9,19 +9,27 @@ import (
 	repoAwrds "patreon/internal/app/repository/awards"
 	"patreon/internal/microservices/files/delivery/grpc/client"
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	"patreon/pkg/utils"
 
 	"github.com/pkg/errors"
 )
 
 type AwardsUsecase struct {
-	repository repoAwrds.Repository
-	fileClient client.FileServiceClient
+	repository     repoAwrds.Repository
+	fileClient     client.FileServiceClient
+	imageConvector utils.ImageConverter
 }
 
-func NewAwardsUsecase(repository repoAwrds.Repository, fileClient client.FileServiceClient) *AwardsUsecase {
+func NewAwardsUsecase(repository repoAwrds.Repository, fileClient client.FileServiceClient,
+	convector ...utils.ImageConverter) *AwardsUsecase {
+	conv := utils.ImageConverter(&utils.ConverterToWebp{})
+	if len(convector) != 0 {
+		conv = convector[0]
+	}
 	return &AwardsUsecase{
-		repository: repository,
-		fileClient: fileClient,
+		repository:     repository,
+		fileClient:     fileClient,
+		imageConvector: conv,
 	}
 }
 
@@ -103,10 +111,17 @@ func (usecase *AwardsUsecase) GetCreatorId(awardsId int64) (int64, error) {
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 // 			repository.DefaultErrDB
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *AwardsUsecase) UpdateCover(data io.Reader, name repoFiles.FileName, awardsId int64) error {
 	_, err := usecase.repository.CheckAwards(awardsId)
 	if err != nil {
 		return err
+	}
+
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return errors.Wrap(err, "failed convert to webp of update awards cover")
 	}
 
 	path, err := usecase.fileClient.SaveFile(context.Background(), data, name, repoFiles.Image)

@@ -138,7 +138,7 @@ func (usecase *AttachesUsecase) LoadImage(data io.Reader, name repoFiles.FileNam
 	var err error
 	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
 	if err != nil {
-		return app.InvalidInt, err
+		return app.InvalidInt, errors.Wrap(err, "failed convert to webp of create image in attach")
 	}
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
@@ -255,7 +255,7 @@ func (usecase *AttachesUsecase) UpdateImage(data io.Reader, name repoFiles.FileN
 	var err error
 	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed convert to webp of update image in attach")
 	}
 
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)

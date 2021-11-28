@@ -50,7 +50,7 @@ func NewAttachUploadVideoHandler(
 // @Summary update video to post
 // @tags attaches
 // @Accept  video/mpeg4-generic, video/mpeg, video/mp4
-// @Param video formData file true "image file with ext video/mpeg4-generic, video/mpeg, video/mp4"
+// @Param video formData file true "image file with ext video/mpeg4-generic, video/mpeg, video/mp4, max size 80 MB"
 // @Success 200
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some type"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"

@@ -50,7 +50,7 @@ func NewAttachUploadImageHandler(
 // @Summary update image to post
 // @tags attaches
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param image formData file true "image file with ext jpeg/png"
+// @Param image formData file true "image file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some types"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"

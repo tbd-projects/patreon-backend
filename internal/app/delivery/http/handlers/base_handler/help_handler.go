@@ -23,8 +23,7 @@ import (
 )
 
 const (
-	EmptyQuery      = -2
-
+	EmptyQuery = -2
 )
 
 type Sanitizable interface {
@@ -176,7 +175,7 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 	r.Body = http.MaxBytesReader(w, r.Body, maxSize)
 	if err := r.ParseMultipartForm(maxSize); err != nil {
 		return nil, "", http.StatusBadRequest, app.GeneralError{
-			ExternalErr: err,
+			ExternalErr: errors.Wrapf(err, "max size is : %d ", maxSize),
 			Err:         handler_errors.FileSizeError,
 		}
 	}

@@ -43,7 +43,7 @@ func NewUpdateCoverAwardsHandler(log *logrus.Logger,
 // @Summary set new awards cover
 // @tags awards
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param cover formData file true "Cover file with ext jpeg/png"
+// @Param cover formData file true "Cover file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200 "successfully upload avatar"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name"
 // @Failure 422 {object} http_models.ErrResponse "this creator id not know"

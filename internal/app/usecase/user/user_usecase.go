@@ -11,6 +11,7 @@ import (
 	usePosts "patreon/internal/app/usecase/posts"
 	"patreon/internal/microservices/files/delivery/grpc/client"
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	"patreon/pkg/utils"
 
 	"github.com/pkg/errors"
 )
@@ -18,11 +19,18 @@ import (
 type UserUsecase struct {
 	repository     repoUser.Repository
 	repositoryFile client.FileServiceClient
+	imageConvector  utils.ImageConverter
 }
 
-func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServiceClient) *UserUsecase {
+func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServiceClient,
+	convector ...utils.ImageConverter) *UserUsecase {
+	conv := utils.ImageConverter(&utils.ConverterToWebp{})
+	if len(convector) != 0 {
+		conv = convector[0]
+	}
 	return &UserUsecase{
 		repository:     repository,
+		imageConvector:  conv,
 		repositoryFile: fileClient,
 	}
 }
@@ -155,7 +163,15 @@ func (usecase *UserUsecase) UpdatePassword(userId int64, oldPassword, newPasswor
 //			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error {
+	var err error
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return errors.Wrap(err, "failed convert to webp of update user avatar")
+	}
+
 	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)
 	if err != nil {
 		return err

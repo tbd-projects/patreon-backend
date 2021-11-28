@@ -42,7 +42,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger,
 // @Summary set new creator avatar
 // @tags creators
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param avatar formData file true "Avatar file with ext jpeg/png"
+// @Param avatar formData file true "Avatar file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200 "successfully upload avatar"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name"
 // @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"

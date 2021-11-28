@@ -48,7 +48,7 @@ func NewPostsUploadAudioHandler(log *logrus.Logger,
 // @Summary add audio to post
 // @tags attaches
 // @Accept audio/mp3, audio/mpeg, audio/mpeg3
-// @Param audio formData file true "audio file with ext audio/mp3, audio/mpeg, audio/mpeg3"
+// @Param audio formData file true "audio file with ext audio/mp3, audio/mpeg, audio/mpeg3, max size 30 MB"
 // @Success 201 {object} http_models.IdResponse "id attaches"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload some types", "invalid form field name for load file"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"

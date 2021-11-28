@@ -50,6 +50,8 @@ func main() {
 	grpc := grpc2.NewServer(
 		grpc2.UnaryInterceptor(grpcDurationMetrics),
 		grpc2.StreamInterceptor(grpc_prometheus.StreamServerInterceptor),
+		grpc2.MaxRecvMsgSize(utils.MAX_GRPC_SIZE),
+		grpc2.MaxSendMsgSize(utils.MAX_GRPC_SIZE),
 	)
 
 	grpc_prometheus.Register(grpc)

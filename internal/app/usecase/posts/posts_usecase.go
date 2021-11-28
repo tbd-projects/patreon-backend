@@ -9,6 +9,7 @@ import (
 	repoPosts "patreon/internal/app/repository/posts"
 	"patreon/internal/microservices/files/delivery/grpc/client"
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	"patreon/pkg/utils"
 
 	"github.com/pkg/errors"
 )
@@ -17,13 +18,19 @@ type PostsUsecase struct {
 	repository      repoPosts.Repository
 	repositoryData  repoAttaches.Repository
 	filesRepository client.FileServiceClient
+	imageConvector  utils.ImageConverter
 }
 
 func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoAttaches.Repository,
-	fileClient client.FileServiceClient) *PostsUsecase {
+	fileClient client.FileServiceClient, convector ...utils.ImageConverter) *PostsUsecase {
+	conv := utils.ImageConverter(&utils.ConverterToWebp{})
+	if len(convector) != 0 {
+		conv = convector[0]
+	}
 	return &PostsUsecase{
 		repository:      repository,
 		repositoryData:  repositoryData,
+		imageConvector:  conv,
 		filesRepository: fileClient,
 	}
 }
@@ -127,9 +134,17 @@ func (usecase *PostsUsecase) GetCreatorId(postId int64) (int64, error) {
 //			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *PostsUsecase) LoadCover(data io.Reader, name repoFiles.FileName, postId int64) error {
 	if _, err := usecase.repository.GetPostCreator(postId); err != nil {
 		return err
+	}
+
+	var err error
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return errors.Wrap(err, "failed convert to webp of update post cover")
 	}
 
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)
