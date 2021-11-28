@@ -39,7 +39,7 @@ build-docker-sessions:
 build-docker-files:
 	docker build --no-cache --network host -f ./docker/files-service.Dockerfile . --tag files-service
 build-docker-ngnix:
-	docker build --no-cache --network host -f ./docker/ngnix.Dockerfile . --tag ngnix
+	docker build --no-cache --network host -f ./docker/ngnix.Dockerfile . --tag ngnix-ssl
 
 
 run-https:

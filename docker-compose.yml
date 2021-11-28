@@ -7,7 +7,7 @@ volumes:
   access-redis:
 services:
   ngnix-proxy:
-    image: nginx:latest
+    image: ngnix-ssl
     expose:
       - "80"
       - "443"
@@ -22,7 +22,7 @@ services:
       - default
     volumes:
       - ./logs-ngnix:/var/log/nginx/
-      - ./patreon-secrt/api.pyaterochka-team.site:/etc/letsencrypt/live/api.pyaterochka-team.site/
+      - ./patreon-secrt/api.pyaterochka-team.site:/etc/letsencrypt/live/api.pyaterochka-team.site
       - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
   sessions-service:
     image: session-service
