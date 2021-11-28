@@ -7,7 +7,7 @@ volumes:
   access-redis:
 services:
   ngnix-proxy:
-    image: ngnix-ssl
+    image: nginx-ssl
     expose:
       - "80"
       - "443"
