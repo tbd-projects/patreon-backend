@@ -1,5 +1,6 @@
 .PHONY = build test
 
+GRAFANA_DIR=./grafana
 LOG_DIR=./logs
 LOG_SESSION_DIR = ./logs-sessions
 LOG_SESSION_DIR = ./logs-files
@@ -45,11 +46,15 @@ build-docker-nginx: # сборка образа сервиса nginx
 run-https: # запустить https сервер
 	#sudo chown -R 5050:5050 ./pgadmin
 	mkdir -p $(LOG_DIR)
+	mkdir -p $(GRAFANA_DIR)
+	sudo chown 777 ./grafana
 	docker-compose --env-file ./configs/run-https.env up --build --no-deps
 
 run-http:  # запустить http сервер
 	#sudo chown -R 5050:5050 ./pgadmin
 	mkdir -p $(LOG_DIR)
+	mkdir -p $(GRAFANA_DIR)
+	sudo chown 777 ./grafana
 	docker-compose --env-file ./configs/run-http.env up --build --no-deps
 
 stop:  # остановить сервер

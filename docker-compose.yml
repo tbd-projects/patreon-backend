@@ -139,6 +139,8 @@ services:
     depends_on:
       - prometheus
       - node_exporter
+    volumes:
+      - ./grafana:/var/lib/grafana
     environment:
       - GF_SERVER_ROOT_URL=${GRAFANA_URL}
     expose:
