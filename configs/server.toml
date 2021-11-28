@@ -13,12 +13,12 @@ domen = "api.pyaterochka-team.site"
 database_url = "port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
 #database_url = "port=5432 user=flashie password=1111 dbname=restapi_dev sslmode=disable"
 session-redis_url = "redis://localhost:6379"
-access-redis_url = "redis://localhost:6379"
+access-redis_url = "redis://localhost:6380"
 
 [server]
 database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
 session-redis_url = "redis://session-redis/0"
-access-redis_url = "redis://access-redis/0"
+access-redis_url = "redis://access-redis:6380/0"
 
 [microservice]
 session_url = "sessions-service:5001"

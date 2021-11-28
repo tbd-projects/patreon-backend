@@ -22,8 +22,8 @@ services:
       - default
     volumes:
       - ./logs-ngnix:/var/log/nginx/
-      - ./patreon-secrt/api.pyaterochka-team.site:/etc/letsencrypt/live/api.pyaterochka-team.site
-      - ./configs/nginx-local.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt/live/api.pyaterochka-team.site:/etc/letsencrypt/live/api.pyaterochka-team.site
+      - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
   sessions-service:
     image: session-service
     expose:
@@ -37,7 +37,7 @@ services:
       - session-redis
     volumes:
       - ./logs-sessions:/app/logs
-      - ./configs:/app/configs
+      - ${CONFIG_DIR}:/app/configs
   files-service:
     image: files-service
     expose:
@@ -50,9 +50,8 @@ services:
     volumes:
       - ./logs-files:/app/logs
       - ./media:/app/media
-      - ./configs:/app/configs
+      - ${CONFIG_DIR}:/app/configs
   main:
-    container_name: server
     image: patreon
     expose:
       - "8080"
@@ -62,7 +61,7 @@ services:
       - ./logs:/app/logs
       - ./media:/app/media
       - ./patreon-secrt:/app/patreon-secrt
-      - ./configs:/app/configs
+      - ${CONFIG_DIR}:/app/configs
     depends_on:
       - session-redis
       - access-redis
@@ -79,14 +78,17 @@ services:
       - "6379:6379"
     volumes:
       - session-redis:/data
+    restart: always
   access-redis:
     image: "redis:alpine"
+    command: --port 6380
     expose:
       - "6380"
     ports:
       - "6380:6380"
     volumes:
       - access-redis:/data
+    restart: always
   patreon-bd:
     image: pg-14
     expose:
@@ -95,9 +97,9 @@ services:
     volumes:
       - postgis-data:/var/lib/postgresql
     environment:
-      - POSTGRES_PASSWORD=pyaterochka
-      - POSTGRES_USER=patreon
-      - POSTGRES_DB=restapi_dev
+      - POSTGRES_PASSWORD=${PG_BD_NAME}
+      - POSTGRES_USER=${PG_BD_PASSWORD}
+      - POSTGRES_DB=${PG_BD_USERNAME}
     ports:
       - "5432:5432"
     restart: on-failure
@@ -146,9 +148,9 @@ services:
     image: prometheuscommunity/postgres-exporter
     environment:
 #      DATA_SOURCE_URI: "patreon-bd:5432"
-      DATA_SOURCE_USER: "patreon"
-      DATA_SOURCE_PASS: "pyaterochka"
-      DATA_SOURCE_URI: patreon-bd:5432/restapi_dev?sslmode=disable
+      DATA_SOURCE_USER: "${PG_BD_USERNAME}"
+      DATA_SOURCE_PASS: "${PG_BD_PASSWORD}"
+      DATA_SOURCE_URI: "patreon-bd:5432/${PG_BD_NAME}?sslmode=disable"
     #      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
     #    volumes:
     #      - ./queries.yaml:/etc/postgres_exporter/queries.yaml:ro

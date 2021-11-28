@@ -32,7 +32,7 @@ func (repo *RedisRepository) Set(session *models.Session) error {
 	}(con)
 
 	res, err := redis.String(con.Do("SET", session.UniqID, session.UserID,
-		"EX", session.Expiration))
+		"PX", session.Expiration))
 	if res != "OK" {
 		return errors.Wrapf(err,
 			"error when try create session with uniqId: %s, and userId: %s", session.UniqID, session.UserID)
@@ -40,7 +40,7 @@ func (repo *RedisRepository) Set(session *models.Session) error {
 	return nil
 }
 
-func (repo *RedisRepository) GetUserId(uniqID string) (string, error) {
+func (repo *RedisRepository) GetUserId(uniqID string, updExpiration int) (string, error) {
 	con := repo.redisPool.Get()
 	defer func() {
 		err := con.Close()
@@ -50,7 +50,7 @@ func (repo *RedisRepository) GetUserId(uniqID string) (string, error) {
 		}
 	}()
 
-	res, err := redis.String(con.Do("GET", uniqID))
+	res, err := redis.String(con.Do("GETEX", uniqID, "PX", updExpiration))
 	if err != nil {
 		return "", errors.Wrapf(err,
 			"error when try get session with uniqId: %s", uniqID)

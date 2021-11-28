@@ -49,8 +49,8 @@ func NewAttachUploadAudioHandler(
 // PUT update audio to post
 // @Summary update audio to post
 // @tags attaches
-// @Accept  audio/ogg
-// @Param audio formData file true "image file with ext audio/ogg"
+// @Accept  audio/mp3, audio/mpeg, audio/mpeg3
+// @Param audio formData file true "image file with ext audio/mp3, audio/mpeg, audio/mpeg3"
 // @Success 200
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some types"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
@@ -75,7 +75,7 @@ func (h *AttachUploadAudioHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_AUDIO_SIZE,
-		"audio", []string{"audio/ogg"})
+		"audio", []string{"audio/mp3", "audio/mpeg", "audio/mpeg3"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return

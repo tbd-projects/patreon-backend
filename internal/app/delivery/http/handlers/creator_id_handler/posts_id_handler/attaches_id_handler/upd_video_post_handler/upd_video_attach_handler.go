@@ -49,8 +49,8 @@ func NewAttachUploadVideoHandler(
 // PUT update video to post
 // @Summary update video to post
 // @tags attaches
-// @Accept  video/3gpp, video/mp4
-// @Param video formData file true "image file with ext video/3gpp, video/mp4"
+// @Accept  video/mpeg4-generic, video/mpeg, video/mp4
+// @Param video formData file true "image file with ext video/mpeg4-generic, video/mpeg, video/mp4"
 // @Success 200
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some type"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
@@ -75,7 +75,7 @@ func (h *AttachUploadVideoHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_VIDEO_SIZE,
-		"video", []string{"video/3gpp", "video/mp4"})
+		"video", []string{"video/mpeg4-generic", "video/mpeg", "video/mp4"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return

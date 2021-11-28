@@ -33,7 +33,7 @@ func (repo *RedisRepository) Set(key string, value string, timeExp int) error {
 				err.Error(), key, value)
 		}
 	}(con)
-	res, err := redis.String(con.Do("SET", key, value, "EX", timeExp))
+	res, err := redis.String(con.Do("SET", key, value, "PX", timeExp))
 	if res != "OK" {
 		return app.GeneralError{
 			Err: errors.Wrapf(SetError,

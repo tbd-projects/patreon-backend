@@ -47,8 +47,8 @@ func NewPostsUploadVideoHandler(log *logrus.Logger,
 // POST add video to post
 // @Summary add video to post
 // @tags attaches
-// @Accept video/3gpp, video/mp4
-// @Param video formData file true "image file with ext video/3gpp, video/mp4"
+// @Accept 	video/mpeg4-generic, video/mp4,  video/mpeg
+// @Param video formData file true "image file with ext video/mpeg4-generic, video/mpeg, video/mp4"
 // @Success 201 {object} http_models.IdResponse "id attaches"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload some types", "invalid form field name for load file"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
@@ -71,7 +71,7 @@ func (h *PostsUploadVideoHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_VIDEO_SIZE,
-		"video", []string{"video/3gpp", "video/mp4"})
+		"video", []string{"video/mpeg4-generic", "video/mpeg", "video/mp4"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)
 		return
