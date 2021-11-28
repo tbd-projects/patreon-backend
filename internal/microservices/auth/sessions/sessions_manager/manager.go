@@ -50,7 +50,7 @@ func (manager *SessionManager) Delete(uniqID string) error {
 }
 
 func (manager *SessionManager) Check(uniqID string) (models.Result, error) {
-	userID, err := manager.sessionRepository.GetUserId(uniqID)
+	userID, err := manager.sessionRepository.GetUserId(uniqID, int(ExpiredCookiesTime.Milliseconds()))
 	if err != nil {
 		return models.Result{UserID: UnknownUser, UniqID: uniqID}, err
 	}

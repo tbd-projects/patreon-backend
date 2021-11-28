@@ -45,7 +45,7 @@ build-docker-ngnix:
 run-https:
 	#sudo chown -R 5050:5050 ./pgadmin
 	mkdir -p $(LOG_DIR)
-	docker-compose --env-file ./configs/run-http.env up --build --no-deps
+	docker-compose --env-file ./configs/run-https.env up --build --no-deps
 
 run-http:
 	#sudo chown -R 5050:5050 ./pgadmin

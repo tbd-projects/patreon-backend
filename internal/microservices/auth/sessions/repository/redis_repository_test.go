@@ -93,13 +93,13 @@ func (s *SuiteTestRepository) TestGetUserID() {
 	require.NoError(s.T(), err)
 
 	var userID string
-	userID, err = s.redisRepository.GetUserId(session.UniqID)
+	userID, err = s.redisRepository.GetUserId(session.UniqID, session.Expiration)
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), userID, session.UserID)
 	assert.Equal(s.T(), s.output, "")
 
 	s.redisServer.SetError("Error")
-	_, err = s.redisRepository.GetUserId(session.UniqID)
+	_, err = s.redisRepository.GetUserId(session.UniqID, session.Expiration)
 	assert.Error(s.T(), err)
 
 	s.redisServer.Close()
