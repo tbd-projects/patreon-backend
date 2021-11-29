@@ -5,7 +5,7 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	http_models "patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/models"
+	app_models "patreon/internal/app/models"
 	usecase_posts "patreon/internal/app/usecase/posts"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
@@ -56,7 +56,7 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
 		return
 	}
-	posts, err := h.postsUsecase.GetAvailablePosts(userID.(int64), &models.Pagination{
+	posts, err := h.postsUsecase.GetAvailablePosts(userID.(int64), &app_models.Pagination{
 		Limit:  limit,
 		Offset: offset,
 	})
