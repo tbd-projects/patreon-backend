@@ -18,6 +18,11 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	GetPost(postID int64, userId int64, addView bool) (*models.Post, error)
 
+	// GetAvailablePosts Errors:
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	GetAvailablePosts(userId int64, pag *models.Pagination) ([]models.AvailablePost, error)
+
 	// GetPostCreator Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:

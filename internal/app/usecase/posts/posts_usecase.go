@@ -43,6 +43,13 @@ func (usecase *PostsUsecase) GetPosts(creatorId int64, userId int64,
 	return usecase.repository.GetPosts(creatorId, userId, pag, withDraft)
 }
 
+// GetAvailablePosts Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *PostsUsecase) GetAvailablePosts(userID int64, pag *models.Pagination) ([]models.AvailablePost, error) {
+	return usecase.repository.GetAvailablePosts(userID, pag)
+}
+
 // GetPost Errors:
 //		repository.NotFound
 // 		app.GeneralError with Errors:

@@ -3,7 +3,7 @@ package http_models
 import (
 	"fmt"
 	"math"
-	"patreon/internal/app/csrf/models"
+	csrf_models "patreon/internal/app/csrf/models"
 	"patreon/internal/app/models"
 	"strconv"
 	"time"
@@ -251,5 +251,15 @@ func ToResponseUserPayments(payments []models.UserPayments) ResponseUserPayments
 	}
 	return ResponseUserPayments{
 		Payments: res,
+	}
+}
+
+type ResponseAvailablePosts struct {
+	AvailablePosts []models.AvailablePost `json:"available_posts"`
+}
+
+func ToResponseAvailablePosts(availablePosts []models.AvailablePost) ResponseAvailablePosts {
+	return ResponseAvailablePosts{
+		AvailablePosts: availablePosts,
 	}
 }

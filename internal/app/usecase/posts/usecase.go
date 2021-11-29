@@ -15,6 +15,10 @@ const (
 
 type Usecase interface {
 
+	// GetAvailablePosts Errors:
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	GetAvailablePosts(userID int64, pag *models.Pagination) ([]models.AvailablePost, error)
 	// GetPosts Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB

@@ -16,6 +16,24 @@ import (
 )
 
 const (
+	getAvailablePosts = `SELECT p.title,
+       p.description,
+       p.likes,
+       p.date,
+       p.cover,
+       p.type_awards,
+       p.creator_id,
+       u.nickname,
+       lk.likes_id IS NOT NULL,
+       views
+FROM subscribers s
+         JOIN posts p on p.creator_id = s.creator_id
+         LEFT JOIN likes AS lk ON (lk.post_id = p.posts_id and lk.users_id = $1)
+         JOIN awards a on p.type_awards = a.awards_id and a.creator_id = p.creator_id
+         JOIN users u on p.creator_id = u.users_id
+WHERE s.users_id = $1 and p.is_draft = false
+ORDER BY p.date desc;`
+
 	createQuery = `INSERT INTO posts (title, description,
 		type_awards, creator_id, cover, is_draft) VALUES ($1, $2, $3, $4, $5, $6) 
 		RETURNING posts_id`
@@ -133,6 +151,46 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (
 	}
 
 	return post, nil
+}
+
+// GetAvailablePosts Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *PostsRepository) GetAvailablePosts(userID int64, pag *models.Pagination) ([]models.AvailablePost, error) {
+	query := getAvailablePosts
+	limit, offset, err := putilits.AddPagination("posts", pag, repo.store)
+	query = query + fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res []models.AvailablePost
+
+	rows, err := repo.store.Query(query, userID)
+	if err != nil {
+		return nil, repository.NewDBError(err)
+	}
+	for rows.Next() {
+		var post models.AvailablePost
+		err = rows.Scan(
+			&post.Title, &post.Description, &post.Likes, &post.Date,
+			&post.Cover, &post.Awards, &post.CreatorId, &post.CreatorNickname,
+			&post.AddLike, &post.Views)
+
+		if err != nil {
+			_ = rows.Close()
+			return nil, repository.NewDBError(err)
+		}
+
+		res = append(res, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, repository.NewDBError(err)
+	}
+
+	return res, nil
 }
 
 // GetPosts Errors:

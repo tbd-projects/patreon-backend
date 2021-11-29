@@ -39,6 +39,10 @@ type Post struct {
 	Date        time.Time `json:"date"`
 	IsDraft     bool      `json:"is_draft"`
 }
+type AvailablePost struct {
+	CreatorNickname string `json:"creator_nickname"`
+	Post
+}
 
 func (ps *UpdatePost) String() string {
 	return fmt.Sprintf("{ID: %d, Title: %s, Likes: %d}", ps.ID,

@@ -38,6 +38,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/nickname_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler/user_posts_handler"
 	"patreon/internal/app/delivery/http/handlers/register_handler"
 	"patreon/internal/microservices/auth/delivery/grpc/client"
 
@@ -66,6 +67,7 @@ const (
 	AWARDS_UPDATE
 	AWARDS_COVER
 	POSTS
+	POSTS_AVAILABLE
 	POSTS_WITH_ID
 	POSTS_UPD
 	POSTS_LIKES
@@ -153,6 +155,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		ATTACH_ADD_AUDIO:         upl_audio_attach_handler.NewPostsUploadAudioHandler(f.logger, ucAttaches, ucPosts, sManager),
 		ATTACH_UPD_VIDEO:         upd_video_attach_handler.NewAttachUploadVideoHandler(f.logger, ucAttaches, ucPosts, sManager),
 		ATTACH_UPD_AUDIO:         upd_audio_attach_handler.NewAttachUploadAudioHandler(f.logger, ucAttaches, ucPosts, sManager),
+		POSTS_AVAILABLE:          user_posts_handler.NewPostsHandler(f.logger, sManager, ucPosts),
 	}
 }
 
@@ -175,6 +178,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/nickname": hs[UPDATE_NICKNAME],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 		"/user/payments":        hs[USER_PAYMENTS],
+		"/user/posts":           hs[POSTS_AVAILABLE],
 		// /creators ---------------------------------------------------------////
 		"/creators":                                   hs[CREATORS],
 		"/creators/{creator_id:[0-9]+}":               hs[CREATOR_WITH_ID],
