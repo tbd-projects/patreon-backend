@@ -4,6 +4,7 @@
 ./docs
 ./docker
 ./scripts
+./grafana
 *.out
 *.txt
 *.html

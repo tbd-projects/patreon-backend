@@ -1,4 +1,4 @@
-CREATE EXTENSION hunspell_ru_ru_aot;
+CREATE EXTENSION hunspell_ru_ru;
 
 DROP INDEX idx_rum_search_creators;
 
@@ -14,7 +14,7 @@ $$
 BEGIN
     UPDATE search_creators
     SET description_en = to_tsvector('english', NEW.description),
-        description_ru = to_tsvector('russian_aot_hunspell', NEW.description)
+        description_ru = to_tsvector('russian_hunspell', NEW.description)
     WHERE ID = NEW.creator_id;
     RETURN NEW;
 END;
@@ -34,7 +34,7 @@ CREATE OR REPLACE FUNCTION insert_search_creators()
 $$
 BEGIN
     INSERT INTO search_creators (ID, description_en, description_ru)
-    VALUES (NEW.creator_id, to_tsvector('english', NEW.description), to_tsvector('russian_aot_hunspell', NEW.description));
+    VALUES (NEW.creator_id, to_tsvector('english', NEW.description), to_tsvector('russian_hunspell', NEW.description));
     RETURN NEW;
 END
 $$
@@ -60,7 +60,7 @@ BEGIN
     FOR IdCreator, Des IN SELECT DISTINCT creator_id, description FROM creator_profile
         LOOP
             UPDATE search_creators SET description_en = to_tsvector('english', Des),
-                                       description_ru = to_tsvector('russian_aot_hunspell', Des)
+                                       description_ru = to_tsvector('russian_hunspell', Des)
             WHERE id = IdCreator;
         END LOOP;
 END
