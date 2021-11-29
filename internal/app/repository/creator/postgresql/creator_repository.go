@@ -29,10 +29,10 @@ const (
 	// SearchCreators
 	querySearchCreators = `
 					WITH searched_creators AS (
-    						SELECT id, usr.nickname, least(sc.description_en <=> plainto_tsquery('english', $1), sc.description_ru <=> plainto_tsquery('russian_aot_hunspell', $1)) AS rank
+    						SELECT id, usr.nickname, least(sc.description_en <=> plainto_tsquery('english', $1), sc.description_ru <=> plainto_tsquery('russian_hunspell', $1)) AS rank
 							FROM search_creators as sc
 							LEFT JOIN users AS usr ON (usr.users_id = sc.id and usr.nickname LIKE $1 || '%')
-							WHERE sc.description_en @@ plainto_tsquery('english', $1) OR sc.description_ru <=> plainto_tsquery('russian_aot_hunspell', $1) OR usr.nickname LIKE $1 || '%'
+							WHERE sc.description_en @@ plainto_tsquery('english', $1) OR sc.description_ru @@ plainto_tsquery('russian_hunspell', $1) OR usr.nickname LIKE $1 || '%'
 							ORDER BY usr.nickname, rank
         					LIMIT $2 OFFSET $3
 					)

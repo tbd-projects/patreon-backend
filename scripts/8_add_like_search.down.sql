@@ -91,6 +91,6 @@ DROP PROCEDURE set_nick_search_creators();
 
 DROP INDEX idx_like_search_nick_creators;
 
-DROP EXTENSION hunspell_ru_ru_aot;
+DROP EXTENSION hunspell_ru_ru;
 
 DROP PROCEDURE add_rus_search_creators();

@@ -10,8 +10,9 @@ RUN apt-get update \
 RUN apt-get update && apt-get install -y git
 RUN apt-get update && apt-get install -y make
 RUN git clone https://github.com/postgrespro/hunspell_dicts
-WORKDIR /hunspell_dicts/hunspell_ru_ru_aot
+WORKDIR /hunspell_dicts/hunspell_ru_ru
 RUN make USE_PGXS=1 install
+RUN rm -rf ./hunspell_dicts
 
 WORKDIR /
 

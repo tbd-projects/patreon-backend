@@ -43,18 +43,16 @@ build-docker-nginx: # сборка образа сервиса nginx
 	docker build --no-cache --network host -f ./docker/nginx.Dockerfile . --tag nginx-ssl
 
 
-run-https: # запустить https сервер
+run-init:
 	#sudo chown -R 5050:5050 ./pgadmin
 	mkdir -p $(LOG_DIR)
 	mkdir -p $(GRAFANA_DIR)
-	sudo chown 777 ./grafana
+	sudo chown -R 472:472 ./grafana
+
+run-https: run-init # запустить https сервер
 	docker-compose --env-file ./configs/run-https.env up --build --no-deps
 
-run-http:  # запустить http сервер
-	#sudo chown -R 5050:5050 ./pgadmin
-	mkdir -p $(LOG_DIR)
-	mkdir -p $(GRAFANA_DIR)
-	sudo chown 777 ./grafana
+run-http: run-init # запустить http сервер
 	docker-compose --env-file ./configs/run-http.env up --build --no-deps
 
 stop:  # остановить сервер
