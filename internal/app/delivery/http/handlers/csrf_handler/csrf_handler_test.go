@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app"
-	"patreon/internal/app/csrf/models"
+	"patreon/internal/app/csrf/csrf_models"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	"patreon/internal/app/delivery/http/handlers"
 	"testing"

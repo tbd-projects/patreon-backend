@@ -3,7 +3,7 @@ package http_models
 import (
 	"fmt"
 	"math"
-	csrf_models "patreon/internal/app/csrf/models"
+	"patreon/internal/app/csrf/csrf_models"
 	"patreon/internal/app/models"
 	"strconv"
 	"time"

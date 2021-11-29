@@ -1,7 +1,7 @@
 package repository_jwt
 
 import (
-	"patreon/internal/app/csrf/models"
+	"patreon/internal/app/csrf/csrf_models"
 	"testing"
 	"time"
 )

@@ -1,6 +1,6 @@
 package repository_token
 
-import "patreon/internal/app/csrf/models"
+import "patreon/internal/app/csrf/csrf_models"
 
 type Repository interface {
 	Check(sources csrf_models.TokenSources, tokenString csrf_models.Token) error
