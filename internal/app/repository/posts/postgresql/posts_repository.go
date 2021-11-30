@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	getAvailablePosts = `SELECT p.title,
+	getAvailablePosts = `SELECT p.posts_id, p.title,
        p.description,
        p.likes,
        p.date,
@@ -173,7 +173,7 @@ func (repo *PostsRepository) GetAvailablePosts(userID int64, pag *models.Paginat
 		var post models.AvailablePost
 		var awardsId sql.NullInt64
 		err = rows.Scan(
-			&post.Title, &post.Description, &post.Likes, &post.Date,
+			&post.ID, &post.Title, &post.Description, &post.Likes, &post.Date,
 			&post.Cover, &awardsId, &post.CreatorId, &post.CreatorNickname,
 			&post.AddLike, &post.Views)
 
