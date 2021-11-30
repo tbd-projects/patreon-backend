@@ -4,7 +4,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	http_models "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	app_models "patreon/internal/app/models"
 	usecase_posts "patreon/internal/app/usecase/posts"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
