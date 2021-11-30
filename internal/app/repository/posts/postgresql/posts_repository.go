@@ -26,12 +26,12 @@ const (
        u.nickname,
        lk.likes_id IS NOT NULL,
        views
-FROM subscribers s
-         JOIN posts p on p.type_awards = s.awards_id OR p.type_awards is null or p.type_awards in 
-                                                                                 (select awards_id from restapi_dev.public.parents_awards where parent_id = s.awards_id)
+FROM posts p
+         JOIN subscribers s on s.users_id = $1 and s.creator_id = p.creator_id
          LEFT JOIN likes AS lk ON (lk.post_id = p.posts_id and lk.users_id = $1)
          JOIN users u on p.creator_id = u.users_id
-WHERE s.users_id = $1 and p.is_draft = false 
+WHERE p.is_draft = false and (p.type_awards is null OR p.type_awards = s.awards_id or p.type_awards in
+                                                                                                         (select awa.awards_id from restapi_dev.public.parents_awards as awa where awa.parent_id = s.awards_id))
 ORDER BY p.date desc LIMIT $2 OFFSET $3;`
 
 	createQuery = `INSERT INTO posts (title, description,
@@ -171,14 +171,21 @@ func (repo *PostsRepository) GetAvailablePosts(userID int64, pag *models.Paginat
 	}
 	for rows.Next() {
 		var post models.AvailablePost
+		var awardsId sql.NullInt64
 		err = rows.Scan(
 			&post.Title, &post.Description, &post.Likes, &post.Date,
-			&post.Cover, &post.Awards, &post.CreatorId, &post.CreatorNickname,
+			&post.Cover, &awardsId, &post.CreatorId, &post.CreatorNickname,
 			&post.AddLike, &post.Views)
 
 		if err != nil {
 			_ = rows.Close()
 			return nil, repository.NewDBError(err)
+		}
+
+		if awardsId.Valid == false {
+			post.Awards = rp.NoAwards
+		} else {
+			post.Awards = awardsId.Int64
 		}
 
 		res = append(res, post)

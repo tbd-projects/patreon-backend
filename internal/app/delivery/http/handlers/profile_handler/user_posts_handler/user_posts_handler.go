@@ -61,13 +61,14 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 		Offset: offset,
 	})
 
+	if err != nil {
+		h.UsecaseError(w, r, err, codesByErrors)
+		return
+	}
+
 	if len(posts) == 0 {
 		h.Log(r).Errorf("no available posts for user with id = %d", userID)
 		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-	if err != nil {
-		h.UsecaseError(w, r, err, codesByErrors)
 		return
 	}
 
