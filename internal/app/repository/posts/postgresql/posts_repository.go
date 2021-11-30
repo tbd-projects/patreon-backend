@@ -27,12 +27,12 @@ const (
        lk.likes_id IS NOT NULL,
        views
 FROM subscribers s
-         JOIN posts p on p.creator_id = s.creator_id
+         JOIN posts p on p.type_awards = s.awards_id OR p.type_awards is null or p.type_awards in 
+                                                                                 (select awards_id from restapi_dev.public.parents_awards where parent_id = s.awards_id)
          LEFT JOIN likes AS lk ON (lk.post_id = p.posts_id and lk.users_id = $1)
-         JOIN awards a on p.type_awards = a.awards_id and a.creator_id = p.creator_id
          JOIN users u on p.creator_id = u.users_id
-WHERE s.users_id = $1 and p.is_draft = false
-ORDER BY p.date desc;`
+WHERE s.users_id = $1 and p.is_draft = false 
+ORDER BY p.date desc LIMIT $2 OFFSET $3;`
 
 	createQuery = `INSERT INTO posts (title, description,
 		type_awards, creator_id, cover, is_draft) VALUES ($1, $2, $3, $4, $5, $6) 
@@ -157,9 +157,7 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PostsRepository) GetAvailablePosts(userID int64, pag *models.Pagination) ([]models.AvailablePost, error) {
-	query := getAvailablePosts
 	limit, offset, err := putilits.AddPagination("posts", pag, repo.store)
-	query = query + fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -167,7 +165,7 @@ func (repo *PostsRepository) GetAvailablePosts(userID int64, pag *models.Paginat
 
 	var res []models.AvailablePost
 
-	rows, err := repo.store.Query(query, userID)
+	rows, err := repo.store.Query(getAvailablePosts, userID, limit, offset)
 	if err != nil {
 		return nil, repository.NewDBError(err)
 	}
