@@ -15,9 +15,11 @@ var (
 	PostNotFound             = errors.New("post with not found")
 	AttachNotFound           = errors.New("attach with this id not found")
 	LikeNotFound             = errors.New("like with this id not found")
+	CommentNotFound          = errors.New("comment with this id not found")
 	PaymentsNotFound         = errors.New("this user have not payment")
 )
 
+/// File parse error
 var (
 	IncorrectType = errors.New(
 		fmt.Sprintf("Not allow type, allowed type is: %s, %s, %s, %s, %s",
@@ -34,6 +36,7 @@ var (
 	InvalidDescription       = errors.New("invalid creator description")
 	IncorrectAwardsId        = errors.New("this awards id not know")
 	IncorrectPostId          = errors.New("this post id not know")
+	IncorrectUserId          = errors.New("this user id not know")
 	IncorrectCreatorId       = errors.New("this creator id not know")
 	EmptyTitle               = errors.New("empty title")
 	EmptyName                = errors.New("empty name in request")
@@ -53,7 +56,13 @@ var (
 	UserAlreadyExist         = errors.New("user already exist")
 	NicknameAlreadyExist     = errors.New("nickname already exist")
 	CreatorAlreadyExist      = errors.New("creator already exist")
+	CommentAlreadyExist      = errors.New("comment already exist")
 	BDError                  = errors.New("can not do bd operation")
+)
+
+// AccessError
+var (
+	NotAllowAddComment = errors.New("this user can not add comment as creator")
 )
 
 // Session Error

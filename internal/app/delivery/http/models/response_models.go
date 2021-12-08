@@ -70,8 +70,35 @@ type ResponsePost struct {
 	Cover       string    `json:"cover"`
 	AddLike     bool      `json:"add_like,omitempty"`
 	Views       int64     `json:"views"`
+	Comments    int64     `json:"comments"`
 	Date        time.Time `json:"date"`
 	IsDraft     bool      `json:"is_draft,omitempty"`
+}
+
+type ResponsePostComment struct {
+	ID             int64  `json:"comment_id"`
+	Body           string `json:"body"`
+	AsCreator      bool   `json:"as_creator,omitempty"`
+	AuthorId       int64  `json:"author_id"`
+	AuthorNickname string `json:"author_nickname"`
+	AuthorAvatar   string `json:"author_avatar"`
+}
+
+type ResponseUserComment struct {
+	ID        int64  `json:"comment_id"`
+	Body      string `json:"body"`
+	AsCreator bool   `json:"as_creator,omitempty"`
+	PostId    int64  `json:"post_id"`
+	PostName  string `json:"post_name"`
+	PostCover string `json:"post_cover"`
+}
+
+type ResponseUserComments struct {
+	Comments []ResponseUserComment `json:"comments"`
+}
+
+type ResponsePostComments struct {
+	Comments []ResponsePostComment `json:"comments"`
 }
 
 type ResponseAttach struct {
@@ -101,6 +128,44 @@ func ToRProfileResponse(us models.User) ProfileResponse {
 		Avatar:      us.Avatar,
 		HaveCreator: us.HaveCreator,
 	}
+}
+
+func ToResponseUserComment(cm models.UserComment) ResponseUserComment {
+	return ResponseUserComment{
+		ID:        cm.ID,
+		Body:      cm.Body,
+		PostId:    cm.PostId,
+		PostName:  cm.PostName,
+		PostCover: cm.PostCover,
+		AsCreator: cm.AsCreator,
+	}
+}
+
+func ToResponsePostComment(cm models.PostComment) ResponsePostComment {
+	return ResponsePostComment{
+		ID:             cm.ID,
+		Body:           cm.Body,
+		AuthorId:       cm.AuthorId,
+		AuthorNickname: cm.AuthorNickname,
+		AuthorAvatar:   cm.AuthorAvatar,
+		AsCreator:      cm.AsCreator,
+	}
+}
+
+func ToResponsePostComments(cms []models.PostComment) ResponsePostComments {
+	res := ResponsePostComments{[]ResponsePostComment{}}
+	for _, cm := range cms {
+		res.Comments = append(res.Comments, ToResponsePostComment(cm))
+	}
+	return res
+}
+
+func ToResponseUserComments(cms []models.UserComment) ResponseUserComments {
+	res := ResponseUserComments{[]ResponseUserComment{}}
+	for _, cm := range cms {
+		res.Comments = append(res.Comments, ToResponseUserComment(cm))
+	}
+	return res
 }
 
 func ToResponseCreator(cr models.Creator) ResponseCreator {
@@ -155,6 +220,7 @@ func ToResponsePost(ps models.Post) ResponsePost {
 		AddLike:     ps.AddLike,
 		Views:       ps.Views,
 		IsDraft:     ps.IsDraft,
+		Comments:    ps.Comments,
 	}
 }
 

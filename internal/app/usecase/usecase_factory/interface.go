@@ -5,6 +5,7 @@ import (
 	repAccess "patreon/internal/app/repository/access"
 	repoAttaches "patreon/internal/app/repository/attaches"
 	repoAwrds "patreon/internal/app/repository/awards"
+	repoComments "patreon/internal/app/repository/comments"
 	repCreator "patreon/internal/app/repository/creator"
 	repoInfo "patreon/internal/app/repository/info"
 	repoLikes "patreon/internal/app/repository/likes"
@@ -28,4 +29,5 @@ type RepositoryFactory interface {
 	GetAttachesRepository() repoAttaches.Repository
 	GetPaymentsRepository() repoPayments.Repository
 	GetInfoRepository() repoInfo.Repository
+	GetCommentsRepository() repoComments.Repository
 }

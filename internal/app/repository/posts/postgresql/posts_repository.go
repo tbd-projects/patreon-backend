@@ -17,22 +17,23 @@ import (
 
 const (
 	getAvailablePosts = `SELECT p.posts_id, p.title,
-       p.description,
-       p.likes,
-       p.date,
-       p.cover,
-       p.type_awards,
-       p.creator_id,
-       u.nickname,
-       lk.likes_id IS NOT NULL,
-       views
-FROM posts p
-         JOIN subscribers s on s.users_id = $1 and s.creator_id = p.creator_id
-         LEFT JOIN likes AS lk ON (lk.post_id = p.posts_id and lk.users_id = $1)
-         JOIN users u on p.creator_id = u.users_id
-WHERE p.is_draft = false and (p.type_awards is null OR p.type_awards = s.awards_id or p.type_awards in
-                                                                                                         (select awa.awards_id from restapi_dev.public.parents_awards as awa where awa.parent_id = s.awards_id))
-ORDER BY p.date desc LIMIT $2 OFFSET $3;`
+			p.description,
+			p.likes,
+			p.date,
+			p.cover,
+			p.type_awards,
+			p.creator_id,
+			u.nickname,
+			lk.likes_id IS NOT NULL,
+			views,
+			p.number_comments
+	FROM posts p
+			 JOIN subscribers s on s.users_id = $1 and s.creator_id = p.creator_id
+			 LEFT JOIN likes AS lk ON (lk.post_id = p.posts_id and lk.users_id = $1)
+			 JOIN users u on p.creator_id = u.users_id
+	WHERE p.is_draft = false and (p.type_awards is null OR p.type_awards = s.awards_id or p.type_awards in
+			 (select awa.awards_id from restapi_dev.public.parents_awards as awa where awa.parent_id = s.awards_id))
+	ORDER BY p.date desc LIMIT $2 OFFSET $3;`
 
 	createQuery = `INSERT INTO posts (title, description,
 		type_awards, creator_id, cover, is_draft) VALUES ($1, $2, $3, $4, $5, $6) 
@@ -42,7 +43,7 @@ ORDER BY p.date desc LIMIT $2 OFFSET $3;`
 
 	getPostQuery = `
 			SELECT title, description, likes, posts.date, cover, type_awards, 
-			       creator_id, lk.likes_id IS NOT NULL, views, is_draft FROM posts
+			       creator_id, lk.likes_id IS NOT NULL, views, is_draft, number_comments FROM posts
 				LEFT OUTER JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
 				WHERE posts.posts_id = $2;`
 	getPostQueryUpdate = `UPDATE posts SET views = views + 1 WHERE posts_id = $1`
@@ -56,14 +57,14 @@ ORDER BY p.date desc LIMIT $2 OFFSET $3;`
 
 	getPostsQueryWithDraft = `
 			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, 
-					lk.likes_id IS NOT NULL, views, is_draft
+					lk.likes_id IS NOT NULL, views, is_draft, number_comments
 			FROM posts
 			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
 			WHERE creator_id = $2 ORDER BY posts.date DESC
 	`
 	getPostsQueryWithoutDraft = `
 			SELECT posts_id, title, description, likes, type_awards, posts.date, cover, 
-					lk.likes_id IS NOT NULL, views
+					lk.likes_id IS NOT NULL, views, number_comments
 			FROM posts
 			LEFT JOIN likes AS lk ON (lk.post_id = posts.posts_id and lk.users_id = $1)
 			WHERE creator_id = $2 AND NOT is_draft ORDER BY posts.date DESC
@@ -127,7 +128,7 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (
 	var awardsId sql.NullInt64
 	if err := repo.store.QueryRow(getPostQuery, userId, postID).Scan(&post.Title, &post.Description,
 		&post.Likes, &post.Date, &post.Cover, &awardsId,
-		&post.CreatorId, &post.AddLike, &post.Views, &post.IsDraft); err != nil {
+		&post.CreatorId, &post.AddLike, &post.Views, &post.IsDraft, &post.Comments); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
 		}
@@ -175,7 +176,7 @@ func (repo *PostsRepository) GetAvailablePosts(userID int64, pag *models.Paginat
 		err = rows.Scan(
 			&post.ID, &post.Title, &post.Description, &post.Likes, &post.Date,
 			&post.Cover, &awardsId, &post.CreatorId, &post.CreatorNickname,
-			&post.AddLike, &post.Views)
+			&post.AddLike, &post.Views, &post.Comments)
 
 		if err != nil {
 			_ = rows.Close()
@@ -227,10 +228,10 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64,
 
 		if withDraft {
 			err = rows.Scan(&post.ID, &post.Title, &post.Description, &post.Likes,
-				&awardsId, &post.Date, &post.Cover, &post.AddLike, &post.Views, &post.IsDraft)
+				&awardsId, &post.Date, &post.Cover, &post.AddLike, &post.Views, &post.IsDraft, &post.Comments)
 		} else {
 			err = rows.Scan(&post.ID, &post.Title, &post.Description, &post.Likes,
-				&awardsId, &post.Date, &post.Cover, &post.AddLike, &post.Views)
+				&awardsId, &post.Date, &post.Cover, &post.AddLike, &post.Views, &post.Comments)
 		}
 
 		if err != nil {

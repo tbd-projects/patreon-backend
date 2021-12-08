@@ -8,6 +8,7 @@ import (
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	attaches "patreon/internal/app/usecase/attaches"
 	usecase_awards "patreon/internal/app/usecase/awards"
+	usecase_comments "patreon/internal/app/usecase/comments"
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_info "patreon/internal/app/usecase/info"
 	usecase_likes "patreon/internal/app/usecase/likes"
@@ -69,6 +70,20 @@ func (m *MockUsecaseFactory) GetAwardsUsecase() usecase_awards.Usecase {
 func (mr *MockUsecaseFactoryMockRecorder) GetAwardsUsecase() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAwardsUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetAwardsUsecase))
+}
+
+// GetCommentsUsecase mocks base method.
+func (m *MockUsecaseFactory) GetCommentsUsecase() usecase_comments.Usecase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCommentsUsecase")
+	ret0, _ := ret[0].(usecase_comments.Usecase)
+	return ret0
+}
+
+// GetCommentsUsecase indicates an expected call of GetCommentsUsecase.
+func (mr *MockUsecaseFactoryMockRecorder) GetCommentsUsecase() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommentsUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetCommentsUsecase))
 }
 
 // GetCreatorUsecase mocks base method.

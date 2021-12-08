@@ -26,6 +26,10 @@ func (req *RequestRegistration) Sanitize(sanitizer bluemonday.Policy) {
 	req.Password = sanitizer.Sanitize(req.Password)
 }
 
+func (req *RequestComment) Sanitize(sanitizer bluemonday.Policy) {
+	req.Body = sanitizer.Sanitize(req.Body)
+}
+
 func (req *RequestAwards) Sanitize(sanitizer bluemonday.Policy) {
 	req.Name = sanitizer.Sanitize(req.Name)
 	req.Description = sanitizer.Sanitize(req.Description)
