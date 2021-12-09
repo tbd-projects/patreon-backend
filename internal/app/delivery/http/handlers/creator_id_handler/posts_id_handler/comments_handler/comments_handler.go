@@ -52,7 +52,6 @@ func NewCommentsHandler(log *logrus.Logger,
 // @Param attaches body http_models.RequestComment true "Request body for set comment"
 // @Success 200 {object} http_models.IdResponse
 // @Failure 400 {object} http_models.ErrResponse ""invalid parameters""
-// @Failure 409 {object} http_models.ErrResponse ""comment already exist""
 // @Failure 500 {object} http_models.ErrResponse ""can not do bd operation", "server error""
 // @Failure 403 {object} http_models.ErrResponse ""csrf token is invalid, get new token", "this post not belongs this creators", "this user can not add comment as creator""
 // @Failure 422 {object} http_models.ErrResponse ""this post id not know", "this user id not know""

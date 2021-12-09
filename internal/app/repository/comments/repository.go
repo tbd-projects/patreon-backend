@@ -6,7 +6,6 @@ import "patreon/internal/app/models"
 
 type Repository interface {
 	// Create Errors:
-	//		repository_postgresql.CommentAlreadyExist
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	Create(cm *models.Comment) (int64, error)

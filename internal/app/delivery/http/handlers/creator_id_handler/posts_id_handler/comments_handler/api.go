@@ -7,7 +7,6 @@ import (
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
-	repository_postgresql "patreon/internal/app/repository/comments/postgresql"
 )
 
 var codesByErrorsPOST = base_handler.CodeMap{
@@ -17,8 +16,6 @@ var codesByErrorsPOST = base_handler.CodeMap{
 		http.StatusUnprocessableEntity, handler_errors.IncorrectPostId, logrus.WarnLevel},
 	models.InvalidUserId: {
 		http.StatusUnprocessableEntity, handler_errors.IncorrectUserId, logrus.WarnLevel},
-	repository_postgresql.CommentAlreadyExist: {
-		http.StatusConflict, handler_errors.CommentAlreadyExist, logrus.WarnLevel},
 }
 
 var codesByErrorsGET = base_handler.CodeMap{

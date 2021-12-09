@@ -26,7 +26,7 @@ const (
 	getQuery = `SELECT cm.body, cm.as_creator, cm.users_id, cm.posts_id FROM comments AS cm WHERE cm.comments_id = $1`
 
 	getCommentsPostQuery = `
-					SELECT cm.comments_id, cm.body, cm.as_creator, cm.users_id, usr.nickname, 
+					SELECT cm.comments_id, cm.body, cm.as_creator, cm.users_id, usr.nickname, cm.date, 
 					       	CASE WHEN cm.as_creator = TRUE THEN cp.avatar
 							ELSE usr.avatar
 							END
@@ -37,7 +37,7 @@ const (
 					ORDER BY cm.date DESC LIMIT $2 OFFSET $3;`
 
 	getCommentsUserQuery = `
-					SELECT cm.comments_id, cm.body, cm.as_creator, cm.posts_id, ps.title, ps.cover
+					SELECT cm.comments_id, cm.body, cm.as_creator, cm.posts_id, ps.title, ps.cover, cm.date
 					FROM comments AS cm
 					JOIN posts as ps on ps.posts_id = cm.posts_id
 					WHERE cm.users_id = $1
@@ -60,14 +60,9 @@ func NewCommentsRepository(st *sqlx.DB) *CommentsRepository {
 }
 
 // Create Errors:
-//		repository_postgresql.CommentAlreadyExist
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *CommentsRepository) Create(cm *models.Comment) (int64, error) {
-	if err := repo.checkExistsWithPost(cm.AuthorId, cm.PostId, cm.AsCreator); !errors.Is(err, repository.NotFound) {
-		return -1, err
-	}
-
 	trans, err := repo.store.Begin()
 	if err != nil {
 		return app.InvalidInt, repository.NewDBError(err)
@@ -130,7 +125,7 @@ func (repo *CommentsRepository) GetUserComments(userId int64, pag *models.Pagina
 	for rows.Next() {
 		comment := models.UserComment{Comment: models.Comment{AuthorId: userId}}
 		if err = rows.Scan(&comment.ID, &comment.Body, &comment.AsCreator, &comment.PostId,
-			&comment.PostName, &comment.PostCover); err != nil {
+			&comment.PostName, &comment.PostCover, &comment.Date); err != nil {
 			_ = rows.Close()
 			return nil,
 				repository.NewDBError(errors.Wrap(err, fmt.Sprintf("try create comments for user %d", userId)))
@@ -167,7 +162,7 @@ func (repo *CommentsRepository) GetPostComments(postId int64, pag *models.Pagina
 	for rows.Next() {
 		comment := models.PostComment{Comment: models.Comment{PostId: postId}}
 		if err = rows.Scan(&comment.ID, &comment.Body, &comment.AsCreator, &comment.AuthorId,
-			&comment.AuthorNickname, &comment.AuthorAvatar); err != nil {
+			&comment.AuthorNickname, &comment.Date, &comment.AuthorAvatar); err != nil {
 			_ = rows.Close()
 			return nil,
 				repository.NewDBError(errors.Wrap(err, fmt.Sprintf("try create comments for post %d", postId)))

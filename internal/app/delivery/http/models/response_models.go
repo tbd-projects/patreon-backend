@@ -76,21 +76,23 @@ type ResponsePost struct {
 }
 
 type ResponsePostComment struct {
-	ID             int64  `json:"comment_id"`
-	Body           string `json:"body"`
-	AsCreator      bool   `json:"as_creator,omitempty"`
-	AuthorId       int64  `json:"author_id"`
-	AuthorNickname string `json:"author_nickname"`
-	AuthorAvatar   string `json:"author_avatar"`
+	ID             int64     `json:"comment_id"`
+	Body           string    `json:"body"`
+	AsCreator      bool      `json:"as_creator,omitempty"`
+	AuthorId       int64     `json:"author_id"`
+	Date           time.Time `json:"date"`
+	AuthorNickname string    `json:"author_nickname"`
+	AuthorAvatar   string    `json:"author_avatar"`
 }
 
 type ResponseUserComment struct {
-	ID        int64  `json:"comment_id"`
-	Body      string `json:"body"`
-	AsCreator bool   `json:"as_creator,omitempty"`
-	PostId    int64  `json:"post_id"`
-	PostName  string `json:"post_name"`
-	PostCover string `json:"post_cover"`
+	ID        int64     `json:"comment_id"`
+	Body      string    `json:"body"`
+	AsCreator bool      `json:"as_creator,omitempty"`
+	PostId    int64     `json:"post_id"`
+	Date      time.Time `json:"date"`
+	PostName  string    `json:"post_name"`
+	PostCover string    `json:"post_cover"`
 }
 
 type ResponseUserComments struct {
@@ -135,6 +137,7 @@ func ToResponseUserComment(cm models.UserComment) ResponseUserComment {
 		ID:        cm.ID,
 		Body:      cm.Body,
 		PostId:    cm.PostId,
+		Date:      cm.Date,
 		PostName:  cm.PostName,
 		PostCover: cm.PostCover,
 		AsCreator: cm.AsCreator,
@@ -146,6 +149,7 @@ func ToResponsePostComment(cm models.PostComment) ResponsePostComment {
 		ID:             cm.ID,
 		Body:           cm.Body,
 		AuthorId:       cm.AuthorId,
+		Date:           cm.Date,
 		AuthorNickname: cm.AuthorNickname,
 		AuthorAvatar:   cm.AuthorAvatar,
 		AsCreator:      cm.AsCreator,

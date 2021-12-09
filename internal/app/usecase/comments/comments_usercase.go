@@ -18,7 +18,6 @@ func NewCommentsUsecase(repository repoComments.Repository) *CommentsUsecase {
 }
 
 // Create Errors:
-//		repository_postgresql.CommentAlreadyExist
 //		models.InvalidPostId
 //		models.InvalidUserId
 // 		app.GeneralError with Errors

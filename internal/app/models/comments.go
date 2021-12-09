@@ -6,14 +6,16 @@ import (
 	"github.com/pkg/errors"
 	"patreon/internal/app/utilits/models"
 	"strconv"
+	"time"
 )
 
 type Comment struct {
-	ID        int64  `json:"comment_id"`
-	Body      string `json:"body"`
-	AsCreator bool   `json:"as_creator,omitempty"`
-	AuthorId  int64  `json:"author_id"`
-	PostId    int64  `json:"post_id.omitempty"`
+	ID        int64     `json:"comment_id"`
+	Body      string    `json:"body"`
+	AsCreator bool      `json:"as_creator,omitempty"`
+	AuthorId  int64     `json:"author_id"`
+	PostId    int64     `json:"post_id.omitempty"`
+	Date      time.Time `json:"date"`
 }
 
 type PostComment struct {
