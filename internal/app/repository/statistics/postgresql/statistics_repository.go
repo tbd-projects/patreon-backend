@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	checkCreator               = "select exists(select creator_id from creator_profile where creator_id = $1);"
 	countCreatorPosts          = "SELECT count(*) as cnt from posts where creator_id = $1;"
 	countCreatorSubscribers    = "SELECT count(*) as cnt from subscribers where creator_id = $1;"
 	countCreatorPostsLastViews = "select coalesce((select sum(views) " +
@@ -28,6 +29,19 @@ func NewStatisticsRepository(st *sqlx.DB) *StatisticsRepository {
 	return &StatisticsRepository{
 		store: st,
 	}
+}
+
+// CreatorExists Errors:
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (r *StatisticsRepository) CreatorExists(creatorID int64) (bool, error) {
+	var exists bool
+	err := r.store.QueryRow(checkCreator, creatorID).Scan(&exists)
+
+	if err != nil {
+		return false, repository.NewDBError(err)
+	}
+	return exists, nil
 }
 
 // GetCountCreatorPosts Errors:
