@@ -16,14 +16,14 @@ import (
 const (
 	checkExistsQuery = "SELECT count(*) from comments where comments_id = $1"
 
-	checkExistsWithPostQuery = "SELECT count(*) from comments where as_creator = $1 and posts_id = $2 and users_id = $3"
+	checkExistsWithPostQuery = "SELECT count(*) from comments where as_creator = $1 and post_id = $2 and users_id = $3"
 
-	createQuery          = `INSERT INTO comments (body, posts_id, users_id, as_creator) VALUES ($1, $2, $3, $4) RETURNING comments_id`
+	createQuery          = `INSERT INTO comments (body, post_id, users_id, as_creator) VALUES ($1, $2, $3, $4) RETURNING comments_id`
 	createQueryAddToPost = "UPDATE posts SET number_comments = number_comments + 1 where posts_id = $1"
 
 	updateQuery = "UPDATE comments SET body = $1, as_creator = $2 WHERE comments_id = $3"
 
-	getQuery = `SELECT cm.body, cm.as_creator, cm.users_id, cm.posts_id FROM comments AS cm WHERE cm.comments_id = $1`
+	getQuery = `SELECT cm.body, cm.as_creator, cm.users_id, cm.post_id FROM comments AS cm WHERE cm.comments_id = $1`
 
 	getCommentsPostQuery = `
 					SELECT cm.comments_id, cm.body, cm.as_creator, cm.users_id, usr.nickname, cm.date, 
@@ -33,18 +33,18 @@ const (
 					FROM comments AS cm
 					JOIN users as usr on usr.users_id = cm.users_id
 					JOIN creator_profile as cp on cp.creator_id = cm.users_id
-					WHERE cm.posts_id = $1
+					WHERE cm.post_id = $1
 					ORDER BY cm.date DESC LIMIT $2 OFFSET $3;`
 
 	getCommentsUserQuery = `
-					SELECT cm.comments_id, cm.body, cm.as_creator, cm.posts_id, ps.title, ps.cover, cm.date
+					SELECT cm.comments_id, cm.body, cm.as_creator, cm.post_id, ps.title, ps.cover, cm.date
 					FROM comments AS cm
-					JOIN posts as ps on ps.posts_id = cm.posts_id
+					JOIN posts as ps on ps.posts_id = cm.post_id
 					WHERE cm.users_id = $1
 					ORDER BY cm.date DESC LIMIT $2 OFFSET $3;`
 
 	deleteQueryDeleteFromPost = "UPDATE posts SET number_comments = number_comments - 1 where posts_id = $1"
-	deleteQueryDelete         = "DELETE FROM comments WHERE comments_id = $1 RETURNING posts_id"
+	deleteQueryDelete         = "DELETE FROM comments WHERE comments_id = $1 RETURNING post_id"
 )
 
 type CommentsRepository struct {
