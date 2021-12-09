@@ -45,9 +45,9 @@ func NewCommentsHandler(log *logrus.Logger,
 }
 
 // POST comments
-// @Summary crete current comment
+// @Summary crete comment to post
 // @tags comments
-// @Description create current comment for current post
+// @Description create comment for current post
 // @Produce json
 // @Param attaches body http_models.RequestComment true "Request body for set comment"
 // @Success 200 {object} http_models.IdResponse
@@ -110,9 +110,9 @@ func (h *CommentsHandler) POST(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET comments
-// @Summary get current comments
+// @Summary get post comments
 // @tags comments
-// @Description get current comments for current post
+// @Description get comments for current post
 // @Param page query uint64 true "start page number of posts mutually exclusive with offset"
 // @Param offset query uint64 true "start number of posts mutually exclusive with page"
 // @Param limit query uint64 true "posts to return"

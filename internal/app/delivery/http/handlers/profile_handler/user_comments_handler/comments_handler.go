@@ -33,9 +33,9 @@ func NewUserCommentsHandler(log *logrus.Logger,
 }
 
 // GET comments
-// @Summary get current comments
+// @Summary get user comments
 // @tags comments
-// @Description get current comments for current user
+// @Description get comments for current user
 // @Param page query uint64 true "start page number of posts mutually exclusive with offset"
 // @Param offset query uint64 true "start number of posts mutually exclusive with page"
 // @Param limit query uint64 true "posts to return"

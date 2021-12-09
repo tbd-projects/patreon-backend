@@ -112,9 +112,9 @@ func (h *CommentsIdHandler) PUT(w http.ResponseWriter, r *http.Request) {
 }
 
 // DELETE comments
-// @Summary update current comment
+// @Summary delete current comment
 // @tags comments
-// @Description update current comment from current post
+// @Description delete current comment from current post
 // @Produce json
 // @Success 200
 // @Failure 400 {object} http_models.ErrResponse ""invalid parameters""
