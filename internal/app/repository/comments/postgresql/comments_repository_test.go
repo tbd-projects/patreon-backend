@@ -15,7 +15,7 @@ type SuiteCommentsRepository struct {
 
 func (s *SuiteCommentsRepository) SetupSuite() {
 	s.InitBD()
-	s.repo = NewAwardsRepository(s.DB)
+	s.repo = NewCommentsRepository(s.DB)
 }
 
 func (s *SuiteCommentsRepository) AfterTest(_, _ string) {

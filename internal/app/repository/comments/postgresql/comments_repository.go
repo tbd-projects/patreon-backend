@@ -23,6 +23,8 @@ const (
 
 	updateQuery = "UPDATE comments SET body = $1, as_creator = $2 WHERE comments_id = $3"
 
+	getQuery = `SELECT cm.body, cm.as_creator, cm.users_id, cm.posts_id FROM comments AS cm WHERE cm.comments_id = $1`
+
 	getCommentsPostQuery = `
 					SELECT cm.comments_id, cm.body, cm.as_creator, cm.users_id, usr.nickname, 
 					       	CASE WHEN cm.as_creator = TRUE THEN cp.avatar
@@ -37,7 +39,7 @@ const (
 	getCommentsUserQuery = `
 					SELECT cm.comments_id, cm.body, cm.as_creator, cm.posts_id, ps.title, ps.cover
 					FROM comments AS cm
-					JOIN posts as ps on ps.posts_id = $1
+					JOIN posts as ps on ps.posts_id = cm.posts_id
 					WHERE cm.users_id = $1
 					ORDER BY cm.date DESC LIMIT $2 OFFSET $3;`
 
@@ -62,7 +64,7 @@ func NewCommentsRepository(st *sqlx.DB) *CommentsRepository {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *CommentsRepository) Create(cm *models.Comment) (int64, error) {
-	if err := repo.checkExistsWithPost(cm.AuthorId, cm.PostId, cm.AsCreator); errors.Is(err, repository.NotFound) {
+	if err := repo.checkExistsWithPost(cm.AuthorId, cm.PostId, cm.AsCreator); !errors.Is(err, repository.NotFound) {
 		return -1, err
 	}
 
@@ -182,11 +184,12 @@ func (repo *CommentsRepository) GetPostComments(postId int64, pag *models.Pagina
 
 // CheckExists Errors:
 //		repository_postgresql.CommentAlreadyExist
+//		repository.NotFound
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *CommentsRepository) CheckExists(commentId int64) error {
 	cnt := int64(0)
-	if err := repo.store.Get(cnt, checkExistsQuery, commentId); err != nil {
+	if err := repo.store.Get(&cnt, checkExistsQuery, commentId); err != nil {
 		if err == sql.ErrNoRows {
 			return repository.NotFound
 		}
@@ -201,13 +204,32 @@ func (repo *CommentsRepository) CheckExists(commentId int64) error {
 	return repository.NotFound
 }
 
+// Get Errors:
+//		repository.NotFound
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (repo *CommentsRepository) Get(commentsId int64) (*models.Comment, error) {
+	cm := &models.Comment{ID: commentsId}
+	if err := repo.store.QueryRowx(getQuery, commentsId).
+		Scan(&cm.Body, &cm.AsCreator, &cm.AuthorId, &cm.PostId); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, repository.NotFound
+		}
+		return nil, repository.NewDBError(errors.Wrap(err,
+			fmt.Sprintf("try checkExists comments with id %d", commentsId)))
+	}
+
+	return cm, nil
+}
+
 // CheckExists Errors:
 //		repository_postgresql.CommentAlreadyExist
+//		repository.NotFound
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *CommentsRepository) checkExistsWithPost(authorId int64, postId int64, asCreator bool) error {
 	cnt := int64(0)
-	if err := repo.store.Get(cnt, checkExistsWithPostQuery, asCreator, postId, authorId); err != nil {
+	if err := repo.store.Get(&cnt, checkExistsWithPostQuery, asCreator, postId, authorId); err != nil {
 		if err == sql.ErrNoRows {
 			return repository.NotFound
 		}

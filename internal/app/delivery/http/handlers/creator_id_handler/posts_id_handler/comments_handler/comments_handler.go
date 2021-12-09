@@ -94,7 +94,7 @@ func (h *CommentsHandler) POST(w http.ResponseWriter, r *http.Request) {
 	if req.AsCreator && userID != creatorId {
 		h.Log(r).Error(fmt.Sprintf("try add as creator for not self post: creatorId %d, userId %d",
 			userID, creatorId))
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.NotAllowAddComment)
+		h.Error(w, r, http.StatusForbidden, handler_errors.NotAllowAddComment)
 		return
 	}
 

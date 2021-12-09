@@ -21,6 +21,12 @@ type Usecase interface {
 	// 			repository.DefaultErrDB
 	Update(cm *models.Comment) error
 
+	// Get Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	Get(commentsId int64) (*models.Comment, error)
+
 	// CheckExists Errors:
 	//		repository_postgresql.CommentAlreadyExist
 	// 		app.GeneralError with Errors

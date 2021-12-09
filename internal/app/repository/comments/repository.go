@@ -19,11 +19,18 @@ type Repository interface {
 
 	// CheckExists Errors:
 	//		repository_postgresql.CommentAlreadyExist
+	//		repository.NotFound
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	CheckExists(commentId int64) error
 
-	// GetUserComments Errors:
+	// Get Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	Get(commentsId int64) (*models.Comment, error)
+
+// GetUserComments Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	GetUserComments(userId int64, pag *models.Pagination) ([]models.UserComment, error)

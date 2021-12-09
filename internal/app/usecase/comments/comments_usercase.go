@@ -36,6 +36,14 @@ func (usecase *CommentsUsecase) Create(cm *models.Comment) (int64, error) {
 	return usecase.repository.Create(cm)
 }
 
+// Get Errors:
+//		repository.NotFound
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (usecase *CommentsUsecase) Get(commentsId int64) (*models.Comment, error) {
+	return usecase.repository.Get(commentsId)
+}
+
 // Update Errors:
 //		repository.NotFound
 // 		app.GeneralError with Errors
