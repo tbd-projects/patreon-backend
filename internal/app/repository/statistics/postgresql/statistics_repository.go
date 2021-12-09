@@ -7,13 +7,17 @@ import (
 )
 
 const (
-	countCreatorPosts       = "SELECT count(*) as cnt from posts where creator_id = $1;"
-	countCreatorSubscribers = "SELECT count(*) as cnt from subscribers where creator_id = $1;"
-	//countCreatorPostsViews     = "SELECT sum(views) FROM posts GROUP BY creator_id HAVING creator_id = $1;"
-	countCreatorPostsLastViews = "SELECT SUM(views) FROM (" +
-		"SELECT posts.views, creator_id FROM POSTS" +
-		"WHERE date_part('day', current_date::timestamptz - posts.date) < $2" +
-		"GROUP BY creator_i HAVING creator_id = $1;"
+	countCreatorPosts          = "SELECT count(*) as cnt from posts where creator_id = $1;"
+	countCreatorSubscribers    = "SELECT count(*) as cnt from subscribers where creator_id = $1;"
+	countCreatorPostsLastViews = "select coalesce((select sum(views) " +
+		"from (select posts.views, creator_id from posts " +
+		"where date_part('day', current_date::timestamptz - posts.date) < $2) as sum_viewes " +
+		"group by sum_viewes.creator_id " +
+		"having sum_viewes.creator_id = $1), 0);"
+	totalCreatorIncomes = "select coalesce(" +
+		"(select sum(amount) from (select amount, creator_id from payments " +
+		"where date_part('day', current_date::timestamptz - payments.date) < $2) as last_payments " +
+		"group by last_payments.creator_id having last_payments.creator_id = $1), 0) as sum_payments;"
 )
 
 type StatisticsRepository struct {
@@ -53,14 +57,32 @@ func (r *StatisticsRepository) GetCountCreatorSubscribers(creatorID int64) (int6
 
 	return cnt, nil
 }
+
+// GetCountCreatorViews Errors:
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
 func (r *StatisticsRepository) GetCountCreatorViews(creatorID int64, days int64) (int64, error) {
 	var cnt int64
-	err := r.store.QueryRow(countCreatorPostsLastViews, creatorID).Scan(&cnt)
+	err := r.store.QueryRow(countCreatorPostsLastViews, creatorID, days).Scan(&cnt)
 
 	if err != nil {
 		return app.InvalidInt, repository.NewDBError(err)
 	}
 
 	return cnt, nil
+}
 
+// GetTotalIncome Errors:
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (r *StatisticsRepository) GetTotalIncome(creatorID int64, days int64) (float64, error) {
+	var sum float64
+
+	err := r.store.QueryRow(totalCreatorIncomes, creatorID, days).Scan(&sum)
+
+	if err != nil {
+		return app.InvalidInt, repository.NewDBError(err)
+	}
+
+	return sum, nil
 }
