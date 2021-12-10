@@ -1,7 +1,10 @@
 name: patreon-ci
 
 on:
-  push: [push, pull_request]
+  push:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   lint:
