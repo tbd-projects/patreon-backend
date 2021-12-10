@@ -1,4 +1,4 @@
-package statistics_handler
+package statistics_count_posts_handler
 
 import (
 	"github.com/gorilla/mux"
@@ -15,7 +15,7 @@ type CreatorCountPostsHandler struct {
 	bh.BaseHandler
 }
 
-func NewCreatorPostsHandler(log *logrus.Logger, ucStatistics statistics_usecase.Usecase) *CreatorCountPostsHandler {
+func NewCreatorCountPostsHandler(log *logrus.Logger, ucStatistics statistics_usecase.Usecase) *CreatorCountPostsHandler {
 	h := &CreatorCountPostsHandler{
 		statisticsUsecase: ucStatistics,
 		BaseHandler:       *bh.NewBaseHandler(log),

@@ -1,4 +1,4 @@
-package statistics_handler
+package statistics_total_income_handler
 
 import (
 	"github.com/gorilla/mux"
@@ -33,7 +33,7 @@ func NewCreatorTotalIncomeHandler(log *logrus.Logger, ucStatistics statistics_us
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Failure 404 {object} http_models.ErrResponse "creator not found"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
-// @Router /creators/{:creator_id}/statistics/posts/total_income [GET]
+// @Router /creators/{:creator_id}/statistics/total_income [GET]
 func (h *CreatorTotalIncomeHandler) GET(w http.ResponseWriter, r *http.Request) {
 	days, ok := h.GetInt64FromQueries(w, r, "days")
 	if !ok {

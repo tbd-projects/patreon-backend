@@ -1,1 +1,1 @@
-package statistics_handler
+package statistics_total_income_handler

@@ -1,4 +1,4 @@
-package statistics_handler
+package statistics_count_subscribers_handler
 
 import (
 	"github.com/gorilla/mux"

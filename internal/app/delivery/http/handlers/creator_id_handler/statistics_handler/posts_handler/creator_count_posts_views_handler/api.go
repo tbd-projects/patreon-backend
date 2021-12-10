@@ -1,4 +1,4 @@
-package statistics_handler
+package statistics_count_posts_views_handler
 
 import (
 	"github.com/sirupsen/logrus"
