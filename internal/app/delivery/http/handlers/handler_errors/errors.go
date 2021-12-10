@@ -9,6 +9,7 @@ import (
 
 /// NOT FOUND
 var (
+	CreatorNotFound          = errors.New("creator not found")
 	UserNotFound             = errors.New("user not found")
 	UserWithNicknameNotFound = errors.New("user with this nickname not found")
 	AwardNotFound            = errors.New("award with this id not found")
