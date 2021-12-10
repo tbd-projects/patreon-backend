@@ -13,6 +13,7 @@ import (
 	usecase_likes "patreon/internal/app/usecase/likes"
 	payments "patreon/internal/app/usecase/payments"
 	posts "patreon/internal/app/usecase/posts"
+	statistics "patreon/internal/app/usecase/statistics"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
 	usercase_user "patreon/internal/app/usecase/user"
 	reflect "reflect"
@@ -153,6 +154,20 @@ func (m *MockUsecaseFactory) GetPostsUsecase() posts.Usecase {
 func (mr *MockUsecaseFactoryMockRecorder) GetPostsUsecase() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetPostsUsecase))
+}
+
+// GetStatsUsecase mocks base method.
+func (m *MockUsecaseFactory) GetStatsUsecase() statistics.Usecase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStatsUsecase")
+	ret0, _ := ret[0].(statistics.Usecase)
+	return ret0
+}
+
+// GetStatsUsecase indicates an expected call of GetStatsUsecase.
+func (mr *MockUsecaseFactoryMockRecorder) GetStatsUsecase() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatsUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetStatsUsecase))
 }
 
 // GetSubscribersUsecase mocks base method.

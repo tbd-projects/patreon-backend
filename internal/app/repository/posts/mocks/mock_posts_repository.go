@@ -63,6 +63,21 @@ func (mr *PostsRepositoryMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*PostsRepository)(nil).Delete), arg0)
 }
 
+// GetAvailablePosts mocks base method.
+func (m *PostsRepository) GetAvailablePosts(arg0 int64, arg1 *models.Pagination) ([]models.AvailablePost, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAvailablePosts", arg0, arg1)
+	ret0, _ := ret[0].([]models.AvailablePost)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAvailablePosts indicates an expected call of GetAvailablePosts.
+func (mr *PostsRepositoryMockRecorder) GetAvailablePosts(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvailablePosts", reflect.TypeOf((*PostsRepository)(nil).GetAvailablePosts), arg0, arg1)
+}
+
 // GetPost mocks base method.
 func (m *PostsRepository) GetPost(arg0, arg1 int64, arg2 bool) (*models.Post, error) {
 	m.ctrl.T.Helper()

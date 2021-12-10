@@ -22,8 +22,7 @@ import (
 
 type SuiteUserUsecase struct {
 	usecase.SuiteUsecase
-	uc    Usecase
-	tUser *models.User
+	uc Usecase
 }
 
 func (s *SuiteUserUsecase) SetupSuite() {

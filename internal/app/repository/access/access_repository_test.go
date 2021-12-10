@@ -97,7 +97,7 @@ func (s *SuiteTestRepository) TestGet() {
 	assert.Error(s.T(), err)
 
 	s.redisServer.FastForward(time.Second * 100000)
-	_, err = s.accessRepository.Get(key)
+	_, _ = s.accessRepository.Get(key)
 	assert.Error(s.T(), NotFound)
 
 	s.redisServer.Close()

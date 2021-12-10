@@ -27,5 +27,5 @@ type UsecaseFactory interface {
 	GetAttachesUsecase() useAttaches.Usecase
 	GetPaymentsUsecase() usePayments.Usecase
 	GetInfoUsecase() useInfo.Usecase
-	GetStatisticsUsecase() useStats.Usecase
+	GetStatsUsecase() useStats.Usecase
 }

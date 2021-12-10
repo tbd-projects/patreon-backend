@@ -14,7 +14,6 @@ import (
 type FactorySuite struct {
 	handlers.SuiteHandler
 	mockRepositoryFactory *mock_repository_factory.MockRepositoryFactory
-	factory               *UsecaseFactory
 	fileConn              *grpc.ClientConn
 }
 

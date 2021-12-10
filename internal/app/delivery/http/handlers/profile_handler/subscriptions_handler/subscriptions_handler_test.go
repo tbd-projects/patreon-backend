@@ -1,13 +1,9 @@
 package subscriptions_handler
 
-import (
-	"patreon/internal/app/delivery/http/handlers"
-)
-
-type SubscriptionsTestSuite struct {
-	handlers.SuiteHandler
-	handler *SubscriptionsHandler
-}
+//type SubscriptionsTestSuite struct {
+//	handlers.SuiteHandler
+//	handler *SubscriptionsHandler
+//}
 
 //func (s *SubscriptionsTestSuite) SetupSuite() {
 //	s.SuiteHandler.SetupSuite()

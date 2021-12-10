@@ -9,14 +9,12 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	usecase_creator "patreon/internal/app/usecase/creator"
-	usecase_user "patreon/internal/app/usecase/user"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 )
 
 type SearchCreatorsHandler struct {
 	sessionClient  session_client.AuthCheckerClient
 	creatorUsecase usecase_creator.Usecase
-	userUsecase    usecase_user.Usecase
 	bh.BaseHandler
 }
 

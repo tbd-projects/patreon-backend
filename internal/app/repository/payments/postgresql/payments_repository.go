@@ -13,13 +13,11 @@ import (
 )
 
 const (
-	queryCountUserPayments  = "SELECT count(*) FROM payments where users_id = $1"
 	querySelectUserPayments = "SELECT p.amount, p.date, p.creator_id, u.nickname, cp.category, cp.description FROM payments p " +
 		"JOIN creator_profile cp on p.creator_id = cp.creator_id " +
 		"JOIN users u on cp.creator_id = u.users_id where p.users_id = $1 " +
 		"ORDER BY p.date DESC "
 
-	queryCountCreatorPayments  = "SELECT count(*) FROM payments where creator_id = $1"
 	querySelectCreatorPayments = "SELECT p.amount, p.date, p.users_id, u.nickname FROM payments p " +
 		"JOIN users u on p.users_id = u.users_id where p.creator_id = $1 " +
 		"ORDER BY p.date DESC "

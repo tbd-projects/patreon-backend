@@ -25,7 +25,6 @@ type UsecaseFactory struct {
 	csrfUsecase        usecase_csrf.Usecase
 	accessUsecase      useAccess.Usecase
 	subscribersUsecase useSubscr.Usecase
-	awardsUsercase     useAwards.Usecase
 	awardsUsecase      useAwards.Usecase
 	postsUsecase       usePosts.Usecase
 	attachesUsecase    useAttaches.Usecase

@@ -1,13 +1,9 @@
 package attaches_id_handler
 
-import (
-	"patreon/internal/app/delivery/http/handlers"
-)
-
-type AttachesIDTestSuite struct {
-	handlers.SuiteHandler
-	handler *AttachesIDHandler
-}
+//type AttachesIDTestSuite struct {
+//	handlers.SuiteHandler
+//	handler *AttachesIDHandler
+//}
 
 /*
 func (s *PostsIdTestSuite) SetupSuite() {

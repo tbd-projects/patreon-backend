@@ -124,7 +124,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucPayments := f.usecaseFactory.GetPaymentsUsecase()
 	ucInfo := f.usecaseFactory.GetInfoUsecase()
 	sManager := client.NewSessionClient(f.sessionClientConn)
-	ucStats := f.usecaseFactory.GetStatisticsUsecase()
+	ucStats := f.usecaseFactory.GetStatsUsecase()
 
 	return map[int]app.Handler{
 		INFO:                     info_handler.NewInfoHandler(f.logger, ucInfo),

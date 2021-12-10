@@ -15,8 +15,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/golang/mock/gomock"
-
 	"github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/stretchr/testify/require"
@@ -27,10 +25,6 @@ type SuiteLikesRepository struct {
 	repo *LikesRepository
 }
 type LikesWithFieldMatcher struct{ like *models.Like }
-
-func newLikesWithFieldMatcher(like *models.Like) gomock.Matcher {
-	return &LikesWithFieldMatcher{like}
-}
 
 func (match *LikesWithFieldMatcher) Matches(x interface{}) bool {
 	switch x.(type) {

@@ -70,7 +70,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_getDataType() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getDataTypeQuery)).
 		WithArgs(1).
 		WillReturnError(repository.DefaultErrDB)
-	id, err = s.repo.getAttachType(1)
+	_, err = s.repo.getAttachType(1)
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 }
 
@@ -98,7 +98,7 @@ func (s *SuiteAttachesRepository) TestAttachesRepository_Create() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(createQuery)).
 		WithArgs(1, data.Value, data.PostId).
 		WillReturnError(repository.DefaultErrDB)
-	id, err = s.repo.Create(&data)
+	_, err = s.repo.Create(&data)
 	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 }
 
