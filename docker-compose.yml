@@ -23,6 +23,7 @@ services:
     volumes:
       - ./logs-ngnix:/var/log/nginx/
       - ./patreon-secrt/ngnix/letsencrypt:/etc/letsencrypt
+      - ./static:/static
       - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
   sessions-service:
     image: session-service

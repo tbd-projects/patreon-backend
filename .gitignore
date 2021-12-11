@@ -22,6 +22,7 @@ logs-files
 logs-ngnix
 patreon-secrt
 grafana
+static
 
 cover2
 cover
