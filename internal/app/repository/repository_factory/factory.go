@@ -44,7 +44,7 @@ type RepositoryFactory struct {
 	paymentsRepository    repoPayments.Repository
 	infoRepository        repoInfo.Repository
 	statsRepository       repStats.Repository
-	CommentsRepository        repoComments.Repository
+	CommentsRepository    repoComments.Repository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {

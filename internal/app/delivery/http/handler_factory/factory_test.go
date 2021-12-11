@@ -71,7 +71,6 @@ func (s *FactorySuite) TestGetHandlersUrlsAlreadyExists() {
 	s.usecaseFactory.EXPECT().GetStatsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetCommentsUsecase().Times(1)
 
-
 	s.factory.urlHandler = nil
 	defer func() {
 		if r := recover(); r != nil {
