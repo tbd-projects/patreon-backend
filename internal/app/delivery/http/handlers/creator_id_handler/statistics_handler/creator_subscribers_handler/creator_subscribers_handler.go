@@ -6,7 +6,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	http_models "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	statistics_usecase "patreon/internal/app/usecase/statistics"
 )
 

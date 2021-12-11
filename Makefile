@@ -17,8 +17,8 @@ run-posgres-redis:
 	systemctl start postgresql
 
 generate-api:
-	go get -u github.com/swaggo/swag/cmd/swag@latest
-	swag init --parseDependency --parseInternal -g ./cmd/server/main.go -o docs
+	go install github.com/swaggo/swag/cmd/swag@latest
+	swag init --parseDependency --parseInternal --parseDepth 1 -g ./cmd/server/main.go -o docs
 
 build: generate-api
 	mkdir -p ./patreon-secrt
