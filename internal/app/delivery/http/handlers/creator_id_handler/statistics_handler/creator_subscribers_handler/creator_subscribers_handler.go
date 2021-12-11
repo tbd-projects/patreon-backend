@@ -28,7 +28,7 @@ func NewCreatorCountSubscribersHandler(log *logrus.Logger, ucStatistics statisti
 // @tags posts
 // @Description get number of creator subscribers
 // @Produce json
-// @Success 201 {object} http_models.ResponseCreatorTotalIncome
+// @Success 201 {object} http_models.ResponseCreatorCountSubscribers
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Failure 404 {object} http_models.ErrResponse "creator not found"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
