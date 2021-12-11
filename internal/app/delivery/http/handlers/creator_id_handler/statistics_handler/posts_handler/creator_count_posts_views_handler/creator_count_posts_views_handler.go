@@ -29,7 +29,7 @@ func NewCreatorViewsHandler(log *logrus.Logger, ucStatistics statistics_usecase.
 // @Description get count of creator posts views
 // @Produce json
 // @Param days query uint64 true "number of processing days"
-// @Success 201 {array} http_models.ResponseCreatorPostsViews
+// @Success 201 {object} http_models.ResponseCreatorPostsViews
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters", "invalid parameters in query"
 // @Failure 404 {object} http_models.ErrResponse "creator not found"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
