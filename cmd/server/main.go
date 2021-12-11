@@ -47,6 +47,9 @@ func init() {
 // @tag.name payments
 // @tag.description "Some methods for work with payments"
 
+// @tag.name comments
+// @tag.description "Some methods for work with comments"
+
 // @tag.name utilities
 // @tag.description "Some methods for front work"
 

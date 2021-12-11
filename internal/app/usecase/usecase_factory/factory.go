@@ -5,6 +5,7 @@ import (
 	useAccess "patreon/internal/app/usecase/access"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	useAwards "patreon/internal/app/usecase/awards"
+	useComments "patreon/internal/app/usecase/comments"
 	useCreator "patreon/internal/app/usecase/creator"
 	useInfo "patreon/internal/app/usecase/info"
 	useLikes "patreon/internal/app/usecase/likes"
@@ -33,6 +34,7 @@ type UsecaseFactory struct {
 	paymentsUsecase    usePayments.Usecase
 	fileClient         client.FileServiceClient
 	statsUsecase       useStats.Usecase
+	commentsUsecase    useComments.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory, fileConn *grpc.ClientConn) *UsecaseFactory {
@@ -127,4 +129,11 @@ func (f *UsecaseFactory) GetStatsUsecase() useStats.Usecase {
 		f.statsUsecase = useStats.NewStatisticsUsecase(f.repositoryFactory.GetStatsRepository())
 	}
 	return f.statsUsecase
+}
+
+func (f *UsecaseFactory) GetCommentsUsecase() useComments.Usecase {
+	if f.commentsUsecase == nil {
+		f.commentsUsecase = useComments.NewCommentsUsecase(f.repositoryFactory.GetCommentsRepository())
+	}
+	return f.commentsUsecase
 }

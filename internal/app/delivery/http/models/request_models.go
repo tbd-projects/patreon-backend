@@ -23,6 +23,11 @@ type RequestLogin struct {
 	Password string `json:"password"`
 }
 
+type RequestComment struct {
+	Body      string `json:"body"`
+	AsCreator bool   `json:"as_creator,omitempty"`
+}
+
 type RequestChangePassword struct {
 	OldPassword string `json:"old"`
 	NewPassword string `json:"new"`
@@ -122,8 +127,6 @@ func (req *RequestChangeNickname) Validate() error {
 	}
 	return nil
 }
-
-
 
 // requestAttachValidError Errors:
 //		handler_errors.IncorrectType

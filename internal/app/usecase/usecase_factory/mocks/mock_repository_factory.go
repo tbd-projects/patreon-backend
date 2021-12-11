@@ -9,6 +9,7 @@ import (
 	repository_access "patreon/internal/app/repository/access"
 	repository_attaches "patreon/internal/app/repository/attaches"
 	repository_awards "patreon/internal/app/repository/awards"
+	repository_comments "patreon/internal/app/repository/comments"
 	repository_creator "patreon/internal/app/repository/creator"
 	repository_info "patreon/internal/app/repository/info"
 	repository_likes "patreon/internal/app/repository/likes"
@@ -85,6 +86,20 @@ func (m *MockRepositoryFactory) GetAwardsRepository() repository_awards.Reposito
 func (mr *MockRepositoryFactoryMockRecorder) GetAwardsRepository() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAwardsRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetAwardsRepository))
+}
+
+// GetCommentsRepository mocks base method.
+func (m *MockRepositoryFactory) GetCommentsRepository() repository_comments.Repository {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCommentsRepository")
+	ret0, _ := ret[0].(repository_comments.Repository)
+	return ret0
+}
+
+// GetCommentsRepository indicates an expected call of GetCommentsRepository.
+func (mr *MockRepositoryFactoryMockRecorder) GetCommentsRepository() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommentsRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetCommentsRepository))
 }
 
 // GetCreatorRepository mocks base method.

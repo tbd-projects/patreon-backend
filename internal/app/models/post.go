@@ -35,6 +35,7 @@ type Post struct {
 	Cover       string    `json:"cover"`
 	CreatorId   int64     `json:"creator_id"`
 	Views       int64     `json:"views"`
+	Comments    int64     `json:"comments"`
 	AddLike     bool      `json:"add_like"`
 	Date        time.Time `json:"date"`
 	IsDraft     bool      `json:"is_draft"`

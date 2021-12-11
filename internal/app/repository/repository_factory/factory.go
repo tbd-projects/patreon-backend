@@ -8,6 +8,8 @@ import (
 	repoAttachesPsql "patreon/internal/app/repository/attaches/postgresql"
 	repoAwrds "patreon/internal/app/repository/awards"
 	repAwardsPsql "patreon/internal/app/repository/awards/postgresql"
+	repoComments "patreon/internal/app/repository/comments"
+	repCommentsPsql "patreon/internal/app/repository/comments/postgresql"
 	repCreator "patreon/internal/app/repository/creator"
 	repCreatorPsql "patreon/internal/app/repository/creator/postgresql"
 	repoInfo "patreon/internal/app/repository/info"
@@ -42,6 +44,7 @@ type RepositoryFactory struct {
 	paymentsRepository    repoPayments.Repository
 	infoRepository        repoInfo.Repository
 	statsRepository       repStats.Repository
+	CommentsRepository        repoComments.Repository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -130,4 +133,11 @@ func (f *RepositoryFactory) GetStatsRepository() repStats.Repository {
 		f.statsRepository = repStatsPsql.NewStatisticsRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.statsRepository
+}
+
+func (f *RepositoryFactory) GetCommentsRepository() repoComments.Repository {
+	if f.CommentsRepository == nil {
+		f.CommentsRepository = repCommentsPsql.NewCommentsRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.CommentsRepository
 }

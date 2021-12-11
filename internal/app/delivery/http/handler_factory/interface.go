@@ -4,6 +4,7 @@ import (
 	useCsrf "patreon/internal/app/csrf/usecase"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	useAwards "patreon/internal/app/usecase/awards"
+	useComments "patreon/internal/app/usecase/comments"
 	useCreator "patreon/internal/app/usecase/creator"
 	useInfo "patreon/internal/app/usecase/info"
 	useLikes "patreon/internal/app/usecase/likes"
@@ -27,5 +28,6 @@ type UsecaseFactory interface {
 	GetAttachesUsecase() useAttaches.Usecase
 	GetPaymentsUsecase() usePayments.Usecase
 	GetInfoUsecase() useInfo.Usecase
+	GetCommentsUsecase() useComments.Usecase
 	GetStatsUsecase() useStats.Usecase
 }

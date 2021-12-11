@@ -23,6 +23,8 @@ import (
 	upd_img_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_image_post_handler"
 	upd_text_data_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_text_post_handler"
 	upd_video_attach_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_id_handler/upd_video_post_handler"
+	comments_id_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/comment_id_handler"
+	comments_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/comments_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/likes_handler"
 	upl_cover_posts_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_cover_post_handler"
 	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_handler"
@@ -42,6 +44,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/nickname_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/password_handler"
+	"patreon/internal/app/delivery/http/handlers/profile_handler/user_comments_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/user_posts_handler"
 	"patreon/internal/app/delivery/http/handlers/register_handler"
 	"patreon/internal/microservices/auth/delivery/grpc/client"
@@ -95,6 +98,9 @@ const (
 	STATS_POSTS_VIEWS
 	STATS_COUNT_SUBSCRIBERS
 	STATS_TOTAL_INCOMES
+	POST_COMMENTS
+	COMMENTS_ID
+	USER_COMMENTS
 )
 
 type HandlerFactory struct {
@@ -123,6 +129,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucAttaches := f.usecaseFactory.GetAttachesUsecase()
 	ucPayments := f.usecaseFactory.GetPaymentsUsecase()
 	ucInfo := f.usecaseFactory.GetInfoUsecase()
+	ucComment := f.usecaseFactory.GetCommentsUsecase()
 	sManager := client.NewSessionClient(f.sessionClientConn)
 	ucStats := f.usecaseFactory.GetStatsUsecase()
 
@@ -169,6 +176,9 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		STATS_COUNT_POSTS:        statistics_count_posts_handler.NewCreatorCountPostsHandler(f.logger, ucStats),
 		STATS_POSTS_VIEWS:        statistics_count_posts_views_handler.NewCreatorViewsHandler(f.logger, ucStats),
 		STATS_TOTAL_INCOMES:      statistics_total_income_handler.NewCreatorTotalIncomeHandler(f.logger, ucStats),
+		POST_COMMENTS:            comments_handler.NewCommentsHandler(f.logger, ucComment, ucPosts, sManager),
+		COMMENTS_ID:              comments_id_handler.NewCommentsIdHandler(f.logger, ucComment, ucPosts, sManager),
+		USER_COMMENTS:            user_comments_handler.NewUserCommentsHandler(f.logger, ucComment, sManager),
 	}
 }
 
@@ -191,6 +201,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/nickname": hs[UPDATE_NICKNAME],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 		"/user/payments":        hs[USER_PAYMENTS],
+		"/user/comments":        hs[USER_COMMENTS],
 		"/user/posts":           hs[POSTS_AVAILABLE],
 		// /creators ---------------------------------------------------------////
 		"/creators":                                   hs[CREATORS],
@@ -211,6 +222,9 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update":       hs[POSTS_UPD],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/update/cover": hs[POST_UPD_COVER],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/like":         hs[POSTS_LIKES],
+		// ../comments -----------------------------------------------------////
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/comments":                     hs[POST_COMMENTS],
+		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/comments/{comment_id:[0-9]+}": hs[COMMENTS_ID],
 		// ../attaches  ----------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches":                        hs[ATTACHES],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/attaches/text":                   hs[ATTACH_ADD_TEXT],

@@ -21,6 +21,7 @@ var (
 	InvalidCreatorId            = errors.New("not positive creator id")
 	InvalidAwardsId             = errors.New("not positive awards id")
 	InvalidPostId               = errors.New("not positive posts id")
+	InvalidUserId               = errors.New("not positive user id")
 	InvalidType                 = errors.New("not positive data type")
 )
 
@@ -66,6 +67,22 @@ func awardsValidError() models_utilits.ExtractorErrorByName {
 	validMap := models_utilits.MapOfValidateError{
 		"name":  EmptyName,
 		"price": IncorrectAwardsPrice,
+	}
+	return func(key string) error {
+		if val, ok := validMap[key]; ok {
+			return val
+		}
+		return nil
+	}
+}
+
+// awardsValidError Errors:
+//		InvalidUserId
+//		InvalidPostId
+func commentsValidError() models_utilits.ExtractorErrorByName {
+	validMap := models_utilits.MapOfValidateError{
+		"author_id": InvalidUserId,
+		"post_id":   InvalidPostId,
 	}
 	return func(key string) error {
 		if val, ok := validMap[key]; ok {
