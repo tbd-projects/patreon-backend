@@ -28,7 +28,7 @@ func (repo *PayTokenRepository) Set(key string, value string, timeExp int) error
 			panic(fmt.Sprintf("Unsuccessful close connection to redis with error: %s, with key: %s value: %s", err.Error(), key, value))
 		}
 	}(con)
-	res, err := redis.String(con.Do("SET", key, value, "PX", timeExp))
+	res, err := redis.String(con.Do("SET", key, value, "EX", timeExp))
 	if res != "OK" {
 		return app.GeneralError{
 			Err: errors.Wrapf(SetError,

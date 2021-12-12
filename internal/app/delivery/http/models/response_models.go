@@ -349,3 +349,7 @@ type ResponseCreatorTotalIncome struct {
 type ResponseCreatorCountPosts struct {
 	CountPosts int64 `json:"count_posts"`
 }
+
+type ResponsePayToken struct {
+	PayToken string `json:"token"`
+}
