@@ -52,6 +52,7 @@ func (h *CreatorCountPostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 
 	countPostsViews, err := h.statisticsUsecase.GetCountCreatorPosts(creatorId)
 	if err != nil {
+		h.Log(r).Errorf("usecase error: %v", err)
 		h.UsecaseError(w, r, err, codeByErrorGet)
 		return
 	}
