@@ -102,15 +102,15 @@ func (o *RequestPosts) UnmarshalJSON(text []byte) error {
 }
 
 type SubscribeRequest struct {
-	AwardName string `json:"award_name"`
+	Token string `json:"pay_token"`
 }
 
 func (req *SubscribeRequest) Validate() error {
 	err := validation.Errors{
-		"award_name": validation.Validate(req.AwardName, validation.Required, validation.Length(1, 0)),
+		"pay_token": validation.Validate(req.Token, validation.Required, validation.Length(1, 0)),
 	}.Filter()
 	if err != nil {
-		return AwardNameValidateError
+		return TokenValidateError
 	}
 	return nil
 }

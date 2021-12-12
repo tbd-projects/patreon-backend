@@ -22,4 +22,9 @@ type Usecase interface {
 	//		app.GeneralError with Errors:
 	//			repository.DefaultErrDB
 	GetCreatorPayments(creatorID int64, pag *db_models.Pagination) ([]models.CreatorPayments, error)
+	// UpdateStatus Errors:
+	//		repository_payments.CountPaymentsByTokenError
+	//		app.GeneralError with Errors:
+	//			repository.DefaultErrDB
+	UpdateStatus(token string) error
 }

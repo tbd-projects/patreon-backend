@@ -19,9 +19,9 @@ func NewSubscribersRepository(store *sqlx.DB) *SubscribersRepository {
 // Create Errors:
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
-func (repo *SubscribersRepository) Create(subscriber *models.Subscriber) error {
+func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, payToken string) error {
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
-	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id, pay_token) VALUES($1, $2, $3, $4)"
 	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id, awards_id) VALUES ($1, $2, $3)"
 
 	price := 0
@@ -35,7 +35,7 @@ func (repo *SubscribersRepository) Create(subscriber *models.Subscriber) error {
 	}
 
 	row, err := begin.Query(queryAddPayment, price,
-		subscriber.CreatorID, subscriber.UserID)
+		subscriber.CreatorID, subscriber.UserID, payToken)
 
 	if err != nil {
 		_ = begin.Rollback()

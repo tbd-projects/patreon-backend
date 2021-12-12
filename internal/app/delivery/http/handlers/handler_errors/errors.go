@@ -9,6 +9,7 @@ import (
 
 /// NOT FOUND
 var (
+	PayTokenNotFound         = errors.New("pay token not found")
 	CreatorNotFound          = errors.New("creator not found")
 	UserNotFound             = errors.New("user not found")
 	UserWithNicknameNotFound = errors.New("user with this nickname not found")

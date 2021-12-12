@@ -10,7 +10,7 @@ type Usecase interface {
 	//		repository_postgresql.AwardNameNotFound
 	//		app.generalError with Errors
 	//			repository.DefaultErrDB
-	Subscribe(subscriber *models.Subscriber) error
+	Subscribe(subscriber *models.Subscriber, token string) error
 
 	// UnSubscribe Errors:
 	//		SubscriptionsNotFound

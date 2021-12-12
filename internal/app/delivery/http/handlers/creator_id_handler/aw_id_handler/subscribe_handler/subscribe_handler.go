@@ -1,15 +1,18 @@
 package aw_subscribe_handler
 
 import (
+	"github.com/microcosm-cc/bluemonday"
 	"net/http"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	"patreon/internal/app/models"
 	useAwards "patreon/internal/app/usecase/awards"
+	usecase_pay_token "patreon/internal/app/usecase/pay_token"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
@@ -21,6 +24,7 @@ import (
 type AwardsSubscribeHandler struct {
 	subscriberUsecase usecase_subscribers.Usecase
 	awardsUsecase     useAwards.Usecase
+	payTokenUsecase   usecase_pay_token.Usecase
 	bh.BaseHandler
 }
 
@@ -93,6 +97,7 @@ func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) 
 // @Produce json
 // @Param award_id path int true "award_id"
 // @Param creator_id path int true "creator_id"
+// @Param pay_token body http_models.SubscribeRequest true "Request payToken"
 // @Success 201 "Successfully subscribe on the creator with id = creator_id"
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 409 {object} http_models.ErrResponse "this user already have subscribe on creator"
@@ -102,14 +107,14 @@ func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) 
 // @Failure 401 "user are not authorized"
 // @Router /creators/{:creator_id}/awards/{:award_id}/subscribe [POST]
 func (h *AwardsSubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
-	//req := &responseModels.SubscribeRequest{}
-	//
-	//err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
-	//if err != nil || req.Validate() != nil {
-	//	h.Log(r).Warnf("can not parse request %s", err)
-	//	h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
-	//	return
-	//}
+	req := &http_models.SubscribeRequest{}
+
+	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
+	if err != nil || req.Validate() != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
+		return
+	}
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")
@@ -131,7 +136,17 @@ func (h *AwardsSubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 		AwardID:   awardID,
 	}
 
-	err := h.subscriberUsecase.Subscribe(subscriber)
+	token, err := h.payTokenUsecase.GetToken(userID.(int64))
+	if err != nil {
+		h.UsecaseError(w, r, err, codesByErrorsPOST)
+		return
+	}
+	if token.Token != req.Token {
+		h.Log(r).Warnf("token from store != token from request; from store = %s; from req = %s", token, req.Token)
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		return
+	}
+	err = h.subscriberUsecase.Subscribe(subscriber, req.Token)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPOST)
 		return

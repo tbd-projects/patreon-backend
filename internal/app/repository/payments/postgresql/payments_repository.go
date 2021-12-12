@@ -5,6 +5,7 @@ import (
 	"patreon/internal/app/models"
 	db_models "patreon/internal/app/models"
 	"patreon/internal/app/repository"
+	repository_payments "patreon/internal/app/repository/payments"
 	putilits "patreon/internal/app/utilits/postgresql"
 
 	"github.com/jmoiron/sqlx"
@@ -13,14 +14,16 @@ import (
 )
 
 const (
-	querySelectUserPayments = "SELECT p.amount, p.date, p.creator_id, u.nickname, cp.category, cp.description FROM payments p " +
+	querySelectUserPayments = "SELECT p.amount, p.date, p.creator_id, u.nickname, cp.category, cp.description, p.status FROM payments p " +
 		"JOIN creator_profile cp on p.creator_id = cp.creator_id " +
 		"JOIN users u on cp.creator_id = u.users_id where p.users_id = $1 " +
 		"ORDER BY p.date DESC "
 
-	querySelectCreatorPayments = "SELECT p.amount, p.date, p.users_id, u.nickname FROM payments p " +
+	querySelectCreatorPayments = "SELECT p.amount, p.date, p.users_id, u.nickname, p.status FROM payments p " +
 		"JOIN users u on p.users_id = u.users_id where p.creator_id = $1 " +
 		"ORDER BY p.date DESC "
+	queryUpdateStatus  = "UPDATE payments SET status = true WHERE pay_token = $1;"
+	queryCountPayments = "SELECT count(*) from payments where token = $1;"
 )
 
 type PaymentsRepository struct {
@@ -60,7 +63,7 @@ func (repo *PaymentsRepository) GetUserPayments(userID int64, pag *db_models.Pag
 	for rows.Next() {
 		cur := models.UserPayments{}
 		if err = rows.Scan(&cur.Amount, &cur.Date, &cur.CreatorID,
-			&cur.CreatorNickname, &cur.CreatorCategory, &cur.CreatorDescription); err != nil {
+			&cur.CreatorNickname, &cur.CreatorCategory, &cur.CreatorDescription, &cur.Status); err != nil {
 
 			_ = rows.Close()
 			return nil, repository.NewDBError(errors.Wrapf(err, "method - GetUserPayments"+
@@ -102,7 +105,7 @@ func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64, pag *db_mode
 
 	for rows.Next() {
 		cur := models.CreatorPayments{}
-		if err = rows.Scan(&cur.Amount, &cur.Date, &cur.UserID, &cur.UserNickname); err != nil {
+		if err = rows.Scan(&cur.Amount, &cur.Date, &cur.UserID, &cur.UserNickname, &cur.Status); err != nil {
 			_ = rows.Close()
 			return nil, repository.NewDBError(errors.Wrapf(err, "method - GetUserPayments"+
 				"invalid data in db: table payments"))
@@ -115,4 +118,32 @@ func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64, pag *db_mode
 	}
 
 	return paymentsRes, nil
+}
+
+// UpdateStatus Errors:
+//		app.GeneralError with Errors:
+//			repository.DefaultErrDB
+func (repo *PaymentsRepository) UpdateStatus(token string) error {
+	_, err := repo.store.Exec(queryUpdateStatus, token)
+
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+	return nil
+}
+
+// CheckCountPaymentsByToken Errors:
+//		repository_payments.CountPaymentsByTokenError
+//		app.GeneralError with Errors:
+//			repository.DefaultErrDB
+func (repo *PaymentsRepository) CheckCountPaymentsByToken(token string) error {
+	count := 0
+	err := repo.store.QueryRow(queryCountPayments, token).Scan(&count)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+	if count != 1 {
+		return repository_payments.CountPaymentsByTokenError
+	}
+	return nil
 }

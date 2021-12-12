@@ -9,4 +9,9 @@ type Usecase interface {
 	//		app.GeneralError with Errors
 	//			repository_redis.SetError
 	GetToken(userID int64) (models.PayToken, error)
+	//	CheckToken with Errors:
+	//	repository_redis.NotFound
+	//	app.GeneralError with Errors
+	//		repository_redis.InvalidStorageData
+	CheckToken(token models.PayToken) (bool, error)
 }
