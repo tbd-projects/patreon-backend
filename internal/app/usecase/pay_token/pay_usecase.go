@@ -36,3 +36,15 @@ func (u *PayTokenUsecase) GetToken(userID int64) (models.PayToken, error) {
 
 	return models.PayToken{Token: payToken}, nil
 }
+
+//	CheckToken with Errors:
+//	repository_redis.NotFound
+//	app.GeneralError with Errors
+//		repository_redis.InvalidStorageData
+func (u *PayTokenUsecase) CheckToken(token models.PayToken) (bool, error) {
+	_, err := u.repository.Get(token.Token)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

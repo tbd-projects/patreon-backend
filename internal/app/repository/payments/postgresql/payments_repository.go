@@ -24,6 +24,7 @@ const (
 		"ORDER BY p.date DESC "
 	queryUpdateStatus  = "UPDATE payments SET status = true WHERE pay_token = $1;"
 	queryCountPayments = "SELECT count(*) from payments where token = $1;"
+	queryGetPayment    = "SELECT amount, date, creator_id, users_id, status from payments where pay_token = $1;"
 )
 
 type PaymentsRepository struct {
@@ -146,4 +147,17 @@ func (repo *PaymentsRepository) CheckCountPaymentsByToken(token string) error {
 		return repository_payments.CountPaymentsByTokenError
 	}
 	return nil
+}
+
+// GetPaymentByToken Errors:
+//		app.GeneralError with Errors:
+//			repository.DefaultErrDB
+func (repo *PaymentsRepository) GetPaymentByToken(token string) (models.Payments, error) {
+	res := models.Payments{}
+	err := repo.store.QueryRow(queryGetPayment, token).Scan(&res.Amount, &res.Date, &res.CreatorID, &res.UserID,
+		&res.Status)
+	if err != nil {
+		return res, repository.NewDBError(err)
+	}
+	return res, nil
 }

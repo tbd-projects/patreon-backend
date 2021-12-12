@@ -23,8 +23,9 @@ type Usecase interface {
 	//			repository.DefaultErrDB
 	GetCreatorPayments(creatorID int64, pag *db_models.Pagination) ([]models.CreatorPayments, error)
 	// UpdateStatus Errors:
+	//		repository_payments.NotEqualPaymentAmount
 	//		repository_payments.CountPaymentsByTokenError
 	//		app.GeneralError with Errors:
 	//			repository.DefaultErrDB
-	UpdateStatus(token string) error
+	UpdateStatus(token string, receiveAmount float64) error
 }

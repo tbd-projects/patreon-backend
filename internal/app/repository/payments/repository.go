@@ -27,4 +27,8 @@ type Repository interface {
 	//		app.GeneralError with Errors:
 	//			repository.DefaultErrDB
 	UpdateStatus(token string) error
+	// GetPaymentByToken Errors:
+	//		app.GeneralError with Errors:
+	//			repository.DefaultErrDB
+	GetPaymentByToken(token string) (models.Payments, error)
 }

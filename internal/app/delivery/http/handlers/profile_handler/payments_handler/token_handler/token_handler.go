@@ -12,6 +12,7 @@ import (
 	"patreon/internal/app/usecase/payments"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
@@ -72,18 +73,28 @@ func (h *TokenHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := r.ParseForm(); err != nil {
-		h.Log(r).Error("can not parse form")
+		h.Log(r).Error("token_handler: can not parse form")
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
 		return
 	}
 	payToken := r.PostForm["label"][0]
+	amount := r.PostForm["amount"][0]
+
+	amountFloat, err := strconv.ParseFloat(amount, 64)
+	if err != nil {
+		h.Log(r).Error("token_handler: can not convert string to float - amount field, ", amount)
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
+		return
+	}
 
 	exists, err := h.tokenUsecase.CheckToken(models.PayToken{Token: payToken})
 	if !exists {
+		h.Log(r).Errorf("token_handler: error check token err = %v", err)
 		h.UsecaseError(w, r, err, codeByErrorPOST)
 		return
 	}
-	if err = h.paymentsUsecase.UpdateStatus(payToken); err != nil {
+	if err = h.paymentsUsecase.UpdateStatus(payToken, amountFloat); err != nil {
+		h.Log(r).Errorf("token_handler: error update payment status = %v", err)
 		h.UsecaseError(w, r, err, codeByErrorPOST)
 		return
 	}

@@ -75,16 +75,17 @@ var (
 
 // Request Error
 var (
-	InvalidBody          = errors.New("invalid body in request")
-	InvalidParameters    = errors.New("invalid parameters")
-	UserNotHaveAward     = errors.New("this user not have award for this post")
-	InvalidQueries       = errors.New("invalid parameters in query")
-	FileSizeError        = errors.New("size of file very big")
-	InvalidFormFieldName = errors.New("invalid form field name for load file")
-	InvalidExt           = errors.New("please upload: ")
-	UserAlreadySubscribe = errors.New("this user already have subscribe on creator")
-	SubscribesNotFound   = errors.New("subscribes on the creator not found")
-	InvalidUserNickname  = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
+	NotEqualPaymentAmount = errors.New("payment amount from request not equal amount from database")
+	InvalidBody           = errors.New("invalid body in request")
+	InvalidParameters     = errors.New("invalid parameters")
+	UserNotHaveAward      = errors.New("this user not have award for this post")
+	InvalidQueries        = errors.New("invalid parameters in query")
+	FileSizeError         = errors.New("size of file very big")
+	InvalidFormFieldName  = errors.New("invalid form field name for load file")
+	InvalidExt            = errors.New("please upload: ")
+	UserAlreadySubscribe  = errors.New("this user already have subscribe on creator")
+	SubscribesNotFound    = errors.New("subscribes on the creator not found")
+	InvalidUserNickname   = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
 		models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH))
 )
 

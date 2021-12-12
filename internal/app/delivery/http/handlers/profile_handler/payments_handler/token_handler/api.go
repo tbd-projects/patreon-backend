@@ -19,6 +19,8 @@ var codeByErrorGET = base_handler.CodeMap{
 }
 
 var codeByErrorPOST = base_handler.CodeMap{
+	repository_payments.NotEqualPaymentAmount: {
+		http.StatusBadRequest, handler_errors.NotEqualPaymentAmount, logrus.ErrorLevel},
 	repository_payments.CountPaymentsByTokenError: {
 		http.StatusInternalServerError, handler_errors.InternalError, logrus.ErrorLevel},
 	repository_redis.InvalidStorageData: {
