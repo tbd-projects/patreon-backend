@@ -20,6 +20,9 @@ func NewCreatorCountSubscribersHandler(log *logrus.Logger, ucStatistics statisti
 		statisticsUsecase: ucStatistics,
 		BaseHandler:       *bh.NewBaseHandler(log),
 	}
+
+	h.AddMethod(http.MethodGet, h.GET)
+
 	return h
 }
 
