@@ -39,6 +39,10 @@ func NewCreatorTotalIncomeHandler(log *logrus.Logger, ucStatistics statistics_us
 func (h *CreatorTotalIncomeHandler) GET(w http.ResponseWriter, r *http.Request) {
 	days, ok := h.GetInt64FromQueries(w, r, "days")
 	if !ok {
+		if days == bh.EmptyQuery {
+			h.Log(r).Info("missing param days")
+			h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		}
 		return
 	}
 	if days < 0 {
