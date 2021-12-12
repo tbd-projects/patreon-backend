@@ -29,7 +29,7 @@ func (u *StatisticsUsecase) GetCountCreatorPosts(creatorID int64) (int64, error)
 		return app.InvalidInt, CreatorDoesNotExists
 	}
 
-	return u.GetCountCreatorPosts(creatorID)
+	return u.repository.GetCountCreatorPosts(creatorID)
 }
 
 // GetCountCreatorSubscribers Errors:
@@ -46,7 +46,7 @@ func (u *StatisticsUsecase) GetCountCreatorSubscribers(creatorID int64) (int64, 
 		return app.InvalidInt, CreatorDoesNotExists
 	}
 
-	return u.GetCountCreatorSubscribers(creatorID)
+	return u.repository.GetCountCreatorSubscribers(creatorID)
 }
 
 // GetCountCreatorViews Errors:
@@ -63,7 +63,7 @@ func (u *StatisticsUsecase) GetCountCreatorViews(creatorID int64, days int64) (i
 		return app.InvalidInt, CreatorDoesNotExists
 	}
 
-	return u.GetCountCreatorViews(creatorID, days)
+	return u.repository.GetCountCreatorViews(creatorID, days)
 }
 
 // GetTotalIncome Errors:
@@ -80,5 +80,5 @@ func (u *StatisticsUsecase) GetTotalIncome(creatorID int64, days int64) (float64
 		return app.InvalidFloat, CreatorDoesNotExists
 	}
 
-	return u.GetTotalIncome(creatorID, days)
+	return u.repository.GetTotalIncome(creatorID, days)
 }
