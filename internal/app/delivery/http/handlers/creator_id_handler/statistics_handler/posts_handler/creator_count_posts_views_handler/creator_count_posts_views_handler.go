@@ -20,6 +20,9 @@ func NewCreatorViewsHandler(log *logrus.Logger, ucStatistics statistics_usecase.
 		statisticsUsecase: ucStatistics,
 		BaseHandler:       *bh.NewBaseHandler(log),
 	}
+
+	h.AddMethod(http.MethodGet, h.GET)
+
 	return h
 }
 
