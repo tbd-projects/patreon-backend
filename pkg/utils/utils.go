@@ -66,7 +66,7 @@ func NewRedisPool(redisUrl string) *redis.Pool {
 
 func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
 	return grpc.Dial(grpcUrl, grpc.WithInsecure(), grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE),
-												grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE)))
+												grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE)), grpc.WithBlock())
 }
 
 func StringsToLowerCase(array []string) []string {

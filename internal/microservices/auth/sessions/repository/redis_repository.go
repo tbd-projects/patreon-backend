@@ -50,10 +50,16 @@ func (repo *RedisRepository) GetUserId(uniqID string, updExpiration int) (string
 		}
 	}()
 
-	res, err := redis.String(con.Do("GETEX", uniqID, "PX", updExpiration))
+	res, err := redis.String(con.Do("GET", uniqID))
 	if err != nil {
 		return "", errors.Wrapf(err,
 			"error when try get session with uniqId: %s", uniqID)
+	}
+
+	_, err = redis.Int64(con.Do("EXPIRE", uniqID, updExpiration / 100))
+	if err != nil {
+		return "", errors.Wrapf(err,
+			"error when try update expire session with uniqId: %s", uniqID)
 	}
 	return res, nil
 }

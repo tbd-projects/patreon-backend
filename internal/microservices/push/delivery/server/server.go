@@ -1,7 +1,6 @@
 package push_server
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"patreon/internal/microservices/auth/delivery/grpc/client"
@@ -9,8 +8,6 @@ import (
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 
 	"google.golang.org/grpc/connectivity"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"patreon/internal/app/middleware"
 
@@ -36,12 +33,10 @@ func New(config *push.Config, connections app.ExpectedConnections, logger *log.L
 }
 
 func (s *Server) checkConnection() error {
-	s.connections.SessionGrpcConnection.WaitForStateChange(context.Background(), connectivity.Ready)
 	state := s.connections.SessionGrpcConnection.GetState()
 	if state != connectivity.Ready {
 		return fmt.Errorf("Session connection not ready, status is: %s ", state)
 	}
-
 	return nil
 }
 
@@ -65,17 +60,15 @@ func (s *Server) Start() error {
 	}
 
 	router := mux.NewRouter()
-
-	router.Handle("/metrics", promhttp.Handler())
-	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("main")
+	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("push")
 	err := monitoringHandler.SetupMonitoring()
 	if err != nil {
 		return err
 	}
-
+	sManager := client.NewSessionClient(s.connections.SessionGrpcConnection)
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 
-	h := NewPushHandler(s.logger, client.NewSessionClient(s.connections.SessionGrpcConnection))
+	h := NewPushHandler(s.logger, sManager)
 	h.Connect(routerApi.Path("/user/push"))
 
 	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)

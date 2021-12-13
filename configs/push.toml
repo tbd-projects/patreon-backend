@@ -5,7 +5,7 @@ bind_addr_https = ":5003"
 bind_addr_http = ":5003"
 
 #domen = "95.163.208.72"
-domen = "api.pyaterochka-team.site"
+domen = "localhost"
 session_url = "sessions-service:5001"
 
 [cors]

@@ -16,6 +16,7 @@ services:
       - "443:443"
     depends_on:
       - main
+      - push-service
       - grafana
       - prometheus
     networks:
@@ -49,6 +50,7 @@ services:
     networks:
       - default
     depends_on:
+      - session-redis
       - sessions-service
     volumes:
       - ./logs-push:/app/logs

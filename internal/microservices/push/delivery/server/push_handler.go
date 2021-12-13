@@ -7,9 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
-	csrf_middleware "patreon/internal/app/csrf/middleware"
-	repository_jwt "patreon/internal/app/csrf/repository/jwt"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/auth/sessions/middleware"
@@ -45,13 +42,11 @@ func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClien
 		BaseHandler:   *bh.NewBaseHandler(log),
 		sessionClient: sManager,
 	}
-	h.AddMethod(http.MethodPost, h.POST, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
-		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
-	)
+	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
 	return h
 }
 
-// POST Push Creator
+// GET Push Creator
 // @Summary create creator
 // @Description create creator with id from path, and respond created creator
 // @Param creator body http_models.RequestCreator true "Request body for creators"
@@ -64,16 +59,17 @@ func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClien
 // @Failure 422 {object} http_models.ErrResponse "invalid creator nickname", "invalid creator category-description", "invalid creator category", "invalid body in request"
 // @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 401 "user are not authorized"
-// @Router /user/push [POST]
-func (h *PushHandler) POST(w http.ResponseWriter, r *http.Request) {
+// @Router /user/push [GET]
+func (h *PushHandler) GET(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	userId, ok := r.Context().Value("user_id").(uint64)
+	userId, ok := r.Context().Value("user_id").(int64)
 	if !ok {
+		h.Log(r).Errorf("not found user_id in context")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -88,11 +84,42 @@ func (h *PushHandler) POST(w http.ResponseWriter, r *http.Request) {
 		_ = conn.SetReadDeadline(time.Now().Add(pongWait))
 		conn.SetPongHandler(func(string) error { _ = conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
+		massages := make(chan []byte)
+		errorCh := make(chan error)
+		done := make(chan bool)
+
+		go func() {
+			for {
+				select {
+				case <-done:
+					return
+				default:
+					break
+				}
+				_, tmpmessage, tmperr := conn.ReadMessage()
+				massages <- tmpmessage
+				errorCh <- tmperr
+			}
+		}()
+
+		defer func() { done <- true }()
+
 		for {
-			_, message, err := conn.ReadMessage()
+			var message []byte
+			select {
+			case <-ticker.C:
+				_ = conn.SetWriteDeadline(time.Now().Add(writeWait))
+				if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					return
+				}
+				continue
+			case message = <-massages:
+				err = <-errorCh
+				break
+			}
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					h.Log(r).Printf("error: %v", err)
+					h.Log(r).Warnf("error: %v", err)
 				}
 				break
 			}
@@ -105,16 +132,12 @@ func (h *PushHandler) POST(w http.ResponseWriter, r *http.Request) {
 			}
 			message = append(message, []byte{' '}...)
 			message = append(message, []byte(fmt.Sprintf("%d", userId))...)
+			h.Log(r).Infof("Send massage %v", massages)
 			_, _ = w.Write(message)
-			select {
-			case <-ticker.C:
-				_ = conn.SetWriteDeadline(time.Now().Add(writeWait))
-				if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-					return
-				}
-			default:
-				break
+			if err := w.Close(); err != nil {
+				return
 			}
+
 		}
 	}(conn)
 }
