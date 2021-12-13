@@ -40,9 +40,9 @@ jobs:
           script: |
             cd tp/2021_2_Pyaterochka/
             sudo make stop && sudo docker rm -f $(sudo docker ps -aq)
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:latest
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:${GITHUB_SHA::8} &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:${GITHUB_SHA::8} &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:${GITHUB_SHA::8}
       - name: run project
         uses: appleboy/ssh-action@master
         with:
