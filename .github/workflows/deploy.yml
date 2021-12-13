@@ -34,7 +34,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd 2021_2_Pyaterochka/ && sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
+          script: cd tp/2021_2_Pyaterochka/ && sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:latest
       - name: run project
@@ -43,6 +43,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: ls && cd 2021_2_Pyaterochka/ && sudo make run-https
+          script: ls && cd tp/2021_2_Pyaterochka/ && sudo make run-https
 
 
