@@ -48,8 +48,8 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:latest &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/pg-14
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl:latest &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/pg-14:latest
 
       - name: run project
         uses: appleboy/ssh-action@master
