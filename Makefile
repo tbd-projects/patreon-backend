@@ -57,7 +57,7 @@ run-https: run-init # запустить https сервер
 	docker-compose --env-file ./configs/run-https.env up --build --no-deps
 
 run-https-back: run-init # запустить https сервер
-	docker-compose -d --env-file ./configs/run-https.env up --build --no-deps
+	docker-compose  --env-file ./configs/run-https.env up -d --build --no-deps
 
 run-http: run-init # запустить http сервер
 	docker-compose --env-file ./configs/run-http.env up --build --no-deps
