@@ -41,7 +41,7 @@ services:
       - ./logs-sessions:/app/logs
       - ${CONFIG_DIR}:/app/configs
   push-service:
-    image: push-service
+    image: flashiee/push-service:latest
     expose:
       - "5003"
       - "9091"
