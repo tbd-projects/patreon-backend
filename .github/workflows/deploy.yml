@@ -15,12 +15,12 @@ jobs:
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
       - name: Build Docker image
-        run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/sessions-service:latest -f ./docker/sessions-service.Dockerfile . &&
+        run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest -f ./docker/session-service.Dockerfile . &&
           sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest -f ./docker/files-service.Dockerfile . &&
           sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main:latest -f ./docker/builder.Dockerfile .
 
       - name: Push the image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/sessions-service:latest &&
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/main:latest
 
@@ -34,7 +34,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd 2021_2_Pyaterochka/ && sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/sessions-service:latest &&
+          script: cd 2021_2_Pyaterochka/ && sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:latest
       - name: run project
