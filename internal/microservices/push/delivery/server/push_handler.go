@@ -1,8 +1,6 @@
 package push_server
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"log"
@@ -34,13 +32,15 @@ var upgrader = websocket.Upgrader{
 
 type PushHandler struct {
 	sessionClient session_client.AuthCheckerClient
+	hub *SendHub
 	bh.BaseHandler
 }
 
-func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient) *PushHandler {
+func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient, hub *SendHub) *PushHandler {
 	h := &PushHandler{
 		BaseHandler:   *bh.NewBaseHandler(log),
 		sessionClient: sManager,
+		hub: hub,
 	}
 	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
 	return h
@@ -67,6 +67,7 @@ func (h *PushHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
 	userId, ok := r.Context().Value("user_id").(int64)
 	if !ok {
 		h.Log(r).Errorf("not found user_id in context")
@@ -74,70 +75,7 @@ func (h *PushHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func(conn *websocket.Conn) {
-		ticker := time.NewTicker(pingPeriod)
-		defer func() {
-			ticker.Stop()
-			_ = conn.Close()
-		}()
-		conn.SetReadLimit(maxMessageSize)
-		_ = conn.SetReadDeadline(time.Now().Add(pongWait))
-		conn.SetPongHandler(func(string) error { _ = conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
-
-		massages := make(chan []byte)
-		errorCh := make(chan error)
-		done := make(chan bool)
-
-		go func() {
-			for {
-				select {
-				case <-done:
-					return
-				default:
-					break
-				}
-				_, tmpmessage, tmperr := conn.ReadMessage()
-				massages <- tmpmessage
-				errorCh <- tmperr
-			}
-		}()
-
-		defer func() { done <- true }()
-
-		for {
-			var message []byte
-			select {
-			case <-ticker.C:
-				_ = conn.SetWriteDeadline(time.Now().Add(writeWait))
-				if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-					return
-				}
-				continue
-			case message = <-massages:
-				err = <-errorCh
-				break
-			}
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					h.Log(r).Warnf("error: %v", err)
-				}
-				break
-			}
-			message = bytes.TrimSpace(bytes.Replace(message, []byte{'\n'}, []byte{' '}, -1))
-
-			_ = conn.SetWriteDeadline(time.Now().Add(writeWait))
-			w, err := conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			message = append(message, []byte{' '}...)
-			message = append(message, []byte(fmt.Sprintf("%d", userId))...)
-			h.Log(r).Infof("Send massage %v", massages)
-			_, _ = w.Write(message)
-			if err := w.Close(); err != nil {
-				return
-			}
-
-		}
-	}(conn)
+	client := NewClient(h.hub, userId, conn, h.Log(r))
+	h.hub.RegisterClient(client)
+	go client.SenderProcesses()
 }

@@ -6,6 +6,7 @@ import (
 	"patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/push"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
+	"time"
 
 	"google.golang.org/grpc/connectivity"
 
@@ -40,7 +41,6 @@ func (s *Server) checkConnection() error {
 	return nil
 }
 
-
 // @title Patreon
 // @version 1.0
 // @description Server for Patreon application.
@@ -68,7 +68,11 @@ func (s *Server) Start() error {
 	sManager := client.NewSessionClient(s.connections.SessionGrpcConnection)
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 
-	h := NewPushHandler(s.logger, sManager)
+	senderHub := NewHub()
+	defer senderHub.StopHub()
+	go senderHub.Run()
+
+	h := NewPushHandler(s.logger, sManager, senderHub)
 	h.Connect(routerApi.Path("/user/push"))
 
 	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)
@@ -77,6 +81,35 @@ func (s *Server) Start() error {
 	cors := middleware.NewCorsMiddleware(&s.config.Cors, router)
 	routerCors := cors.SetCors(router)
 
+	done := make(chan bool)
+	go func() {
+		ticker := time.NewTicker(pingPeriod/4)
+
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				keys := make([]int64, len(h.hub.clients))
+				i := 0
+				for k := range h.hub.clients {
+					keys[i] = k
+					i++
+				}
+				h.hub.SendMessage(keys, &PostResponse{
+					PostId: 1,
+					PostTitle: "Привет",
+					CreatorId: 2,
+					CreatorNickname: "Человек",
+					CreatorAvatar: "tude",
+				})
+			}
+		}
+	}()
+
+	defer func() {
+		done <- true
+	}()
 	s.logger.Info("start no production http server")
 	return http.ListenAndServe(s.config.BindHttpAddr, routerCors)
 }
