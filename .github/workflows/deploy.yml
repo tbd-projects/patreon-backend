@@ -39,7 +39,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd tp/2021_2_Pyaterochka/
-            sudo make stop
+#            sudo make stop
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:${GITHUB_SHA::8} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:${GITHUB_SHA::8} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:${GITHUB_SHA::8}
