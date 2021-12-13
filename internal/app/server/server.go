@@ -169,7 +169,7 @@ func (s *Server) Start(config *app.Config) error {
 			}
 		}(s.logger, serverHTTP)
 
-		s.logger.Info("Start https server")
+		s.logger.Info("Start https server - 4_1")
 		return serverHTTPS.ListenAndServeTLS("", "")
 	} else {
 		s.logger.Info("start no production http server")
