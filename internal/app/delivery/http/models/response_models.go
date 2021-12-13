@@ -333,3 +333,19 @@ func ToResponseAvailablePosts(availablePosts []models.AvailablePost) ResponseAva
 		AvailablePosts: availablePosts,
 	}
 }
+
+type ResponseCreatorPostsViews struct {
+	CountPostsViews int64 `json:"count_posts_views"`
+}
+
+type ResponseCreatorCountSubscribers struct {
+	CountSubscribers int64 `json:"count_subscribers"`
+}
+
+type ResponseCreatorTotalIncome struct {
+	TotalIncome float64 `json:"total_income"`
+}
+
+type ResponseCreatorCountPosts struct {
+	CountPosts int64 `json:"count_posts"`
+}

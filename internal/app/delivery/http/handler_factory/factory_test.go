@@ -39,6 +39,7 @@ func (s *FactorySuite) TestInitHandlers() {
 	s.usecaseFactory.EXPECT().GetAttachesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetInfoUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetStatsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetCommentsUsecase().Times(1)
 
 	defer func() {
@@ -67,6 +68,8 @@ func (s *FactorySuite) TestGetHandlersUrlsAlreadyExists() {
 	s.usecaseFactory.EXPECT().GetAttachesUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetPaymentsUsecase().Times(1)
 	s.usecaseFactory.EXPECT().GetInfoUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetStatsUsecase().Times(1)
+	s.usecaseFactory.EXPECT().GetCommentsUsecase().Times(1)
 
 	s.factory.urlHandler = nil
 	defer func() {

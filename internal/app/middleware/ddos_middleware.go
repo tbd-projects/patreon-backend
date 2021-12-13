@@ -24,7 +24,7 @@ func (mw *DDosMiddleware) CheckAccess(next http.Handler) http.Handler {
 		userUrl := r.URL.Path
 		userIp := r.RemoteAddr + userUrl
 		ok, err := mw.accessUsecase.CheckBlackList(userIp)
-		if ok {
+		if ok || err != nil {
 			mw.Log(r).Warnf("DDOS_Middleware user with ip: %v in blackList", userIp)
 			w.WriteHeader(http.StatusTooManyRequests)
 			return
@@ -45,7 +45,7 @@ func (mw *DDosMiddleware) CheckAccess(next http.Handler) http.Handler {
 		}
 		if err == usecase_access.FirstQuery {
 			ok, err = mw.accessUsecase.Create(userIp)
-			if err != nil {
+			if err != nil || !ok {
 				mw.Log(r).Errorf("DDOS_Middleware - error on create AccessUserCounter from user with ip: %v err: %v",
 					userIp, err.Error())
 				w.WriteHeader(http.StatusInternalServerError)

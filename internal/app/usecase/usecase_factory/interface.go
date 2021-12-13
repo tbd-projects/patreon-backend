@@ -11,6 +11,7 @@ import (
 	repoLikes "patreon/internal/app/repository/likes"
 	repoPayments "patreon/internal/app/repository/payments"
 	repoPosts "patreon/internal/app/repository/posts"
+	repoStats "patreon/internal/app/repository/statistics"
 	useSubscr "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 )
@@ -30,4 +31,5 @@ type RepositoryFactory interface {
 	GetPaymentsRepository() repoPayments.Repository
 	GetInfoRepository() repoInfo.Repository
 	GetCommentsRepository() repoComments.Repository
+	GetStatsRepository() repoStats.Repository
 }

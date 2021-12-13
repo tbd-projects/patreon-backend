@@ -32,7 +32,7 @@ func (s *SuiteDdosMiddleware) SetupSuite() {
 	s.ip = "123123"
 }
 
-func (s *SuiteDdosMiddleware) fterTest(_, _ string) {
+func (s *SuiteDdosMiddleware) AfterTest(_, _ string) {
 	s.mock.Finish()
 }
 

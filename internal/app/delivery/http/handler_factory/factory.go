@@ -28,6 +28,10 @@ import (
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/likes_handler"
 	upl_cover_posts_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_cover_post_handler"
 	posts_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/upd_handler"
+	statistics_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/statistics_handler/creator_subscribers_handler"
+	statistics_total_income_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/statistics_handler/creator_total_income_handler"
+	statistics_count_posts_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/statistics_handler/posts_handler/creator_count_posts_handler"
+	statistics_count_posts_views_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/statistics_handler/posts_handler/creator_count_posts_views_handler"
 	upd_avatar_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_avatar_handler"
 	upd_cover_creator_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/upd_cover_handler"
 	"patreon/internal/app/delivery/http/handlers/csrf_handler"
@@ -90,6 +94,10 @@ const (
 	USER_PAYMENTS
 	ATTACH_UPD_VIDEO
 	ATTACH_UPD_AUDIO
+	STATS_COUNT_POSTS
+	STATS_POSTS_VIEWS
+	STATS_COUNT_SUBSCRIBERS
+	STATS_TOTAL_INCOMES
 	POST_COMMENTS
 	COMMENTS_ID
 	USER_COMMENTS
@@ -123,6 +131,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucInfo := f.usecaseFactory.GetInfoUsecase()
 	ucComment := f.usecaseFactory.GetCommentsUsecase()
 	sManager := client.NewSessionClient(f.sessionClientConn)
+	ucStats := f.usecaseFactory.GetStatsUsecase()
 
 	return map[int]app.Handler{
 		INFO:                     info_handler.NewInfoHandler(f.logger, ucInfo),
@@ -163,6 +172,10 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		ATTACH_UPD_VIDEO:         upd_video_attach_handler.NewAttachUploadVideoHandler(f.logger, ucAttaches, ucPosts, sManager),
 		ATTACH_UPD_AUDIO:         upd_audio_attach_handler.NewAttachUploadAudioHandler(f.logger, ucAttaches, ucPosts, sManager),
 		POSTS_AVAILABLE:          user_posts_handler.NewPostsHandler(f.logger, sManager, ucPosts),
+		STATS_COUNT_SUBSCRIBERS:  statistics_handler.NewCreatorCountSubscribersHandler(f.logger, ucStats),
+		STATS_COUNT_POSTS:        statistics_count_posts_handler.NewCreatorCountPostsHandler(f.logger, ucStats),
+		STATS_POSTS_VIEWS:        statistics_count_posts_views_handler.NewCreatorViewsHandler(f.logger, ucStats),
+		STATS_TOTAL_INCOMES:      statistics_total_income_handler.NewCreatorTotalIncomeHandler(f.logger, ucStats),
 		POST_COMMENTS:            comments_handler.NewCommentsHandler(f.logger, ucComment, ucPosts, sManager),
 		COMMENTS_ID:              comments_id_handler.NewCommentsIdHandler(f.logger, ucComment, ucPosts, sManager),
 		USER_COMMENTS:            user_comments_handler.NewUserCommentsHandler(f.logger, ucComment, sManager),
@@ -223,6 +236,12 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/image": hs[ATTACH_UPD_IMAGE],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/video": hs[ATTACH_UPD_VIDEO],
 		"/creators/{creator_id:[0-9]+}/posts/{post_id:[0-9]+}/{attach_id:[0-9]+}/update/audio": hs[ATTACH_UPD_AUDIO],
+		// ../statistics -----------------------------------------------------////
+		"/creators/{creator_id:[0-9]+}/statistics/posts/views":  hs[STATS_POSTS_VIEWS],
+		"/creators/{creator_id:[0-9]+}/statistics/posts/count":  hs[STATS_COUNT_POSTS],
+		"/creators/{creator_id:[0-9]+}/statistics/total_income": hs[STATS_TOTAL_INCOMES],
+		"/creators/{creator_id:[0-9]+}/statistics/subscribers":  hs[STATS_COUNT_SUBSCRIBERS],
+
 		//   /token  ---------------------------------------------------------////
 		"/token": hs[GET_CSRF_TOKEN],
 	}

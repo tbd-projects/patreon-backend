@@ -4,7 +4,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	responseModels "patreon/internal/app/delivery/http/models"
+	"patreon/internal/app/delivery/http/models"
 	usecase_subscribers "patreon/internal/app/usecase/subscribers"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/auth/sessions/middleware"
@@ -58,7 +58,7 @@ func (h *SubscribeHandler) GET(w http.ResponseWriter, r *http.Request) {
 		h.UsecaseError(w, r, err, codesByErrorsGET)
 		return
 	}
-	res := responseModels.ToSubscribersCreatorResponse(subscribers)
+	res := http_models.ToSubscribersCreatorResponse(subscribers)
 	h.Log(r).Debugf("get users %v", subscribers)
 	h.Respond(w, r, http.StatusOK, res)
 }

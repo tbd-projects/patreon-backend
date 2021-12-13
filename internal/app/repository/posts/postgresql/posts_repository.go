@@ -145,7 +145,7 @@ func (repo *PostsRepository) GetPost(postID int64, userId int64, addView bool) (
 		}
 	}
 
-	if awardsId.Valid == false {
+	if !awardsId.Valid {
 		post.Awards = rp.NoAwards
 	} else {
 		post.Awards = awardsId.Int64
@@ -183,7 +183,7 @@ func (repo *PostsRepository) GetAvailablePosts(userID int64, pag *models.Paginat
 			return nil, repository.NewDBError(err)
 		}
 
-		if awardsId.Valid == false {
+		if !awardsId.Valid {
 			post.Awards = rp.NoAwards
 		} else {
 			post.Awards = awardsId.Int64
@@ -239,7 +239,7 @@ func (repo *PostsRepository) GetPosts(creatorsId int64, userId int64,
 			return nil, repository.NewDBError(err)
 		}
 
-		if awardsId.Valid == false {
+		if !awardsId.Valid {
 			post.Awards = rp.NoAwards
 		} else {
 			post.Awards = awardsId.Int64

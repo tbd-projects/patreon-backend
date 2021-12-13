@@ -11,6 +11,7 @@ import (
 	useLikes "patreon/internal/app/usecase/likes"
 	usePayments "patreon/internal/app/usecase/payments"
 	usePosts "patreon/internal/app/usecase/posts"
+	useStats "patreon/internal/app/usecase/statistics"
 	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
 	"patreon/internal/microservices/files/delivery/grpc/client"
@@ -25,7 +26,6 @@ type UsecaseFactory struct {
 	csrfUsecase        usecase_csrf.Usecase
 	accessUsecase      useAccess.Usecase
 	subscribersUsecase useSubscr.Usecase
-	awardsUsercase     useAwards.Usecase
 	awardsUsecase      useAwards.Usecase
 	postsUsecase       usePosts.Usecase
 	attachesUsecase    useAttaches.Usecase
@@ -33,6 +33,7 @@ type UsecaseFactory struct {
 	likesUsecase       useLikes.Usecase
 	paymentsUsecase    usePayments.Usecase
 	fileClient         client.FileServiceClient
+	statsUsecase       useStats.Usecase
 	commentsUsecase    useComments.Usecase
 }
 
@@ -122,6 +123,12 @@ func (f *UsecaseFactory) GetInfoUsecase() useInfo.Usecase {
 		f.infoUsecase = useInfo.NewInfoUsecase(f.repositoryFactory.GetInfoRepository())
 	}
 	return f.infoUsecase
+}
+func (f *UsecaseFactory) GetStatsUsecase() useStats.Usecase {
+	if f.statsUsecase == nil {
+		f.statsUsecase = useStats.NewStatisticsUsecase(f.repositoryFactory.GetStatsRepository())
+	}
+	return f.statsUsecase
 }
 
 func (f *UsecaseFactory) GetCommentsUsecase() useComments.Usecase {

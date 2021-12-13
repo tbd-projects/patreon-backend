@@ -198,7 +198,7 @@ func (repo *CreatorRepository) GetCreator(creatorId int64, userId int64) (*model
 		return nil, repository.NewDBError(err)
 	}
 
-	if awardsId.Valid == false {
+	if !awardsId.Valid {
 		creator.AwardsId = rp.NoAwards
 	} else {
 		creator.AwardsId = awardsId.Int64

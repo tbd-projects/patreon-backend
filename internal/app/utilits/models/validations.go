@@ -35,7 +35,7 @@ func ParseErrorToMap(err error) (MapOfUnmarshalError, error) {
 
 func ExtractValidateError(extractor ExtractorErrorByName, mapOfErr MapOfUnmarshalError) error {
 	var knowError error = nil
-	for key, _ := range mapOfErr {
+	for key := range mapOfErr {
 		if knowError = extractor(key); knowError != nil {
 			break
 		}
