@@ -55,7 +55,11 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/pg-14:latest
 
       - name: pull project
+        uses: appleboy/ssh-action@master
         with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: git pull
 
       - name: run project
