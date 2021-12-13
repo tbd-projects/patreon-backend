@@ -38,6 +38,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            sudo make stop
             sudo docker rm 2021_2_pyaterochka_main_1
             sudo docker rm 2021_2_pyaterochka_sessions-service_1
             sudo docker rm 2021_2_pyaterochka_files-service_1
