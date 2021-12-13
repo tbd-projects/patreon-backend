@@ -58,6 +58,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd tp/2021_2_Pyaterochka/
             sudo make stop && sudo make run-https-back
 
 
