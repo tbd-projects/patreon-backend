@@ -21,11 +21,17 @@ jobs:
         run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/session-service -f ./docker/session-service.Dockerfile . &&
           sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/files-service -f ./docker/files-service.Dockerfile . &&
           sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main -f ./docker/builder.Dockerfile .
+          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl -f ./docker/nginx.Dockerfile .
+          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/pg-14 -f ./docker/postgresql.Dockerfile .
+
 
       - name: Push the image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/session-service &&
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/files-service &&
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/main
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/main &&
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl &&
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pg-14
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -41,7 +47,10 @@ jobs:
             cd tp/2021_2_Pyaterochka/
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:latest
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:latest &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/pg-14
+
       - name: run project
         uses: appleboy/ssh-action@master
         with:
