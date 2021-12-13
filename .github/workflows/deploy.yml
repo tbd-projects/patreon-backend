@@ -2,9 +2,12 @@ name: patreon-ci-deploy
 
 on:
   push:
+    branches:
+    - main
+    - server_beta_4.1/main
   pull_request:
     branches:
-#      - main
+      - main
       - server_beta_4.1/main
 
 jobs:
@@ -15,14 +18,14 @@ jobs:
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
       - name: Build Docker image
-        run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest -f ./docker/session-service.Dockerfile . &&
-          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest -f ./docker/files-service.Dockerfile . &&
-          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main:latest -f ./docker/builder.Dockerfile .
+        run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/session-service:${GITHUB_SHA::8} -f ./docker/session-service.Dockerfile . &&
+          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/files-service:${GITHUB_SHA::8} -f ./docker/files-service.Dockerfile . &&
+          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main:${GITHUB_SHA::8} -f ./docker/builder.Dockerfile .
 
       - name: Push the image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/main:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/session-service:${GITHUB_SHA::8} &&
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/files-service:${GITHUB_SHA::8} &&
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/main:${GITHUB_SHA::8}
 
   deploy:
     runs-on: ubuntu-latest
@@ -34,15 +37,15 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd tp/2021_2_Pyaterochka/ && sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:latest &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:latest &&
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:latest
+          script: cd tp/2021_2_Pyaterochka/ && sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:${GITHUB_SHA::8} &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:${GITHUB_SHA::8} &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:${GITHUB_SHA::8}
       - name: run project
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: ls && cd tp/2021_2_Pyaterochka/ && sudo make run-https
+          script: ls && cd tp/2021_2_Pyaterochka/ && sudo make run-https-back
 
 
