@@ -23,7 +23,7 @@ jobs:
           sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/push-service -f ./docker/push-service.Dockerfile . &&
           sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main -f ./docker/builder.Dockerfile . &&
           sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl -f ./docker/nginx.Dockerfile . &&
-          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/pg-14 -f ./docker/postgresql.Dockerfile .
+          sudo docker build -t --no-cache --network host ${{ secrets.DOCKERHUB_USERNAME }}/pg-14 -f ./docker/postgresql.Dockerfile .
 
 
       - name: Push the image
