@@ -54,13 +54,15 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl:latest &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/pg-14:latest
 
-      - name: pull project
+      - name: git pull
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: git pull
+          script: |
+            cd tp/2021_2_Pyaterochka/
+            git pull
 
       - name: run project
         uses: appleboy/ssh-action@master
