@@ -16,6 +16,7 @@ services:
       - "443:443"
     depends_on:
       - main
+      - push-service
       - grafana
       - prometheus
     networks:
@@ -38,6 +39,21 @@ services:
       - session-redis
     volumes:
       - ./logs-sessions:/app/logs
+      - ${CONFIG_DIR}:/app/configs
+  push-service:
+    image: push-service
+    expose:
+      - "5003"
+      - "9091"
+    ports:
+      - "5003:5003"
+    networks:
+      - default
+    depends_on:
+      - session-redis
+      - sessions-service
+    volumes:
+      - ./logs-push:/app/logs
       - ${CONFIG_DIR}:/app/configs
   files-service:
     image: files-service
@@ -68,6 +84,7 @@ services:
       - access-redis
       - patreon-bd
       - sessions-service
+      - push-service
       - files-service
     environment:
       WAIT_HOSTS: patreon-bd:5432

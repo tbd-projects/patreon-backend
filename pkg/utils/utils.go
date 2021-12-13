@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"patreon/internal"
 	"patreon/internal/app"
 	"strings"
 	"time"
@@ -18,7 +19,7 @@ import (
 
 const MAX_GRPC_SIZE = 1024*1024*100
 
-func NewLogger(config *app.Config, isService bool, serviceName string) (log *logrus.Logger, closeResource func() error) {
+func NewLogger(config *internal.Config, isService bool, serviceName string) (log *logrus.Logger, closeResource func() error) {
 	level, err := logrus.ParseLevel(config.LogLevel)
 	if err != nil {
 		logrus.Fatal(err)
@@ -65,7 +66,7 @@ func NewRedisPool(redisUrl string) *redis.Pool {
 
 func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
 	return grpc.Dial(grpcUrl, grpc.WithInsecure(), grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE),
-												grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE)))
+												grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE)), grpc.WithBlock())
 }
 
 func StringsToLowerCase(array []string) []string {

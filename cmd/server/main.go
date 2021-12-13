@@ -70,7 +70,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	logger, closeResource := utils.NewLogger(config, false, "")
+	logger, closeResource := utils.NewLogger(&config.Config, false, "")
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()

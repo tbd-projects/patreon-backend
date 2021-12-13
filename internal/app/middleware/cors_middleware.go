@@ -1,19 +1,18 @@
 package middleware
 
 import (
-	"net/http"
-	"patreon/internal/app"
-
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"net/http"
+	"patreon/internal"
 )
 
 type CorsMiddleware struct {
 	router *mux.Router
-	config *app.CorsConfig
+	config *internal.CorsConfig
 }
 
-func NewCorsMiddleware(config *app.CorsConfig, router *mux.Router) CorsMiddleware {
+func NewCorsMiddleware(config *internal.CorsConfig, router *mux.Router) CorsMiddleware {
 	return CorsMiddleware{
 		router: router,
 		config: config,

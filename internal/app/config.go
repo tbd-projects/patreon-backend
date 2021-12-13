@@ -1,5 +1,7 @@
 package app
 
+import "patreon/internal"
+
 const (
 	LoadFileUrl  = "media/"
 	DefaultImage = ""
@@ -16,25 +18,13 @@ type RepositoryConnections struct {
 	AccessRedisUrl  string `toml:"access-redis_url"`
 }
 
-type CorsConfig struct {
-	Urls    []string `toml:"urls"`
-	Headers []string `toml:"headers"`
-	Methods []string `toml:"methods"`
-}
-
 type Config struct {
+	internal.Config
 	MediaDir         string                `toml:"media_dir"`
-	BindAddr         string                `toml:"bind_addr"`
-	LogLevel         string                `toml:"log_level"`
-	LogAddr          string                `toml:"log_path"`
 	Microservices    Microservice          `toml:"microservice"`
 	ServerRepository RepositoryConnections `toml:"server"`
 	LocalRepository  RepositoryConnections `toml:"local"`
-	Cors             CorsConfig            `toml:"cors"`
-	IsHTTPSServer    bool
-	Domen            string `toml:"domen"`
-	BindHttpsAddr    string `toml:"bind_addr_https"`
-	BindHttpAddr     string `toml:"bind_addr_http"`
+	Cors             internal.CorsConfig   `toml:"cors"`
 }
 
 func NewConfig() *Config {

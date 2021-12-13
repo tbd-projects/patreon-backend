@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	logger, CloseLogger := utils.NewLogger(config, true, "files_microservice")
+	logger, CloseLogger := utils.NewLogger(&config.Config, true, "files_microservice")
 	defer CloseLogger()
 	level, err := logrus.ParseLevel(config.LogLevel)
 	if err != nil {
