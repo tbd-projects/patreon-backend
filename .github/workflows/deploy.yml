@@ -38,11 +38,12 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd tp/2021_2_Pyaterochka/
             sudo make stop
             sudo docker rm 2021_2_pyaterochka_main_1
             sudo docker rm 2021_2_pyaterochka_sessions-service_1
             sudo docker rm 2021_2_pyaterochka_files-service_1
-            cd tp/2021_2_Pyaterochka/ && sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:${GITHUB_SHA::8} &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/session-service:${GITHUB_SHA::8} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/files-service:${GITHUB_SHA::8} &&
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/main:${GITHUB_SHA::8}
       - name: run project
