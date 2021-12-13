@@ -39,6 +39,20 @@ services:
     volumes:
       - ./logs-sessions:/app/logs
       - ${CONFIG_DIR}:/app/configs
+  push-service:
+    image: push-service
+    expose:
+      - "5003"
+      - "9091"
+    ports:
+      - "5003:5003"
+    networks:
+      - default
+    depends_on:
+      - sessions-service
+    volumes:
+      - ./logs-push:/app/logs
+      - ${CONFIG_DIR}:/app/configs
   files-service:
     image: files-service
     expose:
@@ -68,6 +82,7 @@ services:
       - access-redis
       - patreon-bd
       - sessions-service
+      - push-service
       - files-service
     environment:
       WAIT_HOSTS: patreon-bd:5432

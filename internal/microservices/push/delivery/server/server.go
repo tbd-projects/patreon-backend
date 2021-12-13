@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/push"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 
@@ -11,15 +12,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"net/url"
-	"patreon/internal/app/delivery/http/handler_factory"
 	"patreon/internal/app/middleware"
-	"patreon/internal/app/repository/repository_factory"
-	"patreon/internal/app/usecase/usecase_factory"
 
-	"golang.org/x/crypto/acme/autocert"
-
-	_ "patreon/docs"
+	//_ "patreon/docs"
 	"patreon/internal/app"
 
 	"github.com/gorilla/mux"
@@ -41,24 +36,7 @@ func New(config *push.Config, connections app.ExpectedConnections, logger *log.L
 }
 
 func (s *Server) checkConnection() error {
-	if err := s.connections.SqlConnection.Ping(); err != nil {
-		return fmt.Errorf("Can't check connection to sql with error %v ", err)
-	}
-
-	s.logger.Info("Success check connection to sql db")
-
-	connAccess, err := s.connections.AccessRedisPool.Dial()
-	if err != nil {
-		return fmt.Errorf("Can't check connection to redis with error: %v ", err)
-	}
-
-	s.logger.Info("Success check connection to redis")
-
-	err = connAccess.Close()
-	if err != nil {
-		return fmt.Errorf("Can't close connection to redis with error: %v ", err)
-	}
-
+	s.connections.SessionGrpcConnection.WaitForStateChange(context.Background(), connectivity.Ready)
 	state := s.connections.SessionGrpcConnection.GetState()
 	if state != connectivity.Ready {
 		return fmt.Errorf("Session connection not ready, status is: %s ", state)
@@ -67,39 +45,6 @@ func (s *Server) checkConnection() error {
 	return nil
 }
 
-//return http[0] and https[1] servers
-func makingHTTPSServerWithRedirect(config *push.Config, router http.Handler) (*http.Server, *http.Server) {
-	serverHTTP := &http.Server{
-		Addr: config.BindHttpAddr,
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			targetUrl := url.URL{Scheme: "https", Host: r.Host, Path: r.URL.Path, RawQuery: r.URL.RawQuery}
-			log.Infof("Redirect from %s, to %s", r.RequestURI, targetUrl.String())
-			http.Redirect(w, r, targetUrl.String(), http.StatusPermanentRedirect)
-		}),
-	}
-
-	hostPolicy := func(ctx context.Context, host string) error {
-		allowedHost := config.Domen
-		if host == allowedHost {
-			return nil
-		}
-		return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
-	}
-
-	dataDir := "./patreon-secrt"
-	m := &autocert.Manager{
-		Cache:      autocert.DirCache(dataDir),
-		Prompt:     autocert.AcceptTOS,
-		HostPolicy: hostPolicy,
-	}
-
-	serverHTTPS := &http.Server{
-		Addr:      config.BindHttpsAddr,
-		TLSConfig: m.TLSConfig(),
-		Handler:   router,
-	}
-	return serverHTTP, serverHTTPS
-}
 
 // @title Patreon
 // @version 1.0
@@ -130,37 +75,15 @@ func (s *Server) Start() error {
 
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 
-	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
+	h := NewPushHandler(s.logger, client.NewSessionClient(s.connections.SessionGrpcConnection))
+	h.Connect(routerApi.Path("/user/push"))
 
-	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory, s.connections.FilesGrpcConnection)
-	factory := handler_factory.NewFactory(s.logger, usecaseFactory, s.connections.SessionGrpcConnection)
-	hs := factory.GetHandleUrls()
-
-	for apiUrl, h := range *hs {
-		h.Connect(routerApi.Path(apiUrl))
-	}
 	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)
-	ddosMiddleware := middleware.NewDdosMiddleware(s.logger, usecaseFactory.GetAccessUsecase())
-	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger, ddosMiddleware.CheckAccess)
+	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger)
 
 	cors := middleware.NewCorsMiddleware(&s.config.Cors, router)
 	routerCors := cors.SetCors(router)
 
-	if s.config.IsHTTPSServer {
-		serverHTTP, serverHTTPS := makingHTTPSServerWithRedirect(s.config, routerCors)
-
-		go func(logger *log.Logger, server *http.Server) {
-			logger.Info("Start http server")
-			err := server.ListenAndServe()
-			if err != nil {
-				logger.Errorf("http server error on listenAndServe %s", err)
-			}
-		}(s.logger, serverHTTP)
-
-		s.logger.Info("Start https server")
-		return serverHTTPS.ListenAndServeTLS("", "")
-	} else {
-		s.logger.Info("start no production http server")
-		return http.ListenAndServe(s.config.BindHttpAddr, routerCors)
-	}
+	s.logger.Info("start no production http server")
+	return http.ListenAndServe(s.config.BindHttpAddr, routerCors)
 }

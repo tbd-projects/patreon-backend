@@ -1,0 +1,26 @@
+log_level = "debug"
+log_path = "./logs/"
+
+bind_addr_https = ":5003"
+bind_addr_http = ":5003"
+
+#domen = "95.163.208.72"
+domen = "api.pyaterochka-team.site"
+session_url = "sessions-service:5001"
+
+[cors]
+headers = [
+    "Accept", "Content-Type",
+    "Content-Length", "Accept-Encoding",
+    "X-CSRF-Token", "csrf-token",
+    "Authorization"
+]
+methods = ["GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"]
+urls = [
+    "http://pyaterochka-team.site", "https://pyaterochka-team.site",
+   "http://dev.pyaterochka-team.site", "https://dev.pyaterochka-team.site",
+   "http://localhost:3001", "http://localhost:8080", "https://patreon-dev.herokuapp.com",
+    "https://dev-volodya-patreon.netlify.app", "https://patreon.netlify.app",
+    "http://patreon-dev.herokuapp.com", "http://front2.tp.volodyalarin.site",
+    "http://pyaterochka-team.site"
+]

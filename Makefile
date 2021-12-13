@@ -27,6 +27,8 @@ build-sessions:
 	go build -o sessions.out -v ./cmd/sessions
 build-files:
 	go build -o files.out -v ./cmd/files
+build-push:
+	go build -o push.out -v ./cmd/push
 
 build-docker-server: # запуск обычного http servera
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
@@ -39,6 +41,8 @@ build-docker-sessions: # сборка образа сервиса авториз
 	docker build --no-cache --network host -f ./docker/session-service.Dockerfile . --tag session-service
 build-docker-files: # сборка образа сервиса файлов
 	docker build --no-cache --network host -f ./docker/files-service.Dockerfile . --tag files-service
+build-docker-push: # сборка образа сервиса файлов
+	docker build --no-cache --network host -f ./docker/push-service.Dockerfile . --tag push-service
 build-docker-nginx: # сборка образа сервиса nginx
 	docker build --no-cache --network host -f ./docker/nginx.Dockerfile . --tag nginx-ssl
 

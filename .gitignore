@@ -18,6 +18,7 @@ logs
 local
 media
 logs-sessions
+logs-push
 logs-files
 logs-ngnix
 patreon-secrt
