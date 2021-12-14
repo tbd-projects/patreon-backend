@@ -114,7 +114,7 @@ services:
       - "5432"
     command: "postgres -c shared_preload_libraries='pg_stat_statements'"
     volumes:
-      - postges-data:/var/lib/postgresql
+      - postgis-data:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=${PG_BD_NAME}
       - POSTGRES_USER=${PG_BD_PASSWORD}
