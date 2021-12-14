@@ -3,6 +3,7 @@ version: "3"
 volumes:
   dbbackups:
   postgis-data:
+  postges-data:
   session-redis:
   access-redis:
 services:
@@ -113,7 +114,7 @@ services:
       - "5432"
     command: "postgres -c shared_preload_libraries='pg_stat_statements'"
     volumes:
-      - postgis-data:/var/lib/postgresql
+      - postges-data:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=${PG_BD_NAME}
       - POSTGRES_USER=${PG_BD_PASSWORD}

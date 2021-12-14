@@ -18,11 +18,11 @@ jobs:
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
       - name: Build Docker image
-        run: sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/session-service -f ./docker/session-service.Dockerfile . &&
-          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/files-service -f ./docker/files-service.Dockerfile . &&
-          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/push-service -f ./docker/push-service.Dockerfile . &&
-          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/main -f ./docker/builder.Dockerfile . &&
-          sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl -f ./docker/nginx.Dockerfile . &&
+        run: sudo docker build --no-cache --network host -t ${{ secrets.DOCKERHUB_USERNAME }}/session-service -f ./docker/session-service.Dockerfile . &&
+          sudo docker build --no-cache --network host -t ${{ secrets.DOCKERHUB_USERNAME }}/files-service -f ./docker/files-service.Dockerfile . &&
+          sudo docker build --no-cache --network host -t ${{ secrets.DOCKERHUB_USERNAME }}/push-service -f ./docker/push-service.Dockerfile . &&
+          sudo docker build --no-cache --network host -t ${{ secrets.DOCKERHUB_USERNAME }}/main -f ./docker/builder.Dockerfile . &&
+          sudo docker build --no-cache --network host -t ${{ secrets.DOCKERHUB_USERNAME }}/nginx-ssl -f ./docker/nginx.Dockerfile . &&
           sudo docker build --no-cache --network host -t ${{ secrets.DOCKERHUB_USERNAME }}/pg-14 -f ./docker/postgresql.Dockerfile .
 
 
