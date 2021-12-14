@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/jmoiron/sqlx"
+	"patreon/pkg/rabbit"
 
 	"google.golang.org/grpc"
 
@@ -14,4 +15,5 @@ type ExpectedConnections struct {
 	AccessRedisPool       *redis.Pool
 	SqlConnection         *sqlx.DB
 	PathFiles             string
+	RabbitSession         *rabbit.Session
 }

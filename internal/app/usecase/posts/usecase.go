@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"github.com/sirupsen/logrus"
 	"io"
 	"patreon/internal/app/models"
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
@@ -52,7 +53,7 @@ type Usecase interface {
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB
-	Create(post *models.CreatePost) (int64, error)
+	Create(log *logrus.Entry, post *models.CreatePost) (int64, error)
 
 	// GetCreatorId Errors:
 	//  	repository.NotFound

@@ -1,6 +1,7 @@
 package usecase_comments
 
 import (
+	"github.com/sirupsen/logrus"
 	"patreon/internal/app/models"
 )
 
@@ -13,7 +14,7 @@ type Usecase interface {
 	//		models.InvalidUserId
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(cm *models.Comment) (int64, error)
+	Create(log *logrus.Entry, cm *models.Comment) (int64, error)
 
 	// Update Errors:
 	//		repository.NotFound

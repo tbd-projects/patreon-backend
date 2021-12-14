@@ -93,6 +93,15 @@ func main() {
 		}
 	}(closeResource, logger)
 
+	rabbit, closeResource := utils.NewRabbitSession(logger, repositoryConfig.RabbitUrl)
+
+	defer func(closer func() error, log *logrus.Logger) {
+		err := closer()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(closeResource, logger)
+
 	sessionConn, err := utils.NewGrpcConnection(config.Microservices.SessionServerUrl)
 	if err != nil {
 		logger.Fatal(err)
@@ -108,6 +117,7 @@ func main() {
 			AccessRedisPool:       utils.NewRedisPool(repositoryConfig.AccessRedisUrl),
 			SqlConnection:         db,
 			PathFiles:             config.MediaDir,
+			RabbitSession:         rabbit,
 		},
 		logger,
 	)

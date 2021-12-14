@@ -97,7 +97,7 @@ func (h *CommentsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.commentsUsecase.Create(&models.Comment{PostId: postId, AuthorId: userID, Body: req.Body,
+	res, err := h.commentsUsecase.Create(h.Log(r), &models.Comment{PostId: postId, AuthorId: userID, Body: req.Body,
 		AsCreator: req.AsCreator})
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPOST)

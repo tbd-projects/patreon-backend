@@ -2,6 +2,7 @@ package posts
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
@@ -9,6 +10,7 @@ import (
 	repoPosts "patreon/internal/app/repository/posts"
 	"patreon/internal/microservices/files/delivery/grpc/client"
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	push_client "patreon/internal/microservices/push/delivery/client"
 	"patreon/pkg/utils"
 
 	"github.com/pkg/errors"
@@ -19,10 +21,11 @@ type PostsUsecase struct {
 	repositoryData  repoAttaches.Repository
 	filesRepository client.FileServiceClient
 	imageConvector  utils.ImageConverter
+	pusher          push_client.Pusher
 }
 
 func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoAttaches.Repository,
-	fileClient client.FileServiceClient, convector ...utils.ImageConverter) *PostsUsecase {
+	fileClient client.FileServiceClient, pusher push_client.Pusher, convector ...utils.ImageConverter) *PostsUsecase {
 	conv := utils.ImageConverter(&utils.ConverterToWebp{})
 	if len(convector) != 0 {
 		conv = convector[0]
@@ -32,6 +35,7 @@ func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoAttache
 		repositoryData:  repositoryData,
 		imageConvector:  conv,
 		filesRepository: fileClient,
+		pusher:          pusher,
 	}
 }
 
@@ -105,7 +109,7 @@ func (usecase *PostsUsecase) Update(post *models.UpdatePost) error {
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *PostsUsecase) Create(post *models.CreatePost) (int64, error) {
+func (usecase *PostsUsecase) Create(log *logrus.Entry, post *models.CreatePost) (int64, error) {
 	if err := post.Validate(); err != nil {
 		if errors.Is(err, models.EmptyTitle) || errors.Is(err, models.InvalidCreatorId) ||
 			errors.Is(err, models.InvalidAwardsId) {
@@ -119,8 +123,12 @@ func (usecase *PostsUsecase) Create(post *models.CreatePost) (int64, error) {
 			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
 		}
 	}
-
-	return usecase.repository.Create(post)
+	postId, err := usecase.repository.Create(post)
+	errPush := usecase.pusher.NewPost(post.CreatorId, postId, post.Title)
+	if errPush != nil {
+		log.Errorf("Try push new post, and got err %s", errPush)
+	}
+	return postId, err
 }
 
 // GetCreatorId Errors:

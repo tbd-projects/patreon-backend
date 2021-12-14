@@ -20,6 +20,7 @@ type RepositoryConnections struct {
 	DataBaseUrl     string `toml:"database_url"`
 	SessionRedisUrl string `toml:"session-redis_url"`
 	AccessRedisUrl  string `toml:"access-redis_url"`
+	RabbitUrl       string `toml:"rabbit_url"`
 }
 
 type Config struct {

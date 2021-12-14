@@ -14,7 +14,7 @@
 # ide files
 .idea
 .vscode
-logs
+logs*
 local
 media
 logs-sessions

@@ -27,6 +27,7 @@ import (
 	repoSubscribers "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
 	repUserPsql "patreon/internal/app/repository/user/postgresql"
+	push_client "patreon/internal/microservices/push/delivery/client"
 
 	"github.com/sirupsen/logrus"
 )
@@ -47,8 +48,9 @@ type RepositoryFactory struct {
 	paymentsRepository    repoPayments.Repository
 	infoRepository        repoInfo.Repository
 	statsRepository       repStats.Repository
-	CommentsRepository    repoComments.Repository
 	payTokenRepository    repoPayToken.Repository
+	commentsRepository    repoComments.Repository
+	pusher                push_client.Pusher
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -140,10 +142,17 @@ func (f *RepositoryFactory) GetStatsRepository() repStats.Repository {
 }
 
 func (f *RepositoryFactory) GetCommentsRepository() repoComments.Repository {
-	if f.CommentsRepository == nil {
-		f.CommentsRepository = repCommentsPsql.NewCommentsRepository(f.expectedConnections.SqlConnection)
+	if f.commentsRepository == nil {
+		f.commentsRepository = repCommentsPsql.NewCommentsRepository(f.expectedConnections.SqlConnection)
 	}
-	return f.CommentsRepository
+	return f.commentsRepository
+}
+
+func (f *RepositoryFactory) GetPusher() push_client.Pusher {
+	if f.pusher == nil {
+		f.pusher = push_client.NewPushSender(f.expectedConnections.RabbitSession)
+	}
+	return f.pusher
 }
 func (f *RepositoryFactory) GetPayTokenRepository() repoPayToken.Repository {
 	if f.payTokenRepository == nil {

@@ -1,5 +1,5 @@
 ./media
-./logs
+./logs*
 ./patreon-secrt
 ./docs
 ./docker

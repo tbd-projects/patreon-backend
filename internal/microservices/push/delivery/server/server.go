@@ -2,9 +2,11 @@ package push_server
 
 import (
 	"fmt"
+	"github.com/gorilla/websocket"
 	"net/http"
 	"patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/push"
+	push_models "patreon/internal/microservices/push/push"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 	"time"
 
@@ -38,6 +40,7 @@ func (s *Server) checkConnection() error {
 	if state != connectivity.Ready {
 		return fmt.Errorf("Session connection not ready, status is: %s ", state)
 	}
+
 	return nil
 }
 
@@ -58,6 +61,13 @@ func (s *Server) Start() error {
 	if err := s.checkConnection(); err != nil {
 		return err
 	}
+	upgrader := &websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 
 	router := mux.NewRouter()
 	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("push")
@@ -72,7 +82,7 @@ func (s *Server) Start() error {
 	defer senderHub.StopHub()
 	go senderHub.Run()
 
-	h := NewPushHandler(s.logger, sManager, senderHub)
+	h := NewPushHandler(s.logger, sManager, senderHub, upgrader)
 	h.Connect(routerApi.Path("/user/push"))
 
 	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)
@@ -96,7 +106,7 @@ func (s *Server) Start() error {
 					keys[i] = k
 					i++
 				}
-				h.hub.SendMessage(keys, &PostResponse{
+				h.hub.SendMessage(keys, &push_models.PostPush{
 					PostId: 1,
 					PostTitle: "Привет",
 					CreatorId: 2,

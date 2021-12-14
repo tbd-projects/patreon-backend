@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	logrus "github.com/sirupsen/logrus"
 )
 
 // CommentsUsecase is a mock of Usecase interface.
@@ -49,18 +50,18 @@ func (mr *CommentsUsecaseMockRecorder) CheckExists(arg0 interface{}) *gomock.Cal
 }
 
 // Create mocks base method.
-func (m *CommentsUsecase) Create(arg0 *models.Comment) (int64, error) {
+func (m *CommentsUsecase) Create(arg0 *logrus.Entry, arg1 *models.Comment) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *CommentsUsecaseMockRecorder) Create(arg0 interface{}) *gomock.Call {
+func (mr *CommentsUsecaseMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*CommentsUsecase)(nil).Create), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*CommentsUsecase)(nil).Create), arg0, arg1)
 }
 
 // Delete mocks base method.

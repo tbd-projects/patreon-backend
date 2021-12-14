@@ -21,6 +21,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	push "github.com/prometheus/client_golang/prometheus/push"
 )
 
 // MockRepositoryFactory is a mock of RepositoryFactory interface.
@@ -184,6 +185,20 @@ func (m *MockRepositoryFactory) GetPostsRepository() repository_posts.Repository
 func (mr *MockRepositoryFactoryMockRecorder) GetPostsRepository() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostsRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetPostsRepository))
+}
+
+// GetPusher mocks base method.
+func (m *MockRepositoryFactory) GetPusher() push.Pusher {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPusher")
+	ret0, _ := ret[0].(push.Pusher)
+	return ret0
+}
+
+// GetPusher indicates an expected call of GetPusher.
+func (mr *MockRepositoryFactoryMockRecorder) GetPusher() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPusher", reflect.TypeOf((*MockRepositoryFactory)(nil).GetPusher))
 }
 
 // GetStatsRepository mocks base method.

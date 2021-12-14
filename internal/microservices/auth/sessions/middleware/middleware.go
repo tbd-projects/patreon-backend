@@ -44,13 +44,8 @@ func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 			m.Log(r).Debugf("Get session for user: %d", res.UserID)
 			r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID))
 			r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID))
-			cookie := &http.Cookie{
-				Name:     "session_id",
-				Value:    res.UniqID,
-				Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime),
-				HttpOnly: true,
-			}
-			http.SetCookie(w, cookie)
+			sessionID.Expires = time.Now().Add(sessions_manager.ExpiredCookiesTime)
+			http.SetCookie(w, sessionID)
 		}
 		next(w, r)
 	}
@@ -97,13 +92,8 @@ func (m *SessionMiddleware) AddUserIdFunc(next hf.HandlerFunc) hf.HandlerFunc {
 				r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID))
 				r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID))
 			}
-			cookie := &http.Cookie{
-				Name:     "session_id",
-				Value:    uniqID,
-				Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime),
-				HttpOnly: true,
-			}
-			http.SetCookie(w, cookie)
+			sessionID.Expires = time.Now().Add(sessions_manager.ExpiredCookiesTime)
+			http.SetCookie(w, sessionID)
 		}
 		next(w, r)
 	}
