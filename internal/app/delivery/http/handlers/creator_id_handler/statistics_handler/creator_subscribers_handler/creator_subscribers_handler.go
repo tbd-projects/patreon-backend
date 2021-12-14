@@ -50,7 +50,7 @@ func (h *CreatorCountSubscribersHandler) GET(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	countPostsViews, err := h.statisticsUsecase.GetCountCreatorPosts(creatorId)
+	countPostsViews, err := h.statisticsUsecase.GetCountCreatorSubscribers(creatorId)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorGet)
 		return
