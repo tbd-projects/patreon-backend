@@ -40,6 +40,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/payments_handler"
+	pay_token_handler "patreon/internal/app/delivery/http/handlers/profile_handler/payments_handler/token_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/subscriptions_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/nickname_handler"
@@ -101,6 +102,7 @@ const (
 	POST_COMMENTS
 	COMMENTS_ID
 	USER_COMMENTS
+	USER_PAYMENTS_TOKEN
 )
 
 type HandlerFactory struct {
@@ -132,6 +134,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 	ucComment := f.usecaseFactory.GetCommentsUsecase()
 	sManager := client.NewSessionClient(f.sessionClientConn)
 	ucStats := f.usecaseFactory.GetStatsUsecase()
+	ucPayToken := f.usecaseFactory.GetPayTokenUsecase()
 
 	return map[int]app.Handler{
 		INFO:                     info_handler.NewInfoHandler(f.logger, ucInfo),
@@ -179,6 +182,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		POST_COMMENTS:            comments_handler.NewCommentsHandler(f.logger, ucComment, ucPosts, sManager),
 		COMMENTS_ID:              comments_id_handler.NewCommentsIdHandler(f.logger, ucComment, ucPosts, sManager),
 		USER_COMMENTS:            user_comments_handler.NewUserCommentsHandler(f.logger, ucComment, sManager),
+		USER_PAYMENTS_TOKEN:      pay_token_handler.NewTokenHandler(f.logger, sManager, ucPayToken, ucPayments),
 	}
 }
 
@@ -201,6 +205,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/user/update/nickname": hs[UPDATE_NICKNAME],
 		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
 		"/user/payments":        hs[USER_PAYMENTS],
+		"/user/payments/token":  hs[USER_PAYMENTS_TOKEN],
 		"/user/comments":        hs[USER_COMMENTS],
 		"/user/posts":           hs[POSTS_AVAILABLE],
 		// /creators ---------------------------------------------------------////

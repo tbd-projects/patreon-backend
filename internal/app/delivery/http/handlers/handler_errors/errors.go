@@ -87,6 +87,7 @@ var (
 	SubscribesNotFound    = errors.New("subscribes on the creator not found")
 	InvalidUserNickname   = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
 		models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH))
+	InvalidUserPayToken = errors.New("this user was not given this token")
 )
 
 var InternalError = errors.New("server error")

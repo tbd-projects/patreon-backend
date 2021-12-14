@@ -11,7 +11,7 @@ type PayTokenRepository struct {
 	redisPool *redis.Pool
 }
 
-func (r *PayTokenRepository) NewPayTokenRepository(pool *redis.Pool) *PayTokenRepository {
+func NewPayTokenRepository(pool *redis.Pool) *PayTokenRepository {
 	return &PayTokenRepository{
 		redisPool: pool,
 	}

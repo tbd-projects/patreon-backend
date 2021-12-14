@@ -99,7 +99,7 @@ func (h *AwardsSubscribeHandler) DELETE(w http.ResponseWriter, r *http.Request) 
 // @Param creator_id path int true "creator_id"
 // @Param pay_token body http_models.SubscribeRequest true "Request payToken"
 // @Success 201 "Successfully subscribe on the creator with id = creator_id"
-// @Failure 400 {object} http_models.ErrResponse "invalid parameters"
+// @Failure 400 {object} http_models.ErrResponse "invalid parameters", "this user was not given this token"
 // @Failure 409 {object} http_models.ErrResponse "this user already have subscribe on creator"
 // @Failure 404 {object} http_models.ErrResponse "award with this id not found"
 // @Failure 500 {object} http_models.ErrResponse "server error", "can not do bd operation"
@@ -136,14 +136,10 @@ func (h *AwardsSubscribeHandler) POST(w http.ResponseWriter, r *http.Request) {
 		AwardID:   awardID,
 	}
 
-	token, err := h.payTokenUsecase.GetToken(userID.(int64))
+	err = h.payTokenUsecase.CheckTokenByUser(models.PayToken{Token: req.Token}, userID.(int64))
 	if err != nil {
+		h.Log(r).Warnf("checkTokenVyUser error; err = %s, token from req = %s, userID = %v", err, req.Token, userID)
 		h.UsecaseError(w, r, err, codesByErrorsPOST)
-		return
-	}
-	if token.Token != req.Token {
-		h.Log(r).Warnf("token from store != token from request; from store = %s; from req = %s", token, req.Token)
-		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 	err = h.subscriberUsecase.Subscribe(subscriber, req.Token)

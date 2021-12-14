@@ -13,10 +13,10 @@ const (
 )
 
 type PayTokenUsecase struct {
-	repository pay_token.Repository
+	repository repository_pay_token.Repository
 }
 
-func NewPayTokenUsecase(repository pay_token.Repository) *PayTokenUsecase {
+func NewPayTokenUsecase(repository repository_pay_token.Repository) *PayTokenUsecase {
 	return &PayTokenUsecase{
 		repository: repository,
 	}
@@ -47,4 +47,25 @@ func (u *PayTokenUsecase) CheckToken(token models.PayToken) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+//	CheckTokenByUser with Errors:
+//		InvalidUserToken
+//		repository_redis.NotFound
+//		app.GeneralError with Errors
+//			repository_redis.InvalidStorageData
+func (u *PayTokenUsecase) CheckTokenByUser(token models.PayToken, userID int64) error {
+	userTokenID, err := u.repository.Get(token.Token)
+	if err != nil {
+		return err
+	}
+	userTokenIDToInt, err := strconv.Atoi(userTokenID)
+	if err != nil {
+		return err
+	}
+	if int64(userTokenIDToInt) != userID {
+		return InvalidUserToken
+	}
+
+	return nil
 }

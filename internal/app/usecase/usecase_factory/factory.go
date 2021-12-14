@@ -9,6 +9,7 @@ import (
 	useCreator "patreon/internal/app/usecase/creator"
 	useInfo "patreon/internal/app/usecase/info"
 	useLikes "patreon/internal/app/usecase/likes"
+	usePayToken "patreon/internal/app/usecase/pay_token"
 	usePayments "patreon/internal/app/usecase/payments"
 	usePosts "patreon/internal/app/usecase/posts"
 	useStats "patreon/internal/app/usecase/statistics"
@@ -35,6 +36,7 @@ type UsecaseFactory struct {
 	fileClient         client.FileServiceClient
 	statsUsecase       useStats.Usecase
 	commentsUsecase    useComments.Usecase
+	payTokenUsecase    usePayToken.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory, fileConn *grpc.ClientConn) *UsecaseFactory {
@@ -136,4 +138,10 @@ func (f *UsecaseFactory) GetCommentsUsecase() useComments.Usecase {
 		f.commentsUsecase = useComments.NewCommentsUsecase(f.repositoryFactory.GetCommentsRepository())
 	}
 	return f.commentsUsecase
+}
+func (f *UsecaseFactory) GetPayTokenUsecase() usePayToken.Usecase {
+	if f.payTokenUsecase == nil {
+		f.payTokenUsecase = usePayToken.NewPayTokenUsecase(f.repositoryFactory.GetPayTokenRepository())
+	}
+	return f.payTokenUsecase
 }

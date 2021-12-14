@@ -16,6 +16,8 @@ import (
 	repInfoPsql "patreon/internal/app/repository/info/postgresql"
 	repoLikes "patreon/internal/app/repository/likes"
 	repLikesPsql "patreon/internal/app/repository/likes/postgresql"
+	repoPayToken "patreon/internal/app/repository/pay_token"
+	repoPayTokenRedis "patreon/internal/app/repository/pay_token/redis"
 	repoPayments "patreon/internal/app/repository/payments"
 	repoPaymentsPsql "patreon/internal/app/repository/payments/postgresql"
 	repoPosts "patreon/internal/app/repository/posts"
@@ -45,6 +47,7 @@ type RepositoryFactory struct {
 	infoRepository        repoInfo.Repository
 	statsRepository       repStats.Repository
 	CommentsRepository    repoComments.Repository
+	payTokenRepository    repoPayToken.Repository
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -140,4 +143,10 @@ func (f *RepositoryFactory) GetCommentsRepository() repoComments.Repository {
 		f.CommentsRepository = repCommentsPsql.NewCommentsRepository(f.expectedConnections.SqlConnection)
 	}
 	return f.CommentsRepository
+}
+func (f *RepositoryFactory) GetPayTokenRepository() repoPayToken.Repository {
+	if f.payTokenRepository == nil {
+		f.payTokenRepository = repoPayTokenRedis.NewPayTokenRepository(f.expectedConnections.AccessRedisPool)
+	}
+	return f.payTokenRepository
 }

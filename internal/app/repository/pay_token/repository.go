@@ -1,4 +1,4 @@
-package pay_token
+package repository_pay_token
 
 //go:generate mockgen -destination=mocks/mock_pay_token_repository.go -package=mock_repository -mock_names=Repository=PayTokenRepository . Repository
 

@@ -9,6 +9,7 @@ import (
 	repCreator "patreon/internal/app/repository/creator"
 	repoInfo "patreon/internal/app/repository/info"
 	repoLikes "patreon/internal/app/repository/likes"
+	repoPayToken "patreon/internal/app/repository/pay_token"
 	repoPayments "patreon/internal/app/repository/payments"
 	repoPosts "patreon/internal/app/repository/posts"
 	repoStats "patreon/internal/app/repository/statistics"
@@ -32,4 +33,5 @@ type RepositoryFactory interface {
 	GetInfoRepository() repoInfo.Repository
 	GetCommentsRepository() repoComments.Repository
 	GetStatsRepository() repoStats.Repository
+	GetPayTokenRepository() repoPayToken.Repository
 }
