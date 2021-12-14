@@ -73,7 +73,7 @@ func (h *TokenHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 	h.Log(r).Infof("POST_FORM = %v", r.PostForm)
 	payToken := r.PostForm["label"][0]
-	amount := r.PostForm["amount"][0]
+	amount := r.PostForm["withdraw_amount"][0]
 
 	amountFloat, err := strconv.ParseFloat(amount, 64)
 	if err != nil {
