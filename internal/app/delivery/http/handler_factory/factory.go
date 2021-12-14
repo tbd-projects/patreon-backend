@@ -169,7 +169,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		AWARDS_COVER:             upd_cover_awards_handler.NewUpdateCoverAwardsHandler(f.logger, sManager, ucAwards),
 		ATTACH_UPD_IMAGE:         upd_img_data_handler.NewAttachUploadImageHandler(f.logger, ucAttaches, ucPosts, sManager),
 		ATTACH_UPD_TEXT:          upd_text_data_handler.NewAttachesUpdateTextHandler(f.logger, ucAttaches, ucPosts, sManager),
-		AWARDS_CREATOR_SUBSCRIBE: aw_subscribe_handler.NewAwardsSubscribeHandler(f.logger, sManager, ucSubscr, ucAwards),
+		AWARDS_CREATOR_SUBSCRIBE: aw_subscribe_handler.NewAwardsSubscribeHandler(f.logger, sManager, ucSubscr, ucAwards, ucPayToken),
 		USER_PAYMENTS:            payments_handler.NewPaymentsHandler(f.logger, sManager, ucPayments),
 		ATTACHES:                 attaches_handler.NewAttachesHandler(f.logger, ucAttaches, ucPosts, sManager),
 		ATTACH_ADD_VIDEO:         upl_video_attach_handler.NewPostsUploadVideoHandler(f.logger, ucAttaches, ucPosts, sManager),

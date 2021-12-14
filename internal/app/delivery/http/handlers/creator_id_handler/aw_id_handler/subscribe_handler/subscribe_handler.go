@@ -29,10 +29,11 @@ type AwardsSubscribeHandler struct {
 }
 
 func NewAwardsSubscribeHandler(log *logrus.Logger, sClient session_client.AuthCheckerClient,
-	ucSubscribers usecase_subscribers.Usecase, ucAwards useAwards.Usecase) *AwardsSubscribeHandler {
+	ucSubscribers usecase_subscribers.Usecase, ucAwards useAwards.Usecase, payUc usecase_pay_token.Usecase) *AwardsSubscribeHandler {
 	h := &AwardsSubscribeHandler{
 		BaseHandler:       *bh.NewBaseHandler(log),
 		subscriberUsecase: ucSubscribers,
+		payTokenUsecase:   payUc,
 	}
 	h.AddMethod(http.MethodPost, h.POST, session_middleware.NewSessionMiddleware(sClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
