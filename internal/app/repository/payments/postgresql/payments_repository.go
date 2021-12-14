@@ -23,7 +23,7 @@ const (
 		"JOIN users u on p.users_id = u.users_id where p.creator_id = $1 " +
 		"ORDER BY p.date DESC "
 	queryUpdateStatus  = "UPDATE payments SET status = true WHERE pay_token = $1;"
-	queryCountPayments = "SELECT count(*) from payments where token = $1;"
+	queryCountPayments = "SELECT count(*) from payments where pay_token = $1;"
 	queryGetPayment    = "SELECT amount, date, creator_id, users_id, status from payments where pay_token = $1;"
 )
 
