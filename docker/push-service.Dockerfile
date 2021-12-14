@@ -8,4 +8,6 @@ EXPOSE 8080 443 80 5003
 
 RUN make build-push
 
-CMD ./push.out
+RUN chmod +x ./wait
+
+CMD ./wait && ./push.out

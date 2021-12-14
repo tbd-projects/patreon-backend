@@ -7,6 +7,7 @@ bind_addr_http = ":5003"
 #domen = "95.163.208.72"
 domen = "localhost"
 session_url = "sessions-service:5001"
+rabbit_url = "amqp://patreon:pyaterochka@rabbit:5672/"
 
 [cors]
 headers = [

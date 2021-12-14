@@ -14,6 +14,7 @@ import (
 	repoStats "patreon/internal/app/repository/statistics"
 	useSubscr "patreon/internal/app/repository/subscribers"
 	repUser "patreon/internal/app/repository/user"
+	push_client "patreon/internal/microservices/push/delivery/client"
 )
 
 //go:generate mockgen -destination=mocks/mock_repository_factory.go -package=mock_repository_factory . RepositoryFactory
@@ -32,4 +33,5 @@ type RepositoryFactory interface {
 	GetInfoRepository() repoInfo.Repository
 	GetCommentsRepository() repoComments.Repository
 	GetStatsRepository() repoStats.Repository
+	GetPusher() push_client.Pusher
 }

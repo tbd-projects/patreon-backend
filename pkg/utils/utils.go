@@ -5,6 +5,7 @@ import (
 	"os"
 	"patreon/internal"
 	"patreon/internal/app"
+	"patreon/pkg/rabbit"
 	"strings"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const MAX_GRPC_SIZE = 1024*1024*100
+const MAX_GRPC_SIZE = 1024 * 1024 * 100
 
 func NewLogger(config *internal.Config, isService bool, serviceName string) (log *logrus.Logger, closeResource func() error) {
 	level, err := logrus.ParseLevel(config.LogLevel)
@@ -56,6 +57,11 @@ func NewPostgresConnection(config *app.RepositoryConnections) (db *sqlx.DB, clos
 	return db, db.Close
 }
 
+func NewRabbitSession(logger *logrus.Logger, url string) (session *rabbit.Session, closeResource func() error) {
+	session = rabbit.New(logger.WithField("service", "rabbit"), "rabbit", url)
+	return session, session.Close
+}
+
 func NewRedisPool(redisUrl string) *redis.Pool {
 	return &redis.Pool{
 		Dial: func() (redis.Conn, error) {
@@ -66,7 +72,7 @@ func NewRedisPool(redisUrl string) *redis.Pool {
 
 func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
 	return grpc.Dial(grpcUrl, grpc.WithInsecure(), grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE),
-												grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE)), grpc.WithBlock())
+		grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE)), grpc.WithBlock())
 }
 
 func StringsToLowerCase(array []string) []string {

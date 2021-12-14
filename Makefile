@@ -54,13 +54,13 @@ run-init:
 	sudo chown -R 472:472 ./grafana
 
 run-https: run-init # запустить https сервер
-	docker-compose --env-file ./configs/run-https.env up --build --no-deps
+	docker-compose -f docker-compose.yml --env-file ./configs/run-https.env up --build --no-deps
 
 run-https-back: run-init # запустить https сервер
-	docker-compose  --env-file ./configs/run-https.env up -d --build --no-deps
+	docker-compose  -f docker-compose.yml --env-file ./configs/run-https.env up -d --build --no-deps
 
 run-http: run-init # запустить http сервер
-	docker-compose --env-file ./configs/run-http.env up --build --no-deps
+	docker-compose -f docker-compose-dev.yml --env-file ./configs/run-http.env up --build --no-deps
 
 stop:  # остановить сервер
 	docker-compose stop

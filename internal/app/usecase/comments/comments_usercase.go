@@ -2,18 +2,22 @@ package usecase_comments
 
 import (
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	repoComments "patreon/internal/app/repository/comments"
+	push_client "patreon/internal/microservices/push/delivery/client"
 )
 
 type CommentsUsecase struct {
 	repository repoComments.Repository
+	pusher     push_client.Pusher
 }
 
-func NewCommentsUsecase(repository repoComments.Repository) *CommentsUsecase {
+func NewCommentsUsecase(repository repoComments.Repository, pusher push_client.Pusher) *CommentsUsecase {
 	return &CommentsUsecase{
 		repository: repository,
+		pusher:     pusher,
 	}
 }
 
@@ -22,7 +26,7 @@ func NewCommentsUsecase(repository repoComments.Repository) *CommentsUsecase {
 //		models.InvalidUserId
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (usecase *CommentsUsecase) Create(cm *models.Comment) (int64, error) {
+func (usecase *CommentsUsecase) Create(log *logrus.Entry, cm *models.Comment) (int64, error) {
 	if err := cm.Validate(); err != nil {
 		if errors.Is(err, models.InvalidPostId) || errors.Is(err, models.InvalidUserId) {
 			return app.InvalidInt, err
@@ -32,7 +36,12 @@ func (usecase *CommentsUsecase) Create(cm *models.Comment) (int64, error) {
 			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
 		}
 	}
-	return usecase.repository.Create(cm)
+	commentId, err := usecase.repository.Create(cm)
+	errPush := usecase.pusher.NewComment(commentId, cm.PostId, cm.AuthorId)
+	if errPush != nil {
+		log.Errorf("Try push comment; got error: %s", errPush)
+	}
+	return commentId, err
 }
 
 // Get Errors:

@@ -25,22 +25,20 @@ const (
 	maxMessageSize = 512
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 type PushHandler struct {
 	sessionClient session_client.AuthCheckerClient
-	hub *SendHub
+	hub           *SendHub
+	upgrader      *websocket.Upgrader
 	bh.BaseHandler
 }
 
-func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient, hub *SendHub) *PushHandler {
+func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient, hub *SendHub,
+	upgrader *websocket.Upgrader) *PushHandler {
 	h := &PushHandler{
 		BaseHandler:   *bh.NewBaseHandler(log),
 		sessionClient: sManager,
-		hub: hub,
+		hub:           hub,
+		upgrader: upgrader,
 	}
 	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
 	return h
@@ -61,12 +59,11 @@ func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClien
 // @Failure 401 "user are not authorized"
 // @Router /user/push [GET]
 func (h *PushHandler) GET(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-
 
 	userId, ok := r.Context().Value("user_id").(int64)
 	if !ok {

@@ -91,7 +91,7 @@ func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
 func (f *UsecaseFactory) GetPostsUsecase() usePosts.Usecase {
 	if f.postsUsecase == nil {
 		f.postsUsecase = usePosts.NewPostsUsecase(f.repositoryFactory.GetPostsRepository(),
-			f.repositoryFactory.GetAttachesRepository(), f.fileClient)
+			f.repositoryFactory.GetAttachesRepository(), f.fileClient, f.repositoryFactory.GetPusher())
 	}
 	return f.postsUsecase
 }
@@ -133,7 +133,7 @@ func (f *UsecaseFactory) GetStatsUsecase() useStats.Usecase {
 
 func (f *UsecaseFactory) GetCommentsUsecase() useComments.Usecase {
 	if f.commentsUsecase == nil {
-		f.commentsUsecase = useComments.NewCommentsUsecase(f.repositoryFactory.GetCommentsRepository())
+		f.commentsUsecase = useComments.NewCommentsUsecase(f.repositoryFactory.GetCommentsRepository(), f.repositoryFactory.GetPusher())
 	}
 	return f.commentsUsecase
 }

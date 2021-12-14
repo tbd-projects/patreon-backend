@@ -35,13 +35,22 @@ func main() {
 	}
 	logger.SetLevel(level)
 
+	rabbit, closeResource := utils.NewRabbitSession(logger, config.RabbitUrl)
+
+	defer func(closer func() error, log *logrus.Logger) {
+		err := closer()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(closeResource, logger)
+
 	sessionConn, err := utils.NewGrpcConnection(config.SessionUrl)
 	if err != nil {
 		logger.Fatal(err)
 	}
 
 	logger.Info("Push-service was start")
-	server := push_server.New(config, app.ExpectedConnections{SessionGrpcConnection: sessionConn}, logger)
+	server := push_server.New(config, app.ExpectedConnections{SessionGrpcConnection: sessionConn, RabbitSession: rabbit}, logger)
 	if err = server.Start(); err != nil {
 		logger.Fatalln(err)
 	}

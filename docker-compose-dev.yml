@@ -2,12 +2,13 @@ version: "3"
 
 volumes:
   dbbackups:
+  rabbit-data:
   postgis-data:
   session-redis:
   access-redis:
 services:
   ngnix-proxy:
-    image: flashiee/nginx-ssl:latest
+    image: nginx-ssl
     expose:
       - "80"
       - "443"
@@ -23,7 +24,7 @@ services:
     networks:
       - default
     volumes:
-      - ./logs-ngnix:/var/log/nginx/
+      - ./logs-ngnix:/var/log/nginx
       - ./patreon-secrt/ngnix/letsencrypt:/etc/letsencrypt
       - ./static:/static
       - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
@@ -31,7 +32,7 @@ services:
       WAIT_HOSTS: main:8080, push-service:5003
     restart: always
   sessions-service:
-    image: flashiee/session-service:latest
+    image: session-service
     expose:
       - "5001"
       - "9091"
@@ -45,7 +46,7 @@ services:
       - ./logs-sessions:/app/logs
       - ${CONFIG_DIR}:/app/configs
   push-service:
-    image: flashiee/push-service:latest
+    image: push-service
     expose:
       - "5003"
       - "9091"
@@ -60,8 +61,10 @@ services:
     volumes:
       - ./logs-push:/app/logs
       - ${CONFIG_DIR}:/app/configs
+    environment:
+      WAIT_HOSTS: rabbit:5672
   files-service:
-    image: flashiee/files-service:latest
+    image: files-service
     expose:
       - "5002"
       - "9091"
@@ -74,7 +77,7 @@ services:
       - ./media:/app/media
       - ${CONFIG_DIR}:/app/configs
   main:
-    image: flashiee/main:latest
+    image: patreon
     expose:
       - "8080"
     networks:
@@ -93,7 +96,7 @@ services:
       - files-service
       - rabbit
     environment:
-      WAIT_HOSTS: patreon-bd:5432
+      WAIT_HOSTS: patreon-bd:5432, rabbit:5672
   session-redis:
     image: "redis:alpine"
     expose:
@@ -114,7 +117,7 @@ services:
       - access-redis:/data
     restart: always
   patreon-bd:
-    image: flashiee/pg-14:latest
+    image: pg-14
     expose:
       - "5432"
     command: "postgres -c shared_preload_libraries='pg_stat_statements'"
@@ -173,6 +176,7 @@ services:
     container_name: exporter_container
     image: prometheuscommunity/postgres-exporter
     environment:
+#      DATA_SOURCE_URI: "patreon-bd:5432"
       DATA_SOURCE_USER: "${PG_BD_USERNAME}"
       DATA_SOURCE_PASS: "${PG_BD_PASSWORD}"
       DATA_SOURCE_URI: "patreon-bd:5432/${PG_BD_NAME}?sslmode=disable"

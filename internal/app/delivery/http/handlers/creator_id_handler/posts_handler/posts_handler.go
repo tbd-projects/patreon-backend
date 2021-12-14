@@ -147,7 +147,7 @@ func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		IsDraft:     req.IsDraft,
 	}
 
-	postsId, err := h.postsUsecase.Create(aw)
+	postsId, err := h.postsUsecase.Create(h.Log(r), aw)
 	if err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPOST)
 		return
