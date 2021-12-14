@@ -29,7 +29,6 @@ func NewAccountHandler(log *logrus.Logger, ucPayToken usecase_pay_token.Usecase)
 // @Description get number of yoomoney account
 // @Produce json
 // @Success 200 {object} http_models.ResponsePayAccount "Success"
-// @Failure 500 {object} http_models.ErrResponse "server error"
 // @Router /user/payments/account [GET]
 func (h *AccountHandler) GET(w http.ResponseWriter, r *http.Request) {
 	account := h.tokenUsecase.GetAccount()

@@ -2,9 +2,6 @@ package payments_handler
 
 import (
 	"net/http"
-	csrf_middleware "patreon/internal/app/csrf/middleware"
-	repository_jwt "patreon/internal/app/csrf/repository/jwt"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
@@ -35,10 +32,7 @@ func NewTokenHandler(log *logrus.Logger,
 	h.AddMethod(http.MethodGet, h.GET,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
-	h.AddMethod(http.MethodPost, h.POST,
-		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
-		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
-	)
+	h.AddMethod(http.MethodPost, h.POST)
 	return h
 }
 
@@ -77,6 +71,7 @@ func (h *TokenHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
 		return
 	}
+	h.Log(r).Infof("POST_FORM = %v", r.PostForm)
 	payToken := r.PostForm["label"][0]
 	amount := r.PostForm["amount"][0]
 
