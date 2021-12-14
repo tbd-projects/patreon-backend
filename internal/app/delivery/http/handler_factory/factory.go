@@ -40,6 +40,7 @@ import (
 	"patreon/internal/app/delivery/http/handlers/logout_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/payments_handler"
+	pay_account_handler "patreon/internal/app/delivery/http/handlers/profile_handler/payments_handler/account_handler"
 	pay_token_handler "patreon/internal/app/delivery/http/handlers/profile_handler/payments_handler/token_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/subscriptions_handler"
 	"patreon/internal/app/delivery/http/handlers/profile_handler/update_handler/avatar_handler"
@@ -103,6 +104,7 @@ const (
 	COMMENTS_ID
 	USER_COMMENTS
 	USER_PAYMENTS_TOKEN
+	PAYMENTS_ACCOUNT
 )
 
 type HandlerFactory struct {
@@ -183,6 +185,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		COMMENTS_ID:              comments_id_handler.NewCommentsIdHandler(f.logger, ucComment, ucPosts, sManager),
 		USER_COMMENTS:            user_comments_handler.NewUserCommentsHandler(f.logger, ucComment, sManager),
 		USER_PAYMENTS_TOKEN:      pay_token_handler.NewTokenHandler(f.logger, sManager, ucPayToken, ucPayments),
+		PAYMENTS_ACCOUNT:         pay_account_handler.NewAccountHandler(f.logger, ucPayToken),
 	}
 }
 
@@ -199,15 +202,16 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/logout":   hs[LOGOUT],
 		"/register": hs[REGISTER],
 		// /user     ---------------------------------------------------------////
-		"/user":                 hs[PROFILE],
-		"/user/update/password": hs[UPDATE_PASSWORD],
-		"/user/update/avatar":   hs[UPDATE_AVATAR],
-		"/user/update/nickname": hs[UPDATE_NICKNAME],
-		"/user/subscriptions":   hs[GET_USER_SUBSCRIPTIONS],
-		"/user/payments":        hs[USER_PAYMENTS],
-		"/user/payments/token":  hs[USER_PAYMENTS_TOKEN],
-		"/user/comments":        hs[USER_COMMENTS],
-		"/user/posts":           hs[POSTS_AVAILABLE],
+		"/user":                  hs[PROFILE],
+		"/user/update/password":  hs[UPDATE_PASSWORD],
+		"/user/update/avatar":    hs[UPDATE_AVATAR],
+		"/user/update/nickname":  hs[UPDATE_NICKNAME],
+		"/user/subscriptions":    hs[GET_USER_SUBSCRIPTIONS],
+		"/user/payments":         hs[USER_PAYMENTS],
+		"/user/payments/token":   hs[USER_PAYMENTS_TOKEN],
+		"/user/payments/account": hs[PAYMENTS_ACCOUNT],
+		"/user/comments":         hs[USER_COMMENTS],
+		"/user/posts":            hs[POSTS_AVAILABLE],
 		// /creators ---------------------------------------------------------////
 		"/creators":                                   hs[CREATORS],
 		"/creators/{creator_id:[0-9]+}":               hs[CREATOR_WITH_ID],

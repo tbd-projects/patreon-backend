@@ -7,6 +7,10 @@ const (
 	DefaultImage = ""
 )
 
+type Payments struct {
+	AccountNumber string `toml:"account_number"`
+}
+
 type Microservice struct {
 	SessionServerUrl string `toml:"session_url"`
 	FilesUrl         string `toml:"files_url"`
@@ -25,6 +29,7 @@ type Config struct {
 	ServerRepository RepositoryConnections `toml:"server"`
 	LocalRepository  RepositoryConnections `toml:"local"`
 	Cors             internal.CorsConfig   `toml:"cors"`
+	PaymentsInfo     Payments              `toml:"payments"`
 }
 
 func NewConfig() *Config {

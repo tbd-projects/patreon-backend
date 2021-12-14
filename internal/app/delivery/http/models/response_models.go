@@ -353,3 +353,6 @@ type ResponseCreatorCountPosts struct {
 type ResponsePayToken struct {
 	PayToken string `json:"token"`
 }
+type ResponsePayAccount struct {
+	Account string `json:"account_number"`
+}

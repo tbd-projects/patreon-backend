@@ -13,12 +13,14 @@ const (
 )
 
 type PayTokenUsecase struct {
-	repository repository_pay_token.Repository
+	repository    repository_pay_token.Repository
+	accountNumber string
 }
 
-func NewPayTokenUsecase(repository repository_pay_token.Repository) *PayTokenUsecase {
+func NewPayTokenUsecase(repository repository_pay_token.Repository, accountNumber string) *PayTokenUsecase {
 	return &PayTokenUsecase{
-		repository: repository,
+		repository:    repository,
+		accountNumber: accountNumber,
 	}
 }
 
@@ -68,4 +70,8 @@ func (u *PayTokenUsecase) CheckTokenByUser(token models.PayToken, userID int64) 
 	}
 
 	return nil
+}
+
+func (u *PayTokenUsecase) GetAccount() string {
+	return u.accountNumber
 }

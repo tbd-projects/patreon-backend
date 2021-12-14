@@ -33,6 +33,7 @@ import (
 
 type RepositoryFactory struct {
 	expectedConnections   app.ExpectedConnections
+	paymentsConfig        app.Payments
 	logger                *logrus.Logger
 	userRepository        repUser.Repository
 	creatorRepository     repCreator.Repository

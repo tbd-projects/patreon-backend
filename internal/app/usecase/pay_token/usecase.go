@@ -20,4 +20,6 @@ type Usecase interface {
 	//		app.GeneralError with Errors
 	//			repository_redis.InvalidStorageData
 	CheckTokenByUser(token models.PayToken, userID int64) error
+
+	GetAccount() string
 }

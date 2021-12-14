@@ -35,7 +35,7 @@ func NewTokenHandler(log *logrus.Logger,
 	h.AddMethod(http.MethodGet, h.GET,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
-	h.AddMethod(http.MethodGet, h.POST,
+	h.AddMethod(http.MethodPost, h.POST,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 		csrf_middleware.NewCsrfMiddleware(log, usecase_csrf.NewCsrfUsecase(repository_jwt.NewJwtRepository())).CheckCsrfTokenFunc,
 	)

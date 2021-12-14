@@ -40,3 +40,6 @@ urls = [
     "http://patreon-dev.herokuapp.com", "http://front2.tp.volodyalarin.site",
     "http://pyaterochka-team.site"
 ]
+
+[payments]
+account_number = "410011824645986"

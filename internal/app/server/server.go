@@ -144,7 +144,7 @@ func (s *Server) Start(config *app.Config) error {
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 
-	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory, s.connections.FilesGrpcConnection)
+	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory, s.connections.FilesGrpcConnection, s.config.PaymentsInfo)
 	factory := handler_factory.NewFactory(s.logger, usecaseFactory, s.connections.SessionGrpcConnection)
 	hs := factory.GetHandleUrls()
 

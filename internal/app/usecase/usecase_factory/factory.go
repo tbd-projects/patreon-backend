@@ -1,6 +1,7 @@
 package usecase_factory
 
 import (
+	"patreon/internal/app"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	useAccess "patreon/internal/app/usecase/access"
 	useAttaches "patreon/internal/app/usecase/attaches"
@@ -21,6 +22,7 @@ import (
 )
 
 type UsecaseFactory struct {
+	paymentsConfig     app.Payments
 	repositoryFactory  RepositoryFactory
 	userUsecase        useUser.Usecase
 	creatorUsecase     useCreator.Usecase
@@ -39,11 +41,12 @@ type UsecaseFactory struct {
 	payTokenUsecase    usePayToken.Usecase
 }
 
-func NewUsecaseFactory(repositoryFactory RepositoryFactory, fileConn *grpc.ClientConn) *UsecaseFactory {
+func NewUsecaseFactory(repositoryFactory RepositoryFactory, fileConn *grpc.ClientConn, paymentsConf app.Payments) *UsecaseFactory {
 	fileClient := client.NewFileServiceClient(fileConn)
 	return &UsecaseFactory{
 		repositoryFactory: repositoryFactory,
 		fileClient:        fileClient,
+		paymentsConfig:    paymentsConf,
 	}
 }
 
@@ -141,7 +144,7 @@ func (f *UsecaseFactory) GetCommentsUsecase() useComments.Usecase {
 }
 func (f *UsecaseFactory) GetPayTokenUsecase() usePayToken.Usecase {
 	if f.payTokenUsecase == nil {
-		f.payTokenUsecase = usePayToken.NewPayTokenUsecase(f.repositoryFactory.GetPayTokenRepository())
+		f.payTokenUsecase = usePayToken.NewPayTokenUsecase(f.repositoryFactory.GetPayTokenRepository(), f.paymentsConfig.AccountNumber)
 	}
 	return f.payTokenUsecase
 }
