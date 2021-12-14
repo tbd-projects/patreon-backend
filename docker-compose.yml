@@ -2,6 +2,7 @@ version: "3"
 
 volumes:
   dbbackups:
+  rabbit-data:
   postgis-data:
   session-redis:
   access-redis:
@@ -93,7 +94,7 @@ services:
       - files-service
       - rabbit
     environment:
-      WAIT_HOSTS: patreon-bd:5432
+      WAIT_HOSTS: patreon-bd:5432, rabbit:5672
   session-redis:
     image: "redis:alpine"
     expose:
