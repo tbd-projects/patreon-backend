@@ -73,5 +73,6 @@ jobs:
           script: |
             cd tp/2021_2_Pyaterochka/
             sudo make stop && sudo make run-https-back
+            sudo docker system prune -f
 
 
