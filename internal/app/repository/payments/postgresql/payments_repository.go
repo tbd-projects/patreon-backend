@@ -16,7 +16,7 @@ import (
 const (
 	querySelectUserPayments = "SELECT p.amount, p.date, p.creator_id, u.nickname, cp.category, cp.description, p.status FROM payments p " +
 		"JOIN creator_profile cp on p.creator_id = cp.creator_id " +
-		"JOIN users u on cp.creator_id = u.users_id where p.users_id = $1 and p.status = true " +
+		"JOIN users u on cp.creator_id = u.users_id where p.users_id = $1 " +
 		"ORDER BY p.date DESC "
 
 	querySelectCreatorPayments = "SELECT p.amount, p.date, p.users_id, u.nickname, p.status FROM payments p " +
