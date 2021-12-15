@@ -4,6 +4,7 @@ import (
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/models"
 	usecase_pay_token "patreon/internal/app/usecase/pay_token"
 	"patreon/internal/app/usecase/payments"
@@ -58,7 +59,7 @@ func (h *TokenHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusOK, models.PayToken{Token: payToken.Token})
+	h.Respond(w, r, http.StatusOK, http_models.PayTokenResponse{Token: payToken.Token})
 }
 func (h *TokenHandler) POST(w http.ResponseWriter, r *http.Request) {
 	headerContentType := r.Header.Get("Content-Type")

@@ -1,5 +1,8 @@
 package push_models
 
+//go:generate easyjson -all -disallow_unknown_fields push_models.go
+
+//easyjson:json
 type PostPush struct {
 	PostId          int64  `json:"post_id"`
 	CreatorId       int64  `json:"creator_id"`
@@ -8,6 +11,7 @@ type PostPush struct {
 	CreatorAvatar   string `json:"creator_avatar"`
 }
 
+//easyjson:json
 type CommentPush struct {
 	CommentId      int64  `json:"comment_id"`
 	PostId         int64  `json:"post_id"`
@@ -17,6 +21,7 @@ type CommentPush struct {
 	PostTitle      string `json:"post_title"`
 }
 
+//easyjson:json
 type SubPush struct {
 	AwardsId     int64  `json:"awards_id"`
 	UserId       int64  `json:"user_id"`

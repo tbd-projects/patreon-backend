@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -25,7 +26,7 @@ type Client struct {
 	hub      *SendHub
 	clientId int64
 	conn     *websocket.Conn
-	send     chan interface{}
+	send     chan easyjson.Marshaler
 	close    chan bool
 }
 
@@ -34,7 +35,7 @@ func NewClient(hub *SendHub, clientId int64, conn *websocket.Conn, logger *logru
 		hub:      hub,
 		clientId: clientId,
 		conn:     conn,
-		send:     make(chan interface{}),
+		send:     make(chan easyjson.Marshaler),
 		close:    make(chan bool),
 		logger:   logger,
 	}
@@ -43,6 +44,20 @@ func NewClient(hub *SendHub, clientId int64, conn *websocket.Conn, logger *logru
 func (c *Client) CloseClient() {
 	c.hub.UnregisterClient(c)
 	c.close <- true
+}
+
+
+func (c *Client) writeJSON(cn *websocket.Conn, v easyjson.Marshaler) error {
+	w, err := cn.NextWriter(websocket.TextMessage)
+	if err != nil {
+		return err
+	}
+	_, err1 := easyjson.MarshalToWriter(v, w)
+	err2 := w.Close()
+	if err1 != nil {
+		return err1
+	}
+	return err2
 }
 
 func (c *Client) SenderProcesses() {
@@ -74,7 +89,7 @@ func (c *Client) SenderProcesses() {
 			}
 			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
-			err := c.conn.WriteJSON(msg)
+			err := c.writeJSON(c.conn, msg)
 			if err != nil {
 				_ = c.conn.WriteMessage(websocket.CloseMessage, []byte("server error"))
 				c.logger.Errorf("client with id %d write msg with error %s", c.clientId, err)
@@ -101,7 +116,7 @@ type SendHub struct {
 
 type message struct {
 	users   []int64
-	message interface{}
+	message easyjson.Marshaler
 }
 
 func NewHub() *SendHub {
@@ -122,7 +137,7 @@ func (h *SendHub) UnregisterClient(client *Client) {
 	h.unregister <- client
 }
 
-func (h *SendHub) SendMessage(users []int64, hsg interface{}) {
+func (h *SendHub) SendMessage(users []int64, hsg easyjson.Marshaler) {
 	h.broadcast <- &(message{users: users, message: hsg})
 }
 

@@ -2,7 +2,7 @@ package creator_id_handler
 
 import (
 	"bytes"
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
@@ -15,7 +15,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -33,18 +32,15 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 	userID := int64(1)
 	test := handlers.TestTable{
 		Name:              "correct",
-		Data:              userID,
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusOK,
 	}
 
 	recorder := httptest.NewRecorder()
 
-	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(test.Data)
+	b := &bytes.Buffer{}
 
-	require.NoError(s.T(), err)
-	req, _ := http.NewRequest(http.MethodGet, "/creators", &b)
+	req, _ := http.NewRequest(http.MethodGet, "/creators", b)
 	vars := map[string]string{
 		"creator_id": strconv.Itoa(int(userID)),
 	}
@@ -58,9 +54,8 @@ func (s *CreatorCreateTestSuite) TestServeHTTP_Correct() {
 		Return(&creator, nil)
 	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
-	decoder := json.NewDecoder(recorder.Body)
 	res := &http_models.ResponseCreatorWithAwards{}
-	err = decoder.Decode(res)
+	err := easyjson.UnmarshalFromReader(recorder.Body, res)
 	assert.NoError(s.T(), err)
 	expected := http_models.ToResponseCreatorWithAwards(creator)
 	assert.Equal(s.T(), &expected, res)

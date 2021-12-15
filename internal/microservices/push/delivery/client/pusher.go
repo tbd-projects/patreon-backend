@@ -1,7 +1,7 @@
 package push_client
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"github.com/streadway/amqp"
 	models "patreon/internal/microservices/push"
 	"patreon/pkg/rabbit"
@@ -31,7 +31,7 @@ func (ph *PushSender) NewPost(creatorId int64, postId int64, postTitle string) e
 		Body: []byte{},
 	}
 	var err error
-	publish.Body, err = json.Marshal(push)
+	publish.Body, err = easyjson.Marshal(push)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func (ph *PushSender) NewComment(commentId int64, authorId int64, postId int64) 
 		Body: []byte{},
 	}
 	var err error
-	publish.Body, err = json.Marshal(push)
+	publish.Body, err = easyjson.Marshal(push)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (ph *PushSender) NewSubscriber(subscriberId int64, awardsId int64, creatorI
 	}
 
 	var err error
-	publish.Body, err = json.Marshal(push)
+	publish.Body, err = easyjson.Marshal(push)
 	if err != nil {
 		return err
 	}

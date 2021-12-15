@@ -127,13 +127,13 @@ func (s *Server) Start() error {
 					keys[i] = k
 					i++
 				}
-				h.hub.SendMessage(keys, &push_models.PostPush{
+				h.hub.SendMessage(keys, &utils.PushResponse{Type: push.PostPush, Push: &push_models.PostPush{
 					PostId:          1,
 					PostTitle:       "Привет",
 					CreatorId:       2,
 					CreatorNickname: "Человек",
 					CreatorAvatar:   "tude",
-				})
+				}})
 			}
 		}
 	}()
