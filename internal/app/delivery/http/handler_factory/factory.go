@@ -11,6 +11,7 @@ import (
 	aw_subscribe_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler/subscribe_handler"
 	aw_upd_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler/upd_aw_handler"
 	upd_cover_awards_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_id_handler/upd_cover_awards"
+	creator_payments_handler "patreon/internal/app/delivery/http/handlers/creator_id_handler/payments_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler"
 	"patreon/internal/app/delivery/http/handlers/creator_id_handler/posts_id_handler/attaches_handler"
@@ -105,6 +106,7 @@ const (
 	USER_COMMENTS
 	USER_PAYMENTS_TOKEN
 	PAYMENTS_ACCOUNT
+	CREATOR_PAYMENTS
 )
 
 type HandlerFactory struct {
@@ -186,6 +188,7 @@ func (f *HandlerFactory) initAllHandlers() map[int]app.Handler {
 		USER_COMMENTS:            user_comments_handler.NewUserCommentsHandler(f.logger, ucComment, sManager),
 		USER_PAYMENTS_TOKEN:      pay_token_handler.NewTokenHandler(f.logger, sManager, ucPayToken, ucPayments),
 		PAYMENTS_ACCOUNT:         pay_account_handler.NewAccountHandler(f.logger, ucPayToken),
+		CREATOR_PAYMENTS:         creator_payments_handler.NewPaymentsHandler(f.logger, sManager, ucPayments),
 	}
 }
 
@@ -218,6 +221,7 @@ func (f *HandlerFactory) GetHandleUrls() *map[string]app.Handler {
 		"/creators/{creator_id:[0-9]+}/subscribers":   hs[SUBSCRIBES],
 		"/creators/{creator_id:[0-9]+}/update/avatar": hs[CREATOR_AVATAR],
 		"/creators/{creator_id:[0-9]+}/update/cover":  hs[CREATOR_COVER],
+		"/creators/{creator_id:[0-9]+}/payments":      hs[CREATOR_PAYMENTS],
 		"/creators/search":                            hs[SEARCH_CREATORS],
 		// ../awards ---------------------------------------------------------////
 		"/creators/{creator_id:[0-9]+}/awards":                                hs[AWARDS],

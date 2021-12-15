@@ -19,6 +19,7 @@ var (
 	LikeNotFound             = errors.New("like with this id not found")
 	CommentNotFound          = errors.New("comment with this id not found")
 	PaymentsNotFound         = errors.New("this user have not payment")
+	CreatorPaymentsNotFound  = errors.New("creator payments not found")
 )
 
 /// File parse error
