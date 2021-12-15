@@ -2,7 +2,7 @@ package utils
 
 import (
 	"bytes"
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"patreon/internal/microservices/push"
@@ -11,7 +11,7 @@ import (
 )
 
 type SendMessager interface {
-	SendMessage(users []int64, hsg interface{})
+	SendMessage(users []int64, hsg easyjson.Marshaler)
 }
 
 type ProcessingPush struct {
@@ -110,10 +110,8 @@ func (pp *ProcessingPush) processPostMsg(msg <-chan amqp.Delivery) {
 		}
 
 		post := &push.PostInfo{}
-		body := pushMsg.Body
-		reader := bytes.NewBuffer(body)
-		dec := json.NewDecoder(reader)
-		if err := dec.Decode(post); err != nil {
+		reader := bytes.NewBuffer(pushMsg.Body)
+		if err := easyjson.UnmarshalFromReader(reader, post); err != nil {
 			pp.logger.Errorf("error decode info post from msg with err: %s", err)
 			continue
 		}
@@ -123,7 +121,8 @@ func (pp *ProcessingPush) processPostMsg(msg <-chan amqp.Delivery) {
 			pp.logger.Errorf("error prepare info post with err: %s", err)
 			continue
 		}
-		pp.sendMsg.SendMessage(users, sendPush)
+		pp.logger.Infof("Was send message about new post %v", pushMsg.Body)
+		pp.sendMsg.SendMessage(users, PushResponse{Type: push.PostPush, Push: sendPush})
 	}
 }
 
@@ -136,21 +135,20 @@ func (pp *ProcessingPush) processCommentMsg(msg <-chan amqp.Delivery) {
 		case pushMsg = <-msg:
 			break
 		}
-		post := &push.CommentInfo{}
-		body := pushMsg.Body
-		reader := bytes.NewBuffer(body)
-		dec := json.NewDecoder(reader)
-		if err := dec.Decode(post); err != nil {
-			pp.logger.Errorf("error decode info comment from msg with err: %s", err)
+		comment := &push.CommentInfo{}
+		reader := bytes.NewBuffer(pushMsg.Body)
+		if err := easyjson.UnmarshalFromReader(reader, comment); err != nil {
+			pp.logger.Errorf("error decode info post from msg with err: %s", err)
 			continue
 		}
 
-		users, sendPush, err := pp.usecase.PrepareCommentPush(post)
+		users, sendPush, err := pp.usecase.PrepareCommentPush(comment)
 		if err != nil {
 			pp.logger.Errorf("error prepare info comment with err: %s", err)
 			continue
 		}
-		pp.sendMsg.SendMessage(users, sendPush)
+		pp.logger.Infof("Was send message about new comment %v", pushMsg.Body)
+		pp.sendMsg.SendMessage(users, PushResponse{Type: push.CommentPush, Push: sendPush})
 	}
 }
 
@@ -163,21 +161,20 @@ func (pp *ProcessingPush) processSubMsg(msg <-chan amqp.Delivery) {
 		case pushMsg = <-msg:
 			break
 		}
-		
-		post := &push.SubInfo{}
-		body := pushMsg.Body
-		reader := bytes.NewBuffer(body)
-		dec := json.NewDecoder(reader)
-		if err := dec.Decode(post); err != nil {
-			pp.logger.Errorf("error decode info sub from msg with err: %s", err)
+
+		subscriber := &push.SubInfo{}
+		reader := bytes.NewBuffer(pushMsg.Body)
+		if err := easyjson.UnmarshalFromReader(reader, subscriber); err != nil {
+			pp.logger.Errorf("error decode info post from msg with err: %s", err)
 			continue
 		}
 
-		users, sendPush, err := pp.usecase.PrepareSubPush(post)
+		users, sendPush, err := pp.usecase.PrepareSubPush(subscriber)
 		if err != nil {
 			pp.logger.Errorf("error prepare info sub with err: %s", err)
 			continue
 		}
-		pp.sendMsg.SendMessage(users, sendPush)
+		pp.logger.Infof("Was send message about new subscriber %v", pushMsg.Body)
+		pp.sendMsg.SendMessage(users, PushResponse{Type: push.NewSubPush, Push: sendPush})
 	}
 }

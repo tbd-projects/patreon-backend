@@ -91,7 +91,7 @@ rm-docker:
 
 run-coverage:
 	go test -covermode=atomic -coverprofile=cover ./...
-	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "config" > cover2
+	cat cover | fgrep -v "easyjson" | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "config" > cover2
 	go tool cover -func=cover2
 
 build-utils:
@@ -101,7 +101,7 @@ parse-last-log: build-utils
 	./utils.out -search-url=${search_url}
 
 gen-mock:
-	go generate ./...
+	go generate -n $$(go list ./internal/...)
 
 gen-proto-sessions:
 	protoc --proto_path=${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf session.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf

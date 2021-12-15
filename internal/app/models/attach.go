@@ -50,7 +50,9 @@ func (att *Attach) Validate() error {
 		"id":    validation.Validate(att.Id, validation.Min(0)),
 		"level": validation.Validate(att.Level, validation.Min(1)),
 	}.Filter()
-
+	if err == nil {
+		return nil
+	}
 	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
 		return errors.Wrap(knowError, "failed error getting in validate attach")

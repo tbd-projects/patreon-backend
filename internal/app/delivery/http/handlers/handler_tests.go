@@ -1,15 +1,16 @@
 package handlers
 
 import (
+	"github.com/mailru/easyjson"
 	"io"
 	mock_usecase_csrf "patreon/internal/app/csrf/usecase/mocks"
 	mock_usecase "patreon/internal/app/usecase/access/mocks"
+	mock_usecase_attaches "patreon/internal/app/usecase/attaches/mocks"
 	mock_usecase_awards "patreon/internal/app/usecase/awards/mocks"
 	mock_usecase_creator "patreon/internal/app/usecase/creator/mocks"
 	mock_usecase_info "patreon/internal/app/usecase/info/mocks"
 	mock_usecase_like "patreon/internal/app/usecase/likes/mocks"
 	mock_usecase_posts "patreon/internal/app/usecase/posts/mocks"
-	mock_usecase_attaches "patreon/internal/app/usecase/attaches/mocks"
 	mock_subscribers "patreon/internal/app/usecase/subscribers/mocks"
 	mock_usecase_user "patreon/internal/app/usecase/user/mocks"
 	mock_auth_checker "patreon/internal/microservices/auth/delivery/grpc/client/mocks"
@@ -21,7 +22,7 @@ import (
 
 type TestTable struct {
 	Name              string
-	Data              interface{}
+	Data              easyjson.Marshaler
 	ExpectedMockTimes int
 	ExpectedCode      int
 }

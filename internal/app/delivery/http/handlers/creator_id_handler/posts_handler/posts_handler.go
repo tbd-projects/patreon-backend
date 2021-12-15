@@ -49,7 +49,7 @@ func NewPostsHandler(log *logrus.Logger,
 // @tags posts
 // @Description get list of posts which belongs the creator with limit and offset in query
 // @Produce json
-// @Success 201 {array} http_models.ResponsePost
+// @Success 201 {object} http_models.ResponsePosts
 // @Param page query uint64 true "start page number of posts mutually exclusive with offset"
 // @Param offset query uint64 true "start number of posts mutually exclusive with page"
 // @Param limit query uint64 true "posts to return"
@@ -102,7 +102,9 @@ func (h *PostsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Log(r).Debugf("get posts %v", respondPosts)
-	h.Respond(w, r, http.StatusOK, respondPosts)
+	h.Respond(w, r, http.StatusOK, http_models.ResponsePosts{
+		Posts: respondPosts,
+	})
 }
 
 // POST Create Posts

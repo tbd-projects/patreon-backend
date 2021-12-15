@@ -3,8 +3,8 @@ package login_handler
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
@@ -38,7 +38,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_EmptyBody() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err := easyjson.MarshalToWriter(s.Tb.Data, &b)
 
 	assert.NoError(s.T(), err)
 
@@ -53,17 +53,13 @@ func (s *LoginTestSuite) TestLoginHandler_POST_InvalidBody() {
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
-	data := struct {
-		Nickname string `json:"nickname"`
-		Password string `json:"password"`
-	}{
-		Nickname: "nickname",
-		Password: "password",
+	data := http_models.ResponsePost {
+		Title: "nickname",
 	}
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(data)
+	_, err := easyjson.MarshalToWriter(data, &b)
 
 	assert.NoError(s.T(), err)
 
@@ -91,7 +87,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_UserNotFound() {
 		Return(expectedId, model_data.IncorrectEmailOrPassword)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err := easyjson.MarshalToWriter(s.Tb.Data, &b)
 
 	assert.NoError(s.T(), err)
 
@@ -134,7 +130,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_SessionError() {
 			errors.New("error"))
 
 	b := bytes.Buffer{}
-	err = json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err = easyjson.MarshalToWriter(s.Tb.Data, &b)
 
 	assert.NoError(s.T(), err)
 
@@ -174,7 +170,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_Ok() {
 		Return(session_models.Result{UserID: 1, UniqID: "123"}, nil)
 
 	b := bytes.Buffer{}
-	err = json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err = easyjson.MarshalToWriter(s.Tb.Data, &b)
 
 	assert.NoError(s.T(), err)
 

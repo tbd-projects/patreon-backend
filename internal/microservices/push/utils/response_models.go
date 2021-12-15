@@ -1,4 +1,6 @@
-package push_server
+package utils
+
+//go:generate easyjson -all -disallow_unknown_fields response_models.go
 
 //easyjson:json
 type PushResponse struct {

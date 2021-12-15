@@ -3,7 +3,7 @@ package profile_handler
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
@@ -31,16 +31,14 @@ func (s *ProfileTestSuite) TestProfileHandler_GET_Correct() {
 	userID := int64(1)
 	test := handlers.TestTable{
 		Name:              "correct",
-		Data:              &models.User{ID: userID, Login: "some", Nickname: "done"},
+		Data:              &models_http.ProfileResponse{ID: userID, Login: "some", Nickname: "done"},
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusOK,
 	}
 
 	recorder := httptest.NewRecorder()
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
-	require.NoError(s.T(), err)
 	ctx := context.WithValue(context.Background(), "user_id", userID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/user", &b)
 
@@ -48,18 +46,17 @@ func (s *ProfileTestSuite) TestProfileHandler_GET_Correct() {
 		EXPECT().
 		GetProfile(userID).
 		Times(test.ExpectedMockTimes).
-		Return(test.Data.(*models.User), nil)
+		Return(&models.User{ID: userID, Login: "some", Nickname: "done"}, nil)
 	s.handler.GET(recorder, reader)
 	assert.Equal(s.T(), test.ExpectedCode, recorder.Code)
 
 	req := &models_http.ProfileResponse{}
-	decoder := json.NewDecoder(recorder.Body)
-	err = decoder.Decode(req)
+	err := easyjson.UnmarshalFromReader(recorder.Body, req)
 	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), req, &models_http.ProfileResponse{ID: userID, Login:  test.Data.(*models.User).Login,
-		Nickname: test.Data.(*models.User).Nickname,
-		Avatar: test.Data.(*models.User).Avatar})
+	assert.Equal(s.T(), req, &models_http.ProfileResponse{ID: userID, Login:  test.Data.(*models_http.ProfileResponse).Login,
+		Nickname: test.Data.(*models_http.ProfileResponse).Nickname,
+		Avatar: test.Data.(*models_http.ProfileResponse).Avatar})
 }
 
 func (s *ProfileTestSuite) TestProfileHandler_GET_NotFound() {
@@ -74,9 +71,6 @@ func (s *ProfileTestSuite) TestProfileHandler_GET_NotFound() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
-
-	require.NoError(s.T(), err)
 	ctx := context.WithValue(context.Background(), "user_id", userID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodGet, "/user", &b)
 
@@ -100,9 +94,6 @@ func (s *ProfileTestSuite) TestProfileHandler_GET_WithoutContext() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
-
-	require.NoError(s.T(), err)
 	reader, _ := http.NewRequest(http.MethodGet, "/user", &b)
 
 	s.MockUserUsecase.

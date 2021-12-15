@@ -9,20 +9,39 @@ import (
 	"time"
 )
 
+//go:generate easyjson -all -disallow_unknown_fields response_models.go
+
+//easyjson:json
 type TokenResponse struct {
 	Token csrf_models.Token `json:"token"`
 }
+
+//easyjson:json
+type PayTokenResponse struct {
+	Token string `json:"token"`
+}
+
+//easyjson:json
+type PayAccountResponse struct {
+	Account string `json:"account_number"`
+}
+
+//easyjson:json
 type ErrResponse struct {
 	Err string `json:"error"`
 }
+
+//easyjson:json
 type OkResponse struct {
 	Ok string `json:"OK"`
 }
 
+//easyjson:json
 type IdResponse struct {
 	ID int64 `json:"id"`
 }
 
+//easyjson:json
 type ProfileResponse struct {
 	ID          int64  `json:"id"`
 	Login       string `json:"login"`
@@ -31,26 +50,32 @@ type ProfileResponse struct {
 	HaveCreator bool   `json:"have_creator"`
 }
 
+//easyjson:json
 type ResponseInfo struct {
 	models.Info
 }
 
+//easyjson:json
 type ResponseCreatorWithAwards struct {
 	models.CreatorWithAwards
 }
 
+//easyjson:json
 type ResponseCreator struct {
 	models.Creator
 }
 
+//easyjson:json
 type ResponseCreators struct {
 	Creators []ResponseCreator `json:"creators"`
 }
 
+//easyjson:json
 type ResponseCreatorSubscrube struct {
 	models.CreatorSubscribe
 }
 
+//easyjson:json
 type ResponseAward struct {
 	ID          int64  `json:"awards_id"`
 	Name        string `json:"name"`
@@ -61,6 +86,12 @@ type ResponseAward struct {
 	ChildAward  int64  `json:"child_award,omitempty"`
 }
 
+//easyjson:json
+type ResponseAwards struct {
+	Awards []ResponseAward
+}
+
+//easyjson:json
 type ResponsePost struct {
 	ID          int64     `json:"posts_id"`
 	Title       string    `json:"title"`
@@ -75,6 +106,12 @@ type ResponsePost struct {
 	IsDraft     bool      `json:"is_draft,omitempty"`
 }
 
+//easyjson:json
+type ResponsePosts struct {
+	Posts []ResponsePost
+}
+
+//easyjson:json
 type ResponsePostComment struct {
 	ID             int64     `json:"comment_id"`
 	Body           string    `json:"body"`
@@ -85,6 +122,7 @@ type ResponsePostComment struct {
 	AuthorAvatar   string    `json:"author_avatar"`
 }
 
+//easyjson:json
 type ResponseUserComment struct {
 	ID        int64     `json:"comment_id"`
 	Body      string    `json:"body"`
@@ -95,28 +133,35 @@ type ResponseUserComment struct {
 	PostCover string    `json:"post_cover"`
 }
 
+//easyjson:json
 type ResponseUserComments struct {
 	Comments []ResponseUserComment `json:"comments"`
 }
 
+//easyjson:json
 type ResponsePostComments struct {
 	Comments []ResponsePostComment `json:"comments"`
 }
 
+//easyjson:json
 type ResponseAttach struct {
 	ID    int64  `json:"attach_id"`
 	Value string `json:"value"`
 	Type  string `json:"type"`
 }
 
+//easyjson:json
 type ResponseApplyAttach struct {
 	IDs []int64 `json:"attaches_id"`
 }
 
+//easyjson:json
 type ResponsePostWithAttaches struct {
 	Post ResponsePost     `json:"post"`
 	Data []ResponseAttach `json:"attaches"`
 }
+
+//easyjson:json
 type ResponseBalance struct {
 	ID      int64        `json:"user_id"`
 	Balance models.Money `json:"balance"`
@@ -248,6 +293,7 @@ func (u *ResponseCreator) String() string {
 	return fmt.Sprintf("{ID: %s, Nickname: %s}", strconv.Itoa(int(u.ID)), u.Nickname)
 }
 
+//easyjson:json
 type SubscriptionsUserResponse struct {
 	Creators []ResponseCreatorSubscrube `json:"creators"`
 }
@@ -272,12 +318,15 @@ func ToSubscriptionsUser(creators []models.CreatorSubscribe) SubscriptionsUserRe
 	}
 }
 
+//easyjson:json
 type ResponseUser struct {
 	ID       int64  `json:"id"`
 	Login    string `json:"login"`
 	Nickname string `json:"nickname"`
 	Avatar   string `json:"avatar,omitempty"`
 }
+
+//easyjson:json
 type SubscribersCreatorResponse struct {
 	Users []ResponseUser `json:"users"`
 }
@@ -297,10 +346,12 @@ func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorRespons
 	}
 }
 
+//easyjson:json
 type ResponseLike struct {
 	Likes int64 `json:"likes"`
 }
 
+//easyjson:json
 type ResponseUserPayments struct {
 	Payments []models.UserPayments `json:"payments"`
 }
@@ -325,6 +376,7 @@ func ToResponseUserPayments(payments []models.UserPayments) ResponseUserPayments
 	}
 }
 
+//easyjson:json
 type ResponseAvailablePosts struct {
 	AvailablePosts []models.AvailablePost `json:"available_posts"`
 }
@@ -335,25 +387,32 @@ func ToResponseAvailablePosts(availablePosts []models.AvailablePost) ResponseAva
 	}
 }
 
+//easyjson:json
 type ResponseCreatorPostsViews struct {
 	CountPostsViews int64 `json:"count_posts_views"`
 }
 
+//easyjson:json
 type ResponseCreatorCountSubscribers struct {
 	CountSubscribers int64 `json:"count_subscribers"`
 }
 
+//easyjson:json
 type ResponseCreatorTotalIncome struct {
 	TotalIncome float64 `json:"total_income"`
 }
 
+//easyjson:json
 type ResponseCreatorCountPosts struct {
 	CountPosts int64 `json:"count_posts"`
 }
 
+//easyjson:json
 type ResponsePayToken struct {
 	PayToken string `json:"token"`
 }
+
+//easyjson:json
 type ResponsePayAccount struct {
 	Account string `json:"account_number"`
 }

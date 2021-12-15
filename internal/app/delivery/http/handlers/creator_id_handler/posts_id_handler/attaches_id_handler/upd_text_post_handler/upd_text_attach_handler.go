@@ -1,7 +1,7 @@
 package upd_text_attach_handler
 
 import (
-	"encoding/json"
+	"github.com/microcosm-cc/bluemonday"
 	"io"
 	"net/http"
 	csrf_middleware "patreon/internal/app/csrf/middleware"
@@ -81,8 +81,7 @@ func (h *AttachesUpdateTextHandler) PUT(w http.ResponseWriter, r *http.Request) 
 	}
 
 	req := &http_models.RequestText{}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(req); err != nil {
+	if err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy()); err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return

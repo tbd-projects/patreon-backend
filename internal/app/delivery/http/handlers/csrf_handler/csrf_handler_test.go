@@ -3,7 +3,6 @@ package csrf_handler
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app"
@@ -32,16 +31,13 @@ func TestCsrfHandler(t *testing.T) {
 func (s *CsrfTestSuite) TestCsrfHandlerGet_ServerErrorSession() {
 	s.Tb = handlers.TestTable{
 		Name:              "server error - invalid session_id",
-		Data:              "",
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusInternalServerError,
 	}
 	w := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
-	assert.NoError(s.T(), err)
 
 	r, _ := http.NewRequest(http.MethodGet, "/token", &b)
 	r = r.WithContext(context.WithValue(r.Context(), "invalid session_id", "empty"))
@@ -51,16 +47,12 @@ func (s *CsrfTestSuite) TestCsrfHandlerGet_ServerErrorSession() {
 func (s *CsrfTestSuite) TestCsrfHandlerGet_ServerErrorUserId() {
 	s.Tb = handlers.TestTable{
 		Name:              "server error - invalid user_id",
-		Data:              "",
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusInternalServerError,
 	}
 	w := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
-
-	assert.NoError(s.T(), err)
 
 	r, _ := http.NewRequest(http.MethodGet, "/token", &b)
 	r = r.WithContext(context.WithValue(r.Context(), "session_id", "session"))
@@ -72,16 +64,12 @@ func (s *CsrfTestSuite) TestCsrfHandlerGet_ServerErrorUserId() {
 func (s *CsrfTestSuite) TestCsrfHandlerGet_CreateTokenError() {
 	s.Tb = handlers.TestTable{
 		Name:              "server error - error on create token",
-		Data:              "",
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusInternalServerError,
 	}
 	w := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
-
-	assert.NoError(s.T(), err)
 
 	r, _ := http.NewRequest(http.MethodGet, "/token", &b)
 	session_id := "session"
@@ -102,16 +90,12 @@ func (s *CsrfTestSuite) TestCsrfHandlerGet_CreateTokenError() {
 func (s *CsrfTestSuite) TestCsrfHandlerGet_Ok() {
 	s.Tb = handlers.TestTable{
 		Name:              "OK",
-		Data:              "",
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusOK,
 	}
 	w := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
-
-	assert.NoError(s.T(), err)
 
 	r, _ := http.NewRequest(http.MethodGet, "/token", &b)
 	session_id := "session"

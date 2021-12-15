@@ -4,7 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/models"
+	"patreon/internal/app/delivery/http/models"
 	usecase_pay_token "patreon/internal/app/usecase/pay_token"
 )
 
@@ -33,5 +33,5 @@ func NewAccountHandler(log *logrus.Logger, ucPayToken usecase_pay_token.Usecase)
 func (h *AccountHandler) GET(w http.ResponseWriter, r *http.Request) {
 	account := h.tokenUsecase.GetAccount()
 
-	h.Respond(w, r, http.StatusOK, models.PayAccount{Account: account})
+	h.Respond(w, r, http.StatusOK, http_models.ResponsePayAccount{Account: account})
 }
