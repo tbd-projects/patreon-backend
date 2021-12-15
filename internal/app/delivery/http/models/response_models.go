@@ -88,7 +88,7 @@ type ResponseAward struct {
 
 //easyjson:json
 type ResponseAwards struct {
-	Awards []ResponseAward
+	Awards []ResponseAward `json:"awards"`
 }
 
 //easyjson:json
@@ -108,7 +108,7 @@ type ResponsePost struct {
 
 //easyjson:json
 type ResponsePosts struct {
-	Posts []ResponsePost
+	Posts []ResponsePost `json:"posts"`
 }
 
 //easyjson:json
