@@ -90,8 +90,8 @@ rm-docker:
 	docker rm -vf $$(docker ps -a -q) || true
 
 run-coverage:
-	go test -covermode=atomic -coverpkg=./internal/... -coverprofile=cover ./internal/...
-	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "config" |fgrep -v "patreon/internal/app/server/server.go" > cover2
+	go test -covermode=atomic -coverprofile=cover ./...
+	cat cover | fgrep -v "mock" | fgrep -v "testing.go" | fgrep -v "docs" | fgrep -v ".pb.go" | fgrep -v "config" > cover2
 	go tool cover -func=cover2
 
 build-utils:

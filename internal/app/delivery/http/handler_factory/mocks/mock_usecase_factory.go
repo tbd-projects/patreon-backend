@@ -12,6 +12,7 @@ import (
 	usecase_creator "patreon/internal/app/usecase/creator"
 	usecase_info "patreon/internal/app/usecase/info"
 	usecase_likes "patreon/internal/app/usecase/likes"
+	usecase_pay_token "patreon/internal/app/usecase/pay_token"
 	payments "patreon/internal/app/usecase/payments"
 	posts "patreon/internal/app/usecase/posts"
 	statistics "patreon/internal/app/usecase/statistics"
@@ -141,6 +142,20 @@ func (m *MockUsecaseFactory) GetLikesUsecase() usecase_likes.Usecase {
 func (mr *MockUsecaseFactoryMockRecorder) GetLikesUsecase() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLikesUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetLikesUsecase))
+}
+
+// GetPayTokenUsecase mocks base method.
+func (m *MockUsecaseFactory) GetPayTokenUsecase() usecase_pay_token.Usecase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPayTokenUsecase")
+	ret0, _ := ret[0].(usecase_pay_token.Usecase)
+	return ret0
+}
+
+// GetPayTokenUsecase indicates an expected call of GetPayTokenUsecase.
+func (mr *MockUsecaseFactoryMockRecorder) GetPayTokenUsecase() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPayTokenUsecase", reflect.TypeOf((*MockUsecaseFactory)(nil).GetPayTokenUsecase))
 }
 
 // GetPaymentsUsecase mocks base method.
