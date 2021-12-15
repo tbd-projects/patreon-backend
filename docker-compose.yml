@@ -74,6 +74,8 @@ services:
       - ./logs-files:/app/logs
       - ./media:/app/media
       - ${CONFIG_DIR}:/app/configs
+    environment:
+      WAIT_HOSTS: rabbit:5672
   main:
     image: flashiee/main:latest
     expose:
