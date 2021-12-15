@@ -31,11 +31,9 @@ func (ph *PushSender) NewPost(creatorId int64, postId int64, postTitle string) e
 		Type: "text/plain",
 		Body: []byte{},
 	}
-
-	body := bytes.NewBuffer(publish.Body)
-	decoder := json.NewDecoder(body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(push); err != nil {
+	var err error
+	publish.Body, err = json.Marshal(push)
+	if err != nil {
 		return err
 	}
 	ch, err := ph.session.GetChannel()
