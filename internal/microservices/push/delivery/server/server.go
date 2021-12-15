@@ -39,11 +39,20 @@ func New(config *push.Config, connections app.ExpectedConnections, logger *log.L
 }
 
 func (s *Server) checkConnection() error {
+	if err := s.connections.SqlConnection.Ping(); err != nil {
+		return fmt.Errorf("Can't check connection to sql with error %v ", err)
+	}
+
+	s.logger.Info("Success check connection to sql db")
+
 	state := s.connections.SessionGrpcConnection.GetState()
 	if state != connectivity.Ready {
 		return fmt.Errorf("Session connection not ready, status is: %s ", state)
 	}
 
+	if !s.connections.RabbitSession.CheckConnection() {
+		return fmt.Errorf("Rabbit connection not ready ")
+	}
 	return nil
 }
 
