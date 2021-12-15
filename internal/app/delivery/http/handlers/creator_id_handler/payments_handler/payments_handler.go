@@ -73,7 +73,7 @@ func (h *PaymentsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	creatorID, err := strconv.ParseInt(id, 10, 64)
 	if !ok || err != nil {
 		h.Log(r).Infof("invalid parametrs creator_id %v", vars)
-		h.Respond(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 	creatorPayments, err := h.paymentsUsecase.GetCreatorPayments(creatorID,
