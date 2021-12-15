@@ -1,10 +1,24 @@
-package push_server
+package utils
 
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"time"
+)
+
+const (
+	// Time allowed to write a message to the peer.
+	writeWait = 10 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 60 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
+
+	// Maximum message size allowed from peer.
+	maxMessageSize = 512
 )
 
 type Client struct {
@@ -41,6 +55,12 @@ func (c *Client) SenderProcesses() {
 		c.CloseClient()
 	}()
 	c.hub.SendMessage([]int64{c.clientId}, fmt.Sprintf("Hello user with Id: %d", c.clientId))
+	c.conn.SetReadLimit(maxMessageSize)
+	_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetPongHandler(func(string) error {
+		_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
 
 	for {
 		select {
@@ -65,6 +85,8 @@ func (c *Client) SenderProcesses() {
 		case <-ticker.C:
 			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				_ = c.conn.WriteMessage(websocket.CloseMessage, []byte("server error"))
+				c.logger.Errorf("client with id %d try send ping with error %s", c.clientId, err)
 				return
 			}
 		}
@@ -72,7 +94,7 @@ func (c *Client) SenderProcesses() {
 }
 
 type SendHub struct {
-	clients    map[int64]*Client
+	Clients    map[int64]*Client
 	broadcast  chan *message
 	register   chan *Client
 	unregister chan *Client
@@ -89,7 +111,7 @@ func NewHub() *SendHub {
 		broadcast:  make(chan *message),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		clients:    make(map[int64]*Client),
+		Clients:    make(map[int64]*Client),
 		stopHub:    make(chan bool),
 	}
 }
@@ -106,21 +128,21 @@ func (h *SendHub) SendMessage(users []int64, hsg interface{}) {
 	h.broadcast <- &(message{users: users, message: hsg})
 }
 
-func (h* SendHub) StopHub() {
+func (h *SendHub) StopHub() {
 	h.stopHub <- true
 }
 
-func (h* SendHub) unregisterAll() {
-	for key, client := range h.clients {
+func (h *SendHub) unregisterAll() {
+	for key, client := range h.Clients {
 		close(client.send)
 		client.CloseClient()
-		delete(h.clients, key)
+		delete(h.Clients, key)
 	}
 }
 
 func (h *SendHub) sendMessage(msg *message) {
 	for _, id := range msg.users {
-		if client, ok := h.clients[id]; ok {
+		if client, ok := h.Clients[id]; ok {
 			select {
 			case client.send <- msg.message:
 				break
@@ -136,13 +158,13 @@ func (h *SendHub) Run() {
 		select {
 		case client, ok := <-h.register:
 			if ok {
-				h.clients[client.clientId] = client
+				h.Clients[client.clientId] = client
 			}
 			break
 		case client, ok := <-h.unregister:
 			if ok {
-				if _, ok = h.clients[client.clientId]; ok {
-					delete(h.clients, client.clientId)
+				if _, ok = h.Clients[client.clientId]; ok {
+					delete(h.Clients, client.clientId)
 					close(client.send)
 				}
 			}

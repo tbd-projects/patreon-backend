@@ -60,7 +60,9 @@ func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:    "session_id",
 		Value:   uniqID.(string),
+		Path:     "/",
 		Expires: time.Now().AddDate(0, 0, -1),
+		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
 	w.WriteHeader(http.StatusOK)

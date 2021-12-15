@@ -8,31 +8,18 @@ import (
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/auth/sessions/middleware"
-	"time"
+	"patreon/internal/microservices/push/utils"
 )
 
-const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum message size allowed from peer.
-	maxMessageSize = 512
-)
 
 type PushHandler struct {
 	sessionClient session_client.AuthCheckerClient
-	hub           *SendHub
+	hub           *utils.SendHub
 	upgrader      *websocket.Upgrader
 	bh.BaseHandler
 }
 
-func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient, hub *SendHub,
+func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient, hub *utils.SendHub,
 	upgrader *websocket.Upgrader) *PushHandler {
 	h := &PushHandler{
 		BaseHandler:   *bh.NewBaseHandler(log),
@@ -72,7 +59,7 @@ func (h *PushHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := NewClient(h.hub, userId, conn, h.Log(r))
+	client := utils.NewClient(h.hub, userId, conn, h.Log(r))
 	h.hub.RegisterClient(client)
 	go client.SenderProcesses()
 }

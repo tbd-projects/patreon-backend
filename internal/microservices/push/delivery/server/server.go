@@ -7,6 +7,7 @@ import (
 	"patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/push"
 	push_models "patreon/internal/microservices/push/push"
+	"patreon/internal/microservices/push/utils"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 	"time"
 
@@ -78,7 +79,7 @@ func (s *Server) Start() error {
 	sManager := client.NewSessionClient(s.connections.SessionGrpcConnection)
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 
-	senderHub := NewHub()
+	senderHub := utils.NewHub()
 	defer senderHub.StopHub()
 	go senderHub.Run()
 
@@ -93,16 +94,16 @@ func (s *Server) Start() error {
 
 	done := make(chan bool)
 	go func() {
-		ticker := time.NewTicker(pingPeriod/4)
+		ticker := time.NewTicker(13)
 
 		for {
 			select {
 			case <-done:
 				return
 			case <-ticker.C:
-				keys := make([]int64, len(h.hub.clients))
+				keys := make([]int64, len(h.hub.Clients))
 				i := 0
-				for k := range h.hub.clients {
+				for k := range h.hub.Clients {
 					keys[i] = k
 					i++
 				}
