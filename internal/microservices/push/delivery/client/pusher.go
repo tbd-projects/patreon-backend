@@ -1,7 +1,6 @@
 package push_client
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/streadway/amqp"
 	models "patreon/internal/microservices/push"
@@ -31,17 +30,12 @@ func (ph *PushSender) NewPost(creatorId int64, postId int64, postTitle string) e
 		Type: "text/plain",
 		Body: []byte{},
 	}
-
-	body := bytes.NewBuffer(publish.Body)
-	decoder := json.NewDecoder(body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(push); err != nil {
-		return err
-	}
-	ch, err := ph.session.GetChannel()
+	var err error
+	publish.Body, err = json.Marshal(push)
 	if err != nil {
 		return err
 	}
+	ch := ph.session.GetChannel()
 
 	err = ch.Publish(
 		ph.session.GetName(),
@@ -56,26 +50,22 @@ func (ph *PushSender) NewPost(creatorId int64, postId int64, postTitle string) e
 
 func (ph *PushSender) NewComment(commentId int64, authorId int64, postId int64) error {
 	push := &models.CommentInfo{
-		AuthorId: authorId,
-		PostId:   postId,
-		Date:     time.Now(),
+		CommentId: commentId,
+		AuthorId:  authorId,
+		PostId:    postId,
+		Date:      time.Now(),
 	}
 
 	publish := amqp.Publishing{
 		Type: "text/plain",
 		Body: []byte{},
 	}
-
-	body := bytes.NewBuffer(publish.Body)
-	decoder := json.NewDecoder(body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(push); err != nil {
-		return err
-	}
-	ch, err := ph.session.GetChannel()
+	var err error
+	publish.Body, err = json.Marshal(push)
 	if err != nil {
 		return err
 	}
+	ch := ph.session.GetChannel()
 
 	err = ch.Publish(
 		ph.session.GetName(),
@@ -90,10 +80,10 @@ func (ph *PushSender) NewComment(commentId int64, authorId int64, postId int64) 
 
 func (ph *PushSender) NewSubscriber(subscriberId int64, awardsId int64, creatorId int64) error {
 	push := &models.SubInfo{
-		UserId:     subscriberId,
+		UserId:    subscriberId,
 		CreatorId: creatorId,
-		AwardsId:   awardsId,
-		Date:       time.Now(),
+		AwardsId:  awardsId,
+		Date:      time.Now(),
 	}
 
 	publish := amqp.Publishing{
@@ -101,16 +91,12 @@ func (ph *PushSender) NewSubscriber(subscriberId int64, awardsId int64, creatorI
 		Body: []byte{},
 	}
 
-	body := bytes.NewBuffer(publish.Body)
-	decoder := json.NewDecoder(body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(push); err != nil {
-		return err
-	}
-	ch, err := ph.session.GetChannel()
+	var err error
+	publish.Body, err = json.Marshal(push)
 	if err != nil {
 		return err
 	}
+	ch := ph.session.GetChannel()
 
 	err = ch.Publish(
 		ph.session.GetName(),

@@ -37,7 +37,7 @@ func (usecase *CommentsUsecase) Create(log *logrus.Entry, cm *models.Comment) (i
 		}
 	}
 	commentId, err := usecase.repository.Create(cm)
-	errPush := usecase.pusher.NewComment(commentId, cm.PostId, cm.AuthorId)
+	errPush := usecase.pusher.NewComment(commentId, cm.AuthorId, cm.PostId)
 	if errPush != nil {
 		log.Errorf("Try push comment; got error: %s", errPush)
 	}

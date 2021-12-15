@@ -10,17 +10,17 @@ type Usecase interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	PreparePostPush(info push.PostInfo) ([]int64, *push_models.PostPush, error)
+	PreparePostPush(info *push.PostInfo) ([]int64, *push_models.PostPush, error)
 
 	// PrepareCommentPush with Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	PrepareCommentPush(info push.CommentInfo) ([]int64, *push_models.CommentPush, error)
+	PrepareCommentPush(info *push.CommentInfo) ([]int64, *push_models.CommentPush, error)
 
 	// PrepareSubPush with Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	PrepareSubPush(info push.SubInfo) ([]int64, *push_models.SubPush, error)
+	PrepareSubPush(info *push.SubInfo) ([]int64, *push_models.SubPush, error)
 }

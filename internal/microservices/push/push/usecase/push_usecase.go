@@ -20,7 +20,7 @@ func NewPushUsecase(repository repository.Repository) *PushUsecase {
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PushUsecase) PreparePostPush(info push.PostInfo) ([]int64, *push_models.PostPush, error) {
+func (usecase *PushUsecase) PreparePostPush(info *push.PostInfo) ([]int64, *push_models.PostPush, error) {
 	result := &push_models.PostPush{
 		PostId:    info.PostId,
 		PostTitle: info.PostTitle,
@@ -43,7 +43,7 @@ func (usecase *PushUsecase) PreparePostPush(info push.PostInfo) ([]int64, *push_
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PushUsecase) PrepareCommentPush(info push.CommentInfo) ([]int64, *push_models.CommentPush, error) {
+func (usecase *PushUsecase) PrepareCommentPush(info *push.CommentInfo) ([]int64, *push_models.CommentPush, error) {
 	result := &push_models.CommentPush{
 		CommentId: info.CommentId,
 		AuthorId:  info.AuthorId,
@@ -80,7 +80,7 @@ func (usecase *PushUsecase) PrepareCommentPush(info push.CommentInfo) ([]int64, 
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PushUsecase) PrepareSubPush(info push.SubInfo) ([]int64, *push_models.SubPush, error) {
+func (usecase *PushUsecase) PrepareSubPush(info *push.SubInfo) ([]int64, *push_models.SubPush, error) {
 	result := &push_models.SubPush{
 		UserId:   info.UserId,
 		AwardsId: info.AwardsId,

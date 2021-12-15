@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"patreon/internal"
-	"patreon/internal/app"
 	"patreon/pkg/rabbit"
 	"strings"
 	"time"
@@ -48,8 +47,8 @@ func NewLogger(config *internal.Config, isService bool, serviceName string) (log
 	return logger, f.Close
 }
 
-func NewPostgresConnection(config *app.RepositoryConnections) (db *sqlx.DB, closeResource func() error) {
-	db, err := sqlx.Open("postgres", config.DataBaseUrl)
+func NewPostgresConnection(databaseUrl string) (db *sqlx.DB, closeResource func() error) {
+	db, err := sqlx.Open("postgres", databaseUrl)
 	if err != nil {
 		logrus.Fatal(err)
 	}

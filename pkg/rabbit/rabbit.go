@@ -34,40 +34,29 @@ func New(logger *logrus.Entry, name string, addr string) *Session {
 		name:   name,
 		done:   make(chan bool),
 	}
-	go session.handleReconnect(addr)
+	session.handleReconnect(addr)
 	return &session
 }
 
 // handleReconnect will wait for a connection error on
 // notifyConnClose, and then continuously attempt to reconnect.
 func (session *Session) handleReconnect(addr string) {
-	for {
-		session.isReady = false
-		session.logger.Infoln("Attempting to connect")
+	session.isReady = false
+	session.logger.Infoln("Attempting to connect")
 
-		_, err := session.connect(addr)
+	_, err := session.connect(addr)
 
-		if err != nil {
-			session.logger.Warningf("Failed to connect. Retrying... with err %s", err)
-
-			select {
-			case <-session.done:
-				return
-			case <-time.After(reconnectDelay):
-			}
-			continue
-		}
-
-		select {
-		case <-session.done:
-			return
-		case <-session.notifyConnClose:
-			session.logger.Infoln("Connection closed. Reconnecting...")
-			continue
-		case <-session.notifyChanClose:
-			session.logger.Infoln("Channel closed. Re-running init...")
-		}
+	if err != nil {
+		session.logger.Warningf("Failed to connect. with err %s", err)
+		return
 	}
+
+	err = session.init(session.connection)
+	if err != nil {
+		session.logger.Warningf("Failed to crate channel. with err %s", err)
+		return
+	}
+	session.isReady = true
 }
 
 func (session *Session) CheckConnection() bool {
@@ -82,9 +71,21 @@ func (session *Session) connect(addr string) (*amqp.Connection, error) {
 		return nil, err
 	}
 
+	go func() {
+		select {
+		case <-session.done:
+			return
+		case err := <- session.notifyConnClose:
+			session.logger.Errorf("Failed in connection. with err %s", err)
+			break
+		case err := <- session.notifyChanClose:
+			session.logger.Errorf("Failed in channel. with err %s", err)
+			break
+		}
+	} ()
+
 	session.changeConnection(conn)
 	session.logger.Infoln("Connected!")
-	session.isReady = true
 	return conn, nil
 }
 
@@ -102,9 +103,10 @@ func (session *Session) init(conn *amqp.Connection) error {
 	if err != nil {
 		return err
 	}
+
 	err = ch.ExchangeDeclare(
 		session.name,
-		session.typeEchange,
+		"topic",
 		true,
 		false,
 		false,
@@ -142,15 +144,8 @@ func (session *Session) GetName() string {
 	return session.name
 }
 
-func (session *Session) GetChannel() (*amqp.Channel, error) {
-	err := session.init(session.connection)
-	if err != nil {
-		return nil, err
-	}
-	if !session.isReady {
-		return nil, ErrGetUninnitChanel
-	}
-	return session.channel, nil
+func (session *Session) GetChannel() *amqp.Channel {
+	return session.channel
 }
 
 // Close will cleanly shutdown the channel and connection.

@@ -61,6 +61,8 @@ services:
     volumes:
       - ./logs-push:/app/logs
       - ${CONFIG_DIR}:/app/configs
+    environment:
+      WAIT_HOSTS: rabbit:5672
   files-service:
     image: flashiee/files-service:latest
     expose:

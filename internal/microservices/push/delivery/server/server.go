@@ -7,6 +7,9 @@ import (
 	"patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/push"
 	push_models "patreon/internal/microservices/push/push"
+	"patreon/internal/microservices/push/push/repository"
+	"patreon/internal/microservices/push/push/usecase"
+	"patreon/internal/microservices/push/utils"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
 	"time"
 
@@ -36,11 +39,20 @@ func New(config *push.Config, connections app.ExpectedConnections, logger *log.L
 }
 
 func (s *Server) checkConnection() error {
+	if err := s.connections.SqlConnection.Ping(); err != nil {
+		return fmt.Errorf("Can't check connection to sql with error %v ", err)
+	}
+
+	s.logger.Info("Success check connection to sql db")
+
 	state := s.connections.SessionGrpcConnection.GetState()
 	if state != connectivity.Ready {
 		return fmt.Errorf("Session connection not ready, status is: %s ", state)
 	}
 
+	if !s.connections.RabbitSession.CheckConnection() {
+		return fmt.Errorf("Rabbit connection not ready ")
+	}
 	return nil
 }
 
@@ -78,7 +90,7 @@ func (s *Server) Start() error {
 	sManager := client.NewSessionClient(s.connections.SessionGrpcConnection)
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 
-	senderHub := NewHub()
+	senderHub := utils.NewHub()
 	defer senderHub.StopHub()
 	go senderHub.Run()
 
@@ -91,27 +103,36 @@ func (s *Server) Start() error {
 	cors := middleware.NewCorsMiddleware(&s.config.Cors, router)
 	routerCors := cors.SetCors(router)
 
+	pushUsecase := usecase.NewPushUsecase(repository.NewPushRepository(s.connections.SqlConnection))
+	processingPush := utils.NewProcessingPush(s.logger.WithField("service", "push_proccessing"),
+		s.connections.RabbitSession, senderHub, pushUsecase)
+
+	defer processingPush.Stop()
+	go processingPush.RunProcessPost()
+	go processingPush.RunProcessComment()
+	go processingPush.RunProcessSub()
+
 	done := make(chan bool)
 	go func() {
-		ticker := time.NewTicker(pingPeriod/4)
+		ticker := time.NewTicker(25 * time.Second)
 
 		for {
 			select {
 			case <-done:
 				return
 			case <-ticker.C:
-				keys := make([]int64, len(h.hub.clients))
+				keys := make([]int64, len(h.hub.Clients))
 				i := 0
-				for k := range h.hub.clients {
+				for k := range h.hub.Clients {
 					keys[i] = k
 					i++
 				}
 				h.hub.SendMessage(keys, &push_models.PostPush{
-					PostId: 1,
-					PostTitle: "Привет",
-					CreatorId: 2,
+					PostId:          1,
+					PostTitle:       "Привет",
+					CreatorId:       2,
 					CreatorNickname: "Человек",
-					CreatorAvatar: "tude",
+					CreatorAvatar:   "tude",
 				})
 			}
 		}
