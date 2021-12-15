@@ -35,7 +35,7 @@ type PushRepository struct {
 	store *sqlx.DB
 }
 
-func NewLikesRepository(st *sqlx.DB) *PushRepository {
+func NewPushRepository(st *sqlx.DB) *PushRepository {
 	return &PushRepository{
 		store: st,
 	}

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -54,7 +53,6 @@ func (c *Client) SenderProcesses() {
 		_ = c.conn.Close()
 		c.CloseClient()
 	}()
-	c.hub.SendMessage([]int64{c.clientId}, fmt.Sprintf("Hello user with Id: %d", c.clientId))
 	c.conn.SetReadLimit(maxMessageSize)
 	_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error {
@@ -147,7 +145,8 @@ func (h *SendHub) sendMessage(msg *message) {
 			case client.send <- msg.message:
 				break
 			default:
-				h.UnregisterClient(client)
+				delete(h.Clients, client.clientId)
+				close(client.send)
 			}
 		}
 	}
@@ -177,6 +176,8 @@ func (h *SendHub) Run() {
 		case <-h.stopHub:
 			h.unregisterAll()
 			return
+		default:
+			break
 		}
 	}
 }

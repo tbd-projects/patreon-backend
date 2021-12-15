@@ -8,6 +8,7 @@ bind_addr_http = ":5003"
 domen = "localhost"
 session_url = "sessions-service:5001"
 rabbit_url = "amqp://patreon:pyaterochka@rabbit:5672/"
+database_url = "host=patreon-bd port=5432 user=patreon password=pyaterochka dbname=restapi_dev sslmode=disable"
 
 [cors]
 headers = [

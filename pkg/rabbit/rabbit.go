@@ -144,8 +144,8 @@ func (session *Session) GetName() string {
 	return session.name
 }
 
-func (session *Session) GetChannel() (*amqp.Channel, error) {
-	return session.channel, nil
+func (session *Session) GetChannel() *amqp.Channel {
+	return session.channel
 }
 
 // Close will cleanly shutdown the channel and connection.
