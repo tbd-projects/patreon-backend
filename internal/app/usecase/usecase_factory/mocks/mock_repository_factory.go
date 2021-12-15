@@ -13,15 +13,16 @@ import (
 	repository_creator "patreon/internal/app/repository/creator"
 	repository_info "patreon/internal/app/repository/info"
 	repository_likes "patreon/internal/app/repository/likes"
+	repository_pay_token "patreon/internal/app/repository/pay_token"
 	repository_payments "patreon/internal/app/repository/payments"
 	repository_posts "patreon/internal/app/repository/posts"
 	repository_statistics "patreon/internal/app/repository/statistics"
 	repository_subscribers "patreon/internal/app/repository/subscribers"
 	repository_user "patreon/internal/app/repository/user"
+	push_client "patreon/internal/microservices/push/delivery/client"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	push "github.com/prometheus/client_golang/prometheus/push"
 )
 
 // MockRepositoryFactory is a mock of RepositoryFactory interface.
@@ -159,6 +160,20 @@ func (mr *MockRepositoryFactoryMockRecorder) GetLikesRepository() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLikesRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetLikesRepository))
 }
 
+// GetPayTokenRepository mocks base method.
+func (m *MockRepositoryFactory) GetPayTokenRepository() repository_pay_token.Repository {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPayTokenRepository")
+	ret0, _ := ret[0].(repository_pay_token.Repository)
+	return ret0
+}
+
+// GetPayTokenRepository indicates an expected call of GetPayTokenRepository.
+func (mr *MockRepositoryFactoryMockRecorder) GetPayTokenRepository() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPayTokenRepository", reflect.TypeOf((*MockRepositoryFactory)(nil).GetPayTokenRepository))
+}
+
 // GetPaymentsRepository mocks base method.
 func (m *MockRepositoryFactory) GetPaymentsRepository() repository_payments.Repository {
 	m.ctrl.T.Helper()
@@ -188,10 +203,10 @@ func (mr *MockRepositoryFactoryMockRecorder) GetPostsRepository() *gomock.Call {
 }
 
 // GetPusher mocks base method.
-func (m *MockRepositoryFactory) GetPusher() push.Pusher {
+func (m *MockRepositoryFactory) GetPusher() push_client.Pusher {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPusher")
-	ret0, _ := ret[0].(push.Pusher)
+	ret0, _ := ret[0].(push_client.Pusher)
 	return ret0
 }
 

@@ -24,52 +24,56 @@ func (s *SuiteSubscribersUsecase) SetupSuite() {
 }
 
 func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_OK() {
+	token := "25"
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber).
 		Return(false, nil).
 		Times(1)
 	s.MockSubscribersRepository.EXPECT().
-		Create(subscriber).Times(1).
+		Create(subscriber, token).Times(1).
 		Return(nil)
-	err := s.uc.Subscribe(subscriber)
+	err := s.uc.Subscribe(subscriber, token)
 	assert.NoError(s.T(), err)
 }
 
 func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_AlreadyExists() {
+	token := "25"
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber).
 		Return(true, nil).
 		Times(1)
 
-	err := s.uc.Subscribe(subscriber)
+	err := s.uc.Subscribe(subscriber, token)
 	assert.Equal(s.T(), err, SubscriptionAlreadyExists)
 }
 
 func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_CheckExistsError() {
+	token := "25"
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber).
 		Return(false, repository.NewDBError(repository.DefaultErrDB)).
 		Times(1)
-	err := s.uc.Subscribe(subscriber)
+	err := s.uc.Subscribe(subscriber, token)
 	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
 }
 
 func (s *SuiteSubscribersUsecase) TestSubscribersUsecaseSubscribe_RepositoryCreateError() {
+	token := "25"
 	subscriber := models.TestSubscriber()
 	s.MockSubscribersRepository.EXPECT().
 		Get(subscriber).
 		Return(false, nil).
 		Times(1)
 	s.MockSubscribersRepository.EXPECT().
-		Create(subscriber).
+		Create(subscriber, token).
 		Times(1).
 		Return(&app.GeneralError{
 			Err: repository.DefaultErrDB,
 		})
-	err := s.uc.Subscribe(subscriber)
+	err := s.uc.Subscribe(subscriber, token)
 	assert.Equal(s.T(), repository.DefaultErrDB, errors.Cause(err).(*app.GeneralError).Err)
 }
 

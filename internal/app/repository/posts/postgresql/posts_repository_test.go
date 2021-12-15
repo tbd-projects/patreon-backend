@@ -92,9 +92,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQuery)).
 		WithArgs(userId, post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
-			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft"}).
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft", "comments"}).
 			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
-				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft))
+				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft, post.Comments))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQueryUpdate)).
 		WithArgs(post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{}).AddRow())
@@ -105,9 +105,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQuery)).
 		WithArgs(userId, post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
-			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft"}).
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft", "comments"}).
 			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
-				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft))
+				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft, post.Comments))
 	res, err = s.repo.GetPost(post.ID, userId, false)
 	assert.Equal(s.T(), res, post)
 	assert.NoError(s.T(), err)
@@ -119,9 +119,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQuery)).
 		WithArgs(userId, post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
-			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft"}).
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft", "comments"}).
 			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
-				awardsId, post.CreatorId, post.AddLike, post.Views, post.IsDraft))
+				awardsId, post.CreatorId, post.AddLike, post.Views, post.IsDraft, post.Comments))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQueryUpdate)).
 		WithArgs(post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{}).AddRow())
@@ -134,9 +134,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQuery)).
 		WithArgs(userId, post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
-			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft"}).
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft", "comments"}).
 			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
-				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft))
+				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft, post.Comments))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQueryUpdate)).
 		WithArgs(post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{}).AddRow().CloseError(models.BDError))
@@ -146,9 +146,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPost() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQuery)).
 		WithArgs(userId, post.ID).
 		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
-			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft"}).
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "is_draft", "comments"}).
 			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
-				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft))
+				post.Awards, post.CreatorId, post.AddLike, post.Views, post.IsDraft, post.Comments))
 	s.Mock.ExpectQuery(regexp.QuoteMeta(getPostQueryUpdate)).
 		WithArgs(post.ID).
 		WillReturnError(models.BDError)
@@ -188,9 +188,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
-			"type_awards", "posts.date", "cover", "have_like", "views"}).
+			"type_awards", "posts.date", "cover", "have_like", "views", "comments"}).
 			AddRow(post.ID, post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
-				post.AddLike, post.Views))
+				post.AddLike, post.Views, post.Comments))
 	res, err := s.repo.GetPosts(post.CreatorId, userId, pag, false)
 	assert.Equal(s.T(), res[0], post)
 	assert.NoError(s.T(), err)
@@ -203,9 +203,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryWithDraft)).
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
-			"type_awards", "posts.date", "cover", "have_like", "views", "is_draft"}).
+			"type_awards", "posts.date", "cover", "have_like", "views", "is_draft", "comments"}).
 			AddRow(post.ID, post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
-				post.AddLike, post.Views, post.IsDraft))
+				post.AddLike, post.Views, post.IsDraft, post.Comments))
 	res, err = s.repo.GetPosts(post.CreatorId, userId, pag, true)
 	assert.Equal(s.T(), res[0], post)
 	assert.NoError(s.T(), err)
@@ -226,9 +226,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
-			"type_awards", "posts.date", "cover", "have_like", "views"}).
+			"type_awards", "posts.date", "cover", "have_like", "views", "comments"}).
 			AddRow(post.ID, post.Title, post.Description, post.Likes, awardsId, post.Date, post.Cover,
-				post.AddLike, post.Views))
+				post.AddLike, post.Views, post.Comments))
 	res, err = s.repo.GetPosts(post.CreatorId, userId, pag, false)
 	post.Awards = repository.NoAwards
 	assert.Equal(s.T(), res[0], post)
@@ -241,9 +241,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"title", "description", "likes",
-			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views"}).
+			"posts.date", "cover", "type_awards", "creator_id", "have_like", "views", "comments"}).
 			AddRow(post.Title, post.Description, post.Likes, post.Date, post.Cover,
-				post.Awards, post.CreatorId, post.Description, post.Views))
+				post.Awards, post.CreatorId, post.Description, post.Views, post.Comments))
 	_, err = s.repo.GetPosts(post.CreatorId, userId, pag, false)
 	assert.Error(s.T(), err)
 
@@ -253,9 +253,9 @@ func (s *SuitePostsRepository) TestPostsRepository_GetPosts() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(userId, post.CreatorId).
 		WillReturnRows(sqlmock.NewRows([]string{"post_id", "title", "description", "likes",
-			"type_awards", "posts.date", "cover", "have_like", "views"}).
+			"type_awards", "posts.date", "cover", "have_like", "views", "comments"}).
 			AddRow(post.ID, post.Title, post.Description, post.Likes, post.Awards, post.Date, post.Cover,
-				post.AddLike, post.Views).RowError(0, models.BDError))
+				post.AddLike, post.Views, post.Comments).RowError(0, models.BDError))
 	_, err = s.repo.GetPosts(post.CreatorId, userId, pag, false)
 	assert.Error(s.T(), err, repository.NewDBError(models.BDError))
 

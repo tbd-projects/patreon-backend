@@ -52,8 +52,8 @@ func (s *SuitePaymentsRepository) TestPaymentsRepository_GetUserPayments_OK() {
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(userId).
-		WillReturnRows(sqlmock.NewRows([]string{"p.amount", "p.date", "p.creator_id", "u.nickname", "cp.category", "cp.description"}).
-			AddRow(payment.Amount, payment.Date, payment.CreatorID, creator.Nickname, creator.Category, creator.Description))
+		WillReturnRows(sqlmock.NewRows([]string{"p.amount", "p.date", "p.creator_id", "u.nickname", "cp.category", "cp.description", "status"}).
+			AddRow(payment.Amount, payment.Date, payment.CreatorID, creator.Nickname, creator.Category, creator.Description, payment.Status))
 	expRes := []models.UserPayments{
 		{
 			Payments:           *payment,
@@ -64,7 +64,7 @@ func (s *SuitePaymentsRepository) TestPaymentsRepository_GetUserPayments_OK() {
 	}
 	res, err := s.repo.GetUserPayments(userId, pag)
 
-	assert.NoError(s.T(), err)
+	require.NoError(s.T(), err)
 	assert.Equal(s.T(), expRes[0].Payments, res[0].Payments)
 
 }
@@ -93,8 +93,8 @@ func (s *SuitePaymentsRepository) TestPaymentsRepository_GetCreatorPayments_OK()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs(creatorId).
-		WillReturnRows(sqlmock.NewRows([]string{"p.amount", "p.date", "p.users_id", "u.nickname"}).
-			AddRow(payment.Amount, payment.Date, payment.UserID, user.Nickname))
+		WillReturnRows(sqlmock.NewRows([]string{"p.amount", "p.date", "p.users_id", "u.nickname", "status"}).
+			AddRow(payment.Amount, payment.Date, payment.UserID, user.Nickname, payment.Status))
 	expRes := []models.CreatorPayments{
 		{
 			Payments:     *payment,
@@ -103,7 +103,7 @@ func (s *SuitePaymentsRepository) TestPaymentsRepository_GetCreatorPayments_OK()
 	}
 	res, err := s.repo.GetCreatorPayments(creatorId, pag)
 
-	assert.NoError(s.T(), err)
+	require.NoError(s.T(), err)
 	assert.Equal(s.T(), expRes[0].Payments, res[0].Payments)
 
 }
