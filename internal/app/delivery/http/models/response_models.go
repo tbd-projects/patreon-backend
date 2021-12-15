@@ -313,6 +313,7 @@ func ToResponseUserPayments(payments []models.UserPayments) ResponseUserPayments
 				Amount:    payment.Amount,
 				Date:      payment.Date,
 				CreatorID: payment.CreatorID,
+				Status:    payment.Status,
 			},
 			CreatorNickname:    payment.CreatorNickname,
 			CreatorDescription: payment.CreatorDescription,
