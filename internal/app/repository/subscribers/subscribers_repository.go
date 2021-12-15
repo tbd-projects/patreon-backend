@@ -69,11 +69,11 @@ func (repo *SubscribersRepository) Create(subscriber *models.Subscriber, payToke
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) GetCreators(userID int64) ([]models.CreatorSubscribe, error) {
-	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1"
+	queryCount := "SELECT count(*) as cnt from subscribers WHERE users_id = $1 and status = true;"
 	querySelect := `
 	SELECT DISTINCT s.creator_id, s.awards_id, category, description, nickname, cp.avatar, cover
 	FROM subscribers s JOIN creator_profile cp ON s.creator_id = cp.creator_id
-	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1
+	JOIN users u ON cp.creator_id = u.users_id where s.users_id = $1 and s.status = true; 
 	`
 
 	count := 0
@@ -109,10 +109,10 @@ func (repo *SubscribersRepository) GetCreators(userID int64) ([]models.CreatorSu
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) GetSubscribers(creatorID int64) ([]models.User, error) {
-	queryCount := "SELECT count(*) as cnt from subscribers WHERE creator_id = $1"
+	queryCount := "SELECT count(*) as cnt from subscribers WHERE creator_id = $1 and status = true"
 	querySelect := `
 	SELECT DISTINCT s.users_id, nickname, avatar
-	from subscribers s join users u on s.users_id = u.users_id WHERE s.creator_id = $1`
+	from subscribers s join users u on s.users_id = u.users_id WHERE s.creator_id = $1 and status = true`
 
 	count := 0
 	if err := repo.store.QueryRow(queryCount, creatorID).Scan(&count); err != nil {
@@ -145,7 +145,7 @@ func (repo *SubscribersRepository) GetSubscribers(creatorID int64) ([]models.Use
 //		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (repo *SubscribersRepository) Get(subscriber *models.Subscriber) (bool, error) {
-	query := "SELECT count(*) as cnt from subscribers where users_id = $1 and creator_id = $2"
+	query := "SELECT count(*) as cnt from subscribers where users_id = $1 and creator_id = $2 and status = true"
 	cnt := 0
 	if res := repo.store.QueryRow(query, subscriber.UserID, subscriber.CreatorID).Scan(&cnt); res != nil {
 		return false, repository.NewDBError(res)
