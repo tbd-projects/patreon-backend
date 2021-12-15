@@ -28,7 +28,7 @@ const (
 			views,
 			p.number_comments
 	FROM posts p
-			 JOIN subscribers s on s.users_id = $1 and s.creator_id = p.creator_id
+			 JOIN subscribers s on s.users_id = $1 and s.creator_id = p.creator_id and s.status = true
 			 LEFT JOIN likes AS lk ON (lk.post_id = p.posts_id and lk.users_id = $1)
 			 JOIN users u on p.creator_id = u.users_id
 	WHERE p.is_draft = false and (p.type_awards is null OR p.type_awards = s.awards_id or p.type_awards in
