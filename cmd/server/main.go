@@ -84,7 +84,7 @@ func main() {
 		repositoryConfig = &config.ServerRepository
 	}
 
-	db, closeResource := utils.NewPostgresConnection(repositoryConfig)
+	db, closeResource := utils.NewPostgresConnection(repositoryConfig.DataBaseUrl)
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
