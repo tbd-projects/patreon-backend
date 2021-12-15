@@ -22,9 +22,10 @@ const (
 	querySelectCreatorPayments = "SELECT p.amount, p.date, p.users_id, u.nickname, p.status FROM payments p " +
 		"JOIN users u on p.users_id = u.users_id where p.creator_id = $1 and p.status = true " +
 		"ORDER BY p.date DESC "
-	queryUpdateStatus  = "UPDATE payments SET status = true WHERE pay_token = $1;"
-	queryCountPayments = "SELECT count(*) from payments where pay_token = $1;"
-	queryGetPayment    = "SELECT amount, date, creator_id, users_id, status from payments where pay_token = $1;"
+	queryUpdateStatus    = "UPDATE payments SET status = true WHERE pay_token = $1 RETURNING users_id, creator_id, awards_id;"
+	queryCountPayments   = "SELECT count(*) from payments where pay_token = $1;"
+	queryGetPayment      = "SELECT amount, date, creator_id, users_id, status from payments where pay_token = $1;"
+	queryUpdateSubscribe = "UPDATE subscribers set status = true where users_id = $1 and creator_id = $2 and awards_id = $3;"
 )
 
 type PaymentsRepository struct {
@@ -125,9 +126,23 @@ func (repo *PaymentsRepository) GetCreatorPayments(creatorID int64, pag *db_mode
 //		app.GeneralError with Errors:
 //			repository.DefaultErrDB
 func (repo *PaymentsRepository) UpdateStatus(token string) error {
-	_, err := repo.store.Exec(queryUpdateStatus, token)
-
+	begin, err := repo.store.Begin()
 	if err != nil {
+		return repository.NewDBError(err)
+	}
+	awardsID, usersID, creatorID := 0, 0, 0
+	err = repo.store.QueryRow(queryUpdateStatus, token).Scan(&usersID, &creatorID, &awardsID)
+	if err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+	_, err = repo.store.Exec(queryUpdateSubscribe, usersID, creatorID, awardsID)
+	if err != nil {
+		_ = begin.Rollback()
+		return repository.NewDBError(err)
+	}
+
+	if err = begin.Commit(); err != nil {
 		return repository.NewDBError(err)
 	}
 	return nil
