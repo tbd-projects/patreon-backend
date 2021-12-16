@@ -18,6 +18,3 @@ type Log struct {
 	WorkTime int64     `json:"work_time,omitempty"`
 	ReqID    string    `json:"req_id,omitempty"`
 }
-
-
-
