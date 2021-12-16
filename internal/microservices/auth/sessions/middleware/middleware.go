@@ -38,7 +38,6 @@ func (m *SessionMiddleware) clearCookie(w http.ResponseWriter, cook *http.Cookie
 	http.SetCookie(w, cook)
 }
 
-
 // CheckFunc Errors:
 //		Status 401 "not authorized user"
 func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
@@ -53,6 +52,7 @@ func (m *SessionMiddleware) CheckFunc(next hf.HandlerFunc) hf.HandlerFunc {
 		uniqID := sessionID.Value
 		if res, err := m.SessionClient.Check(context.Background(), uniqID); err != nil {
 			m.Log(r).Warnf("Error in checking session: %v", err)
+			m.clearCookie(w, sessionID)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		} else {
@@ -107,9 +107,10 @@ func (m *SessionMiddleware) AddUserIdFunc(next hf.HandlerFunc) hf.HandlerFunc {
 				m.Log(r).Debugf("Get session for user: %d", res.UserID)
 				r = r.WithContext(context.WithValue(r.Context(), "user_id", res.UserID))
 				r = r.WithContext(context.WithValue(r.Context(), "session_id", res.UniqID))
+				m.updateCookie(w, sessionID)
+			} else {
+				m.clearCookie(w, sessionID)
 			}
-			m.updateCookie(w, sessionID)
-			http.SetCookie(w, sessionID)
 		}
 		next(w, r)
 	}
