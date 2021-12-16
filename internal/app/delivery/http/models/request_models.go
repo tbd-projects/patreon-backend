@@ -158,6 +158,9 @@ func (req *RequestAttach) Validate() error {
 		"id":     validation.Validate(req.Id, validation.Min(1)),
 		"status": validation.Validate(req.Status, validation.In(handlers.AddStatus, handlers.UpdateStatus)),
 	}.Filter()
+	if err == nil {
+		return nil
+	}
 
 	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {
