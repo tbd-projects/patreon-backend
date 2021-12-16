@@ -38,7 +38,6 @@ func (s *CsrfTestSuite) TestCsrfHandlerGet_ServerErrorSession() {
 
 	b := bytes.Buffer{}
 
-
 	r, _ := http.NewRequest(http.MethodGet, "/token", &b)
 	r = r.WithContext(context.WithValue(r.Context(), "invalid session_id", "empty"))
 	s.handler.GET(w, r)

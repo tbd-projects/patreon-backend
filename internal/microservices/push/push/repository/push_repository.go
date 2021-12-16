@@ -90,7 +90,7 @@ func (repo *PushRepository) GetAwardsNameAndPrice(awardsId int64) (name string, 
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *PushRepository) GetCreatorPostAndTitle(postId int64) (int64, string,  error) {
+func (repo *PushRepository) GetCreatorPostAndTitle(postId int64) (int64, string, error) {
 	var creatorId int64
 	var title string
 	if err := repo.store.QueryRow(GetCreatorPostAndTitleQuery, postId).Scan(&creatorId, &title); err != nil {
@@ -145,7 +145,6 @@ func (repo *PushRepository) CheckCreatorForGetSubPush(creatorId int64) (bool, er
 
 	return enable, nil
 }
-
 
 // CheckCreatorForGetCommentPush Errors:
 //		repository.NotFound

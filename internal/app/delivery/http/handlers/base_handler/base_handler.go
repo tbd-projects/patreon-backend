@@ -21,8 +21,8 @@ const (
 )
 
 type BaseHandler struct {
-	handlerMethods      map[string]hf.HandlerFunc
-	middlewares         []hf.HMiddlewareFunc
+	handlerMethods map[string]hf.HandlerFunc
+	middlewares    []hf.HMiddlewareFunc
 	HelpHandlers
 }
 

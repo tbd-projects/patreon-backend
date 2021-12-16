@@ -56,7 +56,7 @@ func (repo *RedisRepository) GetUserId(uniqID string, updExpiration int) (string
 			"error when try get session with uniqId: %s", uniqID)
 	}
 
-	_, err = redis.Int64(con.Do("EXPIRE", uniqID, updExpiration / 100))
+	_, err = redis.Int64(con.Do("EXPIRE", uniqID, updExpiration/100))
 	if err != nil {
 		return "", errors.Wrapf(err,
 			"error when try update expire session with uniqId: %s", uniqID)

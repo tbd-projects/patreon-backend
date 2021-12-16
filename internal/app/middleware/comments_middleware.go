@@ -14,7 +14,7 @@ import (
 )
 
 type CommentsMiddleware struct {
-	log           utilits.LogObject
+	log             utilits.LogObject
 	usecaseComments usecase_comments.Usecase
 }
 
@@ -95,4 +95,3 @@ func (mw *CommentsMiddleware) CheckCorrectCommentFunc(next hf.HandlerFunc) hf.Ha
 func (mw *CommentsMiddleware) CheckCorrectComment(handler http.Handler) http.Handler {
 	return http.HandlerFunc(mw.CheckCorrectCommentFunc(handler.ServeHTTP))
 }
-

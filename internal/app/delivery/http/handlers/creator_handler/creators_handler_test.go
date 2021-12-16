@@ -86,7 +86,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Invalid_Body() {
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 	s.Tb = handlers.TestTable{
 		Name:              "Invalid request body",
-		Data:               http_models.RequestCreator{},
+		Data:              http_models.RequestCreator{},
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusInternalServerError,
 	}
@@ -115,7 +115,7 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Create_Err() {
 	s.Tb = handlers.TestTable{
 		Name:              "CreateError in create usecase",
-		Data:               http_models.RequestCreator{},
+		Data:              http_models.RequestCreator{},
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}

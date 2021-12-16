@@ -54,9 +54,9 @@ func (s *ProfileTestSuite) TestProfileHandler_GET_Correct() {
 	err := easyjson.UnmarshalFromReader(recorder.Body, req)
 	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), req, &models_http.ProfileResponse{ID: userID, Login:  test.Data.(*models_http.ProfileResponse).Login,
+	assert.Equal(s.T(), req, &models_http.ProfileResponse{ID: userID, Login: test.Data.(*models_http.ProfileResponse).Login,
 		Nickname: test.Data.(*models_http.ProfileResponse).Nickname,
-		Avatar: test.Data.(*models_http.ProfileResponse).Avatar})
+		Avatar:   test.Data.(*models_http.ProfileResponse).Avatar})
 }
 
 func (s *ProfileTestSuite) TestProfileHandler_GET_NotFound() {

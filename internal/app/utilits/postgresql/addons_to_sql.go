@@ -24,4 +24,3 @@ func CustomRebind(startIndex int, query string) string {
 
 	return string(append(rqb, query...))
 }
-

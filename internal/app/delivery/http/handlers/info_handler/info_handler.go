@@ -9,14 +9,14 @@ import (
 )
 
 type InfoHandler struct {
-	infoUsecase    usecase_info.Usecase
+	infoUsecase usecase_info.Usecase
 	base_handler.BaseHandler
 }
 
 func NewInfoHandler(log *logrus.Logger, ucInfo usecase_info.Usecase) *InfoHandler {
 	h := &InfoHandler{
-		BaseHandler:    *base_handler.NewBaseHandler(log),
-		infoUsecase:    ucInfo,
+		BaseHandler: *base_handler.NewBaseHandler(log),
+		infoUsecase: ucInfo,
 	}
 
 	h.AddMethod(http.MethodGet, h.GET)

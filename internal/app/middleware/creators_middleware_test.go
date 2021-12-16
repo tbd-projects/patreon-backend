@@ -38,7 +38,6 @@ func TestCreatorsMiddleware(t *testing.T) {
 
 	assert.Equal(t, recorder.Code, http.StatusOK)
 
-
 	recorder = httptest.NewRecorder()
 	ctx = context.WithValue(context.Background(), "user_id", int64(2))
 	reader, err = http.NewRequestWithContext(ctx, http.MethodPost, "/register", &b)

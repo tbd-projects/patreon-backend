@@ -31,7 +31,7 @@ func TestAwardsMiddleware(t *testing.T) {
 	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
 	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"award_id": strconv.Itoa(1),
+		"award_id":   strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestAwardsMiddleware(t *testing.T) {
 	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
 	vars = map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"award_id": strconv.Itoa(1),
+		"award_id":   strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestAwardsMiddleware(t *testing.T) {
 	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
 	vars = map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"award_id": strconv.Itoa(1),
+		"award_id":   strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)
@@ -81,7 +81,7 @@ func TestAwardsMiddleware(t *testing.T) {
 	reader, err = http.NewRequest(http.MethodPost, "/register", &b)
 	vars = map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"award_id": strconv.Itoa(1),
+		"award_id":   strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)

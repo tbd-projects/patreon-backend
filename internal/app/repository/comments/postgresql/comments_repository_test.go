@@ -21,6 +21,7 @@ func (s *SuiteCommentsRepository) SetupSuite() {
 func (s *SuiteCommentsRepository) AfterTest(_, _ string) {
 	require.NoError(s.T(), s.Mock.ExpectationsWereMet())
 }
+
 /*
 func (s *SuiteCommentsRepository) checkUniqCorrect(name string, creatorId int64, skipAwardsid int64, price int64) {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(checkUniqQueryName)).

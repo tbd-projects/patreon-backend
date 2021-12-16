@@ -35,7 +35,7 @@ type SuiteHandler struct {
 	MockCreatorUsecase     *mock_usecase_creator.CreatorUsecase
 	MockAwardsUsecase      *mock_usecase_awards.AwardsUsecase
 	MockPostsUsecase       *mock_usecase_posts.PostsUsecase
-	MockAttachesUsecase   *mock_usecase_attaches.AttachesUsecase
+	MockAttachesUsecase    *mock_usecase_attaches.AttachesUsecase
 	MockAccessUsecase      *mock_usecase.AccessUsecase
 	MockSessionsManager    *mock_auth_checker.MockAuthCheckerClient
 	MockInfoUsecase        *mock_usecase_info.InfoUsecase

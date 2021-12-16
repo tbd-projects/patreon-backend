@@ -29,7 +29,7 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	Get(commentsId int64) (*models.Comment, error)
 
-// GetUserComments Errors:
+	// GetUserComments Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	GetUserComments(userId int64, pag *models.Pagination) ([]models.UserComment, error)

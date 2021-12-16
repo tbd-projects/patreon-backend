@@ -20,9 +20,9 @@ func NewCorsMiddleware(config *internal.CorsConfig, router *mux.Router) CorsMidd
 }
 func (mw *CorsMiddleware) SetCors(handler http.Handler) http.Handler {
 	return gh.CORS(
-			gh.AllowedOrigins(mw.config.Urls),
-			gh.AllowedHeaders(mw.config.Headers),
-			gh.AllowCredentials(),
-			gh.AllowedMethods(mw.config.Methods),
-		) (handler)
+		gh.AllowedOrigins(mw.config.Urls),
+		gh.AllowedHeaders(mw.config.Headers),
+		gh.AllowCredentials(),
+		gh.AllowedMethods(mw.config.Methods),
+	)(handler)
 }

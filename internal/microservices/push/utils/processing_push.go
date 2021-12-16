@@ -19,7 +19,7 @@ type ProcessingPush struct {
 	logger  *logrus.Entry
 	sendMsg SendMessager
 	usecase usecase.Usecase
-	stop chan bool
+	stop    chan bool
 }
 
 func NewProcessingPush(logger *logrus.Entry, session *rabbit.Session, sendMsg SendMessager, usecase usecase.Usecase) *ProcessingPush {
@@ -28,7 +28,7 @@ func NewProcessingPush(logger *logrus.Entry, session *rabbit.Session, sendMsg Se
 		sendMsg: sendMsg,
 		logger:  logger,
 		usecase: usecase,
-		stop : make(chan bool),
+		stop:    make(chan bool),
 	}
 }
 

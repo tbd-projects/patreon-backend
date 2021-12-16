@@ -79,7 +79,6 @@ func (h *CommentsIdHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	if len(mux.Vars(r)) > 3 {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
@@ -99,7 +98,6 @@ func (h *CommentsIdHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusForbidden, handler_errors.NotAllowAddComment)
 		return
 	}
-
 
 	err = h.commentsUsecase.Update(&models.Comment{ID: commentId, Body: req.Body, AsCreator: req.AsCreator})
 	if err != nil {

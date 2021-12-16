@@ -46,7 +46,6 @@ func (c *Client) CloseClient() {
 	c.close <- true
 }
 
-
 func (c *Client) writeJSON(cn *websocket.Conn, v easyjson.Marshaler) error {
 	w, err := cn.NextWriter(websocket.TextMessage)
 	if err != nil {

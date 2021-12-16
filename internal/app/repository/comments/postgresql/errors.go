@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	CommentAlreadyExist  = errors.New("comment already exist")
+	CommentAlreadyExist = errors.New("comment already exist")
 )

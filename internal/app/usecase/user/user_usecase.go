@@ -19,7 +19,7 @@ import (
 type UserUsecase struct {
 	repository     repoUser.Repository
 	repositoryFile client.FileServiceClient
-	imageConvector  utils.ImageConverter
+	imageConvector utils.ImageConverter
 }
 
 func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServiceClient,
@@ -30,7 +30,7 @@ func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServic
 	}
 	return &UserUsecase{
 		repository:     repository,
-		imageConvector:  conv,
+		imageConvector: conv,
 		repositoryFile: fileClient,
 	}
 }

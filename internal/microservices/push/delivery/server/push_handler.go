@@ -11,7 +11,6 @@ import (
 	"patreon/internal/microservices/push/utils"
 )
 
-
 type PushHandler struct {
 	sessionClient session_client.AuthCheckerClient
 	hub           *utils.SendHub
@@ -25,7 +24,7 @@ func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClien
 		BaseHandler:   *bh.NewBaseHandler(log),
 		sessionClient: sManager,
 		hub:           hub,
-		upgrader: upgrader,
+		upgrader:      upgrader,
 	}
 	h.AddMethod(http.MethodGet, h.GET, middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc)
 	return h

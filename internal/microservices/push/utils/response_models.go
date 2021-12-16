@@ -4,6 +4,6 @@ package utils
 
 //easyjson:json
 type PushResponse struct {
-	Type string `json:"type"`
+	Type string      `json:"type"`
 	Push interface{} `json:"push"`
 }

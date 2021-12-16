@@ -18,7 +18,7 @@ type SuiteLikeUsecase struct {
 func (s *SuiteLikeUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
 	s.uc = NewLikesUsecase(s.MockLikesRepository)
-	s.tLike = &models.Like{ID : 2, PostId: 3, UserId: 1, Value: 1}
+	s.tLike = &models.Like{ID: 2, PostId: 3, UserId: 1, Value: 1}
 }
 
 func (s *SuiteLikeUsecase) TestLikeUsecase_Add_Ok() {
@@ -123,5 +123,3 @@ func (s *SuiteLikeUsecase) TestLikeUsecase_Delete_Ok() {
 func TestUsecaseLike(t *testing.T) {
 	suite.Run(t, new(SuiteLikeUsecase))
 }
-
-

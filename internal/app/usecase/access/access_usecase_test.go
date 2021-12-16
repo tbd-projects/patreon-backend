@@ -43,14 +43,14 @@ func (s *SuiteAccessUsecase) TestCreatorUsecase_AddToBlackList() {
 	userIp := "123213"
 
 	s.MockAccessRepository.EXPECT().
-		Set(blackList + userIp, userIp, timeBlocked).
+		Set(blackList+userIp, userIp, timeBlocked).
 		Times(1).
 		Return(nil)
 	err := s.uc.AddToBlackList(userIp)
 	assert.NoError(s.T(), err)
 
 	s.MockAccessRepository.EXPECT().
-		Set(blackList + userIp, userIp, timeBlocked).
+		Set(blackList+userIp, userIp, timeBlocked).
 		Times(1).
 		Return(repository.DefaultErrDB)
 	err = s.uc.AddToBlackList(userIp)
@@ -61,7 +61,7 @@ func (s *SuiteAccessUsecase) TestCreatorUsecase_CheckBlackList() {
 	userIp := "123213"
 
 	s.MockAccessRepository.EXPECT().
-		Get(blackList + userIp).
+		Get(blackList+userIp).
 		Times(1).
 		Return("", nil)
 	ok, err := s.uc.CheckBlackList(userIp)
@@ -69,7 +69,7 @@ func (s *SuiteAccessUsecase) TestCreatorUsecase_CheckBlackList() {
 	assert.NoError(s.T(), err)
 
 	s.MockAccessRepository.EXPECT().
-		Get(blackList + userIp).
+		Get(blackList+userIp).
 		Times(1).
 		Return("", repository.DefaultErrDB)
 	ok, err = s.uc.CheckBlackList(userIp)
@@ -77,7 +77,7 @@ func (s *SuiteAccessUsecase) TestCreatorUsecase_CheckBlackList() {
 	assert.Error(s.T(), err)
 
 	s.MockAccessRepository.EXPECT().
-		Get(blackList + userIp).
+		Get(blackList+userIp).
 		Times(1).
 		Return("", repository_access.NotFound)
 	ok, err = s.uc.CheckBlackList(userIp)
@@ -107,7 +107,7 @@ func (s *SuiteAccessUsecase) TestCreatorUsecase_Update() {
 	s.MockAccessRepository.EXPECT().
 		Increment(userIp).
 		Times(1).
-		Return(int64(queryLimit + 10), nil)
+		Return(int64(queryLimit+10), nil)
 	id, err = s.uc.Update(userIp)
 	assert.Equal(s.T(), int64(-1), id)
 	assert.ErrorIs(s.T(), err, NoAccess)

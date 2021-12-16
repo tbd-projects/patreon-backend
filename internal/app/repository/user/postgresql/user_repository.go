@@ -27,7 +27,7 @@ const (
 	findByNicknameQuery = `SELECT users_id, login, nickname, users.avatar, encrypted_password, cp.creator_id IS NOT NULL
 	from users LEFT JOIN creator_profile AS cp ON (users.users_id = cp.creator_id) where nickname=$1`
 
-	createQuery = `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
+	createQuery         = `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
 	createSettingsQuery = `INSERT INTO user_settings (user_id, get_sub, get_post, get_comment) VALUES ($1, true, true, true)`
 )
 

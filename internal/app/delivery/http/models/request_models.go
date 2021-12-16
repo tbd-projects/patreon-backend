@@ -83,8 +83,6 @@ type RequestPosts struct {
 	IsDraft     bool   `json:"is_draft,omitempty"`
 }
 
-
-
 //easyjson:json
 type RequestAttach struct {
 	Type   models.DataType `json:"type"`

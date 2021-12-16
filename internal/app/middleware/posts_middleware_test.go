@@ -31,7 +31,7 @@ func TestPostsMiddleware(t *testing.T) {
 	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
 	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"post_id": strconv.Itoa(1),
+		"post_id":    strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)
@@ -62,7 +62,7 @@ func TestPostsMiddleware_Fobbiden(t *testing.T) {
 
 	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"post_id": strconv.Itoa(1),
+		"post_id":    strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)
@@ -92,7 +92,7 @@ func TestPostsMiddleware_StatusInternalServerError(t *testing.T) {
 	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
 	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"post_id": strconv.Itoa(1),
+		"post_id":    strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)
@@ -122,7 +122,7 @@ func TestPostsMiddleware_StatusForbidden2(t *testing.T) {
 	reader, err := http.NewRequest(http.MethodPost, "/register", &b)
 	vars := map[string]string{
 		"creator_id": strconv.Itoa(1),
-		"post_id": strconv.Itoa(1),
+		"post_id":    strconv.Itoa(1),
 	}
 	reader = mux.SetURLVars(reader, vars)
 	require.NoError(t, err)
@@ -191,4 +191,3 @@ func TestPostsMiddleware_StatusBadRequest2(t *testing.T) {
 	assert.Equal(t, recorder.Code, http.StatusBadRequest)
 	mock.Finish()
 }
-

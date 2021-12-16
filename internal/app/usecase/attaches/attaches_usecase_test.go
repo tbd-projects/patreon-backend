@@ -18,7 +18,6 @@ import (
 type SuiteAttachesUsecase struct {
 	usecase.SuiteUsecase
 	uc *AttachesUsecase
-
 }
 
 func (s *SuiteAttachesUsecase) SetupSuite() {

@@ -108,9 +108,9 @@ func createAttach(postId int64, typeId int64, attaches models.Attach) []models.T
 
 func updateAttachError(level int64, id int64, err error) models.TestQuery {
 	return models.TestQuery{
-		Query: updateAttachFilesQuery,
-		Args:  []driver.Value{level, id},
-		Err:   err,
+		Query:   updateAttachFilesQuery,
+		Args:    []driver.Value{level, id},
+		Err:     err,
 		RunType: models.Query,
 	}
 }

@@ -15,7 +15,7 @@ import (
 )
 
 type AttachesMiddleware struct {
-	log          utilits.LogObject
+	log             utilits.LogObject
 	usecaseAttaches useAttaches.Usecase
 }
 

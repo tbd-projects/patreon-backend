@@ -50,8 +50,8 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_InvalidBody() {
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
-	Data := http_models.ResponsePost {
-		Title:    "nickname",
+	Data := http_models.ResponsePost{
+		Title: "nickname",
 	}
 	recorder := httptest.NewRecorder()
 

@@ -53,7 +53,7 @@ func (s *LoginTestSuite) TestLoginHandler_POST_InvalidBody() {
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
-	data := http_models.ResponsePost {
+	data := http_models.ResponsePost{
 		Title: "nickname",
 	}
 	recorder := httptest.NewRecorder()
