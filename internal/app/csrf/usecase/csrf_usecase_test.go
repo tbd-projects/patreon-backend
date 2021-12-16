@@ -3,7 +3,7 @@ package usecase_csrf
 import (
 	"fmt"
 	"patreon/internal/app"
-	"patreon/internal/app/csrf/models"
+	"patreon/internal/app/csrf/csrf_models"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	mock_repository_jwt "patreon/internal/app/csrf/repository/jwt/mocks"
 	"testing"

@@ -5,6 +5,7 @@ import (
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
+	"patreon/internal/app/delivery/http/handlers"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
@@ -42,7 +43,7 @@ func NewUpdateCoverHandler(log *logrus.Logger,
 // @Summary set new creator cover
 // @tags creators
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param cover formData file true "Cover file with ext jpeg/png"
+// @Param cover formData file true "Cover file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200 "successfully upload cover"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name", "please upload a JPEG, JPG or PNG files"
 // @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
@@ -50,7 +51,7 @@ func NewUpdateCoverHandler(log *logrus.Logger,
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
 // @Router /creators/{creator_id:}/update/cover [PUT]
 func (h *UpdateCoverCreatorHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
+	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
 		"cover", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)

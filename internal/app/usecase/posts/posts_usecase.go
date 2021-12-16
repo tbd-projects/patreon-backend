@@ -2,6 +2,7 @@ package posts
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
@@ -9,6 +10,8 @@ import (
 	repoPosts "patreon/internal/app/repository/posts"
 	"patreon/internal/microservices/files/delivery/grpc/client"
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	push_client "patreon/internal/microservices/push/delivery/client"
+	"patreon/pkg/utils"
 
 	"github.com/pkg/errors"
 )
@@ -17,14 +20,22 @@ type PostsUsecase struct {
 	repository      repoPosts.Repository
 	repositoryData  repoAttaches.Repository
 	filesRepository client.FileServiceClient
+	imageConvector  utils.ImageConverter
+	pusher          push_client.Pusher
 }
 
 func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoAttaches.Repository,
-	fileClient client.FileServiceClient) *PostsUsecase {
+	fileClient client.FileServiceClient, pusher push_client.Pusher, convector ...utils.ImageConverter) *PostsUsecase {
+	conv := utils.ImageConverter(&utils.ConverterToWebp{})
+	if len(convector) != 0 {
+		conv = convector[0]
+	}
 	return &PostsUsecase{
 		repository:      repository,
 		repositoryData:  repositoryData,
+		imageConvector:  conv,
 		filesRepository: fileClient,
+		pusher:          pusher,
 	}
 }
 
@@ -34,6 +45,13 @@ func NewPostsUsecase(repository repoPosts.Repository, repositoryData repoAttache
 func (usecase *PostsUsecase) GetPosts(creatorId int64, userId int64,
 	pag *models.Pagination, withDraft bool) ([]models.Post, error) {
 	return usecase.repository.GetPosts(creatorId, userId, pag, withDraft)
+}
+
+// GetAvailablePosts Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *PostsUsecase) GetAvailablePosts(userID int64, pag *models.Pagination) ([]models.AvailablePost, error) {
+	return usecase.repository.GetAvailablePosts(userID, pag)
 }
 
 // GetPost Errors:
@@ -91,7 +109,7 @@ func (usecase *PostsUsecase) Update(post *models.UpdatePost) error {
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *PostsUsecase) Create(post *models.CreatePost) (int64, error) {
+func (usecase *PostsUsecase) Create(log *logrus.Entry, post *models.CreatePost) (int64, error) {
 	if err := post.Validate(); err != nil {
 		if errors.Is(err, models.EmptyTitle) || errors.Is(err, models.InvalidCreatorId) ||
 			errors.Is(err, models.InvalidAwardsId) {
@@ -105,8 +123,12 @@ func (usecase *PostsUsecase) Create(post *models.CreatePost) (int64, error) {
 			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
 		}
 	}
-
-	return usecase.repository.Create(post)
+	postId, err := usecase.repository.Create(post)
+	errPush := usecase.pusher.NewPost(post.CreatorId, postId, post.Title)
+	if errPush != nil {
+		log.Errorf("Try push new post, and got err %s", errPush)
+	}
+	return postId, err
 }
 
 // GetCreatorId Errors:
@@ -127,9 +149,17 @@ func (usecase *PostsUsecase) GetCreatorId(postId int64) (int64, error) {
 //			repository.DefaultErrDB
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *PostsUsecase) LoadCover(data io.Reader, name repoFiles.FileName, postId int64) error {
 	if _, err := usecase.repository.GetPostCreator(postId); err != nil {
 		return err
+	}
+
+	var err error
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return errors.Wrap(err, "failed convert to webp of update post cover")
 	}
 
 	path, err := usecase.filesRepository.SaveFile(context.Background(), data, name, repoFiles.Image)

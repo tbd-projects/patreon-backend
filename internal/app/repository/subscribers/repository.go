@@ -8,7 +8,7 @@ type Repository interface {
 	// Create Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB
-	Create(subscriber *models.Subscriber) error
+	Create(subscriber *models.Subscriber, payToken string) error
 	// Delete Errors:
 	//		app.GeneralError with Errors
 	//			repository.DefaultErrDB

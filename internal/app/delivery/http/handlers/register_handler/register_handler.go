@@ -1,7 +1,6 @@
 package register_handler
 
 import (
-	"encoding/json"
 	"net/http"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
@@ -59,9 +58,6 @@ func (h *RegisterHandler) POST(w http.ResponseWriter, r *http.Request) {
 		Password: req.Password,
 		Nickname: req.Nickname,
 	}
-
-	logUser, _ := json.Marshal(u)
-	h.Log(r).Debug("get: ", string(logUser))
 
 	id, err := h.userUsecase.Create(u)
 	if err != nil {

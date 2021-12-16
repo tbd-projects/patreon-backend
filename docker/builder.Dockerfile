@@ -4,11 +4,11 @@ WORKDIR /app
 
 COPY . .
 
-RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+RUN apt-get clean
 RUN apt-get update
 RUN apt-get install jq -y
 
-EXPOSE 443 80 8080
+EXPOSE 8080
 
 RUN make build
 

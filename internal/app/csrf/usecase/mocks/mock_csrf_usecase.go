@@ -5,7 +5,7 @@
 package mock_usecase_csrf
 
 import (
-	csrf_models "patreon/internal/app/csrf/models"
+	csrf_models "patreon/internal/app/csrf/csrf_models"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

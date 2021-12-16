@@ -46,7 +46,7 @@ func NewCreatorHandler(log *logrus.Logger, sManager session_client.AuthCheckerCl
 // @Description get list of creators which register on service
 // @Produce json
 // @tags creators
-// @Success 201 {array} http_models.ResponseCreator
+// @Success 201 {object} http_models.ResponseCreators
 // @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
 // @Router /creators [GET]
@@ -63,7 +63,7 @@ func (h *CreatorHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Log(r).Debugf("get creators %v", respondCreators)
-	h.Respond(w, r, http.StatusOK, respondCreators)
+	h.Respond(w, r, http.StatusOK, http_models.ResponseCreators{Creators: respondCreators})
 }
 
 // POST Create Creator

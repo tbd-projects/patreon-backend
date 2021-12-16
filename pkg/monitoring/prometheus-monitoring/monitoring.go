@@ -19,11 +19,11 @@ type PrometheusMetrics struct {
 func NewPrometheusMetrics(serviceName string) *PrometheusMetrics {
 	metrics := &PrometheusMetrics{
 		HitsSuccess: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: serviceName + "_hits",
+			Name: serviceName + "_success_hits",
 			Help: "Count success responses from service",
 		}, []string{"status", "path", "method"}),
 		HitsErrors: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: serviceName + "errors",
+			Name: serviceName + "_errors_hits",
 			Help: "Count errors response from service",
 		}, []string{"status", "path", "method"}),
 		ExecutionTime: prometheus.NewHistogramVec(prometheus.HistogramOpts{

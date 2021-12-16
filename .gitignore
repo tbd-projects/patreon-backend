@@ -14,12 +14,17 @@
 # ide files
 .idea
 .vscode
-logs
+logs*
 local
 media
 logs-sessions
+logs-push
 logs-files
+logs-ngnix
 patreon-secrt
+grafana
+static
+configs
 
 cover2
 cover

@@ -45,6 +45,7 @@ func (server *AuthServer) StartGRPCServer(listenUrl string) error {
 }
 
 func (s *AuthServer) Check(ctx context.Context, sessionID *proto.SessionID) (*proto.Result, error) {
+	s.logger.Infof("AUTHSERVER - Check: call with sessionID = %v\n", sessionID.ID)
 	res, err := s.sessionManager.Check(sessionID.ID)
 	if err != nil {
 		s.logger.Errorf("AUTHSERVER\n")
@@ -52,6 +53,7 @@ func (s *AuthServer) Check(ctx context.Context, sessionID *proto.SessionID) (*pr
 			err)
 		return nil, err
 	}
+	s.logger.Infof("AUTHSERVER - Check: correctly work, res = %v\n", res)
 
 	return &proto.Result{
 		UserID:    res.UserID,
@@ -60,6 +62,7 @@ func (s *AuthServer) Check(ctx context.Context, sessionID *proto.SessionID) (*pr
 }
 
 func (s *AuthServer) Create(ctx context.Context, userID *proto.UserID) (*proto.Result, error) {
+	s.logger.Infof("AUTHSERVER - Create: call with userID = %v\n", userID.ID)
 	res, err := s.sessionManager.Create(userID.ID)
 	if err != nil {
 		s.logger.Errorf("AUTHSERVER\n")
@@ -67,12 +70,15 @@ func (s *AuthServer) Create(ctx context.Context, userID *proto.UserID) (*proto.R
 			err)
 		return nil, err
 	}
+	s.logger.Infof("AUTHSERVER - Create: correctly work, res = %v\n", res)
+
 	return &proto.Result{
 		UserID:    res.UserID,
 		SessionID: res.UniqID,
 	}, nil
 }
 func (s *AuthServer) Delete(ctx context.Context, sessionID *proto.SessionID) (*proto.Nothing, error) {
+	s.logger.Infof("AUTHSERVER - Delete: call with sessionID = %v\n", sessionID.ID)
 	err := s.sessionManager.Delete(sessionID.ID)
 	if err != nil {
 		s.logger.Errorf("AUTHSERVER\n")
@@ -80,6 +86,8 @@ func (s *AuthServer) Delete(ctx context.Context, sessionID *proto.SessionID) (*p
 			err)
 		return &proto.Nothing{Dummy: false}, err
 	}
+	s.logger.Infof("AUTHSERVER - Delete: correctly work\n")
+
 	return &proto.Nothing{
 		Dummy: true,
 	}, nil

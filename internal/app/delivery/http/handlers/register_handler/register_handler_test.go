@@ -2,8 +2,8 @@ package register_handler
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app/delivery/http/handlers"
@@ -50,17 +50,13 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_InvalidBody() {
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
-	Data := struct {
-		Login    string `json:"logine"`
-		Password string `json:"password"`
-	}{
-		Login:    "nickname",
-		Password: "password",
+	Data := http_models.ResponsePost{
+		Title: "nickname",
 	}
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(Data)
+	_, err := easyjson.MarshalToWriter(Data, &b)
 
 	assert.NoError(s.T(), err)
 
@@ -95,7 +91,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_UserAlreadyExist() {
 		Return(expId, repository_user.LoginAlreadyExist)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err := easyjson.MarshalToWriter(s.Tb.Data, &b)
 
 	assert.NoError(s.T(), err)
 
@@ -129,7 +125,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_SmallPassword() {
 		Return(expId, models_data.IncorrectEmailOrPassword)
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err := easyjson.MarshalToWriter(s.Tb.Data, &b)
 
 	assert.NoError(s.T(), err)
 
@@ -180,7 +176,7 @@ func (s *RegisterTestSuite) TestRegisterHandler_POST_CreateSuccess() {
 	}
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err := easyjson.MarshalToWriter(s.Tb.Data, &b)
 	assert.NoError(s.T(), err)
 
 	assert.NoError(s.T(), user.Encrypt())

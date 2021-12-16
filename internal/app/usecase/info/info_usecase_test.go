@@ -11,7 +11,7 @@ import (
 
 type SuiteLikeUsecase struct {
 	usecase.SuiteUsecase
-	uc    Usecase
+	uc       Usecase
 	testData *models.Info
 }
 
@@ -43,6 +43,3 @@ func (s *SuiteLikeUsecase) TestInfoUsecase_Get_Error() {
 func TestUsecaseInfo(t *testing.T) {
 	suite.Run(t, new(SuiteLikeUsecase))
 }
-
-
-

@@ -1,6 +1,6 @@
 package repository_jwt
 
-import "patreon/internal/app/csrf/models"
+import "patreon/internal/app/csrf/csrf_models"
 
 //go:generate mockgen -destination=mocks/mock_jwt_repository.go -package=mock_repository -mock_names=Repository=JwtRepository . Repository
 

@@ -18,4 +18,17 @@ type Repository interface {
 	//		app.GeneralError with Errors:
 	//			repository.DefaultErrDB
 	GetCreatorPayments(creatorID int64, pag *db_models.Pagination) ([]models.CreatorPayments, error)
+	// CheckCountPaymentsByToken Errors:
+	//		repository_payments.CountPaymentsByTokenError
+	//		app.GeneralError with Errors:
+	//			repository.DefaultErrDB
+	CheckCountPaymentsByToken(token string) error
+	// UpdateStatus Errors:
+	//		app.GeneralError with Errors:
+	//			repository.DefaultErrDB
+	UpdateStatus(token string) error
+	// GetPaymentByToken Errors:
+	//		app.GeneralError with Errors:
+	//			repository.DefaultErrDB
+	GetPaymentByToken(token string) (models.Payments, error)
 }

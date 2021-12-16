@@ -49,18 +49,18 @@ func (mr *MockSessionRepositoryMockRecorder) Del(arg0 interface{}) *gomock.Call 
 }
 
 // GetUserId mocks base method.
-func (m *MockSessionRepository) GetUserId(arg0 string) (string, error) {
+func (m *MockSessionRepository) GetUserId(arg0 string, arg1 int) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserId", arg0)
+	ret := m.ctrl.Call(m, "GetUserId", arg0, arg1)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserId indicates an expected call of GetUserId.
-func (mr *MockSessionRepositoryMockRecorder) GetUserId(arg0 interface{}) *gomock.Call {
+func (mr *MockSessionRepositoryMockRecorder) GetUserId(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserId", reflect.TypeOf((*MockSessionRepository)(nil).GetUserId), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserId", reflect.TypeOf((*MockSessionRepository)(nil).GetUserId), arg0, arg1)
 }
 
 // Set mocks base method.

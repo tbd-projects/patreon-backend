@@ -3,14 +3,13 @@ package repository_postgresql
 import (
 	"database/sql"
 	"database/sql/driver"
+	"github.com/lib/pq"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"regexp"
 	"strconv"
 	"testing"
-
-	"github.com/lib/pq"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,48 +33,252 @@ func (s *SuiteUserRepository) AfterTest(_, _ string) {
 
 func (s *SuiteUserRepository) TestUserRepository_Create() {
 	u := models.TestUser()
-	query := `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
+	runFunc := func(input ...interface{}) (res []interface{}) {
+		oldNick, _ := input[0].(*models.User)
+		err := s.repo.Create(oldNick)
+		return []interface{}{err}
+	}
 
-	u.ID = 1
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(strconv.Itoa(int(u.ID))))
+	testings := []models.TestCase{
+		{
+			Name: "Correct",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     nil,
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     nil,
+					RunType: models.TransBegin,
+				},
+				{
+					Query: createQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnRows: sqlmock.NewRows([]string{"id"}).AddRow(u.ID),
+					},
+					Args:    []driver.Value{u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage},
+					RunType: models.Query,
+				},
+				{
+					Query:   createSettingsQuery,
+					Err:     nil,
+					Args:    []driver.Value{u.ID},
+					RunType: models.Exec,
+				},
+				{
+					Err:     nil,
+					RunType: models.TransCommit,
+				},
+			},
+		},
+		{
+			Name: "ErrBegin",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NewDBError(repository.DefaultErrDB),
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     repository.DefaultErrDB,
+					RunType: models.TransBegin,
+				},
+			},
+		},
+		{
+			Name: "ErrCreate",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NewDBError(repository.DefaultErrDB),
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     nil,
+					RunType: models.TransBegin,
+				},
+				{
+					Query:   createQuery,
+					Err:     repository.DefaultErrDB,
+					Args:    []driver.Value{u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage},
+					RunType: models.Query,
+				},
+				{
+					Err:     nil,
+					RunType: models.TransRollback,
+				},
+			},
+		},
+		{
+			Name: "ErrCreateDupleLogin",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     LoginAlreadyExist,
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     nil,
+					RunType: models.TransBegin,
+				},
+				{
+					Query: createQuery,
+					Err: &pq.Error{
+						Code:       codeDuplicateVal,
+						Constraint: loginConstraint,
+					},
+					Args:    []driver.Value{u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage},
+					RunType: models.Query,
+				},
+				{
+					Err:     nil,
+					RunType: models.TransRollback,
+				},
+			},
+		},
+		{
+			Name: "ErrCreateDupleNickname",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     NicknameAlreadyExist,
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     nil,
+					RunType: models.TransBegin,
+				},
+				{
+					Query: createQuery,
+					Err: &pq.Error{
+						Code:       codeDuplicateVal,
+						Constraint: nicknameConstraint,
+					},
+					Args:    []driver.Value{u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage},
+					RunType: models.Query,
+				},
+				{
+					Err:     nil,
+					RunType: models.TransRollback,
+				},
+			},
+		},
+		{
+			Name: "ErrCreateOtherError",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				CheckError:      true,
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     nil,
+					RunType: models.TransBegin,
+				},
+				{
+					Query: createQuery,
+					Err: &pq.Error{
+						Code:       "sadasd",
+						Constraint: nicknameConstraint,
+					},
+					Args:    []driver.Value{u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage},
+					RunType: models.Query,
+				},
+				{
+					Err:     nil,
+					RunType: models.TransRollback,
+				},
+			},
+		},
+		{
+			Name: "ErrCreateSettings",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NewDBError(repository.DefaultErrDB),
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     nil,
+					RunType: models.TransBegin,
+				},
+				{
+					Query: createQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnRows: sqlmock.NewRows([]string{"id"}).AddRow(u.ID),
+					},
+					Args:    []driver.Value{u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage},
+					RunType: models.Query,
+				},
+				{
+					Query:   createSettingsQuery,
+					Err:     repository.DefaultErrDB,
+					Args:    []driver.Value{u.ID},
+					RunType: models.Exec,
+				},
+				{
+					Err:     nil,
+					RunType: models.TransRollback,
+				},
+			},
+		},
+		{
+			Name: "ErrCommit",
+			Args: []interface{}{u},
+			Expected: models.TestExpected{
+				HaveError:       true,
+				ExpectedErr:     repository.NewDBError(repository.DefaultErrDB),
+				ExpectedReturns: []interface{}{},
+			},
+			RunFunc: runFunc,
+			Queries: []models.TestQuery{
+				{
+					Err:     nil,
+					RunType: models.TransBegin,
+				},
+				{
+					Query: createQuery,
+					Err:   nil,
+					Rows: &models.TestRow{
+						ReturnRows: sqlmock.NewRows([]string{"id"}).AddRow(u.ID),
+					},
+					Args:    []driver.Value{u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage},
+					RunType: models.Query,
+				},
+				{
+					Query:   createSettingsQuery,
+					Err:     nil,
+					Args:    []driver.Value{u.ID},
+					RunType: models.Exec,
+				},
+				{
+					Err:     repository.DefaultErrDB,
+					RunType: models.TransCommit,
+				},
+			},
+		},
+	}
 
-	err := s.repo.Create(u)
-	assert.NoError(s.T(), err)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
-		WillReturnError(models.BDError)
-
-	err = s.repo.Create(u)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(models.BDError), err)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
-		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: loginConstraint})
-
-	err = s.repo.Create(u)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), LoginAlreadyExist, err)
-
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
-		WillReturnError(&pq.Error{Code: codeDuplicateVal, Constraint: nicknameConstraint})
-
-	err = s.repo.Create(u)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), NicknameAlreadyExist, err)
-
-	pqerr := &pq.Error{Code: "646543", Constraint: nicknameConstraint}
-	s.Mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs(u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).
-		WillReturnError(pqerr)
-
-	err = s.repo.Create(u)
-	assert.Error(s.T(), err)
-	assert.Equal(s.T(), repository.NewDBError(pqerr), err)
+	for _, test := range testings {
+		s.RunTestCase(test)
+	}
 }
 
 func (s *SuiteUserRepository) TestUserRepository_FindByLogin() {

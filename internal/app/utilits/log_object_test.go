@@ -12,11 +12,10 @@ import (
 )
 
 func TestLogObject(t *testing.T) {
-	defer func (t *testing.T) {
+	defer func(t *testing.T) {
 		err := recover()
 		require.Equal(t, err, nil)
-	} (t)
-
+	}(t)
 
 	log := &logrus.Logger{}
 	object := NewLogObject(log)

@@ -1,6 +1,7 @@
 package usecase_factory
 
 import (
+	"patreon/internal/app"
 	"patreon/internal/app/delivery/http/handlers"
 	mock_repository_factory "patreon/internal/app/usecase/usecase_factory/mocks"
 	"testing"
@@ -14,7 +15,6 @@ import (
 type FactorySuite struct {
 	handlers.SuiteHandler
 	mockRepositoryFactory *mock_repository_factory.MockRepositoryFactory
-	factory               *UsecaseFactory
 	fileConn              *grpc.ClientConn
 }
 
@@ -24,7 +24,7 @@ func (s *FactorySuite) SetupSuite() {
 	s.fileConn, _ = grpc.Dial("", grpc.WithInsecure())
 }
 func (s *FactorySuite) TestGetUserUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	s.mockRepositoryFactory.EXPECT().GetUserRepository()
 
 	defer func() {
@@ -35,7 +35,7 @@ func (s *FactorySuite) TestGetUserUsecaseFirstCall() {
 	factory.GetUserUsecase()
 }
 func (s *FactorySuite) TestGetUserUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	factory.userUsecase = s.MockUserUsecase
 
 	defer func() {
@@ -46,7 +46,7 @@ func (s *FactorySuite) TestGetUserUsecaseSecondCall() {
 	factory.GetUserUsecase()
 }
 func (s *FactorySuite) TestGetCreatorUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	s.mockRepositoryFactory.EXPECT().GetCreatorRepository()
 
 	defer func() {
@@ -57,7 +57,7 @@ func (s *FactorySuite) TestGetCreatorUsecaseFirstCall() {
 	factory.GetCreatorUsecase()
 }
 func (s *FactorySuite) TestGetCreatorUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	factory.creatorUsecase = s.MockCreatorUsecase
 
 	defer func() {
@@ -68,7 +68,7 @@ func (s *FactorySuite) TestGetCreatorUsecaseSecondCall() {
 	factory.GetCreatorUsecase()
 }
 func (s *FactorySuite) TestGetCsrfrUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	s.mockRepositoryFactory.EXPECT().GetCsrfRepository()
 
 	defer func() {
@@ -79,7 +79,7 @@ func (s *FactorySuite) TestGetCsrfrUsecaseFirstCall() {
 	factory.GetCsrfUsecase()
 }
 func (s *FactorySuite) TestGetCsrfUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	factory.csrfUsecase = s.MockCsrfUsecase
 
 	defer func() {
@@ -90,7 +90,7 @@ func (s *FactorySuite) TestGetCsrfUsecaseSecondCall() {
 	factory.GetCsrfUsecase()
 }
 func (s *FactorySuite) TestGetAccessUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 
 	s.mockRepositoryFactory.EXPECT().GetAccessRepository()
 
@@ -102,7 +102,7 @@ func (s *FactorySuite) TestGetAccessUsecaseFirstCall() {
 	factory.GetAccessUsecase()
 }
 func (s *FactorySuite) TestGetAccessUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 
 	factory.accessUsecase = s.MockAccessUsecase
 
@@ -114,7 +114,7 @@ func (s *FactorySuite) TestGetAccessUsecaseSecondCall() {
 	factory.GetAccessUsecase()
 }
 func (s *FactorySuite) TestGetSubscribersUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 
 	s.mockRepositoryFactory.EXPECT().GetSubscribersRepository()
 	s.mockRepositoryFactory.EXPECT().GetAwardsRepository()
@@ -128,7 +128,7 @@ func (s *FactorySuite) TestGetSubscribersUsecaseFirstCall() {
 }
 
 func (s *FactorySuite) TestGetSubscribersUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 
 	factory.subscribersUsecase = s.MockSubscribersUsecase
 
@@ -141,7 +141,7 @@ func (s *FactorySuite) TestGetSubscribersUsecaseSecondCall() {
 }
 
 func (s *FactorySuite) TestGetAwardsUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 
 	factory.awardsUsecase = nil
 	s.mockRepositoryFactory.EXPECT().GetAwardsRepository()
@@ -155,7 +155,7 @@ func (s *FactorySuite) TestGetAwardsUsecaseFirstCall() {
 }
 
 func (s *FactorySuite) TestGetAwardsUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	factory.awardsUsecase = s.MockAwardsUsecase
 
 	defer func() {
@@ -167,10 +167,11 @@ func (s *FactorySuite) TestGetAwardsUsecaseSecondCall() {
 }
 
 func (s *FactorySuite) TestGetPostsUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 
 	s.mockRepositoryFactory.EXPECT().GetPostsRepository()
 	s.mockRepositoryFactory.EXPECT().GetAttachesRepository()
+	s.mockRepositoryFactory.EXPECT().GetPusher()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -181,7 +182,7 @@ func (s *FactorySuite) TestGetPostsUsecaseFirstCall() {
 }
 
 func (s *FactorySuite) TestGetPostsUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	factory.postsUsecase = s.MockPostsUsecase
 
 	defer func() {
@@ -192,7 +193,7 @@ func (s *FactorySuite) TestGetPostsUsecaseSecondCall() {
 	factory.GetPostsUsecase()
 }
 func (s *FactorySuite) TestGetLikesUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	s.mockRepositoryFactory.EXPECT().GetLikesRepository()
 
 	defer func() {
@@ -204,7 +205,7 @@ func (s *FactorySuite) TestGetLikesUsecaseFirstCall() {
 }
 
 func (s *FactorySuite) TestGetLikesUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	factory.likesUsecase = s.MockLikeUsecase
 
 	defer func() {
@@ -215,7 +216,7 @@ func (s *FactorySuite) TestGetLikesUsecaseSecondCall() {
 	factory.GetLikesUsecase()
 }
 func (s *FactorySuite) TestGetAttachesUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	s.mockRepositoryFactory.EXPECT().GetAttachesRepository()
 
 	defer func() {
@@ -227,7 +228,7 @@ func (s *FactorySuite) TestGetAttachesUsecaseFirstCall() {
 }
 
 func (s *FactorySuite) TestGetInfoUsecaseFirstCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	s.mockRepositoryFactory.EXPECT().GetInfoRepository()
 
 	defer func() {
@@ -239,7 +240,7 @@ func (s *FactorySuite) TestGetInfoUsecaseFirstCall() {
 }
 
 func (s *FactorySuite) TestGetInfoUsecaseSecondCall() {
-	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn)
+	factory := NewUsecaseFactory(s.mockRepositoryFactory, s.fileConn, app.Payments{AccountNumber: "dorre"})
 	factory.infoUsecase = s.MockInfoUsecase
 
 	defer func() {

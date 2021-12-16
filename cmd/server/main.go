@@ -47,6 +47,9 @@ func init() {
 // @tag.name payments
 // @tag.description "Some methods for work with payments"
 
+// @tag.name comments
+// @tag.description "Some methods for work with comments"
+
 // @tag.name utilities
 // @tag.description "Some methods for front work"
 
@@ -67,7 +70,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	logger, closeResource := utils.NewLogger(config, false, "")
+	logger, closeResource := utils.NewLogger(&config.Config, false, "")
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -81,7 +84,16 @@ func main() {
 		repositoryConfig = &config.ServerRepository
 	}
 
-	db, closeResource := utils.NewPostgresConnection(repositoryConfig)
+	db, closeResource := utils.NewPostgresConnection(repositoryConfig.DataBaseUrl)
+
+	defer func(closer func() error, log *logrus.Logger) {
+		err := closer()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(closeResource, logger)
+
+	rabbit, closeResource := utils.NewRabbitSession(logger, repositoryConfig.RabbitUrl)
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -105,6 +117,7 @@ func main() {
 			AccessRedisPool:       utils.NewRedisPool(repositoryConfig.AccessRedisUrl),
 			SqlConnection:         db,
 			PathFiles:             config.MediaDir,
+			RabbitSession:         rabbit,
 		},
 		logger,
 	)

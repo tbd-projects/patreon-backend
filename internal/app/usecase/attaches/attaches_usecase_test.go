@@ -18,7 +18,6 @@ import (
 type SuiteAttachesUsecase struct {
 	usecase.SuiteUsecase
 	uc *AttachesUsecase
-
 }
 
 func (s *SuiteAttachesUsecase) SetupSuite() {
@@ -80,7 +79,7 @@ func (s *SuiteAttachesUsecase) TestCreatorUsecase_LoadImage() {
 		Times(1).
 		Return(reader, fileName, repository.DefaultErrDB)
 	_, err = s.uc.LoadImage(reader, fileName, att.PostId)
-	assert.EqualError(s.T(), err, repository.DefaultErrDB.Error())
+	assert.Error(s.T(), err)
 
 	s.MockConvector.EXPECT().
 		Convert(gomock.Any(), reader, fileName).

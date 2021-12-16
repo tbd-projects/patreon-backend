@@ -3,6 +3,7 @@ package usecase_creator
 import (
 	"bytes"
 	"context"
+	"github.com/golang/mock/gomock"
 	"io"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
@@ -25,7 +26,7 @@ type SuiteCreatorUsecase struct {
 
 func (s *SuiteCreatorUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-	s.uc = NewCreatorUsecase(s.MockCreatorRepository, s.MockFileClient)
+	s.uc = NewCreatorUsecase(s.MockCreatorRepository, s.MockFileClient, s.MockConvector)
 }
 
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_DB_Error() {
@@ -110,14 +111,19 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_Create_Success() {
 
 func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateAvatar_Success() {
 	cr := models.TestCreator()
+	name := "true"
+	out := io.Reader(bytes.NewBufferString(""))
+
+	s.MockConvector.EXPECT().
+		Convert(gomock.Any(), out, repository_files.FileName(name)).
+		Times(1).
+		Return(out, repository_files.FileName(name), nil)
 
 	s.MockCreatorRepository.EXPECT().
 		ExistsCreator(cr.ID).
 		Times(1).
 		Return(true, nil)
 
-	name := "true"
-	out := io.Reader(bytes.NewBufferString(""))
 	s.MockFileClient.EXPECT().
 		SaveFile(context.Background(), out, repository_files.FileName(name), repository_files.Image).
 		Times(1).
@@ -136,6 +142,11 @@ func (s *SuiteCreatorUsecase) TestCreatorUsecase_UpdateCover_Success() {
 	cr := models.TestCreator()
 	name := "true"
 	out := io.Reader(bytes.NewBufferString(""))
+
+	s.MockConvector.EXPECT().
+		Convert(gomock.Any(), out, repository_files.FileName(name)).
+		Times(1).
+		Return(out, repository_files.FileName(name), nil)
 
 	s.MockCreatorRepository.EXPECT().
 		ExistsCreator(cr.ID).

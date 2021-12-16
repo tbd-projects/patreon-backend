@@ -11,6 +11,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	logrus "github.com/sirupsen/logrus"
 )
 
 // PostsUsecase is a mock of Usecase interface.
@@ -37,18 +38,18 @@ func (m *PostsUsecase) EXPECT() *PostsUsecaseMockRecorder {
 }
 
 // Create mocks base method.
-func (m *PostsUsecase) Create(arg0 *models.CreatePost) (int64, error) {
+func (m *PostsUsecase) Create(arg0 *logrus.Entry, arg1 *models.CreatePost) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *PostsUsecaseMockRecorder) Create(arg0 interface{}) *gomock.Call {
+func (mr *PostsUsecaseMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*PostsUsecase)(nil).Create), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*PostsUsecase)(nil).Create), arg0, arg1)
 }
 
 // Delete mocks base method.
@@ -63,6 +64,21 @@ func (m *PostsUsecase) Delete(arg0 int64) error {
 func (mr *PostsUsecaseMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*PostsUsecase)(nil).Delete), arg0)
+}
+
+// GetAvailablePosts mocks base method.
+func (m *PostsUsecase) GetAvailablePosts(arg0 int64, arg1 *models.Pagination) ([]models.AvailablePost, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAvailablePosts", arg0, arg1)
+	ret0, _ := ret[0].([]models.AvailablePost)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAvailablePosts indicates an expected call of GetAvailablePosts.
+func (mr *PostsUsecaseMockRecorder) GetAvailablePosts(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvailablePosts", reflect.TypeOf((*PostsUsecase)(nil).GetAvailablePosts), arg0, arg1)
 }
 
 // GetCreatorId mocks base method.

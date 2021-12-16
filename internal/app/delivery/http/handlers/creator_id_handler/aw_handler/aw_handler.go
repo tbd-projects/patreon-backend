@@ -46,7 +46,7 @@ func NewAwardsHandler(log *logrus.Logger,
 // @tags awards
 // @Description get list of awards which belongs the creator
 // @Produce json
-// @Success 201 {array} http_models.ResponseAward
+// @Success 201 {object} http_models.ResponseAwards
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Router /creators/{:creator_id}/awards [GET]
@@ -74,7 +74,7 @@ func (h *AwardsHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Log(r).Debugf("get creators %v", respondAwards)
-	h.Respond(w, r, http.StatusOK, respondAwards)
+	h.Respond(w, r, http.StatusOK, http_models.ResponseAwards{Awards: respondAwards})
 }
 
 // POST Create Awards

@@ -5,8 +5,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-
 const InvalidInt = -1
+const InvalidFloat = -1.0
 
 var UnknownError = errors.New("gotten unspecified error")
 
@@ -16,5 +16,5 @@ type GeneralError struct {
 }
 
 func (e GeneralError) Error() string {
-	return fmt.Sprintf("%v: %v", e.Err, e.ExternalErr)
+	return fmt.Sprintf("%v: %s", e.Err, e.ExternalErr.Error())
 }

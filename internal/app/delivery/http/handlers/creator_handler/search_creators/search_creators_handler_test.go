@@ -13,6 +13,7 @@ func (s *SearchCreatorsTestSuite) SetupSuite() {
 	s.SuiteHandler.SetupSuite()
 	s.handler = NewCreatorHandler(s.Logger, s.MockSessionsManager, s.MockCreatorUsecase)
 }
+
 /*
 type creatorWithFieldMatcher struct{ creator *models_data.Creator }
 

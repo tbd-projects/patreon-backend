@@ -8,8 +8,8 @@ import (
 
 	"github.com/lib/pq"
 
-	"github.com/zhashkevych/go-sqlxmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -32,9 +32,9 @@ func (s *SuiteSubscribersRepository) AfterTest(_, _ string) {
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_Ok() {
 	subscriber := models.TestSubscriber()
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
-	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id, awards_id, pay_token) VALUES($1, $2, $3, $4, $5)"
 	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id, awards_id) VALUES ($1, $2, $3)"
-
+	token := "25"
 	price := int64(1)
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAwardPrice)).
 		WithArgs(subscriber.AwardID).
@@ -44,7 +44,7 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_Ok() {
 	s.Mock.ExpectBegin()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAddPayment)).
-		WithArgs(price, subscriber.CreatorID, subscriber.UserID).
+		WithArgs(price, subscriber.CreatorID, subscriber.UserID, subscriber.AwardID, token).
 		WillReturnRows(sqlmock.NewRows([]string{})).
 		RowsWillBeClosed()
 
@@ -54,23 +54,24 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_Ok() {
 		RowsWillBeClosed()
 	s.Mock.ExpectCommit()
 
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.NoError(s.T(), err)
 }
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_FirstQueryDbError() {
 	subscriber := models.TestSubscriber()
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
+	token := "25"
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAwardPrice)).
 		WithArgs(subscriber.AwardID).WillReturnError(repository.DefaultErrDB)
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_BeginDbError() {
 	subscriber := models.TestSubscriber()
-
+	token := "25"
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
 
 	price := int64(1)
@@ -80,15 +81,15 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_BeginDbErr
 		WillReturnRows(sqlmock.NewRows([]string{"price"}).AddRow(price))
 	s.Mock.ExpectBegin().WillReturnError(repository.DefaultErrDB)
 
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_SecondQueryDbError() {
 	subscriber := models.TestSubscriber()
-
+	token := "25"
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
-	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id, awards_id, pay_token) VALUES($1, $2, $3, $4, $5)"
 
 	price := int64(1)
 
@@ -100,20 +101,20 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_SecondQuer
 	s.Mock.ExpectBegin()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAddPayment)).
-		WithArgs(price, subscriber.CreatorID, subscriber.UserID).
+		WithArgs(price, subscriber.CreatorID, subscriber.UserID, subscriber.AwardID, token).
 		WillReturnError(repository.DefaultErrDB)
 
 	s.Mock.ExpectRollback()
 
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_ThirdQueryDbError() {
 	subscriber := models.TestSubscriber()
-
+	token := "25"
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
-	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id, awards_id, pay_token) VALUES($1, $2, $3, $4, $5)"
 	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id, awards_id) VALUES ($1, $2, $3)"
 
 	price := int64(1)
@@ -124,7 +125,7 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_ThirdQuery
 		RowsWillBeClosed()
 	s.Mock.ExpectBegin()
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAddPayment)).
-		WithArgs(price, subscriber.CreatorID, subscriber.UserID).
+		WithArgs(price, subscriber.CreatorID, subscriber.UserID, subscriber.AwardID, token).
 		WillReturnRows(sqlmock.NewRows([]string{})).RowsWillBeClosed()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAddSubscribe)).
@@ -132,15 +133,15 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_ThirdQuery
 		WillReturnError(repository.DefaultErrDB)
 
 	s.Mock.ExpectRollback()
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_CommitDbError() {
 	subscriber := models.TestSubscriber()
-
+	token := "25"
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
-	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id, awards_id, pay_token) VALUES($1, $2, $3, $4, $5)"
 	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id, awards_id) VALUES ($1, $2, $3)"
 
 	price := int64(1)
@@ -153,7 +154,7 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_CommitDbEr
 	s.Mock.ExpectBegin()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAddPayment)).
-		WithArgs(price, subscriber.CreatorID, subscriber.UserID).
+		WithArgs(price, subscriber.CreatorID, subscriber.UserID, subscriber.AwardID, token).
 		WillReturnRows(sqlmock.NewRows([]string{})).
 		RowsWillBeClosed()
 
@@ -163,13 +164,13 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_CommitDbEr
 		RowsWillBeClosed()
 
 	s.Mock.ExpectCommit().WillReturnError(repository.DefaultErrDB)
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_FirstQueryCloseRowDbError() {
 	subscriber := models.TestSubscriber()
-
+	token := "25"
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
 
 	price := int64(1)
@@ -179,14 +180,14 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_FirstQuery
 		WillReturnRows(sqlmock.NewRows([]string{"price"}).AddRow(price).
 			CloseError(repository.DefaultErrDB))
 
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_SecondQueryCloseRowDbError() {
 	subscriber := models.TestSubscriber()
-
+	token := "25"
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
-	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id, awards_id, pay_token) VALUES($1, $2, $3, $4, $5)"
 
 	price := int64(1)
 
@@ -198,19 +199,19 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_SecondQuer
 	s.Mock.ExpectBegin()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAddPayment)).
-		WithArgs(price, subscriber.CreatorID, subscriber.UserID).
+		WithArgs(price, subscriber.CreatorID, subscriber.UserID, subscriber.AwardID, token).
 		WillReturnRows(sqlmock.NewRows([]string{}).
 			CloseError(repository.DefaultErrDB))
 	s.Mock.ExpectRollback()
 
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_ThirdQueryCloseRowDbError() {
 	subscriber := models.TestSubscriber()
-
+	token := "25"
 	queryAwardPrice := "SELECT price FROM awards WHERE awards_id = $1"
-	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id) VALUES($1, $2, $3)"
+	queryAddPayment := "INSERT INTO payments(amount, creator_id, users_id, awards_id, pay_token) VALUES($1, $2, $3, $4, $5)"
 	queryAddSubscribe := "INSERT INTO subscribers(users_id, creator_id, awards_id) VALUES ($1, $2, $3)"
 
 	price := int64(1)
@@ -223,7 +224,7 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_ThirdQuery
 	s.Mock.ExpectBegin()
 
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryAddPayment)).
-		WithArgs(price, subscriber.CreatorID, subscriber.UserID).
+		WithArgs(price, subscriber.CreatorID, subscriber.UserID, subscriber.AwardID, token).
 		WillReturnRows(sqlmock.NewRows([]string{})).
 		RowsWillBeClosed()
 
@@ -234,7 +235,7 @@ func (s *SuiteSubscribersRepository) TestSubscribersRepository_Create_ThirdQuery
 
 	s.Mock.ExpectRollback()
 
-	err := s.repo.Create(subscriber)
+	err := s.repo.Create(subscriber, token)
 	assert.Error(s.T(), repository.NewDBError(repository.DefaultErrDB), err)
 }
 

@@ -5,6 +5,7 @@ import (
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
+	"patreon/internal/app/delivery/http/handlers"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
@@ -42,7 +43,7 @@ func NewPostsUpdateCoverHandler(log *logrus.Logger,
 // @Summary set new post cover
 // @tags posts
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param cover formData file true "cover file with ext jpeg/png"
+// @Param cover formData file true "cover file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200 "successfully upload cover"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "please upload a JPEG, JPG or PNG files", "invalid form field name for load file"
 // @Failure 404 {object} http_models.ErrResponse "post with this id not found"
@@ -64,7 +65,7 @@ func (h *PostsUpdateCoverHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
+	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
 		"cover", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)

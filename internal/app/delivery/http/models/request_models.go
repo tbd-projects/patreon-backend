@@ -1,42 +1,56 @@
 package http_models
 
 import (
-	"encoding/json"
 	"github.com/pkg/errors"
 	"image/color"
 	"patreon/internal/app/delivery/http/handlers"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/models"
-	rep "patreon/internal/app/repository"
 	models_utilits "patreon/internal/app/utilits/models"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
+//go:generate easyjson -all -disallow_unknown_fields request_models.go
+
+//easyjson:json
 type RequestCreator struct {
 	Category    string `json:"category"`
 	Description string `json:"description"`
 }
 
+//easyjson:json
 type RequestLogin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
 
+//easyjson:json
+type RequestComment struct {
+	Body      string `json:"body"`
+	AsCreator bool   `json:"as_creator,omitempty"`
+}
+
+//easyjson:json
 type RequestChangePassword struct {
 	OldPassword string `json:"old"`
 	NewPassword string `json:"new"`
 }
+
+//easyjson:json
 type RequestChangeNickname struct {
 	OldNickname string `json:"old"`
 	NewNickname string `json:"new"`
 }
+
+//easyjson:json
 type RequestRegistration struct {
 	Login    string `json:"login"`
 	Nickname string `json:"nickname"`
 	Password string `json:"password"`
 }
 
+//easyjson:json
 type Color struct {
 	R uint8 `json:"red"`
 	G uint8 `json:"green"`
@@ -53,6 +67,7 @@ func NewColor(rgba color.RGBA) Color {
 	}
 }
 
+//easyjson:json
 type RequestAwards struct {
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
@@ -60,6 +75,7 @@ type RequestAwards struct {
 	Color       Color  `json:"color,omitempty"`
 }
 
+//easyjson:json
 type RequestPosts struct {
 	Title       string `json:"title,omitempty"`
 	AwardsId    int64  `json:"awards_id,omitempty"`
@@ -67,6 +83,7 @@ type RequestPosts struct {
 	IsDraft     bool   `json:"is_draft,omitempty"`
 }
 
+//easyjson:json
 type RequestAttach struct {
 	Type   models.DataType `json:"type"`
 	Value  string          `json:"value,omitempty"`
@@ -74,38 +91,26 @@ type RequestAttach struct {
 	Status string          `json:"status,omitempty"`
 }
 
+//easyjson:json
 type RequestAttaches struct {
 	Attaches []RequestAttach `json:"attaches"`
 }
 
+//easyjson:json
 type RequestText struct {
 	Text string `json:"text"`
 }
 
-func (o *RequestPosts) UnmarshalJSON(text []byte) error {
-	type options RequestPosts
-	opts := options{
-		AwardsId: rep.NoAwards,
-	}
-
-	if err := json.Unmarshal(text, &opts); err != nil {
-		return err
-	}
-
-	*o = RequestPosts(opts)
-	return nil
-}
-
 type SubscribeRequest struct {
-	AwardName string `json:"award_name"`
+	Token string `json:"pay_token"`
 }
 
 func (req *SubscribeRequest) Validate() error {
 	err := validation.Errors{
-		"award_name": validation.Validate(req.AwardName, validation.Required, validation.Length(1, 0)),
+		"pay_token": validation.Validate(req.Token, validation.Required, validation.Length(1, 0)),
 	}.Filter()
 	if err != nil {
-		return AwardNameValidateError
+		return TokenValidateError
 	}
 	return nil
 }
@@ -122,8 +127,6 @@ func (req *RequestChangeNickname) Validate() error {
 	}
 	return nil
 }
-
-
 
 // requestAttachValidError Errors:
 //		handler_errors.IncorrectType

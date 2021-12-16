@@ -7,6 +7,7 @@ import (
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
+	"patreon/internal/app/delivery/http/handlers"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	usecase_user "patreon/internal/app/usecase/user"
@@ -41,7 +42,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger,
 // @Summary set new user avatar
 // @tags user
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param avatar formData file true "Avatar file with ext jpeg/png"
+// @Param avatar formData file true "Avatar file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200 "successfully upload avatar"
 // @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name", "please upload a JPEG, JPG or PNG files"
@@ -51,7 +52,7 @@ func NewUpdateAvatarHandler(log *logrus.Logger,
 // @Failure 418 "User are authorized"
 // @Router /user/update/avatar [PUT]
 func (h *UpdateAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
+	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
 		"avatar", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)

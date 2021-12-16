@@ -79,7 +79,7 @@ func (s *SuiteTestSesManager) TestCheckSession() {
 	userID := int64(1)
 
 	s.mockSessionRepository.EXPECT().
-		GetUserId(uniqID).
+		GetUserId(uniqID, int(ExpiredCookiesTime.Milliseconds())).
 		Return(fmt.Sprintf("%d", userID), nil).
 		Times(1)
 
@@ -90,7 +90,7 @@ func (s *SuiteTestSesManager) TestCheckSession() {
 	assert.Equal(s.T(), result.UniqID, uniqID)
 
 	s.mockSessionRepository.EXPECT().
-		GetUserId(uniqID).
+		GetUserId(uniqID, int(ExpiredCookiesTime.Milliseconds())).
 		Return("", sessions.StatusNotOK).
 		Times(1)
 

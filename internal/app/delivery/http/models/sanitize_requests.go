@@ -26,6 +26,10 @@ func (req *RequestRegistration) Sanitize(sanitizer bluemonday.Policy) {
 	req.Password = sanitizer.Sanitize(req.Password)
 }
 
+func (req *RequestComment) Sanitize(sanitizer bluemonday.Policy) {
+	req.Body = sanitizer.Sanitize(req.Body)
+}
+
 func (req *RequestAwards) Sanitize(sanitizer bluemonday.Policy) {
 	req.Name = sanitizer.Sanitize(req.Name)
 	req.Description = sanitizer.Sanitize(req.Description)
@@ -41,7 +45,7 @@ func (req *RequestText) Sanitize(sanitizer bluemonday.Policy) {
 }
 
 func (req *SubscribeRequest) Sanitize(sanitizer bluemonday.Policy) {
-	req.AwardName = sanitizer.Sanitize(req.AwardName)
+	req.Token = sanitizer.Sanitize(req.Token)
 }
 func (req *RequestChangeNickname) Sanitize(sanitizer bluemonday.Policy) {
 	req.OldNickname = sanitizer.Sanitize(req.OldNickname)
@@ -59,4 +63,3 @@ func (req *RequestAttaches) Sanitize(sanitizer bluemonday.Policy) {
 		attach.Sanitize(sanitizer)
 	}
 }
-

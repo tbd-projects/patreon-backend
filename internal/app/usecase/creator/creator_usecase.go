@@ -10,6 +10,7 @@ import (
 	repoCreator "patreon/internal/app/repository/creator"
 	"patreon/internal/microservices/files/delivery/grpc/client"
 	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	"patreon/pkg/utils"
 
 	"github.com/pkg/errors"
 )
@@ -19,12 +20,19 @@ const NoUser int64 = -2
 type CreatorUsecase struct {
 	repository     repoCreator.Repository
 	repositoryFile client.FileServiceClient
+	imageConvector utils.ImageConverter
 }
 
-func NewCreatorUsecase(repository repoCreator.Repository, repoClient client.FileServiceClient) *CreatorUsecase {
+func NewCreatorUsecase(repository repoCreator.Repository, repoClient client.FileServiceClient,
+	convector ...utils.ImageConverter) *CreatorUsecase {
+	conv := utils.ImageConverter(&utils.ConverterToWebp{})
+	if len(convector) != 0 {
+		conv = convector[0]
+	}
 	return &CreatorUsecase{
 		repository:     repository,
 		repositoryFile: repoClient,
+		imageConvector: conv,
 	}
 }
 
@@ -94,10 +102,17 @@ func (usecase *CreatorUsecase) GetCreator(id int64, userId int64) (*models.Creat
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 // 			repository.DefaultErrDB
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileName, id int64) error {
 	_, err := usecase.repository.ExistsCreator(id)
 	if err != nil {
 		return err
+	}
+
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return errors.Wrap(err, "failed convert to webp of update creator cover")
 	}
 
 	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)
@@ -117,10 +132,17 @@ func (usecase *CreatorUsecase) UpdateCover(data io.Reader, name repoFiles.FileNa
 //			repository_os.ErrorCreate
 //   		repository_os.ErrorCopyFile
 // 			repository.DefaultErrDB
+//			utils.ConvertErr
+//  		utils.UnknownExtOfFileName
 func (usecase *CreatorUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, id int64) error {
 	_, err := usecase.repository.ExistsCreator(id)
 	if err != nil {
 		return err
+	}
+
+	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+	if err != nil {
+		return errors.Wrap(err, "failed convert to webp of update creator avatar")
 	}
 
 	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)

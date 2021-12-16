@@ -47,5 +47,5 @@ type Repository interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-   	ApplyChangeAttaches(postId int64, newAttaches []models.Attach, updatedAttaches []models.Attach) ([]int64, error)
+	ApplyChangeAttaches(postId int64, newAttaches []models.Attach, updatedAttaches []models.Attach) ([]int64, error)
 }

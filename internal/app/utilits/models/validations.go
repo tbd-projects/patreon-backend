@@ -1,13 +1,16 @@
 package models_utilits
 
 import (
-	"encoding/json"
-
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/mailru/easyjson"
 )
+
+//go:generate easyjson -disallow_unknown_fields validations.go
 
 type ExtractorErrorByName func(string) error
 type MapOfValidateError map[string]error
+
+//easyjson:json
 type MapOfUnmarshalError map[string]string
 
 func RequiredIf(cond bool) validation.RuleFunc {
@@ -21,12 +24,12 @@ func RequiredIf(cond bool) validation.RuleFunc {
 
 func ParseErrorToMap(err error) (MapOfUnmarshalError, error) {
 	var mapOfErr MapOfUnmarshalError
-	encoded, bad := json.Marshal(err)
+	encoded, bad := err.(validation.Errors).MarshalJSON()
 	if bad != nil {
 		return nil, bad
 	}
 
-	bad = json.Unmarshal(encoded, &mapOfErr)
+	bad = easyjson.Unmarshal(encoded, &mapOfErr)
 	if bad != nil {
 		return nil, bad
 	}
@@ -35,7 +38,7 @@ func ParseErrorToMap(err error) (MapOfUnmarshalError, error) {
 
 func ExtractValidateError(extractor ExtractorErrorByName, mapOfErr MapOfUnmarshalError) error {
 	var knowError error = nil
-	for key, _ := range mapOfErr {
+	for key := range mapOfErr {
 		if knowError = extractor(key); knowError != nil {
 			break
 		}

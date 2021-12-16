@@ -1,7 +1,7 @@
 package utilits
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"patreon/internal/app/delivery/http/models"
 )
@@ -14,15 +14,14 @@ func (h *Responder) Error(w http.ResponseWriter, r *http.Request, code int, err 
 	h.Respond(w, r, code, http_models.ErrResponse{Err: err.Error()})
 }
 
-func (h *Responder) Respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
-	encoder := json.NewEncoder(w)
+func (h *Responder) Respond(w http.ResponseWriter, r *http.Request, code int, data easyjson.Marshaler) {
 	w.WriteHeader(code)
 	if data != nil {
-		err := encoder.Encode(data)
+		_, _, err := easyjson.MarshalToHTTPResponseWriter(data, w)
 		if err != nil {
 			h.Log(r).Error(err)
 		}
 	}
-	logUser, _ := json.Marshal(data)
+	logUser, _ := easyjson.Marshal(data)
 	h.Log(r).Info("Respond data: ", string(logUser))
 }

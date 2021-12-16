@@ -1,10 +1,12 @@
 ./media
-./logs
+./logs*
 ./patreon-secrt
 ./docs
 ./docker
 ./scripts
+./grafana
 *.out
 *.txt
 *.html
 .idea
+./static

@@ -24,31 +24,39 @@ func (server *FileServer) MakeUnused(ctx context.Context, path *proto.FilePath) 
 	return &proto.Nothing{}, nil
 }
 
-func (server *FileServer) SaveFile(ctx context.Context, file *proto.SaveArgs) (*proto.FilePath, error) {
+func (s *FileServer) SaveFile(ctx context.Context, file *proto.SaveArgs) (*proto.FilePath, error) {
+	s.logger.Infof("FILESERVER - SaveFile: call with fileName = %v, fileType = %v\n", file.Name, file.Type)
+
 	fileReader := bytes.NewReader(file.GetFile().File)
 
-	res, err := server.fileRepository.SaveFile(fileReader, repository_files.FileName(file.Name),
+	res, err := s.fileRepository.SaveFile(fileReader, repository_files.FileName(file.Name),
 		repository_files.TypeFiles(file.Type))
 
 	if err != nil {
-		server.logger.Errorf("FILESERVER\n")
-		server.logger.Errorf("can not save file with name =  %s, err = %v", file.Name,
+		s.logger.Errorf("FILESERVER\n")
+		s.logger.Errorf("can not save file with name =  %s, err = %v", file.Name,
 			err)
 		return nil, err
 	}
+	s.logger.Infof("FILESERVER - SaveFile: correctly work resPath = %v\n", res)
+
 	return &proto.FilePath{
 		Path: res,
 	}, nil
 }
 
-func (server *FileServer) LoadFile(ctx context.Context, path *proto.FilePath) (*proto.File, error) {
-	res, err := server.fileRepository.LoadFile(path.Path)
+func (s *FileServer) LoadFile(ctx context.Context, path *proto.FilePath) (*proto.File, error) {
+	s.logger.Infof("FILESERVER - LoadFile: call with path = %v\n", path.Path)
+
+	res, err := s.fileRepository.LoadFile(path.Path)
 	if err != nil {
-		server.logger.Errorf("FILESERVER\n")
-		server.logger.Errorf("can not load file with path =  %s, err = %v", path.Path, err)
+		s.logger.Errorf("FILESERVER\n")
+		s.logger.Errorf("can not load file with path = %s, err = %v", path.Path, err)
 		return nil, err
 	}
 	convertRes := grpc2.StreamToByte(res)
+
+	s.logger.Infof("FILESERVER - LoadFile: correctly work res = io.Reader \n")
 
 	return &proto.File{
 		File: convertRes,
@@ -64,19 +72,19 @@ func NewFilesGRPCServer(logger *logrus.Logger, grpcServer *grpc.Server, repo rep
 	return server
 }
 
-func (server *FileServer) StartGRPCServer(listenUrl string) error {
+func (s *FileServer) StartGRPCServer(listenUrl string) error {
 	lis, err := net.Listen("tcp", listenUrl)
-	server.logger.Infof("my listen url %s \n", listenUrl)
+	s.logger.Infof("my listen url %s \n", listenUrl)
 
 	if err != nil {
-		server.logger.Errorf("FILESERVER\n")
-		server.logger.Errorf("can not listen url: %s err :%v\n", listenUrl, err)
+		s.logger.Errorf("FILESERVER\n")
+		s.logger.Errorf("can not listen url: %s err :%v\n", listenUrl, err)
 		return err
 	}
-	proto.RegisterFileServiceServer(server.grpcServer, server)
+	proto.RegisterFileServiceServer(s.grpcServer, s)
 
 	go prometheus_monitoring.CreateNewMonitoringRouter("files-service")
 
-	server.logger.Info("Start file service\n")
-	return server.grpcServer.Serve(lis)
+	s.logger.Info("Start file service\n")
+	return s.grpcServer.Serve(lis)
 }

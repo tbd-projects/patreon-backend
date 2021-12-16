@@ -1,7 +1,7 @@
 package usecase_csrf
 
 import (
-	"patreon/internal/app/csrf/models"
+	"patreon/internal/app/csrf/csrf_models"
 	repository_token "patreon/internal/app/csrf/repository/jwt"
 	"time"
 )

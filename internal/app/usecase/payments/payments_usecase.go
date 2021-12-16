@@ -41,3 +41,23 @@ func (usecase *PaymentsUsecase) GetCreatorPayments(creatorID int64, pag *db_mode
 
 	return creatorPayments, nil
 }
+
+// UpdateStatus Errors:
+//		repository_payments.NotEqualPaymentAmount
+//		repository_payments.CountPaymentsByTokenError
+//		app.GeneralError with Errors:
+//			repository.DefaultErrDB
+func (usecase *PaymentsUsecase) UpdateStatus(token string, recieveAmount float64) error {
+	err := usecase.repository.CheckCountPaymentsByToken(token)
+	if err != nil {
+		return err
+	}
+	res, err := usecase.repository.GetPaymentByToken(token)
+	if err != nil {
+		return err
+	}
+	if res.Amount != recieveAmount {
+		return repository_payments.NotEqualPaymentAmount
+	}
+	return usecase.repository.UpdateStatus(token)
+}

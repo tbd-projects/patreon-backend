@@ -1,0 +1,232 @@
+version: "3"
+
+volumes:
+  dbbackups:
+  rabbit-data:
+  postgis-data:
+  session-redis:
+  access-redis:
+services:
+  ngnix-proxy:
+    image: nginx-ssl
+    expose:
+      - "80"
+      - "443"
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - main
+      - push-service
+      - grafana
+      - prometheus
+      - rabbit
+    networks:
+      - default
+    volumes:
+      - ./logs-ngnix:/var/log/nginx
+      - ./patreon-secrt/ngnix/letsencrypt:/etc/letsencrypt
+      - ./static:/static
+      - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
+    environment:
+      WAIT_HOSTS: main:8080, push-service:5003
+    restart: always
+  sessions-service:
+    image: session-service
+    expose:
+      - "5001"
+      - "9091"
+    ports:
+      - "5001:5001"
+    networks:
+      - default
+    depends_on:
+      - session-redis
+    volumes:
+      - ./logs-sessions:/app/logs
+      - ${CONFIG_DIR}:/app/configs
+  push-service:
+    image: push-service
+    expose:
+      - "5003"
+      - "9091"
+    ports:
+      - "5003:5003"
+    networks:
+      - default
+    depends_on:
+      - session-redis
+      - sessions-service
+      - rabbit
+    volumes:
+      - ./logs-push:/app/logs
+      - ${CONFIG_DIR}:/app/configs
+    environment:
+      WAIT_HOSTS: rabbit:5672
+  files-service:
+    image: files-service
+    expose:
+      - "5002"
+      - "9091"
+    ports:
+      - "5002:5002"
+    networks:
+      - default
+    volumes:
+      - ./logs-files:/app/logs
+      - ./media:/app/media
+      - ${CONFIG_DIR}:/app/configs
+  main:
+    image: patreon
+    expose:
+      - "8080"
+    networks:
+      - default
+    volumes:
+      - ./logs:/app/logs
+      - ./media:/app/media
+      - ./patreon-secrt:/app/patreon-secrt
+      - ${CONFIG_DIR}:/app/configs
+    depends_on:
+      - session-redis
+      - access-redis
+      - patreon-bd
+      - sessions-service
+      - push-service
+      - files-service
+      - rabbit
+    environment:
+      WAIT_HOSTS: patreon-bd:5432, rabbit:5672
+  session-redis:
+    image: "redis:alpine"
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    volumes:
+      - session-redis:/data
+    restart: always
+  access-redis:
+    image: "redis:alpine"
+    command: --port 6380
+    expose:
+      - "6380"
+    ports:
+      - "6380:6380"
+    volumes:
+      - access-redis:/data
+    restart: always
+  patreon-bd:
+    image: pg-14
+    expose:
+      - "5432"
+    command: "postgres -c shared_preload_libraries='pg_stat_statements'"
+    volumes:
+      - postgis-data:/var/lib/postgresql
+    environment:
+      - POSTGRES_PASSWORD=${PG_BD_PASSWORD}
+      - POSTGRES_USER=${PG_BD_USERNAME}
+      - POSTGRES_DB=${PG_BD_NAME}
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    healthcheck:
+      test: "exit 0"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+  prometheus:
+    image: prom/prometheus
+    expose:
+      - "9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.external-url=${PROMETHEUS_URL}'
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: 'node_exporter'
+    user: root
+    privileged: true
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - "9100"
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+      - node_exporter
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SERVER_ROOT_URL=${GRAFANA_URL}
+    expose:
+      - "3000"
+  postgres_exporter:
+    container_name: exporter_container
+    image: prometheuscommunity/postgres-exporter
+    environment:
+#      DATA_SOURCE_URI: "patreon-bd:5432"
+      DATA_SOURCE_USER: "${PG_BD_USERNAME}"
+      DATA_SOURCE_PASS: "${PG_BD_PASSWORD}"
+      DATA_SOURCE_URI: "patreon-bd:5432/${PG_BD_NAME}?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    volumes:
+      - ./scripts/queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    ports:
+      - "9187:9187"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 500M
+    networks:
+      - default
+    depends_on:
+      - patreon-bd
+  rabbit:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "${PG_BD_USERNAME}"
+      RABBITMQ_DEFAULT_PASS: "${PG_BD_PASSWORD}"
+    volumes:
+      - rabbit-data:/var/lib/rabbitmq/
+      - ./logs-rabbit:/var/log/rabbitmq
+    networks:
+      - default
+#  pgadmin:
+#    container_name: pgadmin_container
+#    image: dpage/pgadmin4:5.7
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: "m@mail.ru"
+#      PGADMIN_DEFAULT_PASSWORD: "pyaterochka"
+#      PGADMIN_CONFIG_SERVER_MODE: "False"
+#    volumes:
+#      - ./pgadmin:/var/lib/pgadmin
+#    ports:
+#      - "5050:80"
+#    restart: unless-stopped
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '0.5'
+#          memory: 1G
+#    networks:
+#      - postgres
+networks:
+  default:
+    driver: bridge

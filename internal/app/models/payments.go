@@ -7,6 +7,7 @@ type Payments struct {
 	Date      time.Time `json:"date"`
 	CreatorID int64     `json:"creator_id,omitempty"`
 	UserID    int64     `json:"user_id,omitempty"`
+	Status    bool      `json:"status"`
 }
 
 type UserPayments struct {

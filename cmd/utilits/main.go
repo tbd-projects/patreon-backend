@@ -2,36 +2,25 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"log"
-	"net/url"
 	"os"
+	"patreon/cmd/utilits/models"
 	"patreon/internal/app"
 	"strings"
 	"time"
 )
 
-type Log struct {
-	Level    string    `json:"level,omitempty"`
-	Method   string    `json:"method,omitempty"`
-	Msg      string    `json:"msg,omitempty"`
-	Adr      string    `json:"remote_addr,omitempty"`
-	Url      url.URL   `json:"urls,omitempty"`
-	Time     time.Time `json:"time,omitempty"`
-	WorkTime int64     `json:"work_time,omitempty"`
-	ReqID    string    `json:"req_id,omitempty"`
-}
-
 var (
-	configPath    string
-	logLevel      string
-	needFile      string
-	allFiles      bool
-	SearchURL     string
+	configPath          string
+	logLevel            string
+	needFile            string
+	allFiles            bool
+	SearchURL           string
 	useServerRepository bool
 )
 
@@ -61,8 +50,8 @@ func printLogFromFile(logger *logrus.Logger, fileName string, fileTime time.Time
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		bytes := scanner.Bytes()
-		lg := Log{}
-		err = json.Unmarshal(bytes, &lg)
+		lg := &models.Log{}
+		err = easyjson.Unmarshal(bytes, lg)
 		if err != nil {
 			return err
 		}

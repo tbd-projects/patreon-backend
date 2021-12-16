@@ -7,7 +7,7 @@ import "patreon/internal/microservices/auth/sessions/models"
 
 type SessionRepository interface {
 	Set(session *models.Session) error
-	GetUserId(key string) (string, error)
+	GetUserId(key string, updExpiration int) (string, error)
 	Del(session *models.Session) error
 }
 

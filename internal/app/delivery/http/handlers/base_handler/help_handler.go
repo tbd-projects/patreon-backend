@@ -1,8 +1,8 @@
 package base_handler
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/mailru/easyjson"
 	"io"
 	"net/http"
 	"patreon/internal/app"
@@ -23,11 +23,11 @@ import (
 )
 
 const (
-	EmptyQuery      = -2
-	MAX_UPLOAD_SIZE = 1024 * 1024 * 4 // 4MB
+	EmptyQuery = -2
 )
 
 type Sanitizable interface {
+	easyjson.Unmarshaler
 	Sanitize(sanitizer bluemonday.Policy)
 }
 
@@ -176,7 +176,7 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 	r.Body = http.MaxBytesReader(w, r.Body, maxSize)
 	if err := r.ParseMultipartForm(maxSize); err != nil {
 		return nil, "", http.StatusBadRequest, app.GeneralError{
-			ExternalErr: err,
+			ExternalErr: errors.Wrapf(err, "max size is : %d ", maxSize),
 			Err:         handler_errors.FileSizeError,
 		}
 	}
@@ -213,7 +213,7 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 	return f, repFiles.FileName(fHeader.Filename), 0, nil
 }
 
-func (h *HelpHandlers) GetRequestBody(w http.ResponseWriter, r *http.Request,
+func (h *HelpHandlers) GetRequestBody(_ http.ResponseWriter, r *http.Request,
 	reqStruct Sanitizable, sanitizer bluemonday.Policy) error {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -222,9 +222,7 @@ func (h *HelpHandlers) GetRequestBody(w http.ResponseWriter, r *http.Request,
 		}
 	}(r.Body)
 
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(reqStruct); err != nil {
+	if err := easyjson.UnmarshalFromReader(r.Body, reqStruct); err != nil {
 		return err
 	}
 	reqStruct.Sanitize(sanitizer)

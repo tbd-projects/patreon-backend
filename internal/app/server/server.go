@@ -122,6 +122,7 @@ func (s *Server) Start(config *app.Config) error {
 	}
 
 	router := mux.NewRouter()
+
 	router.Handle("/metrics", promhttp.Handler())
 	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("main")
 	err := monitoringHandler.SetupMonitoring()
@@ -143,7 +144,7 @@ func (s *Server) Start(config *app.Config) error {
 
 	repositoryFactory := repository_factory.NewRepositoryFactory(s.logger, s.connections)
 
-	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory, s.connections.FilesGrpcConnection)
+	usecaseFactory := usecase_factory.NewUsecaseFactory(repositoryFactory, s.connections.FilesGrpcConnection, s.config.PaymentsInfo)
 	factory := handler_factory.NewFactory(s.logger, usecaseFactory, s.connections.SessionGrpcConnection)
 	hs := factory.GetHandleUrls()
 
@@ -168,7 +169,7 @@ func (s *Server) Start(config *app.Config) error {
 			}
 		}(s.logger, serverHTTP)
 
-		s.logger.Info("Start https server")
+		s.logger.Info("Start https server - 4_1")
 		return serverHTTPS.ListenAndServeTLS("", "")
 	} else {
 		s.logger.Info("start no production http server")

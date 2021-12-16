@@ -22,13 +22,12 @@ import (
 
 type SuiteUserUsecase struct {
 	usecase.SuiteUsecase
-	uc    Usecase
-	tUser *models.User
+	uc Usecase
 }
 
 func (s *SuiteUserUsecase) SetupSuite() {
 	s.SuiteUsecase.SetupSuite()
-	s.uc = NewUserUsecase(s.MockUserRepository, s.MockFileClient)
+	s.uc = NewUserUsecase(s.MockUserRepository, s.MockFileClient, s.MockConvector)
 }
 
 func (s *SuiteUserUsecase) TestCreatorUsecase_GetProfile_DB_Error() {
@@ -465,6 +464,10 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ErrorSave() {
 	u := s.Tb.Data.(*models.User)
 	out := bytes.NewBufferString("")
 	name := repository_files.FileName("asd")
+	s.MockConvector.EXPECT().
+		Convert(gomock.Any(), out, name).
+		Times(1).
+		Return(out, name, nil)
 	s.MockFileClient.EXPECT().
 		SaveFile(context.Background(), out, name, repository_files.Image).
 		Times(s.Tb.ExpectedMockTimes).
@@ -484,6 +487,10 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ok() {
 	u := s.Tb.Data.(*models.User)
 	out := bytes.NewBufferString("")
 	name := repository_files.FileName("asd")
+	s.MockConvector.EXPECT().
+		Convert(gomock.Any(), out, name).
+		Times(1).
+		Return(out, name, nil)
 	s.MockFileClient.EXPECT().
 		SaveFile(context.Background(), out, name, repository_files.Image).
 		Times(s.Tb.ExpectedMockTimes).
@@ -503,11 +510,33 @@ func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ErrorAdd() {
 	u := s.Tb.Data.(*models.User)
 	out := bytes.NewBufferString("")
 	name := repository_files.FileName("asd")
+	s.MockConvector.EXPECT().
+		Convert(gomock.Any(), out, name).
+		Times(1).
+		Return(out, name, nil)
 	s.MockFileClient.EXPECT().
 		SaveFile(context.Background(), out, name, repository_files.Image).
 		Times(s.Tb.ExpectedMockTimes).
 		Return("ASd", nil)
 	s.MockUserRepository.EXPECT().UpdateAvatar(u.ID, app.LoadFileUrl+"ASd").Times(1).Return(repository.DefaultErrDB)
+	err := s.uc.UpdateAvatar(out, name, u.ID)
+	assert.Error(s.T(), err)
+}
+
+func (s *SuiteUserUsecase) TestCreatorUsecase_UpdateAvatar_ErrorConvert() {
+	s.Tb = usecase.TestTable{
+		Name:              "Invalid password - short",
+		Data:              models.TestUser(),
+		ExpectedMockTimes: 1,
+		ExpectedError:     models.IncorrectEmailOrPassword,
+	}
+	u := s.Tb.Data.(*models.User)
+	out := bytes.NewBufferString("")
+	name := repository_files.FileName("asd")
+	s.MockConvector.EXPECT().
+		Convert(gomock.Any(), out, name).
+		Times(1).
+		Return(out, name, repository.DefaultErrDB)
 	err := s.uc.UpdateAvatar(out, name, u.ID)
 	assert.Error(s.T(), err)
 }

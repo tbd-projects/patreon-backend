@@ -2,8 +2,8 @@ package creator_handler
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/mailru/easyjson"
 	"net/http"
 	"net/http/httptest"
 	"patreon/internal/app"
@@ -36,11 +36,10 @@ func (s *CreatorTestSuite) SetupSuite() {
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {
 	s.Tb = handlers.TestTable{
 		Name:              "No url params",
-		Data:              int64(-1),
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusInternalServerError,
 	}
-
+	tmp := int64(-1)
 	reqBody := http_models.RequestCreator{
 		Description: "description",
 		Category:    "category",
@@ -48,15 +47,14 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(reqBody)
-
+	_, err := easyjson.MarshalToWriter(reqBody, &b)
 	require.NoError(s.T(), err)
 
 	reader, _ := http.NewRequest(http.MethodPost, "/creators", &b)
 
 	s.MockUserUsecase.
 		EXPECT().
-		GetProfile(s.Tb.Data.(int64)).
+		GetProfile(tmp).
 		Times(s.Tb.ExpectedMockTimes)
 	s.handler.POST(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
@@ -64,21 +62,22 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_No_Params() {
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Invalid_Body() {
 	s.Tb = handlers.TestTable{
 		Name:              "Invalid request body",
-		Data:              int64(1),
+		Data:              http_models.RequestComment{Body: "dore"},
 		ExpectedMockTimes: 0,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
+	tmp := int64(1)
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
+	_, err := easyjson.MarshalToWriter(s.Tb.Data, &b)
 
 	require.NoError(s.T(), err)
-	ctx := context.WithValue(context.Background(), "user_id", s.Tb.Data.(int64))
+	ctx := context.WithValue(context.Background(), "user_id", tmp)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/creators", &b)
 	s.MockUserUsecase.
 		EXPECT().
-		GetProfile(s.Tb.Data.(int64)).
+		GetProfile(tmp).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
 	s.handler.POST(recorder, reader)
@@ -87,10 +86,11 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Invalid_Body() {
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 	s.Tb = handlers.TestTable{
 		Name:              "Invalid request body",
-		Data:              int64(1),
+		Data:              http_models.RequestCreator{},
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusInternalServerError,
 	}
+	tmp := int64(1)
 	reqBody := http_models.RequestCreator{
 		Description: "description",
 		Category:    "category",
@@ -98,14 +98,14 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(reqBody)
+	_, err := easyjson.MarshalToWriter(reqBody, &b)
 
 	require.NoError(s.T(), err)
-	ctx := context.WithValue(context.Background(), "user_id", s.Tb.Data.(int64))
+	ctx := context.WithValue(context.Background(), "user_id", tmp)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/creators", &b)
 	s.MockUserUsecase.
 		EXPECT().
-		GetProfile(s.Tb.Data.(int64)).
+		GetProfile(tmp).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(nil, &app.GeneralError{Err: repository.DefaultErrDB})
 	s.handler.POST(recorder, reader)
@@ -115,10 +115,11 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_DB_Error() {
 func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Create_Err() {
 	s.Tb = handlers.TestTable{
 		Name:              "CreateError in create usecase",
-		Data:              int64(1),
+		Data:              http_models.RequestCreator{},
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusUnprocessableEntity,
 	}
+	tmp := int64(1)
 	reqBody := http_models.RequestCreator{
 		Description: "description",
 		Category:    "category",
@@ -126,14 +127,14 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Create_Err() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(reqBody)
+	_, err := easyjson.MarshalToWriter(reqBody, &b)
 
 	require.NoError(s.T(), err)
-	ctx := context.WithValue(context.Background(), "user_id", s.Tb.Data.(int64))
+	ctx := context.WithValue(context.Background(), "user_id", tmp)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/creators", &b)
 	s.MockUserUsecase.
 		EXPECT().
-		GetProfile(s.Tb.Data.(int64)).
+		GetProfile(tmp).
 		Times(s.Tb.ExpectedMockTimes).
 		Return(nil, models_data.IncorrectCreatorCategory)
 	s.handler.POST(recorder, reader)
@@ -147,7 +148,6 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Correct() {
 	user.Nickname = "nickname"
 	s.Tb = handlers.TestTable{
 		Name:              "Correct creator create",
-		Data:              userId,
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusCreated,
 	}
@@ -164,10 +164,10 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Correct() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(reqBody)
+	_, err := easyjson.MarshalToWriter(reqBody, &b)
 
 	require.NoError(s.T(), err)
-	ctx := context.WithValue(context.Background(), "user_id", s.Tb.Data.(int64))
+	ctx := context.WithValue(context.Background(), "user_id", user.ID)
 	reader, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/creators", &b)
 	s.MockUserUsecase.
 		EXPECT().
@@ -180,9 +180,8 @@ func (s *CreatorTestSuite) TestCreatorIdHandler_POST_Correct() {
 		Times(s.Tb.ExpectedMockTimes).
 		Return(creator.ID, nil)
 	s.handler.POST(recorder, reader)
-	decoder := json.NewDecoder(recorder.Body)
 	var res http_models.IdResponse
-	err = decoder.Decode(&res)
+	err = easyjson.UnmarshalFromReader(recorder.Body, &res)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
 	assert.Equal(s.T(), http_models.IdResponse{ID: userId}, res)
@@ -213,7 +212,7 @@ func (s *CreatorTestSuite) TestCreatorHandler_GET_Correct() {
 	userID := int64(1)
 	s.Tb = handlers.TestTable{
 		Name:              "correct",
-		Data:              &models_data.Creator{ID: userID, Avatar: "some", Nickname: "done"},
+		Data:              &http_models.ResponseCreator{Creator: models_data.Creator{ID: userID, Avatar: "some", Nickname: "done"}},
 		ExpectedMockTimes: 1,
 		ExpectedCode:      http.StatusOK,
 	}
@@ -221,25 +220,22 @@ func (s *CreatorTestSuite) TestCreatorHandler_GET_Correct() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
 
-	require.NoError(s.T(), err)
 	reader, _ := http.NewRequest(http.MethodGet, "/creators", &b)
 
 	s.MockCreatorUsecase.
 		EXPECT().
 		GetCreators().
 		Times(s.Tb.ExpectedMockTimes).
-		Return([]models_data.Creator{*s.Tb.Data.(*models_data.Creator)}, nil)
+		Return([]models_data.Creator{s.Tb.Data.(*http_models.ResponseCreator).Creator}, nil)
 	s.handler.ServeHTTP(recorder, reader)
 	assert.Equal(s.T(), s.Tb.ExpectedCode, recorder.Code)
-	req := &[]http_models.ResponseCreator{}
-	decoder := json.NewDecoder(recorder.Body)
-	err = decoder.Decode(req)
+	req := &http_models.ResponseCreators{}
+	err := easyjson.UnmarshalFromReader(recorder.Body, req)
 	require.NoError(s.T(), err)
 
-	assert.Equal(s.T(), req, &[]http_models.ResponseCreator{
-		http_models.ToResponseCreator(*s.Tb.Data.(*models_data.Creator))})
+	assert.Equal(s.T(), req, &http_models.ResponseCreators{Creators: []http_models.ResponseCreator{
+		http_models.ToResponseCreator(s.Tb.Data.(*http_models.ResponseCreator).Creator)}})
 }
 
 func (s *CreatorTestSuite) TestCreatorHandler_GET_EmptyCreators() {
@@ -253,9 +249,6 @@ func (s *CreatorTestSuite) TestCreatorHandler_GET_EmptyCreators() {
 	recorder := httptest.NewRecorder()
 
 	b := bytes.Buffer{}
-	err := json.NewEncoder(&b).Encode(s.Tb.Data)
-
-	require.NoError(s.T(), err)
 	reader, _ := http.NewRequest(http.MethodGet, "/creators", &b)
 
 	s.MockCreatorUsecase.

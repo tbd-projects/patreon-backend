@@ -9,15 +9,20 @@ import (
 
 /// NOT FOUND
 var (
+	PayTokenNotFound         = errors.New("pay token not found")
+	CreatorNotFound          = errors.New("creator not found")
 	UserNotFound             = errors.New("user not found")
 	UserWithNicknameNotFound = errors.New("user with this nickname not found")
 	AwardNotFound            = errors.New("award with this id not found")
 	PostNotFound             = errors.New("post with not found")
 	AttachNotFound           = errors.New("attach with this id not found")
 	LikeNotFound             = errors.New("like with this id not found")
+	CommentNotFound          = errors.New("comment with this id not found")
 	PaymentsNotFound         = errors.New("this user have not payment")
+	CreatorPaymentsNotFound  = errors.New("creator payments not found")
 )
 
+/// File parse error
 var (
 	IncorrectType = errors.New(
 		fmt.Sprintf("Not allow type, allowed type is: %s, %s, %s, %s, %s",
@@ -34,6 +39,7 @@ var (
 	InvalidDescription       = errors.New("invalid creator description")
 	IncorrectAwardsId        = errors.New("this awards id not know")
 	IncorrectPostId          = errors.New("this post id not know")
+	IncorrectUserId          = errors.New("this user id not know")
 	IncorrectCreatorId       = errors.New("this creator id not know")
 	EmptyTitle               = errors.New("empty title")
 	EmptyName                = errors.New("empty name in request")
@@ -53,7 +59,13 @@ var (
 	UserAlreadyExist         = errors.New("user already exist")
 	NicknameAlreadyExist     = errors.New("nickname already exist")
 	CreatorAlreadyExist      = errors.New("creator already exist")
+	CommentAlreadyExist      = errors.New("comment already exist")
 	BDError                  = errors.New("can not do bd operation")
+)
+
+// AccessError
+var (
+	NotAllowAddComment = errors.New("this user can not add comment as creator")
 )
 
 // Session Error
@@ -64,17 +76,19 @@ var (
 
 // Request Error
 var (
-	InvalidBody          = errors.New("invalid body in request")
-	InvalidParameters    = errors.New("invalid parameters")
-	UserNotHaveAward     = errors.New("this user not have award for this post")
-	InvalidQueries       = errors.New("invalid parameters in query")
-	FileSizeError        = errors.New("size of file very big")
-	InvalidFormFieldName = errors.New("invalid form field name for load file")
-	InvalidExt           = errors.New("please upload: ")
-	UserAlreadySubscribe = errors.New("this user already have subscribe on creator")
-	SubscribesNotFound   = errors.New("subscribes on the creator not found")
-	InvalidUserNickname  = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
+	NotEqualPaymentAmount = errors.New("payment amount from request not equal amount from database")
+	InvalidBody           = errors.New("invalid body in request")
+	InvalidParameters     = errors.New("invalid parameters")
+	UserNotHaveAward      = errors.New("this user not have award for this post")
+	InvalidQueries        = errors.New("invalid parameters in query")
+	FileSizeError         = errors.New("size of file very big")
+	InvalidFormFieldName  = errors.New("invalid form field name for load file")
+	InvalidExt            = errors.New("please upload: ")
+	UserAlreadySubscribe  = errors.New("this user already have subscribe on creator")
+	SubscribesNotFound    = errors.New("subscribes on the creator not found")
+	InvalidUserNickname   = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
 		models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH))
+	InvalidUserPayToken = errors.New("this user was not given this token")
 )
 
 var InternalError = errors.New("server error")

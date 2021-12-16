@@ -2,10 +2,10 @@ package repository_postgresql
 
 import (
 	"database/sql"
-	"github.com/zhashkevych/go-sqlxmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/zhashkevych/go-sqlxmock"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
 	"regexp"
@@ -111,8 +111,8 @@ func (s *SuiteInfoRepository) TestInfoRepositoryGet_TypeDbError() {
 	s.Mock.ExpectQuery(regexp.QuoteMeta(queryTypeDataGet)).
 		WithArgs().
 		WillReturnError(repository.DefaultErrDB)
-		_, err := s.repo.Get()
-		assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
+	_, err := s.repo.Get()
+	assert.Error(s.T(), err, repository.NewDBError(repository.DefaultErrDB))
 }
 
 func TestInfoRepository(t *testing.T) {

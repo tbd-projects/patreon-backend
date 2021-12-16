@@ -1,15 +1,19 @@
 package usecase_factory
 
 import (
+	"patreon/internal/app"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
 	useAccess "patreon/internal/app/usecase/access"
 	useAttaches "patreon/internal/app/usecase/attaches"
 	useAwards "patreon/internal/app/usecase/awards"
+	useComments "patreon/internal/app/usecase/comments"
 	useCreator "patreon/internal/app/usecase/creator"
 	useInfo "patreon/internal/app/usecase/info"
 	useLikes "patreon/internal/app/usecase/likes"
+	usePayToken "patreon/internal/app/usecase/pay_token"
 	usePayments "patreon/internal/app/usecase/payments"
 	usePosts "patreon/internal/app/usecase/posts"
+	useStats "patreon/internal/app/usecase/statistics"
 	useSubscr "patreon/internal/app/usecase/subscribers"
 	useUser "patreon/internal/app/usecase/user"
 	"patreon/internal/microservices/files/delivery/grpc/client"
@@ -18,13 +22,13 @@ import (
 )
 
 type UsecaseFactory struct {
+	paymentsConfig     app.Payments
 	repositoryFactory  RepositoryFactory
 	userUsecase        useUser.Usecase
 	creatorUsecase     useCreator.Usecase
 	csrfUsecase        usecase_csrf.Usecase
 	accessUsecase      useAccess.Usecase
 	subscribersUsecase useSubscr.Usecase
-	awardsUsercase     useAwards.Usecase
 	awardsUsecase      useAwards.Usecase
 	postsUsecase       usePosts.Usecase
 	attachesUsecase    useAttaches.Usecase
@@ -32,13 +36,17 @@ type UsecaseFactory struct {
 	likesUsecase       useLikes.Usecase
 	paymentsUsecase    usePayments.Usecase
 	fileClient         client.FileServiceClient
+	statsUsecase       useStats.Usecase
+	commentsUsecase    useComments.Usecase
+	payTokenUsecase    usePayToken.Usecase
 }
 
-func NewUsecaseFactory(repositoryFactory RepositoryFactory, fileConn *grpc.ClientConn) *UsecaseFactory {
+func NewUsecaseFactory(repositoryFactory RepositoryFactory, fileConn *grpc.ClientConn, paymentsConf app.Payments) *UsecaseFactory {
 	fileClient := client.NewFileServiceClient(fileConn)
 	return &UsecaseFactory{
 		repositoryFactory: repositoryFactory,
 		fileClient:        fileClient,
+		paymentsConfig:    paymentsConf,
 	}
 }
 
@@ -88,7 +96,7 @@ func (f *UsecaseFactory) GetAwardsUsecase() useAwards.Usecase {
 func (f *UsecaseFactory) GetPostsUsecase() usePosts.Usecase {
 	if f.postsUsecase == nil {
 		f.postsUsecase = usePosts.NewPostsUsecase(f.repositoryFactory.GetPostsRepository(),
-			f.repositoryFactory.GetAttachesRepository(), f.fileClient)
+			f.repositoryFactory.GetAttachesRepository(), f.fileClient, f.repositoryFactory.GetPusher())
 	}
 	return f.postsUsecase
 }
@@ -120,4 +128,23 @@ func (f *UsecaseFactory) GetInfoUsecase() useInfo.Usecase {
 		f.infoUsecase = useInfo.NewInfoUsecase(f.repositoryFactory.GetInfoRepository())
 	}
 	return f.infoUsecase
+}
+func (f *UsecaseFactory) GetStatsUsecase() useStats.Usecase {
+	if f.statsUsecase == nil {
+		f.statsUsecase = useStats.NewStatisticsUsecase(f.repositoryFactory.GetStatsRepository())
+	}
+	return f.statsUsecase
+}
+
+func (f *UsecaseFactory) GetCommentsUsecase() useComments.Usecase {
+	if f.commentsUsecase == nil {
+		f.commentsUsecase = useComments.NewCommentsUsecase(f.repositoryFactory.GetCommentsRepository(), f.repositoryFactory.GetPusher())
+	}
+	return f.commentsUsecase
+}
+func (f *UsecaseFactory) GetPayTokenUsecase() usePayToken.Usecase {
+	if f.payTokenUsecase == nil {
+		f.payTokenUsecase = usePayToken.NewPayTokenUsecase(f.repositoryFactory.GetPayTokenRepository(), f.paymentsConfig.AccountNumber)
+	}
+	return f.payTokenUsecase
 }

@@ -2,7 +2,7 @@ package utilits
 
 import (
 	"bytes"
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -31,8 +31,7 @@ func TestResponder(t *testing.T) {
 	responder.Error(recorder, reader, http.StatusOK, tmpError)
 	assert.Equal(t, http.StatusOK, recorder.Code)
 	req := &http_models.ErrResponse{}
-	decoder := json.NewDecoder(recorder.Body)
-	err = decoder.Decode(req)
+	err = easyjson.UnmarshalFromReader(recorder.Body, req)
 	require.NoError(t, err)
 	assert.Equal(t, req.Err, tmpError.Error())
 }

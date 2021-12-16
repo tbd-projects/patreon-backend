@@ -24,9 +24,9 @@ func NewSubscribersUsecase(repoSubscr repository_subscribers.Repository,
 // Subscribe Errors:
 //		SubscriptionAlreadyExists
 //		repository_postgresql.AwardNameNotFound
-//		app.generalError with Errors
+//		app.GeneralError with Errors
 //			repository.DefaultErrDB
-func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber) error {
+func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber, token string) error {
 	exist, err := uc.repoSubscr.Get(subscriber)
 	if err != nil {
 		return errors.Wrapf(err, "METHOD: subscribers_usecase.Subscribe; "+
@@ -36,7 +36,7 @@ func (uc *SubscribersUsecase) Subscribe(subscriber *models.Subscriber) error {
 		return SubscriptionAlreadyExists
 	}
 
-	return uc.repoSubscr.Create(subscriber)
+	return uc.repoSubscr.Create(subscriber, token)
 }
 
 // GetCreators Errors:
@@ -55,7 +55,7 @@ func (uc *SubscribersUsecase) GetSubscribers(creatorID int64) ([]models.User, er
 
 // UnSubscribe Errors:
 //		SubscriptionsNotFound
-//		app.generalError with Errors
+//		app.GeneralError with Errors
 //			repository.DefaultErrDB
 func (uc *SubscribersUsecase) UnSubscribe(subscriber *models.Subscriber) error {
 	exists, err := uc.repoSubscr.Get(subscriber)

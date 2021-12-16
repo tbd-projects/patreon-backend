@@ -5,6 +5,7 @@ import (
 	csrf_middleware "patreon/internal/app/csrf/middleware"
 	repository_jwt "patreon/internal/app/csrf/repository/jwt"
 	usecase_csrf "patreon/internal/app/csrf/usecase"
+	"patreon/internal/app/delivery/http/handlers"
 	bh "patreon/internal/app/delivery/http/handlers/base_handler"
 	"patreon/internal/app/delivery/http/handlers/handler_errors"
 	"patreon/internal/app/middleware"
@@ -49,7 +50,7 @@ func NewAttachUploadImageHandler(
 // @Summary update image to post
 // @tags attaches
 // @Accept  image/png, image/jpeg, image/jpg
-// @Param image formData file true "image file with ext jpeg/png"
+// @Param image formData file true "image file with ext jpeg/png, image/jpeg, image/jpg, max size 4 MB"
 // @Success 200
 // @Failure 400 {object} http_models.ErrResponse "size of file very big", "invalid form field name for load file", "please upload a some types"
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
@@ -73,7 +74,7 @@ func (h *AttachUploadImageHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, filename, code, err := h.GerFilesFromRequest(w, r, bh.MAX_UPLOAD_SIZE,
+	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
 		"image", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)

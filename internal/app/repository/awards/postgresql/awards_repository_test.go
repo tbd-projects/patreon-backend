@@ -3,9 +3,9 @@ package repository_postgresql
 import (
 	"database/sql"
 	"database/sql/driver"
-	"github.com/zhashkevych/go-sqlxmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/zhashkevych/go-sqlxmock"
 	"patreon/internal/app"
 	"patreon/internal/app/models"
 	"patreon/internal/app/repository"
@@ -443,7 +443,7 @@ func (s *SuiteAwardsRepository) TestAwardsRepository_GetAwards() {
 		WillReturnRows(sqlmock.NewRows([]string{"awards_id", "name", "description", "price",
 			"color", "cover", "child_id"}).
 			AddRow(awards.ID, awards.Name, awards.Description, awards.Price,
-					awards.Cover, awards.Cover, awards.ChildAward))
+				awards.Cover, awards.Cover, awards.ChildAward))
 	_, err = s.repo.GetAwards(creatorId)
 	assert.Error(s.T(), err)
 
