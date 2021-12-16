@@ -107,7 +107,7 @@ func (c *Client) SenderProcesses() {
 }
 
 type SendHub struct {
-	Clients    map[int64]*Client
+	Clients    map[int64][]*Client
 	broadcast  chan *message
 	register   chan *Client
 	unregister chan *Client
@@ -124,7 +124,7 @@ func NewHub() *SendHub {
 		broadcast:  make(chan *message),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		Clients:    make(map[int64]*Client),
+		Clients:    make(map[int64][]*Client),
 		stopHub:    make(chan bool),
 	}
 }
@@ -146,23 +146,41 @@ func (h *SendHub) StopHub() {
 }
 
 func (h *SendHub) unregisterAll() {
-	for key, client := range h.Clients {
-		close(client.send)
-		client.CloseClient()
-		delete(h.Clients, key)
+	for key, clients := range h.Clients {
+		for _, client := range clients {
+			close(client.send)
+			client.CloseClient()
+			delete(h.Clients, key)
+		}
 	}
 }
 
 func (h *SendHub) sendMessage(msg *message) {
 	for _, id := range msg.users {
-		if client, ok := h.Clients[id]; ok {
-			select {
-			case client.send <- msg.message:
-				break
-			default:
-				delete(h.Clients, client.clientId)
+		if clients, ok := h.Clients[id]; ok {
+			for _, client := range clients {
+				select {
+				case client.send <- msg.message:
+					break
+				default:
+					delete(h.Clients, client.clientId)
+					close(client.send)
+				}
+			}
+		}
+	}
+}
+
+func (h *SendHub) unregisterClient(client *Client) {
+	if _, ok := h.Clients[client.clientId]; ok {
+		for indx, storedClient := range h.Clients[client.clientId] {
+			if storedClient == client {
+				h.Clients[client.clientId] = append(h.Clients[client.clientId][:indx], h.Clients[client.clientId][indx+1:]...)
 				close(client.send)
 			}
+		}
+		if len(h.Clients[client.clientId]) == 0 {
+			delete(h.Clients, client.clientId)
 		}
 	}
 }
@@ -172,15 +190,16 @@ func (h *SendHub) Run() {
 		select {
 		case client, ok := <-h.register:
 			if ok {
-				h.Clients[client.clientId] = client
+				if _, ok = h.Clients[client.clientId]; ok {
+					h.Clients[client.clientId] = append(h.Clients[client.clientId], client)
+				} else {
+					h.Clients[client.clientId] = []*Client{client}
+				}
 			}
 			break
 		case client, ok := <-h.unregister:
 			if ok {
-				if _, ok = h.Clients[client.clientId]; ok {
-					delete(h.Clients, client.clientId)
-					close(client.send)
-				}
+				h.unregisterClient(client)
 			}
 			break
 		case msg, ok := <-h.broadcast:

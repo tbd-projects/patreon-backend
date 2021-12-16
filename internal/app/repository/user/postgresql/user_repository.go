@@ -26,6 +26,9 @@ const (
 
 	findByNicknameQuery = `SELECT users_id, login, nickname, users.avatar, encrypted_password, cp.creator_id IS NOT NULL
 	from users LEFT JOIN creator_profile AS cp ON (users.users_id = cp.creator_id) where nickname=$1`
+
+	createQuery = `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
+	createSettingsQuery = `INSERT INTO user_settings (user_id, get_sub, get_post, get_comment) VALUES ($1, true, true, true)`
 )
 
 type UserRepository struct {
@@ -44,14 +47,28 @@ func NewUserRepository(st *sqlx.DB) *UserRepository {
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *UserRepository) Create(u *models.User) error {
-	query := `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
 
-	if err := repo.store.QueryRow(query, u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).Scan(&u.ID); err != nil {
+	tx, err := repo.store.Beginx()
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if err = tx.QueryRow(createQuery, u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).Scan(&u.ID); err != nil {
+		_ = tx.Rollback()
 		if _, ok := err.(*pq.Error); ok {
 			return parsePQError(err.(*pq.Error))
 		}
 		return repository.NewDBError(err)
 	}
+	if _, err = tx.Exec(createSettingsQuery, u.ID); err != nil {
+		_ = tx.Rollback()
+		return repository.NewDBError(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return repository.NewDBError(err)
+	}
+
 	return nil
 }
 

@@ -31,18 +31,16 @@ func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClien
 	return h
 }
 
-// GET Push Creator
-// @Summary create creator
-// @Description create creator with id from path, and respond created creator
-// @Param creator body http_models.RequestCreator true "Request body for creators"
+// GET create websocket with push
+// @Summary create websocket with push
+// @Description create websocket with send push about new comment or post, or subscriber
 // @Produce json
-// @tags creators
-// @Success 201 {object} http_models.IdResponse
-// @Failure 409 {object} http_models.ErrResponse "creator already exist"
-// @Failure 404 {object} http_models.ErrResponse "user with this id not found"
-// @Failure 500 {object} http_models.ErrResponse "can not do bd operation", "server error"
-// @Failure 422 {object} http_models.ErrResponse "invalid creator nickname", "invalid creator category-description", "invalid creator category", "invalid body in request"
-// @Failure 403 {object} http_models.ErrResponse "csrf token is invalid, get new token"
+// @tags utilities
+// @Success 200 {object} utils.PushResponse Type can be "Comment", "Post", "Subscriber"
+// @Success 200 {object} push_models.PostPush
+// @Success 200 {object} push_models.CommentPush
+// @Success 200 {object} push_models.SubPush
+// @Failure 500 "server error"
 // @Failure 401 "user are not authorized"
 // @Router /user/push [GET]
 func (h *PushHandler) GET(w http.ResponseWriter, r *http.Request) {
