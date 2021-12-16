@@ -61,8 +61,8 @@ func main() {
 	logger.Info("Push-service was start")
 	server := push_server.New(config, app.ExpectedConnections{
 		SessionGrpcConnection: sessionConn,
-		RabbitSession: rabbit,
-		SqlConnection: db,
+		RabbitSession:         rabbit,
+		SqlConnection:         db,
 	}, logger)
 	if err = server.Start(); err != nil {
 		logger.Fatalln(err)

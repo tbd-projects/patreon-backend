@@ -15,13 +15,12 @@ import (
 	"time"
 )
 
-
 var (
-	configPath    string
-	logLevel      string
-	needFile      string
-	allFiles      bool
-	SearchURL     string
+	configPath          string
+	logLevel            string
+	needFile            string
+	allFiles            bool
+	SearchURL           string
 	useServerRepository bool
 )
 
