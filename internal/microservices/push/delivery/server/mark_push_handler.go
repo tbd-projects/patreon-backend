@@ -34,7 +34,7 @@ func NewMarkPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerC
 // @Description mark push as viewed
 // @Produce json
 // @tags user
-// @Success 200 {object} utils.PushResponse Type can be "Comment", "Post", "Payment"
+// @Success 200
 // @Failure 500 {object} http_models.ErrResponse "can not do bd operation"
 // @Failure 400 {object} http_models.ErrResponse "invalid parameters"
 // @Failure 404 {object} http_models.ErrResponse "content not modify"
