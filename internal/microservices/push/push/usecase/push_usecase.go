@@ -71,44 +71,55 @@ func (usecase *PushUsecase) PrepareCommentPush(info *push.CommentInfo) ([]int64,
 	}
 
 	if allow {
+		result.CreatorId = creatroId
 		return []int64{creatroId}, result, err
 	}
 	return []int64{}, result, err
 }
 
-// PrepareSubPush with Errors:
+// PreparePaymentsPush with Errors:
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PushUsecase) PrepareSubPush(info *push.SubInfo) ([]int64, *push_models.SubPush, error) {
-	result := &push_models.SubPush{
-		UserId:   info.UserId,
-		AwardsId: info.AwardsId,
-	}
+func (usecase *PushUsecase) PreparePaymentsPush(info *push.PaymentApply) ([]int64, *push_models.PaymentApplyPush, error) {
+	result := &push_models.PaymentApplyPush{}
 
-	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(info.UserId)
+	payment, err := usecase.repository.GetAwardsInfoAndCreatorIdAndUserIdFromPayments(info.Token)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	result.UserAvatar = nickname
-	result.UserAvatar = avatar
+	result.AwardsId = payment.AwardsId
+	result.AwardsName = payment.AwardsName
 
-	name, price, err := usecase.repository.GetAwardsNameAndPrice(info.AwardsId)
+	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(result.CreatorId)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	result.AwardsName = name
-	result.AwardsPrice = price
+	result.CreatorNickname = nickname
+	result.CreatorAvatar = avatar
+	return []int64{payment.UserId}, result, err
+}
 
-	allow, err := usecase.repository.CheckCreatorForGetCommentPush(info.CreatorId)
-	if err != nil {
-		return nil, nil, err
-	}
+// AddPushInfo Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *PushUsecase) AddPushInfo(userId []int64, pushType string, push interface{}) error {
+	return usecase.repository.AddPushInfo(userId, pushType, push)
+}
 
-	if allow {
-		return []int64{info.CreatorId}, result, err
-	}
-	return []int64{}, result, err
+// GetPushInfo Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *PushUsecase) GetPushInfo(userId int64) ([]repository.Push, error) {
+	return usecase.repository.GetPushInfo(userId)
+}
+
+// MarkViewed Errors:
+//		repository.NotModify
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (usecase *PushUsecase) MarkViewed(pushId int64, userId int64) error {
+	return usecase.repository.MarkViewed(pushId, userId)
 }

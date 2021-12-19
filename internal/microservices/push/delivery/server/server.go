@@ -3,17 +3,14 @@ package push_server
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"google.golang.org/grpc/connectivity"
 	"net/http"
 	"patreon/internal/microservices/auth/delivery/grpc/client"
 	"patreon/internal/microservices/push"
-	push_models "patreon/internal/microservices/push/push"
 	"patreon/internal/microservices/push/push/repository"
 	"patreon/internal/microservices/push/push/usecase"
 	"patreon/internal/microservices/push/utils"
 	prometheus_monitoring "patreon/pkg/monitoring/prometheus-monitoring"
-	"time"
-
-	"google.golang.org/grpc/connectivity"
 
 	"patreon/internal/app/middleware"
 
@@ -110,37 +107,14 @@ func (s *Server) Start() error {
 	defer processingPush.Stop()
 	go processingPush.RunProcessPost()
 	go processingPush.RunProcessComment()
-	go processingPush.RunProcessSub()
+	go processingPush.RunProcessPayment()
 
-	done := make(chan bool)
-	go func() {
-		ticker := time.NewTicker(25 * time.Second)
+	h2 := NewPushesHandler(s.logger, sManager, pushUsecase)
+	h2.Connect(routerApi.Path("/user/pushes"))
 
-		for {
-			select {
-			case <-done:
-				return
-			case <-ticker.C:
-				keys := make([]int64, len(h.hub.Clients))
-				i := 0
-				for k := range h.hub.Clients {
-					keys[i] = k
-					i++
-				}
-				h.hub.SendMessage(keys, &utils.PushResponse{Type: push.PostPush, Push: &push_models.PostPush{
-					PostId:          1,
-					PostTitle:       "Привет",
-					CreatorId:       2,
-					CreatorNickname: "Человек",
-					CreatorAvatar:   "tude",
-				}})
-			}
-		}
-	}()
+	h3 := NewMarkPushHandler(s.logger, sManager, pushUsecase)
+	h3.Connect(routerApi.Path("/user/push/{push_id:[0-9]+}"))
 
-	defer func() {
-		done <- true
-	}()
 	s.logger.Info("start no production http server")
 	return http.ListenAndServe(s.config.BindHttpAddr, routerCors)
 }

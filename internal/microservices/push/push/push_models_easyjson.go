@@ -17,112 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush(in *jlexer.Lexer, out *SubPush) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "awards_id":
-			out.AwardsId = int64(in.Int64())
-		case "user_id":
-			out.UserId = int64(in.Int64())
-		case "awards_name":
-			out.AwardsName = string(in.String())
-		case "awards_price":
-			out.AwardsPrice = int64(in.Int64())
-		case "user_nickname":
-			out.UserNickname = string(in.String())
-		case "user_avatar":
-			out.UserAvatar = string(in.String())
-		default:
-			in.AddError(&jlexer.LexerError{
-				Offset: in.GetPos(),
-				Reason: "unknown field",
-				Data:   key,
-			})
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush(out *jwriter.Writer, in SubPush) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"awards_id\":"
-		out.RawString(prefix[1:])
-		out.Int64(int64(in.AwardsId))
-	}
-	{
-		const prefix string = ",\"user_id\":"
-		out.RawString(prefix)
-		out.Int64(int64(in.UserId))
-	}
-	{
-		const prefix string = ",\"awards_name\":"
-		out.RawString(prefix)
-		out.String(string(in.AwardsName))
-	}
-	{
-		const prefix string = ",\"awards_price\":"
-		out.RawString(prefix)
-		out.Int64(int64(in.AwardsPrice))
-	}
-	{
-		const prefix string = ",\"user_nickname\":"
-		out.RawString(prefix)
-		out.String(string(in.UserNickname))
-	}
-	{
-		const prefix string = ",\"user_avatar\":"
-		out.RawString(prefix)
-		out.String(string(in.UserAvatar))
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v SubPush) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v SubPush) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *SubPush) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *SubPush) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush(l, v)
-}
-func easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush1(in *jlexer.Lexer, out *PostPush) {
+func easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush(in *jlexer.Lexer, out *PostPush) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -165,7 +60,7 @@ func easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush1(in *jlexer.Lexe
 		in.Consumed()
 	}
 }
-func easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush1(out *jwriter.Writer, in PostPush) {
+func easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush(out *jwriter.Writer, in PostPush) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -200,24 +95,122 @@ func easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush1(out *jwriter.Wr
 // MarshalJSON supports json.Marshaler interface
 func (v PostPush) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush1(&w, v)
+	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v PostPush) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush1(w, v)
+	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *PostPush) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *PostPush) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush(l, v)
+}
+func easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush1(in *jlexer.Lexer, out *PaymentApplyPush) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "creator_id":
+			out.CreatorId = int64(in.Int64())
+		case "creator_nickname":
+			out.CreatorNickname = string(in.String())
+		case "creator_avatar":
+			out.CreatorAvatar = string(in.String())
+		case "awards_id":
+			out.AwardsId = int64(in.Int64())
+		case "awards_name":
+			out.AwardsName = string(in.String())
+		default:
+			in.AddError(&jlexer.LexerError{
+				Offset: in.GetPos(),
+				Reason: "unknown field",
+				Data:   key,
+			})
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush1(out *jwriter.Writer, in PaymentApplyPush) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"creator_id\":"
+		out.RawString(prefix[1:])
+		out.Int64(int64(in.CreatorId))
+	}
+	{
+		const prefix string = ",\"creator_nickname\":"
+		out.RawString(prefix)
+		out.String(string(in.CreatorNickname))
+	}
+	{
+		const prefix string = ",\"creator_avatar\":"
+		out.RawString(prefix)
+		out.String(string(in.CreatorAvatar))
+	}
+	{
+		const prefix string = ",\"awards_id\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.AwardsId))
+	}
+	{
+		const prefix string = ",\"awards_name\":"
+		out.RawString(prefix)
+		out.String(string(in.AwardsName))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v PaymentApplyPush) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v PaymentApplyPush) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *PaymentApplyPush) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *PostPush) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *PaymentApplyPush) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush1(l, v)
 }
 func easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush2(in *jlexer.Lexer, out *CommentPush) {
@@ -239,6 +232,8 @@ func easyjson7aa4b9ffDecodePatreonInternalMicroservicesPushPush2(in *jlexer.Lexe
 			continue
 		}
 		switch key {
+		case "creator_id":
+			out.CreatorId = int64(in.Int64())
 		case "comment_id":
 			out.CommentId = int64(in.Int64())
 		case "post_id":
@@ -270,8 +265,13 @@ func easyjson7aa4b9ffEncodePatreonInternalMicroservicesPushPush2(out *jwriter.Wr
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"comment_id\":"
+		const prefix string = ",\"creator_id\":"
 		out.RawString(prefix[1:])
+		out.Int64(int64(in.CreatorId))
+	}
+	{
+		const prefix string = ",\"comment_id\":"
+		out.RawString(prefix)
 		out.Int64(int64(in.CommentId))
 	}
 	{

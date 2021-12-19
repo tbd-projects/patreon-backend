@@ -44,7 +44,7 @@ type Usecase interface {
 	//		app.GeneralError with Errors:
 	//			app.UnknownError
 	//			repository.DefaultErrDB
-	Update(post *models.UpdatePost) error
+	Update(log *logrus.Entry, post *models.UpdatePost) error
 
 	// Create Errors:
 	//		models.InvalidAwardsId

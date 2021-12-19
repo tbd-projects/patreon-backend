@@ -50,7 +50,7 @@ func (s *SuitePushRepository) TestPushRepository_GetAwardsNameAndPrice() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: GetAwardsNameAndPriceQuery,
+					Query: getAwardsNameAndPriceQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"name", "price"}).
@@ -72,7 +72,7 @@ func (s *SuitePushRepository) TestPushRepository_GetAwardsNameAndPrice() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetAwardsNameAndPriceQuery,
+					Query:   getAwardsNameAndPriceQuery,
 					Err:     repository.DefaultErrDB,
 					RunType: models.Query,
 					Args:    []driver.Value{price},
@@ -90,7 +90,7 @@ func (s *SuitePushRepository) TestPushRepository_GetAwardsNameAndPrice() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetAwardsNameAndPriceQuery,
+					Query:   getAwardsNameAndPriceQuery,
 					Err:     sql.ErrNoRows,
 					RunType: models.Query,
 					Args:    []driver.Value{price},
@@ -124,7 +124,7 @@ func (s *SuitePushRepository) TestPushRepository_GetCreatorPostAndTitle() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: GetCreatorPostAndTitleQuery,
+					Query: getCreatorPostAndTitleQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"name", "price"}).
@@ -146,7 +146,7 @@ func (s *SuitePushRepository) TestPushRepository_GetCreatorPostAndTitle() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetCreatorPostAndTitleQuery,
+					Query:   getCreatorPostAndTitleQuery,
 					Err:     repository.DefaultErrDB,
 					RunType: models.Query,
 					Args:    []driver.Value{creatorId},
@@ -164,7 +164,7 @@ func (s *SuitePushRepository) TestPushRepository_GetCreatorPostAndTitle() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetCreatorPostAndTitleQuery,
+					Query:   getCreatorPostAndTitleQuery,
 					Err:     sql.ErrNoRows,
 					RunType: models.Query,
 					Args:    []driver.Value{creatorId},
@@ -197,7 +197,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetCommentPush()
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: CheckCreatorForGetCommentPushQuery,
+					Query: checkCreatorForGetCommentPushQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"get"}).
@@ -219,7 +219,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetCommentPush()
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: CheckCreatorForGetCommentPushQuery,
+					Query: checkCreatorForGetCommentPushQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"get"}).
@@ -241,7 +241,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetCommentPush()
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   CheckCreatorForGetCommentPushQuery,
+					Query:   checkCreatorForGetCommentPushQuery,
 					Err:     repository.DefaultErrDB,
 					RunType: models.Query,
 					Args:    []driver.Value{creatorId},
@@ -259,7 +259,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetCommentPush()
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   CheckCreatorForGetCommentPushQuery,
+					Query:   checkCreatorForGetCommentPushQuery,
 					Err:     sql.ErrNoRows,
 					RunType: models.Query,
 					Args:    []driver.Value{creatorId},
@@ -292,7 +292,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetSubPush() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: CheckCreatorForGetSubPushQuery,
+					Query: checkCreatorForGetSubPushQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"get"}).
@@ -314,7 +314,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetSubPush() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: CheckCreatorForGetSubPushQuery,
+					Query: checkCreatorForGetSubPushQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"get"}).
@@ -336,7 +336,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetSubPush() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   CheckCreatorForGetSubPushQuery,
+					Query:   checkCreatorForGetSubPushQuery,
 					Err:     repository.DefaultErrDB,
 					RunType: models.Query,
 					Args:    []driver.Value{creatorId},
@@ -354,7 +354,7 @@ func (s *SuitePushRepository) TestPushRepository_CheckCreatorForGetSubPush() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   CheckCreatorForGetSubPushQuery,
+					Query:   checkCreatorForGetSubPushQuery,
 					Err:     sql.ErrNoRows,
 					RunType: models.Query,
 					Args:    []driver.Value{creatorId},
@@ -387,7 +387,7 @@ func (s *SuitePushRepository) TestPushRepository_GetSubUserForPushPost() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: GetSubUserForPushPostQuery,
+					Query: getSubUserForPushPostQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"user"}).
@@ -409,7 +409,7 @@ func (s *SuitePushRepository) TestPushRepository_GetSubUserForPushPost() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetSubUserForPushPostQuery,
+					Query:   getSubUserForPushPostQuery,
 					Err:     repository.DefaultErrDB,
 					RunType: models.Query,
 					Args:    []driver.Value{id},
@@ -427,7 +427,7 @@ func (s *SuitePushRepository) TestPushRepository_GetSubUserForPushPost() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: GetSubUserForPushPostQuery,
+					Query: getSubUserForPushPostQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"user"}).
@@ -449,7 +449,7 @@ func (s *SuitePushRepository) TestPushRepository_GetSubUserForPushPost() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: GetSubUserForPushPostQuery,
+					Query: getSubUserForPushPostQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"user"}).
@@ -492,7 +492,7 @@ func (s *SuitePushRepository) TestPushRepository_GetUserNameAndAvatar() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: GetUserNameAndAvatarQuery,
+					Query: getUserNameAndAvatarQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"name", "price"}).
@@ -514,7 +514,7 @@ func (s *SuitePushRepository) TestPushRepository_GetUserNameAndAvatar() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetUserNameAndAvatarQuery,
+					Query:   getUserNameAndAvatarQuery,
 					Err:     repository.DefaultErrDB,
 					RunType: models.Query,
 					Args:    []driver.Value{id},
@@ -532,7 +532,7 @@ func (s *SuitePushRepository) TestPushRepository_GetUserNameAndAvatar() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetUserNameAndAvatarQuery,
+					Query:   getUserNameAndAvatarQuery,
 					Err:     sql.ErrNoRows,
 					RunType: models.Query,
 					Args:    []driver.Value{id},
@@ -567,7 +567,7 @@ func (s *SuitePushRepository) TestPushRepository_GetCreatorNameAndAvatar() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query: GetCreatorNameAndAvatarQuery,
+					Query: getCreatorNameAndAvatarQuery,
 					Err:   nil,
 					Rows: &models.TestRow{
 						ReturnRows: sqlmock.NewRows([]string{"name", "price"}).
@@ -589,7 +589,7 @@ func (s *SuitePushRepository) TestPushRepository_GetCreatorNameAndAvatar() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetCreatorNameAndAvatarQuery,
+					Query:   getCreatorNameAndAvatarQuery,
 					Err:     repository.DefaultErrDB,
 					RunType: models.Query,
 					Args:    []driver.Value{id},
@@ -607,7 +607,7 @@ func (s *SuitePushRepository) TestPushRepository_GetCreatorNameAndAvatar() {
 			RunFunc: runFunc,
 			Queries: []models.TestQuery{
 				{
-					Query:   GetCreatorNameAndAvatarQuery,
+					Query:   getCreatorNameAndAvatarQuery,
 					Err:     sql.ErrNoRows,
 					RunType: models.Query,
 					Args:    []driver.Value{id},

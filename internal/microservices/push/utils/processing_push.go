@@ -36,6 +36,13 @@ func (pp *ProcessingPush) Stop() {
 	pp.stop <- true
 }
 
+func (pp *ProcessingPush) saveHistory(userIds []int64, pushType string, ph interface{}) {
+	err := pp.usecase.AddPushInfo(userIds, pushType, ph)
+	if err != nil {
+		pp.logger.Errorf("some error when try add push to history with type %s", pushType)
+	}
+}
+
 func (pp *ProcessingPush) initMsg(routerKey string) (<-chan amqp.Delivery, error) {
 	ch := pp.session.GetChannel()
 
@@ -90,13 +97,13 @@ func (pp *ProcessingPush) RunProcessComment() {
 	pp.processCommentMsg(msg)
 }
 
-func (pp *ProcessingPush) RunProcessSub() {
-	msg, err := pp.initMsg(push.NewSubPush)
+func (pp *ProcessingPush) RunProcessPayment() {
+	msg, err := pp.initMsg(push.PaymentPush)
 	if err != nil {
 		pp.logger.Errorf("error init sub query from msg with err: %s", err)
 		return
 	}
-	pp.processSubMsg(msg)
+	pp.processPayment(msg)
 }
 
 func (pp *ProcessingPush) processPostMsg(msg <-chan amqp.Delivery) {
@@ -122,6 +129,7 @@ func (pp *ProcessingPush) processPostMsg(msg <-chan amqp.Delivery) {
 			continue
 		}
 		pp.logger.Infof("Was send message about new post %v", pushMsg.Body)
+		pp.saveHistory(users, push.PostPush, sendPush)
 		pp.sendMsg.SendMessage(users, PushResponse{Type: push.PostPush, Push: sendPush})
 	}
 }
@@ -148,11 +156,12 @@ func (pp *ProcessingPush) processCommentMsg(msg <-chan amqp.Delivery) {
 			continue
 		}
 		pp.logger.Infof("Was send message about new comment %v", pushMsg.Body)
+		pp.saveHistory(users, push.CommentPush, sendPush)
 		pp.sendMsg.SendMessage(users, PushResponse{Type: push.CommentPush, Push: sendPush})
 	}
 }
 
-func (pp *ProcessingPush) processSubMsg(msg <-chan amqp.Delivery) {
+func (pp *ProcessingPush) processPayment(msg <-chan amqp.Delivery) {
 	for {
 		var pushMsg amqp.Delivery
 		select {
@@ -162,19 +171,20 @@ func (pp *ProcessingPush) processSubMsg(msg <-chan amqp.Delivery) {
 			break
 		}
 
-		subscriber := &push.SubInfo{}
+		payment := &push.PaymentApply{}
 		reader := bytes.NewBuffer(pushMsg.Body)
-		if err := easyjson.UnmarshalFromReader(reader, subscriber); err != nil {
+		if err := easyjson.UnmarshalFromReader(reader, payment); err != nil {
 			pp.logger.Errorf("error decode info post from msg with err: %s", err)
 			continue
 		}
 
-		users, sendPush, err := pp.usecase.PrepareSubPush(subscriber)
+		users, sendPush, err := pp.usecase.PreparePaymentsPush(payment)
 		if err != nil {
 			pp.logger.Errorf("error prepare info sub with err: %s", err)
 			continue
 		}
 		pp.logger.Infof("Was send message about new subscriber %v", pushMsg.Body)
-		pp.sendMsg.SendMessage(users, PushResponse{Type: push.NewSubPush, Push: sendPush})
+		pp.saveHistory(users, push.PaymentPush, sendPush)
+		pp.sendMsg.SendMessage(users, PushResponse{Type: push.PaymentPush, Push: sendPush})
 	}
 }

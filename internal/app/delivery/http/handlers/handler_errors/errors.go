@@ -92,3 +92,4 @@ var (
 )
 
 var InternalError = errors.New("server error")
+var NoModify = errors.New("content not modify")

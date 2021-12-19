@@ -1,18 +1,22 @@
 package payments
 
 import (
+	"github.com/sirupsen/logrus"
 	"patreon/internal/app/models"
 	db_models "patreon/internal/app/models"
 	repository_payments "patreon/internal/app/repository/payments"
+	push_client "patreon/internal/microservices/push/delivery/client"
 )
 
 type PaymentsUsecase struct {
 	repository repository_payments.Repository
+	pusher     push_client.Pusher
 }
 
-func NewPaymentsUsecase(repo repository_payments.Repository) *PaymentsUsecase {
+func NewPaymentsUsecase(repo repository_payments.Repository, pusher push_client.Pusher) *PaymentsUsecase {
 	return &PaymentsUsecase{
 		repository: repo,
+		pusher:     pusher,
 	}
 }
 
@@ -47,7 +51,7 @@ func (usecase *PaymentsUsecase) GetCreatorPayments(creatorID int64, pag *db_mode
 //		repository_payments.CountPaymentsByTokenError
 //		app.GeneralError with Errors:
 //			repository.DefaultErrDB
-func (usecase *PaymentsUsecase) UpdateStatus(token string, recieveAmount float64) error {
+func (usecase *PaymentsUsecase) UpdateStatus(log *logrus.Entry, token string, recieveAmount float64) error {
 	err := usecase.repository.CheckCountPaymentsByToken(token)
 	if err != nil {
 		return err
@@ -59,5 +63,11 @@ func (usecase *PaymentsUsecase) UpdateStatus(token string, recieveAmount float64
 	if res.Amount != recieveAmount {
 		return repository_payments.NotEqualPaymentAmount
 	}
+
+	errPush := usecase.pusher.ApplyPayments(token)
+	if errPush != nil {
+		log.Errorf("Try push new post, and got err %s", errPush)
+	}
+
 	return usecase.repository.UpdateStatus(token)
 }

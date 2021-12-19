@@ -1,6 +1,7 @@
 package payments
 
 import (
+	"github.com/sirupsen/logrus"
 	"patreon/internal/app/models"
 	db_models "patreon/internal/app/models"
 )
@@ -27,5 +28,5 @@ type Usecase interface {
 	//		repository_payments.CountPaymentsByTokenError
 	//		app.GeneralError with Errors:
 	//			repository.DefaultErrDB
-	UpdateStatus(token string, receiveAmount float64) error
+	UpdateStatus(log *logrus.Entry, token string, receiveAmount float64) error
 }

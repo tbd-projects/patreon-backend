@@ -141,15 +141,15 @@ func (mr *PostsUsecaseMockRecorder) LoadCover(arg0, arg1, arg2 interface{}) *gom
 }
 
 // Update mocks base method.
-func (m *PostsUsecase) Update(arg0 *models.UpdatePost) error {
+func (m *PostsUsecase) Update(arg0 *logrus.Entry, arg1 *models.UpdatePost) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0)
+	ret := m.ctrl.Call(m, "Update", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *PostsUsecaseMockRecorder) Update(arg0 interface{}) *gomock.Call {
+func (mr *PostsUsecaseMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*PostsUsecase)(nil).Update), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*PostsUsecase)(nil).Update), arg0, arg1)
 }
