@@ -76,7 +76,7 @@ func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = h.postsUsecase.Update(&models_db.UpdatePost{ID: postId, Title: req.Title,
+	if err = h.postsUsecase.Update(h.Log(r), &models_db.UpdatePost{ID: postId, Title: req.Title,
 		Description: req.Description, Awards: req.AwardsId, IsDraft: req.IsDraft}); err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)
 		return
