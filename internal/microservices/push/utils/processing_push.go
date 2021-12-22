@@ -180,7 +180,7 @@ func (pp *ProcessingPush) processPayment(msg <-chan amqp.Delivery) {
 
 		users, sendPush, err := pp.usecase.PreparePaymentsPush(payment)
 		if err != nil {
-			pp.logger.Errorf("error prepare info sub with err: %s", err)
+			pp.logger.Errorf("error prepare info sub with err: %s %v", err, payment)
 			continue
 		}
 		pp.logger.Infof("Was send message about new subscriber %v", pushMsg.Body)
