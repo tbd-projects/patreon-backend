@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"patreon/internal/microservices/push"
 	"patreon/internal/microservices/push/push"
@@ -94,9 +93,9 @@ func (usecase *PushUsecase) PreparePaymentsPush(info *push.PaymentApply) ([]int6
 	result.AwardsId = payment.AwardsId
 	result.AwardsName = payment.AwardsName
 
-	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(result.CreatorId)
+	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(payment.CreatorId)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, fmt.Sprintf("Get creator info, with id %d, %s, %s, %s", result.CreatorId, nickname, avatar, err))
+		return nil, nil, errors.Wrap(err, "Get creator info")
 	}
 
 	result.CreatorNickname = nickname
