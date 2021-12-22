@@ -97,7 +97,7 @@ func (usecase *PushUsecase) PreparePaymentsPush(info *push.PaymentApply) ([]int6
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "Get creator info")
 	}
-
+	result.CreatorId = payment.CreatorId
 	result.CreatorNickname = nickname
 	result.CreatorAvatar = avatar
 	return []int64{payment.UserId}, result, err
