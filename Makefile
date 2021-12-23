@@ -108,6 +108,9 @@ gen-proto-sessions:
 gen-proto-files:
 	protoc --proto_path=${MICROSERVICE_DIR}/files/delivery/grpc/protobuf files.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/files/delivery/grpc/protobuf
 
+gen-proto-smtp:
+	protoc --proto_path=${MICROSERVICE_DIR}/smtp/delivery/grpc/protobuf smtp.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/smtp/delivery/grpc/protobuf
+
 test:
 	go test -v -race ./internal/...
 
