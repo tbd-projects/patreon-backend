@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/pkg/errors"
 	"patreon/internal/microservices/push"
 	"patreon/internal/microservices/push/push"
 	"patreon/internal/microservices/push/push/repository"
@@ -86,17 +87,17 @@ func (usecase *PushUsecase) PreparePaymentsPush(info *push.PaymentApply) ([]int6
 
 	payment, err := usecase.repository.GetAwardsInfoAndCreatorIdAndUserIdFromPayments(info.Token)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.Wrap(err, "Get payments info")
 	}
 
 	result.AwardsId = payment.AwardsId
 	result.AwardsName = payment.AwardsName
 
-	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(result.CreatorId)
+	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(payment.CreatorId)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.Wrap(err, "Get creator info")
 	}
-
+	result.CreatorId = payment.CreatorId
 	result.CreatorNickname = nickname
 	result.CreatorAvatar = avatar
 	return []int64{payment.UserId}, result, err
