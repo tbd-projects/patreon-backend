@@ -58,7 +58,7 @@ func NewPostsUpdateHandler(log *logrus.Logger,
 // @Router /creators/{:creator_id}/posts/{:post_id}/update [PUT]
 func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	req := &http_models.RequestPosts{}
-
+	bluemonday.StripTagsPolicy()
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
