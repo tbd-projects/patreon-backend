@@ -49,7 +49,7 @@ const (
 	queryGetCreator = `SELECT cp.creator_id, cc.name, cp.description, cp.avatar, cp.cover, usr.nickname, sb.awards_id
 			FROM creator_profile as cp JOIN users AS usr ON usr.users_id = cp.creator_id 
 			JOIN creator_category As cc ON cp.category = cc.category_id 
-			LEFT JOIN subscribers AS sb on (cp.creator_id = sb.creator_id and sb.users_id = $1)
+			LEFT JOIN subscribers AS sb on (cp.creator_id = sb.creator_id and sb.users_id = $1 and sb.status = true)
 			WHERE cp.creator_id=$2`
 
 	// ExistsCreator
