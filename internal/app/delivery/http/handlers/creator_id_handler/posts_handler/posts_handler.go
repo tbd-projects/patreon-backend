@@ -10,6 +10,7 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	db_models "patreon/internal/app/models"
+	"patreon/internal/app/repository"
 	usePosts "patreon/internal/app/usecase/posts"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
@@ -139,6 +140,10 @@ func (h *PostsHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
+	}
+
+	if req.AwardsId == 0 {
+		req.AwardsId = repository.NoAwards
 	}
 
 	aw := &db_models.CreatePost{
