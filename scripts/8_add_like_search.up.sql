@@ -74,4 +74,4 @@ CREATE INDEX idx_rum_search_creators
         USING RUM (description_en rum_tsvector_ops, description_ru rum_tsvector_ops);
 
 CREATE INDEX idx_like_search_nick_creators
-    on users (nickname) include (users_id);
+    on users (LOWER(nickname)) include (users_id);
