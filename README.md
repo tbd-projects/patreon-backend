@@ -15,3 +15,5 @@
 ## Ссылка на [frontend](https://github.com/frontend-park-mail-ru/2021_2_Pyaterochka)
 
 ## Ссылка на API документацию [swagger](https://api.pyaterochka-team.site/api/v1/swagger/)
+
+## Ссылка на презентацию с защиты [презентация](https://docs.google.com/presentation/d/1UO-XrfePmd-C1QHroqatAjOrqmx2jJqG02dPDyfk30w/edit?usp=sharing)
