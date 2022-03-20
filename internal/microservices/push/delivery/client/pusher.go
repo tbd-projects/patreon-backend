@@ -18,93 +18,50 @@ func NewPushSender(session *rabbit.Session) *PushSender {
 	}
 }
 
+func (ph *PushSender) push(routeName string, msg easyjson.Marshaler) error {
+	publish := amqp.Publishing{
+		Type: "text/plain",
+		Body: []byte{},
+	}
+	var err error
+	publish.Body, err = easyjson.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	ch := ph.session.GetChannel()
+
+	err = ch.Publish(
+		ph.session.GetName(),
+		routeName,
+		false,
+		false,
+		publish,
+	)
+
+	return err
+}
+
 func (ph *PushSender) NewPost(creatorId int64, postId int64, postTitle string) error {
-	push := &models.PostInfo{
+	return ph.push(models.PostPush, &models.PostInfo{
 		CreatorId: creatorId,
 		PostId:    postId,
 		PostTitle: postTitle,
 		Date:      time.Now(),
-	}
-
-	publish := amqp.Publishing{
-		Type: "text/plain",
-		Body: []byte{},
-	}
-	var err error
-	publish.Body, err = easyjson.Marshal(push)
-	if err != nil {
-		return err
-	}
-	ch := ph.session.GetChannel()
-
-	err = ch.Publish(
-		ph.session.GetName(),
-		models.PostPush,
-		false,
-		false,
-		publish,
-	)
-
-	return err
+	})
 }
 
 func (ph *PushSender) NewComment(commentId int64, authorId int64, postId int64) error {
-	push := &models.CommentInfo{
+	return ph.push(models.CommentPush, &models.CommentInfo{
 		CommentId: commentId,
 		AuthorId:  authorId,
 		PostId:    postId,
 		Date:      time.Now(),
-	}
-
-	publish := amqp.Publishing{
-		Type: "text/plain",
-		Body: []byte{},
-	}
-	var err error
-	publish.Body, err = easyjson.Marshal(push)
-	if err != nil {
-		return err
-	}
-	ch := ph.session.GetChannel()
-
-	err = ch.Publish(
-		ph.session.GetName(),
-		models.CommentPush,
-		false,
-		false,
-		publish,
-	)
-
-	return err
+	})
 }
 
-func (ph *PushSender) NewSubscriber(subscriberId int64, awardsId int64, creatorId int64) error {
-	push := &models.SubInfo{
-		UserId:    subscriberId,
-		CreatorId: creatorId,
-		AwardsId:  awardsId,
-		Date:      time.Now(),
-	}
-
-	publish := amqp.Publishing{
-		Type: "text/plain",
-		Body: []byte{},
-	}
-
-	var err error
-	publish.Body, err = easyjson.Marshal(push)
-	if err != nil {
-		return err
-	}
-	ch := ph.session.GetChannel()
-
-	err = ch.Publish(
-		ph.session.GetName(),
-		models.CommentPush,
-		false,
-		false,
-		publish,
-	)
-
-	return err
+func (ph *PushSender) ApplyPayments(token string) error {
+	return ph.push(models.PaymentPush, &models.PaymentApply{
+		Token: token,
+		Date:  time.Now(),
+	})
 }

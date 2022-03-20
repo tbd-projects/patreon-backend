@@ -85,7 +85,7 @@ func (usecase *PostsUsecase) Delete(postId int64) error {
 //		app.GeneralError with Errors:
 //			app.UnknownError
 //			repository.DefaultErrDB
-func (usecase *PostsUsecase) Update(post *models.UpdatePost) error {
+func (usecase *PostsUsecase) Update(log *logrus.Entry, post *models.UpdatePost) error {
 	if err := post.Validate(); err != nil {
 		if errors.Is(err, models.EmptyTitle) || errors.Is(err, models.InvalidAwardsId) {
 			if post.IsDraft && errors.Is(err, models.EmptyTitle) {
@@ -96,6 +96,23 @@ func (usecase *PostsUsecase) Update(post *models.UpdatePost) error {
 		return &app.GeneralError{
 			Err:         app.UnknownError,
 			ExternalErr: errors.Wrap(err, "failed process of validation creator"),
+		}
+	}
+
+	if !post.IsDraft {
+		if oldPost, err := usecase.repository.GetPost(post.ID, EmptyUser, false); err == nil {
+			if oldPost.IsDraft {
+				if creatorId, err := usecase.repository.GetPostCreator(post.ID); err == nil {
+					errPush := usecase.pusher.NewPost(creatorId, post.ID, post.Title)
+					if errPush != nil {
+						log.Errorf("Try push new post, and got err %s", errPush)
+					}
+				} else {
+					log.Errorf("Try get cretor post, and got err %s", err)
+				}
+			}
+		} else {
+			log.Errorf("Try get cretor old post, and got err %s", err)
 		}
 	}
 
@@ -124,9 +141,11 @@ func (usecase *PostsUsecase) Create(log *logrus.Entry, post *models.CreatePost) 
 		}
 	}
 	postId, err := usecase.repository.Create(post)
-	errPush := usecase.pusher.NewPost(post.CreatorId, postId, post.Title)
-	if errPush != nil {
-		log.Errorf("Try push new post, and got err %s", errPush)
+	if !post.IsDraft {
+		errPush := usecase.pusher.NewPost(post.CreatorId, postId, post.Title)
+		if errPush != nil {
+			log.Errorf("Try push new post, and got err %s", errPush)
+		}
 	}
 	return postId, err
 }

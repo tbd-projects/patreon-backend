@@ -35,10 +35,10 @@ func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClien
 // @Description create websocket with send push about new comment or post, or subscriber
 // @Produce json
 // @tags utilities
-// @Success 200 {object} utils.PushResponse Type can be "Comment", "Post", "Subscriber"
-// @Success 200 {object} push_models.PostPush
-// @Success 200 {object} push_models.CommentPush
-// @Success 200 {object} push_models.SubPush
+// @Success 200 {object} utils.PushResponse Type can be "Comment", "Post", "Payment"
+// @Success 201 {object} push_models.PostPush
+// @Success 202 {object} push_models.CommentPush
+// @Success 203 {object} push_models.PaymentApplyPush
 // @Failure 500 "server error"
 // @Failure 401 "user are not authorized"
 // @Router /user/push [GET]

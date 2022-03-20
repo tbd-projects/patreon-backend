@@ -13,6 +13,7 @@ type PostPush struct {
 
 //easyjson:json
 type CommentPush struct {
+	CreatorId      int64  `json:"creator_id"`
 	CommentId      int64  `json:"comment_id"`
 	PostId         int64  `json:"post_id"`
 	AuthorId       int64  `json:"author_id"`
@@ -22,11 +23,10 @@ type CommentPush struct {
 }
 
 //easyjson:json
-type SubPush struct {
-	AwardsId     int64  `json:"awards_id"`
-	UserId       int64  `json:"user_id"`
-	AwardsName   string `json:"awards_name"`
-	AwardsPrice  int64  `json:"awards_price"`
-	UserNickname string `json:"user_nickname"`
-	UserAvatar   string `json:"user_avatar"`
+type PaymentApplyPush struct {
+	CreatorId       int64  `json:"creator_id"`
+	CreatorNickname string `json:"creator_nickname"`
+	CreatorAvatar   string `json:"creator_avatar"`
+	AwardsId        int64  `json:"awards_id"`
+	AwardsName      string `json:"awards_name"`
 }

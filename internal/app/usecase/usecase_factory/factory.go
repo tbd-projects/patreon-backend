@@ -118,7 +118,7 @@ func (f *UsecaseFactory) GetAttachesUsecase() useAttaches.Usecase {
 
 func (f *UsecaseFactory) GetPaymentsUsecase() usePayments.Usecase {
 	if f.paymentsUsecase == nil {
-		f.paymentsUsecase = usePayments.NewPaymentsUsecase(f.repositoryFactory.GetPaymentsRepository())
+		f.paymentsUsecase = usePayments.NewPaymentsUsecase(f.repositoryFactory.GetPaymentsRepository(), f.repositoryFactory.GetPusher())
 	}
 	return f.paymentsUsecase
 }

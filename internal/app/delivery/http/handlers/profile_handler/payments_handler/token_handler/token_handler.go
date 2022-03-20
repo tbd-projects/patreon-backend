@@ -89,7 +89,7 @@ func (h *TokenHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.UsecaseError(w, r, err, codeByErrorPOST)
 		return
 	}
-	if err = h.paymentsUsecase.UpdateStatus(payToken, amountFloat); err != nil {
+	if err = h.paymentsUsecase.UpdateStatus(h.Log(r), payToken, amountFloat); err != nil {
 		h.Log(r).Errorf("token_handler: error update payment status = %v", err)
 		h.UsecaseError(w, r, err, codeByErrorPOST)
 		return

@@ -107,7 +107,7 @@ type SubscribeRequest struct {
 
 func (req *SubscribeRequest) Validate() error {
 	err := validation.Errors{
-		"pay_token": validation.Validate(req.Token, validation.Required, validation.Length(1, 0)),
+		"pay_token": validation.Validate(req.Token, validation.Required, validation.RuneLength(1, 0)),
 	}.Filter()
 	if err != nil {
 		return TokenValidateError
@@ -118,9 +118,9 @@ func (req *SubscribeRequest) Validate() error {
 func (req *RequestChangeNickname) Validate() error {
 	err := validation.Errors{
 		"old_nickname": validation.Validate(req.OldNickname, validation.Required,
-			validation.Length(models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH)),
+			validation.RuneLength(models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH)),
 		"new_nickname": validation.Validate(req.NewNickname, validation.Required,
-			validation.Length(models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH)),
+			validation.RuneLength(models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH)),
 	}.Filter()
 	if err != nil {
 		return NicknameValidateError
@@ -158,6 +158,9 @@ func (req *RequestAttach) Validate() error {
 		"id":     validation.Validate(req.Id, validation.Min(1)),
 		"status": validation.Validate(req.Status, validation.In(handlers.AddStatus, handlers.UpdateStatus)),
 	}.Filter()
+	if err == nil {
+		return nil
+	}
 
 	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
 	if knowError != nil {

@@ -32,7 +32,7 @@ const (
 							END
 					FROM comments AS cm
 					JOIN users as usr on usr.users_id = cm.users_id
-					JOIN creator_profile as cp on cp.creator_id = cm.users_id
+					LEFT JOIN creator_profile as cp on cp.creator_id = cm.users_id
 					WHERE cm.post_id = $1
 					ORDER BY cm.date DESC LIMIT $2 OFFSET $3;`
 

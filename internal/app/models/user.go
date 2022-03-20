@@ -47,10 +47,10 @@ func (u *User) String() string {
 // Important can return some other error
 func (u *User) Validate() error {
 	err := validation.Errors{
-		"login": validation.Validate(u.Login, validation.Required, validation.Length(MIN_LOGIN_LENGTH, MAX_LOGIN_LENGTH)),
+		"login": validation.Validate(u.Login, validation.Required, validation.RuneLength(MIN_LOGIN_LENGTH, MAX_LOGIN_LENGTH)),
 		"password": validation.Validate(u.Password, validation.By(models_utilits.RequiredIf(u.EncryptedPassword == "")),
-			validation.Length(MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)),
-		"nickname": validation.Validate(u.Nickname, validation.Required, validation.Length(MIN_NICKNAME_LENGTH, MAX_NICKNAME_LENGTH)),
+			validation.RuneLength(MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)),
+		"nickname": validation.Validate(u.Nickname, validation.Required, validation.RuneLength(MIN_NICKNAME_LENGTH, MAX_NICKNAME_LENGTH)),
 	}.Filter()
 	if err == nil {
 		return nil

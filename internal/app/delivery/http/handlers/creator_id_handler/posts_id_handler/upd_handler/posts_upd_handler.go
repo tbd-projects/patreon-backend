@@ -10,6 +10,7 @@ import (
 	"patreon/internal/app/delivery/http/models"
 	"patreon/internal/app/middleware"
 	models_db "patreon/internal/app/models"
+	"patreon/internal/app/repository"
 	usePosts "patreon/internal/app/usecase/posts"
 	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
@@ -57,7 +58,7 @@ func NewPostsUpdateHandler(log *logrus.Logger,
 // @Router /creators/{:creator_id}/posts/{:post_id}/update [PUT]
 func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	req := &http_models.RequestPosts{}
-
+	bluemonday.StripTagsPolicy()
 	err := h.GetRequestBody(w, r, req, *bluemonday.UGCPolicy())
 	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
@@ -75,8 +76,11 @@ func (h *PostsUpdateHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
+	if req.AwardsId == 0 {
+		req.AwardsId = repository.NoAwards
+	}
 
-	if err = h.postsUsecase.Update(&models_db.UpdatePost{ID: postId, Title: req.Title,
+	if err = h.postsUsecase.Update(h.Log(r), &models_db.UpdatePost{ID: postId, Title: req.Title,
 		Description: req.Description, Awards: req.AwardsId, IsDraft: req.IsDraft}); err != nil {
 		h.UsecaseError(w, r, err, codesByErrorsPUT)
 		return

@@ -6,8 +6,8 @@ import "time"
 
 const (
 	CommentPush = "Comment"
+	PaymentPush = "Payment"
 	PostPush    = "Post"
-	NewSubPush  = "Subscriber"
 )
 
 //easyjson:json
@@ -19,17 +19,15 @@ type PostInfo struct {
 }
 
 //easyjson:json
-type SubInfo struct {
-	AwardsId  int64     `json:"awards_id"`
-	UserId    int64     `json:"user_id"`
-	CreatorId int64     `json:"creator_id"`
-	Date      time.Time `json:"date"`
-}
-
-//easyjson:json
 type CommentInfo struct {
 	CommentId int64     `json:"comment_id"`
 	AuthorId  int64     `json:"author_id"`
 	PostId    int64     `json:"post_id"`
 	Date      time.Time `json:"date"`
+}
+
+//easyjson:json
+type PaymentApply struct {
+	Token string    `json:"token"`
+	Date  time.Time `json:"date"`
 }

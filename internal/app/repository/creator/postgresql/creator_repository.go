@@ -32,7 +32,7 @@ const (
     						SELECT id, usr.nickname, least(sc.description_en <=> plainto_tsquery('english', $1), sc.description_ru <=> plainto_tsquery('russian_hunspell', $1)) AS rank
 							FROM search_creators as sc
 							LEFT JOIN users AS usr ON (usr.users_id = sc.id and LOWER(usr.nickname) LIKE LOWER($1) || '%')
-							WHERE sc.description_en @@ plainto_tsquery('english', $1) OR sc.description_ru @@ plainto_tsquery('russian_hunspell', $1) OR usr.nickname LIKE $1 || '%'
+							WHERE sc.description_en @@ plainto_tsquery('english', $1) OR sc.description_ru @@ plainto_tsquery('russian_hunspell', $1) OR LOWER(usr.nickname) LIKE LOWER($1) || '%'
 							ORDER BY usr.nickname, rank
         					LIMIT $2 OFFSET $3
 					)
@@ -49,7 +49,7 @@ const (
 	queryGetCreator = `SELECT cp.creator_id, cc.name, cp.description, cp.avatar, cp.cover, usr.nickname, sb.awards_id
 			FROM creator_profile as cp JOIN users AS usr ON usr.users_id = cp.creator_id 
 			JOIN creator_category As cc ON cp.category = cc.category_id 
-			LEFT JOIN subscribers AS sb on (cp.creator_id = sb.creator_id and sb.users_id = $1)
+			LEFT JOIN subscribers AS sb on (cp.creator_id = sb.creator_id and sb.users_id = $1 and sb.status = true)
 			WHERE cp.creator_id=$2`
 
 	// ExistsCreator
